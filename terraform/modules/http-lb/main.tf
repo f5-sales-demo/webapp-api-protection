@@ -29,10 +29,6 @@ resource "xcsh_healthcheck" "httpbin" {
     path                  = var.health_check_path
     host_header           = var.origin_dns_name
     expected_status_codes = ["200"]
-    # HTTP/1.1 probes. Set explicitly: the provider currently leaves this
-    # Optional+Computed bool unknown after apply when omitted (nested-block
-    # computed-scalar normalization gap) — tracked for a provider fix.
-    use_http2 = false
   }
 }
 
@@ -77,10 +73,11 @@ resource "xcsh_http_loadbalancer" "httpbin" {
     }
     weight   = 1
     priority = 1
-    # Declared explicitly to match the shape F5 XC normalizes into the API
-    # response (an empty endpoint_subsets object). Without it the provider adds
-    # it during read, causing a "was absent, but now present" inconsistency on
-    # apply against the staging tenant. Verified idempotent.
+    # F5 XC always normalizes an empty endpoint_subsets object into the API
+    # response for each default_route_pools entry (verified via live API), so we
+    # declare it to keep apply/plan/import consistent. This is correct config,
+    # not a workaround. (Provider-side handling of server-default empty oneof
+    # members on import is tracked in terraform-provider-xcsh#1003.)
     endpoint_subsets {}
   }
 
