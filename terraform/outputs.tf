@@ -13,6 +13,11 @@ output "origin_pool_name" {
   value       = module.http_lb.origin_pool_name
 }
 
+output "healthcheck_name" {
+  description = "Name of the health check referenced by the origin pool."
+  value       = module.http_lb.healthcheck_name
+}
+
 output "domains" {
   description = "Domains served by the load balancer."
   value       = module.http_lb.domains

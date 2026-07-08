@@ -19,5 +19,10 @@ backend.hcl
 # CLI config / credentials
 .terraformrc
 terraform.rc
+*.tfrc
 *.pem
 *.p12
+
+# Local-state override for local iteration (never committed; authoritative backend is azurerm)
+*_override.tf
+*_override.tf.json

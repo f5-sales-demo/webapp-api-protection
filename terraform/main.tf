@@ -11,9 +11,10 @@
 module "http_lb" {
   source = "./modules/http-lb"
 
-  namespace       = var.namespace
-  lb_domain       = var.lb_domain
-  origin_dns_name = var.origin_dns_name
-  origin_port     = var.origin_port
-  labels          = var.labels
+  namespace         = var.namespace
+  lb_domain         = var.lb_domain
+  origin_dns_name   = var.origin_dns_name
+  origin_port       = var.origin_port
+  health_check_path = var.health_check_path
+  labels            = var.labels
 }

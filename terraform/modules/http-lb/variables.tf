@@ -20,6 +20,12 @@ variable "origin_port" {
   default     = 80
 }
 
+variable "health_check_path" {
+  description = "HTTP path the health check probes on the origin. httpbin's /status/200 always returns 200."
+  type        = string
+  default     = "/status/200"
+}
+
 variable "labels" {
   description = "Labels applied to the load balancer and origin pool."
   type        = map(string)
