@@ -1,0 +1,47 @@
+---
+title: Overview
+description: How the F5 Distributed Cloud web app & API protection use case is built — an xcsh-provider Terraform plan that provisions an HTTP load balancer and origin pool, with state in Azure Blob Storage and GitHub Actions CI.
+sidebar:
+  order: 1
+  label: Overview
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+This use case builds up a **secured web application delivery path on F5 Distributed Cloud** with
+Terraform, one control at a time. Iteration 1 stands up the foundation: an HTTP load balancer with
+an origin pool, keeps its state in **Azure Blob Storage**, and runs plan-on-pull-request /
+apply-on-merge through **GitHub Actions**. Subsequent iterations layer on a web application firewall
+and API protection.
+
+## What it manages (iteration 1)
+
+- An `xcsh_origin_pool` forwarding to the public [httpbin](https://httpbin.org) service.
+- An `xcsh_http_loadbalancer` that advertises on the F5 XC public VIP and routes to that pool.
+- Remote Terraform state in Azure, so runs are shareable between an operator's machine and CI.
+
+## Architecture
+
+| Layer | Choice | Why |
+| --- | --- | --- |
+| Provider | `f5-sales-demo/xcsh` (Terraform registry) | Generated from the F5 XC OpenAPI; already ships `xcsh_http_loadbalancer`, `xcsh_origin_pool`, `xcsh_app_firewall` (WAF) and `xcsh_api_definition` (API protection). Authenticates with an API token (`Authorization: APIToken <token>`). |
+| State backend | `azurerm` (Azure Blob Storage), access-key auth | Durable, shared state. Reuses the account bootstrapped for the DNS use case with a distinct state key. |
+| Automation | GitHub Actions | Plan on every pull request, apply on merge to `main`. Backend coordinates and inputs come from repository **variables**; credentials from **secrets**. |
+
+<Aside type="note">
+Iteration 1 targets the **staging tenant** (`https://nferreira.staging.volterra.us`), which is
+VPN-accessible only. During prototyping, Terraform is run locally over the VPN; CI plan/apply against
+this tenant requires a self-hosted runner on the VPN.
+</Aside>
+
+## Roadmap
+
+- **Iteration 1 (this):** HTTP load balancer + origin pool → httpbin.
+- **Next:** attach a web application firewall (`xcsh_app_firewall`).
+- **Then:** add API protection (`xcsh_api_definition`, API discovery).
+- **Later:** promote from staging to a pre-production environment.
+
+## Where to start
+
+The [Demo](/webapp-api-protection/demo/) walks through deploying and validating the load balancer
+end-to-end with Terraform.

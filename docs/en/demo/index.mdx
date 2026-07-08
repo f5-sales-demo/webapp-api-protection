@@ -1,0 +1,40 @@
+---
+title: Demo
+description: A Terraform-driven web app & API protection exercise on F5 Distributed Cloud — build the HTTP load balancer, validate it, then layer on security controls.
+sidebar:
+  order: 1
+  label: Overview
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+This guide walks through building a **secured web application delivery path** on F5 Distributed
+Cloud, driven by Terraform. Iteration 1 covers the foundation; security phases are added as the plan
+matures. Each phase is idempotent: rerunning it converges to the same state.
+
+## Exercise phases
+
+| Phase | Goal | Status |
+| --- | --- | --- |
+| Build | Deploy the HTTP load balancer + origin pool (httpbin) with Terraform; wire remote state and CI | Iteration 1 |
+| Validate | Confirm the load balancer serves httpbin and the plan is idempotent | Iteration 1 |
+| Protect — WAF | Attach a web application firewall (`xcsh_app_firewall`) | Planned |
+| Protect — API | Add API protection (`xcsh_api_definition`, API discovery) | Planned |
+| Teardown | Destroy the managed objects after explicit confirmation | Iteration 1 |
+
+## Prerequisites
+
+- **Terraform** ≥ 1.5.
+- The **`f5-sales-demo/xcsh`** provider ≥ 3.63.0, resolved from the Terraform registry — or a local
+  build via `dev_overrides`.
+- An **F5 XC API token** for the staging tenant, and **VPN access** to reach it.
+- The **Azure CLI** signed in with Contributor on the subscription (state backend is shared with the
+  DNS use case and already bootstrapped).
+
+<Aside type="caution">
+Iteration 1 targets the staging (non-production) tenant. Promote to pre-production only after the
+plan is bug-free against staging.
+</Aside>
+
+See the [terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)
+for the complete build steps, variables, and secrets.

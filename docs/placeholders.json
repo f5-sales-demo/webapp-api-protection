@@ -1,0 +1,34 @@
+{
+  "groups": [
+    {
+      "label": "F5 XC Tenant",
+      "keys": ["F5XC_API_URL", "F5XC_API_TOKEN"]
+    },
+    {
+      "label": "Web App & API Protection",
+      "keys": ["F5XC_NAMESPACE", "LB_DOMAIN"]
+    }
+  ],
+  "fields": {
+    "F5XC_API_URL": {
+      "type": "text",
+      "default": "https://nferreira.staging.volterra.us",
+      "description": "F5 XC Console API URL (staging tenant)"
+    },
+    "F5XC_API_TOKEN": {
+      "type": "text",
+      "default": "example-api-token",
+      "description": "F5 XC API credential token"
+    },
+    "F5XC_NAMESPACE": {
+      "type": "text",
+      "default": "webapp-api-protection",
+      "description": "Namespace for the load balancer and origin pool"
+    },
+    "LB_DOMAIN": {
+      "type": "text",
+      "default": "httpbin.staging.example.com",
+      "description": "Domain the HTTP load balancer serves"
+    }
+  }
+}

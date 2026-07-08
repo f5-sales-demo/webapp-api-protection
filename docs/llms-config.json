@@ -1,0 +1,11 @@
+{
+  "customSets": [
+    {
+      "label": "Demo",
+      "description": "Terraform-driven web app & API protection exercise on F5 Distributed Cloud",
+      "paths": ["demo/**"]
+    }
+  ],
+  "promote": ["index*", "overview*"],
+  "demote": ["references*", "faq*"]
+}

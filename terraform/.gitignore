@@ -1,0 +1,23 @@
+# Terraform working files
+.terraform/
+.terraform.lock.hcl
+
+# State (local backend during prototyping — never commit)
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Variable files may contain environment-specific values
+*.tfvars
+!*.tfvars.example
+
+# Local backend config (partial backend); example is committed
+backend.hcl
+!backend.hcl.example
+
+# CLI config / credentials
+.terraformrc
+terraform.rc
+*.pem
+*.p12

@@ -1,0 +1,27 @@
+variable "namespace" {
+  description = "F5 XC namespace for the load balancer and origin pool."
+  type        = string
+}
+
+variable "lb_domain" {
+  description = "Domain the HTTP load balancer serves (also part of the resource name)."
+  type        = string
+}
+
+variable "origin_dns_name" {
+  description = "Public DNS name of the origin server the pool forwards to."
+  type        = string
+  default     = "httpbin.org"
+}
+
+variable "origin_port" {
+  description = "TCP port on the origin."
+  type        = number
+  default     = 80
+}
+
+variable "labels" {
+  description = "Labels applied to the load balancer and origin pool."
+  type        = map(string)
+  default     = {}
+}
