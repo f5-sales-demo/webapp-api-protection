@@ -19,11 +19,17 @@ run "plan_creates_loadbalancer_and_pool" {
     health_check_path = "/health"
     labels            = {}
     waf_mode          = "blocking"
+    csd_enabled       = true
   }
 
   assert {
     condition     = output.loadbalancer_name == "webapp-api-protection"
     error_message = "Load balancer name should be webapp-api-protection"
+  }
+
+  assert {
+    condition     = output.csd_enabled == true
+    error_message = "Client-Side Defense should be enabled on the load balancer"
   }
 
   assert {

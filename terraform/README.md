@@ -27,7 +27,7 @@ internet-reachable), with remote state in Azure Blob Storage.
 
 ## Security controls
 
-The `http-lb` module attaches two F5 XC app-security controls to the load balancer:
+The `http-lb` module attaches three F5 XC app-security controls to the load balancer:
 
 - **WAF** — `xcsh_app_firewall.this` (`webapp-api-protection-waf`) is referenced by the
   load balancer's `app_firewall {}` block. Enforcement mode is set by the `waf_mode`
@@ -42,6 +42,15 @@ The `http-lb` module attaches two F5 XC app-security controls to the load balanc
   F5 XC learns the API schema from the live traffic the generator produces. Discovered
   endpoints appear asynchronously in the F5 XC console (Web App & API Protection → API
   Discovery).
+- **Client-Side Defense** — the load balancer's `client_side_defense { policy {
+  js_insert_all_pages {} } }` block injects the F5 XC telemetry JavaScript into served
+  pages to detect Magecart/formjacking/skimming (PCI DSS 6.4.3 / 11.6.1). Toggled by the
+  `csd_enabled` variable (default `true`). CSD requires the tenant Client-Side Defense
+  addon: the plan asserts that dependency via a `data xcsh_addon_service_activation_status`
+  guard (state `AS_SUBSCRIBED`) rather than managing the subscription — tenant entitlement
+  is owned by a separate tenant plan. The served root domain is registered with the CSD
+  reporting engine via `xcsh_protected_domain` (system namespace). Telemetry beacons and
+  detected scripts appear in the console (Web App & API Protection → Client-Side Defense).
 
 ## Architecture
 

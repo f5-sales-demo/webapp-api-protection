@@ -25,6 +25,10 @@ labels = {
 # App firewall (WAF) enforcement mode: "blocking" (actively block) or "monitoring".
 waf_mode = "blocking"
 
+# Client-Side Defense: inject the CSD telemetry JS on all pages + register the
+# domain with the CSD reporting engine. Requires the tenant CSD addon.
+csd_enabled = true
+
 # --- Azure (origin server + traffic generator this plan deploys) ---------------
 
 # Subscription the Azure VMs go into. Find it with: az account show --query id -o tsv

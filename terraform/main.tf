@@ -49,6 +49,46 @@ module "http_lb" {
   health_check_path = var.health_check_path
   labels            = var.labels
   waf_mode          = var.waf_mode
+  csd_enabled       = var.csd_enabled
+
+  # Enabling client_side_defense on the LB requires a protected domain to already
+  # exist in this namespace (F5 XC generates the CSD JS config from it), so the
+  # LB must be created/updated AFTER the protected domain.
+  depends_on = [xcsh_protected_domain.csd]
+}
+
+# --- Client-Side Defense tenant dependency (verified, NOT managed) ------------
+# CSD requires the tenant to be subscribed to the Client-Side Defense addon.
+# Tenant entitlement/provisioning is owned by a separate tenant-level plan, so
+# here we only ASSERT the dependency via the entitlements data source (fail fast
+# if it is not subscribed) rather than managing the subscription in this app.
+data "xcsh_addon_service_activation_status" "csd" {
+  count         = var.csd_enabled ? 1 : 0
+  addon_service = "f5xc-client-side-defense-standard"
+
+  lifecycle {
+    postcondition {
+      condition     = self.state == "AS_SUBSCRIBED"
+      error_message = "Client-Side Defense addon is not subscribed on this tenant (state: ${self.state}). Enable it via the tenant entitlements plan before applying CSD."
+    }
+  }
+}
+
+# Register the served root domain with the CSD reporting engine. CRITICAL: this
+# must be in the LOAD BALANCER'S namespace (var.namespace) — F5 XC generates the
+# per-namespace CSD JS configuration from it, and enabling client_side_defense on
+# the LB fails (500 "Failed to get CSD JS Configuration") if no protected domain
+# exists in the LB's namespace. protected_domain must be an eTLD+1 (server rule
+# ves.io.schema.rules.string.etld); the object `name` is DNS-1123 (no dots).
+# The generated resource's Read tolerates the CSD API's 501 GET-by-name (the API
+# is list/create/delete only) — terraform-provider-xcsh#1044.
+resource "xcsh_protected_domain" "csd" {
+  count            = var.csd_enabled ? 1 : 0
+  name             = "webapp-api-protection-root"
+  namespace        = xcsh_namespace.this.name
+  protected_domain = "f5-sales-demo.com"
+
+  depends_on = [data.xcsh_addon_service_activation_status.csd]
 }
 
 # --- Azure traffic generator (drives live load at the load balancer) ----------

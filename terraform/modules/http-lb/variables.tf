@@ -41,3 +41,9 @@ variable "waf_mode" {
     error_message = "waf_mode must be \"blocking\" or \"monitoring\"."
   }
 }
+
+variable "csd_enabled" {
+  description = "Enable Client-Side Defense on the load balancer (inject the CSD telemetry JavaScript on all pages). Requires the CSD tenant addon."
+  type        = bool
+  default     = true
+}

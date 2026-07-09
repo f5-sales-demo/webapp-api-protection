@@ -33,6 +33,12 @@ output "waf_mode" {
   value       = module.http_lb.waf_mode
 }
 
+output "csd_enabled" {
+  description = "Whether Client-Side Defense JavaScript injection is enabled on the load balancer."
+  value       = module.http_lb.csd_enabled
+}
+
+
 # --- Azure origin server ------------------------------------------------------
 
 output "origin_server_public_ip" {

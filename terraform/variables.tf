@@ -41,6 +41,12 @@ variable "waf_mode" {
   }
 }
 
+variable "csd_enabled" {
+  description = "Enable Client-Side Defense: inject the F5 XC telemetry JavaScript on all pages and register the served domain with the CSD reporting engine. Requires the tenant CSD addon (verified via a data-source guard, not managed here)."
+  type        = bool
+  default     = true
+}
+
 # ---------------------------------------------------------
 # Azure (origin server + traffic generator this plan deploys)
 # ---------------------------------------------------------

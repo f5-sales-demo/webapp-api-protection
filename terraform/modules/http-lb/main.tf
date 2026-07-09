@@ -137,4 +137,19 @@ resource "xcsh_http_loadbalancer" "this" {
   # import path. That suppression was added in lock-step — see
   # terraform-provider-xcsh tools/import-default-suppressions.json (HTTPLoadBalancer).
   enable_api_discovery {}
+
+  # Client-Side Defense — inject the F5 XC telemetry JavaScript into served pages
+  # to detect Magecart/formjacking/skimming (client_side_defense oneof vs the
+  # server default disable_client_side_defense). Requires the CSD tenant addon
+  # (verified via the data-source guard in the root module). When csd_enabled is
+  # false we emit NO block — the server applies disable_client_side_defense, which
+  # the provider suppresses on import (so no drift; do not declare it).
+  dynamic "client_side_defense" {
+    for_each = var.csd_enabled ? [1] : []
+    content {
+      policy {
+        js_insert_all_pages {}
+      }
+    }
+  }
 }

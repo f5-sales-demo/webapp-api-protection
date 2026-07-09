@@ -32,3 +32,8 @@ output "waf_mode" {
   description = "Enforcement mode of the attached app firewall."
   value       = var.waf_mode
 }
+
+output "csd_enabled" {
+  description = "Whether Client-Side Defense JavaScript injection is enabled on the load balancer."
+  value       = var.csd_enabled
+}
