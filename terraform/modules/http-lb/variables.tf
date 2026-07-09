@@ -3,9 +3,9 @@ variable "namespace" {
   type        = string
 }
 
-variable "lb_domain" {
-  description = "Domain the HTTP load balancer serves (also part of the resource name)."
-  type        = string
+variable "lb_domains" {
+  description = "Domains the HTTP load balancer serves (matched on the Host/authority header)."
+  type        = list(string)
 }
 
 variable "origin_dns_name" {

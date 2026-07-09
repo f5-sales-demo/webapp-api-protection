@@ -4,8 +4,8 @@
 # (provider auth from XCSH_API_URL/XCSH_API_TOKEN env; plan does not call the API)
 
 variables {
-  namespace       = "r-mordasiewicz"
-  lb_domain       = "httpbin-webapp-tf.example.com"
+  namespace       = "webapp-api-protection"
+  lb_domains      = ["www.f5-sales-demo.com", "api.f5-sales-demo.com"]
   origin_dns_name = "httpbin.org"
   origin_port     = 80
 }
@@ -24,8 +24,8 @@ run "plan_creates_loadbalancer_and_pool" {
   }
 
   assert {
-    condition     = output.domains == tolist([var.lb_domain])
-    error_message = "Load balancer should serve exactly the configured lb_domain"
+    condition     = output.domains == tolist(var.lb_domains)
+    error_message = "Load balancer should serve exactly the configured lb_domains"
   }
 
   assert {

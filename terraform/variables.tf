@@ -1,11 +1,12 @@
 variable "namespace" {
-  description = "F5 XC namespace the load balancer and origin pool are created in (required; supplied via TF_VAR_namespace / a GitHub Actions variable / tfvars). Unlike DNS objects, HTTP load balancer and origin pool objects live in a user namespace."
+  description = "F5 XC namespace this plan creates and deploys the load balancer / origin pool into. HTTP load balancer and origin pool objects live in a user namespace (unlike DNS objects, which are system-scoped)."
   type        = string
+  default     = "webapp-api-protection"
 }
 
-variable "lb_domain" {
-  description = "Domain the HTTP load balancer serves (required; supplied via TF_VAR_lb_domain / a GitHub Actions variable / tfvars). In the staging tenant use a domain delegated to / reachable in that environment."
-  type        = string
+variable "lb_domains" {
+  description = "Domains the HTTP load balancer serves. On production these are www.f5-sales-demo.com and api.f5-sales-demo.com; F5 XC auto-manages their DNS records because the f5-sales-demo.com zone has allow_http_lb_managed_records enabled."
+  type        = list(string)
 }
 
 variable "origin_dns_name" {

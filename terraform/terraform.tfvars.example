@@ -2,13 +2,12 @@
 # Credentials are NOT set here — export XCSH_API_URL + XCSH_API_TOKEN in the
 # environment (see terraform/README.md).
 
-# F5 XC namespace for the load balancer and origin pool. Must already exist in
-# the target tenant. Verified against the staging tenant's "r-mordasiewicz"
-# namespace; change to your own.
-namespace = "r-mordasiewicz"
+# F5 XC namespace this plan creates and deploys into (default: webapp-api-protection).
+namespace = "webapp-api-protection"
 
-# Domain the load balancer serves. Use one reachable in the target tenant.
-lb_domain = "httpbin-webapp-tf.example.com"
+# Domains the load balancer serves. On production, F5 XC auto-manages their DNS
+# records (the f5-sales-demo.com zone has allow_http_lb_managed_records enabled).
+lb_domains = ["www.f5-sales-demo.com", "api.f5-sales-demo.com"]
 
 # Origin: the public httpbin service (HTTP 200 on port 80, no redirect).
 origin_dns_name = "httpbin.org"

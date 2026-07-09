@@ -1,13 +1,13 @@
-# End-to-end test: apply the plan against the tenant, assert the objects were
-# created with real F5 XC identifiers, then terraform test auto-destroys them.
-# Requires reachable tenant + valid XCSH_API_URL/XCSH_API_TOKEN. Run with:
-#   terraform test
-# This creates and then removes real objects, so it targets a prototyping
-# namespace (var.namespace) only.
+# End-to-end test: apply the plan against the tenant (creates the namespace + LB +
+# pool + health check), assert real F5 XC identifiers, then terraform test
+# auto-destroys them (namespace cascade-deleted). Requires reachable tenant + valid
+# XCSH_API_URL/XCSH_API_TOKEN. Run deliberately with `terraform test` — it creates
+# and removes REAL production objects (incl. the namespace), so do not run it while
+# the real deployment of the same namespace exists.
 
 variables {
-  namespace       = "r-mordasiewicz"
-  lb_domain       = "httpbin-webapp-tf.example.com"
+  namespace       = "webapp-api-protection"
+  lb_domains      = ["www.f5-sales-demo.com", "api.f5-sales-demo.com"]
   origin_dns_name = "httpbin.org"
   origin_port     = 80
 }

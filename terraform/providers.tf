@@ -5,7 +5,7 @@
 #   P12 auth:    XCSH_API_URL + XCSH_P12_FILE + XCSH_P12_PASSWORD
 #   PEM auth:    XCSH_API_URL + XCSH_CERT + XCSH_KEY
 #
-# For this repo XCSH_API_URL points at the staging tenant
-# (https://nferreira.staging.volterra.us), which is VPN-accessible only.
+# For this repo XCSH_API_URL points at the production tenant
+# (https://f5-sales-demo.console.ves.volterra.io), which is internet-reachable.
 # See terraform/README.md for local dev setup (dev_overrides + env).
 provider "xcsh" {}
