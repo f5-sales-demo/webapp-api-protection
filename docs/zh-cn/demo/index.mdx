@@ -1,0 +1,40 @@
+---
+title: 演示
+description: 一个由 Terraform 驱动的 F5 Distributed Cloud Web 应用与 API 保护练习 —— 构建 HTTP 负载均衡器、验证它，然后叠加安全控制。
+sidebar:
+  order: 1
+  label: 概述
+i18n:
+  sourceHash: 109cbaf37abb
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+本指南将带你通过 Terraform 在 F5 Distributed Cloud 上构建一条**受保护的 Web 应用交付路径**。
+迭代 1 涵盖基础部分；随着计划的成熟会逐步添加安全阶段。每个阶段都是幂等的：重新运行会收敛到相同的状态。
+
+## 练习阶段
+
+| 阶段 | 目标 | 状态 |
+| --- | --- | --- |
+| 构建 | 使用 Terraform 部署 HTTP 负载均衡器 + 源站池（httpbin）；接入远程状态和 CI | 迭代 1 |
+| 验证 | 确认负载均衡器提供 httpbin 服务且计划是幂等的 | 迭代 1 |
+| 保护 —— WAF | 附加 Web 应用防火墙（`xcsh_app_firewall`） | 已计划 |
+| 保护 —— API | 添加 API 保护（`xcsh_api_definition`、API 发现） | 已计划 |
+| 拆除 | 在明确确认后销毁受管对象 | 迭代 1 |
+
+## 前提条件
+
+- **Terraform** ≥ 1.5。
+- **`f5-sales-demo/xcsh`** provider ≥ 3.63.0，从 Terraform 注册表解析 —— 或通过 `dev_overrides`
+  进行本地构建。
+- 用于暂存租户的 **F5 XC API 令牌**，以及可访问它的 **VPN 访问权限**。
+- 已登录且在订阅上拥有 Contributor 权限的 **Azure CLI**（状态后端与 DNS 用例共享且已完成引导）。
+
+<Aside type="caution">
+迭代 1 面向暂存（非生产）租户。仅在计划针对暂存环境无缺陷后，才提升到预生产环境。
+</Aside>
+
+有关完整的构建步骤、变量和密钥，请参阅
+[terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)。
