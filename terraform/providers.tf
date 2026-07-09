@@ -9,3 +9,15 @@
 # (https://f5-sales-demo.console.ves.volterra.io), which is internet-reachable.
 # See terraform/README.md for local dev setup (dev_overrides + env).
 provider "xcsh" {}
+
+# Azure — for the origin-server and traffic-generator VMs this plan deploys.
+# Auth comes from the environment (az CLI login locally; ARM_* / a service
+# principal in CI). Only the subscription is set here, from a variable so nothing
+# environment-specific is hardcoded. The azuread provider is read-only (it just
+# resolves the deployer identity for resource naming/tags in the modules).
+provider "azurerm" {
+  features {}
+  subscription_id = var.subscription_id
+}
+
+provider "azuread" {}

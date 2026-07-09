@@ -2,14 +2,26 @@
 name: Terraform
 
 # Plan on PRs, apply on merge to main. State lives in Azure Blob Storage
-# (azurerm backend, access-key auth); the xcsh provider authenticates to the
-# PRODUCTION F5 XC tenant (https://f5-sales-demo.console.ves.volterra.io). Nothing
-# environment-specific is hardcoded: backend coords and inputs come from GitHub
-# repository variables (vars.*), credentials from secrets (secrets.*), injected
-# only into the steps that need them.
+# (azurerm backend, access-key auth). This is a MULTI-PROVIDER plan:
+#   - xcsh    authenticates to the PRODUCTION F5 XC tenant
+#             (https://f5-sales-demo.console.ves.volterra.io) via XCSH_API_* secrets.
+#   - azurerm/azuread create the Azure origin server + traffic generator VMs, using
+#             a service principal via the ARM_* secrets (ARM_CLIENT_ID /
+#             ARM_CLIENT_SECRET / ARM_TENANT_ID / ARM_SUBSCRIPTION_ID).
+#
+# Nothing environment-specific is hardcoded: backend coords and inputs come from
+# GitHub repository variables (vars.*), credentials from secrets (secrets.*),
+# injected only into the steps that need them.
 #
 # RUNNER: the production tenant is internet-reachable, so this runs on a standard
 # GitHub-hosted runner (ubuntu-latest).
+#
+# Required repository SECRETS: ARM_ACCESS_KEY, XCSH_API_URL, XCSH_API_TOKEN,
+#   ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_TENANT_ID, ARM_SUBSCRIPTION_ID,
+#   WEBAPP_SSH_PUBLIC_KEY (an SSH public key installed on the VMs).
+# Required repository VARIABLES: TFSTATE_RESOURCE_GROUP, TFSTATE_STORAGE_ACCOUNT,
+#   TFSTATE_CONTAINER, TFSTATE_KEY, WEBAPP_NAMESPACE, WEBAPP_LB_DOMAINS (JSON list),
+#   WEBAPP_ENVIRONMENT (e.g. webapp-api-protection).
 on:
   pull_request:
     branches: [main]
@@ -28,6 +40,19 @@ concurrency:
 
 env:
   TF_IN_AUTOMATION: 'true'
+  # Azure identity (service principal) for azurerm + azuread. The providers read
+  # these ARM_* variables from the environment automatically.
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  # Terraform inputs (var.*). subscription_id is required; the rest override defaults.
+  TF_VAR_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  TF_VAR_namespace: ${{ vars.WEBAPP_NAMESPACE }}
+  TF_VAR_lb_domains: ${{ vars.WEBAPP_LB_DOMAINS }}
+  TF_VAR_environment: ${{ vars.WEBAPP_ENVIRONMENT }}
+  # Service principals can't resolve an Azure AD user, so name the deployer explicitly.
+  TF_VAR_deployer: cicd
 
 jobs:
   terraform:
@@ -42,6 +67,13 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+
+      - name: Materialize SSH public key for the VMs
+        env:
+          WEBAPP_SSH_PUBLIC_KEY: ${{ secrets.WEBAPP_SSH_PUBLIC_KEY }}
+        run: |
+          printf '%s\n' "$WEBAPP_SSH_PUBLIC_KEY" > "$RUNNER_TEMP/webapp_vm.pub"
+          echo "TF_VAR_ssh_public_key_path=$RUNNER_TEMP/webapp_vm.pub" >> "$GITHUB_ENV"
 
       - name: Init
         env:
@@ -69,8 +101,6 @@ jobs:
           ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
           XCSH_API_URL: ${{ secrets.XCSH_API_URL }}
           XCSH_API_TOKEN: ${{ secrets.XCSH_API_TOKEN }}
-          TF_VAR_namespace: ${{ vars.WEBAPP_NAMESPACE }}
-          TF_VAR_lb_domains: ${{ vars.WEBAPP_LB_DOMAINS }}
         run: terraform plan -input=false -no-color
 
       - name: Apply
@@ -79,6 +109,4 @@ jobs:
           ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
           XCSH_API_URL: ${{ secrets.XCSH_API_URL }}
           XCSH_API_TOKEN: ${{ secrets.XCSH_API_TOKEN }}
-          TF_VAR_namespace: ${{ vars.WEBAPP_NAMESPACE }}
-          TF_VAR_lb_domains: ${{ vars.WEBAPP_LB_DOMAINS }}
         run: terraform apply -input=false -auto-approve -no-color

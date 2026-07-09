@@ -1,19 +1,30 @@
-# End-to-end test: apply the plan against the tenant (creates the namespace + LB +
-# pool + health check), assert real F5 XC identifiers, then terraform test
-# auto-destroys them (namespace cascade-deleted). Requires reachable tenant + valid
-# XCSH_API_URL/XCSH_API_TOKEN. Run deliberately with `terraform test` — it creates
-# and removes REAL production objects (incl. the namespace), so do not run it while
-# the real deployment of the same namespace exists.
-
-variables {
-  namespace       = "webapp-api-protection"
-  lb_domains      = ["www.f5-sales-demo.com", "api.f5-sales-demo.com"]
-  origin_dns_name = "httpbin.org"
-  origin_port     = 80
-}
+# End-to-end test: apply the http-lb module against the tenant (into an existing
+# namespace), assert real F5 XC identifiers, then terraform test auto-destroys the
+# objects. Requires a reachable tenant + valid XCSH_API_URL/XCSH_API_TOKEN AND a
+# pre-existing namespace (pass -var namespace=<ns>). It targets ./modules/http-lb
+# (not the root) so it does NOT create Azure VMs.
+#
+# Run deliberately with `terraform test`. It creates and removes REAL objects named
+# origin-pool / origin-healthcheck / webapp-api-protection in the given namespace,
+# so DO NOT run it while the real deployment using those names exists — it will
+# collide. Use a throwaway namespace for this test.
 
 run "apply_to_tenant_creates_objects" {
   command = apply
+
+  module {
+    source = "./modules/http-lb"
+  }
+
+  variables {
+    namespace         = "webapp-api-protection-test"
+    lb_domains        = ["test.f5-sales-demo.com"]
+    origin_ip         = "203.0.113.10"
+    origin_port       = 80
+    health_check_path = "/health"
+    labels            = {}
+    waf_mode          = "blocking"
+  }
 
   assert {
     condition     = output.loadbalancer_id != ""
@@ -26,12 +37,12 @@ run "apply_to_tenant_creates_objects" {
   }
 
   assert {
-    condition     = output.origin_pool_name == "httpbin-origin-pool"
+    condition     = output.origin_pool_name == "origin-pool"
     error_message = "Origin pool name mismatch after apply"
   }
 
   assert {
-    condition     = output.healthcheck_name == "httpbin-healthcheck"
+    condition     = output.healthcheck_name == "origin-healthcheck"
     error_message = "Health check name mismatch after apply"
   }
 }

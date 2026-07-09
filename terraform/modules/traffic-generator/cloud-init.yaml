@@ -1,0 +1,539 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+packages:
+  # System essentials
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - jq
+  - git
+  - unzip
+  - build-essential
+  - python3
+  - python3-pip
+  - python3-venv
+  - python3-dev
+  - libffi-dev
+  - libssl-dev
+  - libpcap-dev
+  # Network analysis
+  - nmap
+  - masscan
+  - tshark
+  - hping3
+  - socat
+  - tcpdump
+  - netcat-openbsd
+  - ngrep
+  - iperf3
+  - mtr-tiny
+  - whois
+  - dnsutils
+  # Web scanners
+  - nikto
+  - sqlmap
+  - dirb
+  - whatweb
+  - sslscan
+  # Password/credential testing
+  - hydra
+  - medusa
+  - ncrack
+  - john
+  - hashcat
+  # Forensics/analysis
+  - binwalk
+  - strace
+  - ltrace
+  # Performance monitoring
+  - sysstat
+  - htop
+  - iotop
+  - ethtool
+  # Load testing
+  - apache2-utils
+  - wrk
+  # Headless Chrome dependencies
+  - fonts-noto-color-emoji
+  - fonts-liberation
+  - libnss3
+  - libatk-bridge2.0-dev
+  - libdrm2
+  - libxkbcommon0
+  - libgbm1
+  - libasound2-dev
+
+write_files:
+  - path: /usr/local/bin/ghlatest
+    permissions: '0755'
+    content: |
+      #!/bin/sh
+      set -e
+      REPO="$1"
+      if [ -z "$REPO" ]; then echo "Usage: ghlatest owner/repo" >&2; exit 1; fi
+      R=0; M=3
+      while [ "$R" -lt "$M" ]; do
+        RESP=$(curl -fsSL -w "\n%%{http_code}" "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null) || true
+        HTTP_CODE=$(echo "$RESP" | tail -1)
+        BODY=$(echo "$RESP" | sed '$d')
+        if [ "$HTTP_CODE" = "403" ] || [ "$HTTP_CODE" = "429" ]; then
+          echo "WARN: ghlatest rate-limited ($HTTP_CODE) for $REPO" >&2; exit 1
+        fi
+        V=$(echo "$BODY" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"v\{0,1\}\([^"]*\)".*/\1/')
+        if [ -n "$V" ]; then echo "$V"; exit 0; fi
+        R=$((R + 1)); sleep $((R * 3))
+      done
+      echo "ERROR: ghlatest failed for $REPO" >&2; exit 1
+
+  - path: /etc/sysctl.d/99-traffic-generator.conf
+    content: |
+      net.core.somaxconn = 131072
+      net.ipv4.tcp_max_syn_backlog = 131072
+      net.core.netdev_max_backlog = 131072
+      net.ipv4.ip_local_port_range = 1024 65535
+      net.ipv4.tcp_tw_reuse = 1
+      net.ipv4.tcp_fin_timeout = 5
+      net.ipv4.tcp_max_tw_buckets = 4000000
+      net.ipv4.tcp_keepalive_time = 30
+      net.ipv4.tcp_keepalive_intvl = 5
+      net.ipv4.tcp_keepalive_probes = 3
+      net.core.rmem_max = 67108864
+      net.core.wmem_max = 67108864
+      net.ipv4.tcp_rmem = 4096 87380 67108864
+      net.ipv4.tcp_wmem = 4096 65536 67108864
+      net.ipv4.tcp_syncookies = 1
+      net.ipv4.tcp_slow_start_after_idle = 0
+      net.ipv4.tcp_no_metrics_save = 1
+      net.ipv4.tcp_timestamps = 1
+      net.ipv4.tcp_window_scaling = 1
+      fs.file-max = 4194304
+
+  - path: /etc/security/limits.d/99-traffic-generator.conf
+    content: |
+      *    soft    nofile    524288
+      *    hard    nofile    524288
+      root soft    nofile    524288
+      root hard    nofile    524288
+      *    soft    nproc     65535
+      *    hard    nproc     65535
+
+  - path: /etc/profile.d/traffic-generator.sh
+    permissions: '0644'
+    content: |
+      export NODE_PATH=/usr/lib/node_modules
+      export PATH=$PATH:/usr/local/bin
+
+  - path: /usr/local/bin/tgen-profile
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set -uo pipefail
+      report() {
+        echo "================================================================"
+        echo "  TRAFFIC GENERATOR PLATFORM PROFILE — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo "================================================================"
+        echo ""
+        echo "--- CPU ---"
+        echo "Cores: $(nproc)"
+        uptime
+        echo ""
+        echo "--- Memory ---"
+        free -h
+        echo ""
+        echo "--- Disk I/O ---"
+        iostat -x 1 1 2>/dev/null | grep -A20 'Device' || echo "iostat not available"
+        echo ""
+        echo "--- Network connections ---"
+        ss -s
+        echo ""
+        echo "--- TCP state distribution ---"
+        ss -tan | awk 'NR>1 {print $1}' | sort | uniq -c | sort -rn
+        echo ""
+        echo "--- TIME_WAIT count ---"
+        ss -tan state time-wait | wc -l
+        echo ""
+        echo "--- Ephemeral port usage ---"
+        RANGE=$(sysctl -n net.ipv4.ip_local_port_range)
+        LOW=$(echo "$RANGE" | awk '{print $1}')
+        HIGH=$(echo "$RANGE" | awk '{print $2}')
+        USED=$(ss -tan | awk -v low="$LOW" -v high="$HIGH" '{split($4,a,":"); p=a[length(a)]; if(p>=low && p<=high) count++} END {print count+0}')
+        TOTAL=$((HIGH - LOW))
+        echo "  Range: $LOW-$HIGH ($TOTAL ports)"
+        echo "  Used:  $USED ($((USED * 100 / TOTAL))%)"
+        echo ""
+        echo "--- Open file descriptors ---"
+        echo "  System: $(awk '{print $1}' /proc/sys/fs/file-nr) / $(cat /proc/sys/fs/file-max)"
+        echo "  Limit:  $(ulimit -n) (soft) / $(ulimit -Hn) (hard)"
+        echo ""
+        echo "--- Kernel TCP tuning ---"
+        for k in net.core.somaxconn net.ipv4.tcp_max_syn_backlog net.ipv4.ip_local_port_range net.ipv4.tcp_tw_reuse net.ipv4.tcp_fin_timeout net.ipv4.tcp_max_tw_buckets net.core.rmem_max net.core.wmem_max; do
+          printf "  %-40s %s\n" "$k" "$(sysctl -n $k 2>/dev/null || echo N/A)"
+        done
+      }
+      if [ "$${1:-}" = "--watch" ]; then
+        SECS="$${2:-10}"
+        while true; do clear; report; sleep "$SECS"; done
+      else
+        report
+      fi
+
+  - path: /opt/traffic-generator/config.env
+    content: |
+      TARGET_FQDN=${target_fqdn}
+      TARGET_ORIGIN_IP=${target_origin_ip}
+      TARGET_PROTOCOL=http
+      CRAPI_PORT=8888
+      NODE_PATH=/usr/lib/node_modules
+      # --- Continuous load (systemd tgen-continuous.timer) ---
+      # A bounded, rate-limited burst runs on a timer so the F5 XC WAF / API
+      # protection always has live traffic. Rate-based (req/s) keeps egress cost
+      # predictable: ~RATE*DURATION requests per burst. The wrapper reads these on
+      # every run (no redeploy needed). Cadence is set in tgen-continuous.timer
+      # (OnUnitActiveSec, default 5min); set CONTINUOUS_ENABLED=false to pause.
+      CONTINUOUS_ENABLED=true
+      CONTINUOUS_RATE=50
+      CONTINUOUS_DURATION=30s
+
+  - path: /opt/traffic-generator/status.json
+    content: |
+      {"status":"provisioning","tool_tier":"${tool_tier}"}
+
+  - path: /usr/local/lib/cloud-init-helpers.sh
+    permissions: "0644"
+    content: |
+      #!/bin/sh
+      PROGRESS_LOG="/var/log/cloud-init-progress.log"
+      log_phase() {
+        _phase="$1"; shift
+        _msg="$${*:-started}"
+        _ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        printf '[%s] [%s] %s\n' "$_ts" "$_phase" "$_msg" | tee -a "$PROGRESS_LOG" >&2
+      }
+      retry_cmd() {
+        _max="$1"; _base="$2"; shift 2
+        _attempt=1
+        while [ "$_attempt" -le "$_max" ]; do
+          if "$@"; then return 0; fi
+          if [ "$_attempt" -lt "$_max" ]; then
+            _wait=$(( _base * _attempt ))
+            log_phase "retry" "attempt $_attempt/$_max failed ($1) — retrying in $${_wait}s"
+            sleep "$_wait"
+          fi
+          _attempt=$(( _attempt + 1 ))
+        done
+        log_phase "retry" "FAILED after $_max attempts: $1"
+        return 1
+      }
+      fetch_url() {
+        _url="$1"; _out="$2"; _desc="$${3:-$1}"
+        log_phase "fetch" "$_desc"
+        retry_cmd 4 5 curl -fsSL --connect-timeout 15 --max-time 300 -o "$_out" "$_url"
+      }
+      install_packages() {
+        log_phase "apt" "installing: $*"
+        retry_cmd 3 10 apt-get install -y -o DPkg::Lock::Timeout=60 "$@"
+      }
+      clone_repo() {
+        _url="$1"; _dest="$2"; _depth="$${3:-1}"
+        log_phase "git" "cloning $_url -> $_dest"
+        retry_cmd 3 10 git clone --depth "$_depth" --single-branch "$_url" "$_dest"
+      }
+      wait_for_http() {
+        _url="$1"; _max="$2"; _desc="$${3:-$_url}"
+        log_phase "health" "waiting for $_desc (max $${_max}s)"
+        _elapsed=0
+        while [ "$_elapsed" -lt "$_max" ]; do
+          if curl -sf --max-time 5 "$_url" >/dev/null 2>&1; then
+            log_phase "health" "$_desc ready after $${_elapsed}s"
+            return 0
+          fi
+          sleep 5; _elapsed=$(( _elapsed + 5 ))
+        done
+        log_phase "health" "TIMEOUT: $_desc not ready after $${_max}s"
+        return 1
+      }
+
+  # Continuous bounded-load wrapper (invoked by tgen-continuous.timer). Reads
+  # /opt/traffic-generator/config.env each run; self-contained (does not require
+  # the cloned suites). Hits endpoints served by the origin server through the LB.
+  - path: /usr/local/bin/tgen-continuous
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      # NOTE: rendered by Terraform templatefile(), which turns the doubled-brace
+      # escape $${NAME} into a literal shell variable reference. So every shell
+      # variable below is written with that doubled-brace escape; command
+      # substitution uses a single-dollar $( ... ) (templatefile leaves $( alone).
+      # Never write an unbraced double-dollar before a name — it survives verbatim.
+      set -u
+      CONFIG=/opt/traffic-generator/config.env
+      [ -r "$${CONFIG}" ] && . "$${CONFIG}"
+      [ "$${CONTINUOUS_ENABLED:-true}" = "true" ] || exit 0
+      : "$${TARGET_FQDN:?TARGET_FQDN required}"
+      PROTO="$${TARGET_PROTOCOL:-http}"
+      BASE="$${PROTO}://$${TARGET_FQDN}"
+      RATE="$${CONTINUOUS_RATE:-50}"
+      DUR="$${CONTINUOUS_DURATION:-30s}"
+      LOG=/opt/traffic-generator/results/continuous.log
+      mkdir -p /opt/traffic-generator/results
+      # Endpoints the origin server's nginx serves (routed through the LB).
+      ENDPOINTS="/ /health /httpbin/get /httpbin/status/200 /juice-shop/ /vampi/users/v1 /dvwa/ /whoami/"
+      echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] burst -> $${BASE} rate=$${RATE} dur=$${DUR}" >> "$${LOG}"
+      if command -v vegeta >/dev/null 2>&1; then
+        targets=$(mktemp)
+        for ep in $${ENDPOINTS}; do echo "GET $${BASE}$${ep}"; done > "$${targets}"
+        vegeta attack -duration="$${DUR}" -rate="$${RATE}" -targets="$${targets}" 2>>"$${LOG}" | vegeta report >> "$${LOG}" 2>&1
+        rm -f "$${targets}"
+      elif command -v hey >/dev/null 2>&1; then
+        for ep in $${ENDPOINTS}; do hey -z "$${DUR}" -q "$${RATE}" "$${BASE}$${ep}" >> "$${LOG}" 2>&1; done
+      elif command -v wrk >/dev/null 2>&1; then
+        for ep in $${ENDPOINTS}; do wrk -t2 -c10 -d"$${DUR}" "$${BASE}$${ep}" >> "$${LOG}" 2>&1; done
+      else
+        end=$(( $(date +%s) + 30 ))
+        while [ "$(date +%s)" -lt "$${end}" ]; do
+          for ep in $${ENDPOINTS}; do curl -s -o /dev/null "$${BASE}$${ep}"; done
+        done
+      fi
+      tail -n 2000 "$${LOG}" > "$${LOG}.tmp" 2>/dev/null && mv "$${LOG}.tmp" "$${LOG}"
+      echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] burst complete" >> "$${LOG}"
+
+  - path: /etc/systemd/system/tgen-continuous.service
+    content: |
+      [Unit]
+      Description=Continuous bounded HTTP load at the F5 XC load balancer
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      User=azureuser
+      ExecStart=/usr/local/bin/tgen-continuous
+
+  - path: /etc/systemd/system/tgen-continuous.timer
+    content: |
+      [Unit]
+      Description=Run tgen-continuous on a fixed cadence
+
+      [Timer]
+      OnBootSec=5min
+      OnUnitActiveSec=5min
+      AccuracySec=30s
+      Unit=tgen-continuous.service
+
+      [Install]
+      WantedBy=timers.target
+
+runcmd:
+  # --- Phase 0: Kernel tuning, NIC optimization, system limits ---
+  - sysctl --system
+  - systemctl daemon-reload
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase0" "kernel tuning and NIC optimization"
+    # RPS/RFS: distribute NIC softirqs across all cores
+    NCPU=$(nproc)
+    RPS_MASK=$(printf '%x' $(( (1 << NCPU) - 1 )))
+    NIC=$(ip -o link show | awk -F': ' '/state UP/ && !/lo/{print $2; exit}')
+    if [ -n "$NIC" ]; then
+      RFS_ENTRIES=$((32768 * NCPU))
+      echo "$RFS_ENTRIES" > /proc/sys/net/core/rps_sock_flow_entries
+      for rxq in /sys/class/net/"$NIC"/queues/rx-*/rps_cpus; do
+        echo "$RPS_MASK" > "$rxq"
+      done
+      for rxq in /sys/class/net/"$NIC"/queues/rx-*/rps_flow_cnt; do
+        RXQ_COUNT=$(ls -d /sys/class/net/"$NIC"/queues/rx-* | wc -l)
+        echo "$((RFS_ENTRIES / RXQ_COUNT))" > "$rxq"
+      done
+      # Maximize NIC ring buffers
+      if command -v ethtool >/dev/null 2>&1; then
+        RX_MAX=$(ethtool -g "$NIC" 2>/dev/null | awk '/Pre-set.*:/,/^$/{if(/RX:/){print $2; exit}}')
+        TX_MAX=$(ethtool -g "$NIC" 2>/dev/null | awk '/Pre-set.*:/,/^$/{if(/TX:/){print $2; exit}}')
+        [ -n "$RX_MAX" ] && [ -n "$TX_MAX" ] && ethtool -G "$NIC" rx "$RX_MAX" tx "$TX_MAX" 2>/dev/null
+      fi
+      echo "NIC tuning: RPS mask=$RPS_MASK on $NIC"
+    fi
+    # Transparent Huge Pages for large connection pools
+    echo "always" > /sys/kernel/mm/transparent_hugepage/enabled 2>/dev/null || true
+
+  # --- Phase 1: Node.js 24 ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase1" "installing Node.js 24"
+    retry_cmd 3 10 sh -c 'curl -fsSL https://deb.nodesource.com/setup_24.x | bash -'
+    install_packages nodejs
+
+  # --- Phase 2: Python toolchain (uv) ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase2" "installing Python uv"
+    retry_cmd 4 5 sh -c 'curl -fsSL https://astral.sh/uv/install.sh | sh'
+    cp /root/.local/bin/uv /usr/local/bin/uv || true
+    cp /root/.local/bin/uvx /usr/local/bin/uvx || true
+
+  # --- Phase 3: Security binaries (Go tools via ghlatest) ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase3" "installing security binaries"
+    export DPKG_ARCH=$(dpkg --print-architecture)
+    export PATH=/usr/local/bin:$PATH
+
+    echo "Installing nuclei..."
+    NUCLEI_VER=$(ghlatest projectdiscovery/nuclei)
+    fetch_url "https://github.com/projectdiscovery/nuclei/releases/download/v$${NUCLEI_VER}/nuclei_$${NUCLEI_VER}_linux_$${DPKG_ARCH}.zip" /tmp/nuclei.zip "nuclei"
+    unzip -oq /tmp/nuclei.zip nuclei -d /usr/local/bin && rm /tmp/nuclei.zip
+
+    echo "Installing subfinder..."
+    SUBFINDER_VER=$(ghlatest projectdiscovery/subfinder)
+    fetch_url "https://github.com/projectdiscovery/subfinder/releases/download/v$${SUBFINDER_VER}/subfinder_$${SUBFINDER_VER}_linux_$${DPKG_ARCH}.zip" /tmp/subfinder.zip "subfinder"
+    unzip -oq /tmp/subfinder.zip subfinder -d /usr/local/bin && rm /tmp/subfinder.zip
+
+    echo "Installing httpx..."
+    HTTPX_VER=$(ghlatest projectdiscovery/httpx)
+    fetch_url "https://github.com/projectdiscovery/httpx/releases/download/v$${HTTPX_VER}/httpx_$${HTTPX_VER}_linux_$${DPKG_ARCH}.zip" /tmp/httpx.zip "httpx"
+    unzip -oq /tmp/httpx.zip httpx -d /usr/local/bin && rm /tmp/httpx.zip
+
+    echo "Installing ffuf..."
+    FFUF_VER=$(ghlatest ffuf/ffuf)
+    retry_cmd 4 5 sh -c 'curl -fsSL "https://github.com/ffuf/ffuf/releases/download/v$${FFUF_VER}/ffuf_$${FFUF_VER}_linux_$${DPKG_ARCH}.tar.gz" | tar -xz -C /usr/local/bin ffuf'
+
+    echo "Installing gobuster..."
+    GOBUSTER_VER=$(ghlatest OJ/gobuster)
+    retry_cmd 4 5 sh -c 'curl -fsSL "https://github.com/OJ/gobuster/releases/download/v$${GOBUSTER_VER}/gobuster_Linux_$(uname -m).tar.gz" | tar -xz -C /usr/local/bin gobuster'
+
+    echo "Installing feroxbuster..."
+    FEROX_VER=$(ghlatest epi052/feroxbuster)
+    fetch_url "https://github.com/epi052/feroxbuster/releases/download/v$${FEROX_VER}/feroxbuster_$${DPKG_ARCH}.deb.zip" /tmp/ferox.zip "feroxbuster"
+    unzip -oq /tmp/ferox.zip -d /tmp && dpkg -i /tmp/feroxbuster_*.deb && rm -f /tmp/ferox.zip /tmp/feroxbuster_*.deb
+
+    echo "Installing dalfox..."
+    DALFOX_VER=$(ghlatest hahwul/dalfox)
+    fetch_url "https://github.com/hahwul/dalfox/releases/download/v$${DALFOX_VER}/dalfox-linux-$${DPKG_ARCH}.tar.gz" /tmp/dalfox.tar.gz "dalfox"
+    tar -xzf /tmp/dalfox.tar.gz -C /tmp && mv /tmp/dalfox-linux-$${DPKG_ARCH} /usr/local/bin/dalfox && chmod +x /usr/local/bin/dalfox && rm /tmp/dalfox.tar.gz
+
+    echo "Installing amass..."
+    AMASS_VER=$(ghlatest owasp-amass/amass)
+    fetch_url "https://github.com/owasp-amass/amass/releases/download/v$${AMASS_VER}/amass_linux_$${DPKG_ARCH}.tar.gz" /tmp/amass.tar.gz "amass"
+    mkdir -p /tmp/amass && tar -xzf /tmp/amass.tar.gz -C /tmp/amass && cp /tmp/amass/amass_linux_$${DPKG_ARCH}/amass /usr/local/bin/ && rm -rf /tmp/amass /tmp/amass.tar.gz
+
+    echo "Phase 3 complete"
+
+  # --- Phase 3b: High-performance load testing tools ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase3b" "installing load testing tools"
+    export DPKG_ARCH=$(dpkg --print-architecture)
+    export PATH=/usr/local/bin:$PATH
+
+    echo "Installing hey (via go install — no prebuilt binaries available)..."
+    install_packages golang-go
+    mkdir -p /opt/go/bin
+    chown -R azureuser:azureuser /opt/go
+    retry_cmd 3 15 sh -c 'GOPATH=/opt/go go install github.com/rakyll/hey@latest'
+    cp /opt/go/bin/hey /usr/local/bin/hey
+
+    echo "Installing gotestwaf..."
+    retry_cmd 3 15 sh -c 'GOPATH=/opt/go go install github.com/wallarm/gotestwaf/cmd/gotestwaf@latest'
+    cp /opt/go/bin/gotestwaf /usr/local/bin/gotestwaf
+    mkdir -p /opt/gotestwaf
+    cp -r /opt/go/pkg/mod/github.com/wallarm/gotestwaf@*/config.yaml /opt/gotestwaf/ 2>/dev/null || true
+    cp -r /opt/go/pkg/mod/github.com/wallarm/gotestwaf@*/testcases /opt/gotestwaf/ 2>/dev/null || true
+    chown -R azureuser:azureuser /opt/gotestwaf
+
+    echo "Installing vegeta..."
+    VEGETA_VER=$(ghlatest tsenart/vegeta)
+    retry_cmd 4 5 sh -c 'curl -fsSL "https://github.com/tsenart/vegeta/releases/download/v$${VEGETA_VER}/vegeta_$${VEGETA_VER}_linux_$${DPKG_ARCH}.tar.gz" | tar -xz -C /usr/local/bin vegeta'
+
+    echo "Phase 3b complete"
+
+  # --- Phase 4: Python security tools ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase4" "installing Python security tools"
+    retry_cmd 3 10 pip install --retries 3 --break-system-packages scapy impacket arjun hashid pwntools
+    retry_cmd 3 10 pip install --retries 3 --break-system-packages --ignore-installed typing_extensions mitmproxy sslyze
+    retry_cmd 3 10 pip install --retries 3 --break-system-packages wfuzz
+
+  # --- Phase 5: Browser automation ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase5" "installing browser automation tools"
+    retry_cmd 3 15 npm install -g playwright puppeteer puppeteer-extra puppeteer-extra-plugin-stealth
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    retry_cmd 3 30 npx --yes playwright install chromium
+    retry_cmd 3 30 sh -c 'su - azureuser -c "export NODE_PATH=/usr/lib/node_modules && npx --yes playwright install chromium"'
+    npx --yes playwright install-deps chromium 2>/dev/null || true
+
+  # --- Phase 6: Git-cloned tools ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase6" "cloning tool repositories"
+    clone_repo "https://github.com/drwetter/testssl.sh.git" /opt/testssl.sh
+    ln -sf /opt/testssl.sh/testssl.sh /usr/local/bin/testssl
+    clone_repo "https://github.com/danielmiessler/SecLists.git" /opt/SecLists
+    clone_repo "https://github.com/lanmaster53/recon-ng.git" /opt/recon-ng
+    clone_repo "https://github.com/smicallef/spiderfoot.git" /opt/spiderfoot
+    clone_repo "https://github.com/nemesida-waf/waf-bypass.git" /opt/waf-bypass
+    clone_repo "https://github.com/swisskyrepo/PayloadsAllTheThings.git" /opt/PayloadsAllTheThings
+
+  # --- Phase 7: ZAP (standard tier) + heavy frameworks (full tier) ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase7" "installing ZAP and optional tools"
+    export PATH=/usr/local/bin:$PATH
+    echo "Installing ZAP..."
+    ZAP_VER=$(ghlatest zaproxy/zaproxy)
+    retry_cmd 4 5 sh -c 'curl -fsSL "https://github.com/zaproxy/zaproxy/releases/download/v$${ZAP_VER}/ZAP_$${ZAP_VER}_Linux.tar.gz" | tar -xz -C /opt'
+    mv /opt/ZAP_$${ZAP_VER} /opt/zaproxy 2>/dev/null || true
+    printf '#!/bin/sh\nexec /opt/zaproxy/zap.sh "$@"\n' > /usr/local/bin/zap && chmod +x /usr/local/bin/zap
+
+    if [ "${tool_tier}" = "full" ]; then
+      echo "Installing Metasploit (full tier)..."
+      curl -fsSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > /tmp/msfinstall
+      chmod +x /tmp/msfinstall && /tmp/msfinstall
+    fi
+
+  # --- Phase 8: Clone traffic-generator suites ---
+  - mkdir -p /opt/traffic-generator/suites /opt/traffic-generator/results
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase8" "cloning traffic generator suites"
+    clone_repo "https://github.com/f5-sales-demo/traffic-generator.git" /opt/traffic-generator/repo 1 || log_phase "warning" "traffic-generator repo clone failed — suites will be from cloud-init"
+  - |
+    if [ -d /opt/traffic-generator/repo/suites ]; then
+      cp -r /opt/traffic-generator/repo/suites/* /opt/traffic-generator/suites/
+      chmod -R +x /opt/traffic-generator/suites/
+    fi
+  - chown -R azureuser:azureuser /opt/traffic-generator
+
+  # --- Phase 9: Smoke test and status update ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase9" "running smoke test"
+    export NODE_PATH=/usr/lib/node_modules
+    export PATH=/usr/local/bin:$PATH
+    PASS=0; FAIL=0
+    for tool in nmap nikto sqlmap nuclei dalfox ffuf gobuster feroxbuster subfinder httpx sslscan hydra john hashcat masscan hping3 tshark wrk hey vegeta ab zap testssl arjun wfuzz gotestwaf node npx playwright; do
+      if command -v "$tool" >/dev/null 2>&1; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "MISSING: $tool"; fi
+    done
+    if [ "$FAIL" -eq 0 ]; then STATUS="ready"; else STATUS="degraded"; fi
+    log_phase "phase9" "smoke test complete: $PASS passed, $FAIL failed"
+    printf '{"status":"%s","tool_tier":"${tool_tier}","tools_pass":%d,"tools_fail":%d,"timestamp":"%s"}\n' \
+      "$STATUS" "$PASS" "$FAIL" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > /opt/traffic-generator/status.json
+
+  # --- Phase 10: Enable continuous load timer ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase10" "enabling continuous-load timer"
+    systemctl daemon-reload
+    systemctl enable --now tgen-continuous.timer
+    # Kick off one burst immediately so traffic starts without waiting for OnBootSec.
+    systemctl start tgen-continuous.service || true
+
+  # --- Completion ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "complete" "traffic-generator provisioned"

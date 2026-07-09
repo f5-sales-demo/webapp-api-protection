@@ -10,5 +10,17 @@ terraform {
       # generated. Locally the provider is consumed via dev_overrides (ignores this).
       version = ">= 3.64.0"
     }
+    # Azure providers: this plan also deploys its OWN Azure origin server and
+    # traffic generator (modules/origin-server, modules/traffic-generator), which
+    # the load balancer's origin pool points at. Versions match the upstream
+    # example plans the modules were incorporated from.
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
+    }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 3.0"
+    }
   }
 }

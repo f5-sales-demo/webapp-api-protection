@@ -8,6 +8,10 @@
 crash.log
 crash.*.log
 
+# Saved plan artifacts (terraform plan -out)
+tfplan
+*.tfplan
+
 # Variable files may contain environment-specific values
 *.tfvars
 !*.tfvars.example

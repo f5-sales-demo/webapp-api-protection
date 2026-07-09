@@ -8,10 +8,9 @@ variable "lb_domains" {
   type        = list(string)
 }
 
-variable "origin_dns_name" {
-  description = "Public DNS name of the origin server the pool forwards to."
+variable "origin_ip" {
+  description = "Public IP address of the origin server the pool forwards to (the Azure origin server's public IP)."
   type        = string
-  default     = "httpbin.org"
 }
 
 variable "origin_port" {
@@ -21,13 +20,24 @@ variable "origin_port" {
 }
 
 variable "health_check_path" {
-  description = "HTTP path the health check probes on the origin. httpbin's /status/200 always returns 200."
+  description = "HTTP path the health check probes on the origin. The Azure origin server's nginx returns HTTP 200 on /health for any Host."
   type        = string
-  default     = "/status/200"
+  default     = "/health"
 }
 
 variable "labels" {
   description = "Labels applied to the load balancer and origin pool."
   type        = map(string)
   default     = {}
+}
+
+variable "waf_mode" {
+  description = "App firewall enforcement mode: blocking (actively block) or monitoring (detect only)."
+  type        = string
+  default     = "blocking"
+
+  validation {
+    condition     = contains(["blocking", "monitoring"], var.waf_mode)
+    error_message = "waf_mode must be \"blocking\" or \"monitoring\"."
+  }
 }

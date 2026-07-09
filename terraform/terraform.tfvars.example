@@ -1,6 +1,9 @@
 # Copy to terraform.tfvars and adjust. terraform.tfvars is gitignored.
-# Credentials are NOT set here — export XCSH_API_URL + XCSH_API_TOKEN in the
-# environment (see terraform/README.md).
+# Credentials are NOT set here:
+#   F5 XC — export XCSH_API_URL + XCSH_API_TOKEN (see terraform/README.md).
+#   Azure — `az login` locally (or ARM_* / a service principal in CI).
+
+# --- F5 XC ---------------------------------------------------------------------
 
 # F5 XC namespace this plan creates and deploys into (default: webapp-api-protection).
 namespace = "webapp-api-protection"
@@ -9,14 +12,37 @@ namespace = "webapp-api-protection"
 # records (the f5-sales-demo.com zone has allow_http_lb_managed_records enabled).
 lb_domains = ["www.f5-sales-demo.com", "api.f5-sales-demo.com"]
 
-# Origin: the public httpbin service (HTTP 200 on port 80, no redirect).
-origin_dns_name = "httpbin.org"
-origin_port     = 80
-
-# HTTP path the origin-pool health check probes (httpbin /status/200 → 200).
-health_check_path = "/status/200"
+# Origin is the Azure origin server this plan deploys (its public IP is wired in
+# automatically). It serves HTTP on port 80; nginx returns 200 on /health.
+origin_port       = 80
+health_check_path = "/health"
 
 labels = {
   managed_by = "terraform"
   use_case   = "webapp-api-protection"
 }
+
+# App firewall (WAF) enforcement mode: "blocking" (actively block) or "monitoring".
+waf_mode = "blocking"
+
+# --- Azure (origin server + traffic generator this plan deploys) ---------------
+
+# Subscription the Azure VMs go into. Find it with: az account show --query id -o tsv
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# Azure region and the SSH public key installed on both VMs.
+location            = "eastus2"
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"
+
+# Environment label used in Azure resource naming/tags.
+environment = "lab"
+
+# VM sizes (both default to 16 vCPU — downsize for a cheaper demo if desired).
+origin_vm_size      = "Standard_D16s_v3"
+traffic_gen_vm_size = "Standard_F16s_v2"
+
+# Traffic-generator tool tier: "standard" or "full" (adds ZAP, Metasploit).
+traffic_gen_tool_tier = "standard"
+
+# Extra tags merged onto the Azure resources.
+azure_tags = {}
