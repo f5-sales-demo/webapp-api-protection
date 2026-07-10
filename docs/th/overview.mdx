@@ -1,0 +1,50 @@
+---
+title: ภาพรวม
+description: วิธีการสร้างกรณีการใช้งานการป้องกันเว็บแอปและ API ของ F5 Distributed Cloud — แผน Terraform ที่ใช้ผู้ให้บริการ xcsh ซึ่งจัดเตรียมโหลดบาลานเซอร์ HTTP และออริจินพูล โดยเก็บสถานะไว้ใน Azure Blob Storage และใช้ CI ผ่าน GitHub Actions
+sidebar:
+  order: 1
+  label: ภาพรวม
+i18n:
+  sourceHash: 63716f1c09ee
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+กรณีการใช้งานนี้สร้าง **เส้นทางการส่งมอบเว็บแอปพลิเคชันที่มีการรักษาความปลอดภัยบน F5 Distributed Cloud** ด้วย
+Terraform ทีละหนึ่งการควบคุม รอบการทำซ้ำที่ 1 วางรากฐาน: โหลดบาลานเซอร์ HTTP พร้อมกับ
+ออริจินพูล เก็บสถานะไว้ใน **Azure Blob Storage** และเรียกใช้ plan-on-pull-request /
+apply-on-merge ผ่าน **GitHub Actions** รอบการทำซ้ำต่อ ๆ ไปจะเพิ่มไฟร์วอลล์เว็บแอปพลิเคชัน
+และการป้องกัน API เข้ามาเป็นชั้น ๆ
+
+## สิ่งที่บริหารจัดการ (รอบการทำซ้ำที่ 1)
+
+- `xcsh_origin_pool` ที่ส่งต่อไปยังบริการสาธารณะ [httpbin](https://httpbin.org)
+- `xcsh_http_loadbalancer` ที่ประกาศบน VIP สาธารณะของ F5 XC และกำหนดเส้นทางไปยังพูลนั้น
+- สถานะ Terraform ระยะไกลใน Azure เพื่อให้แชร์การเรียกใช้ระหว่างเครื่องของผู้ปฏิบัติงานและ CI ได้
+
+## สถาปัตยกรรม
+
+| ชั้น | ตัวเลือก | เหตุผล |
+| --- | --- | --- |
+| Provider | `f5-sales-demo/xcsh` (Terraform registry) | สร้างจาก F5 XC OpenAPI มาพร้อมกับ `xcsh_http_loadbalancer`, `xcsh_origin_pool`, `xcsh_app_firewall` (WAF) และ `xcsh_api_definition` (การป้องกัน API) อยู่แล้ว ยืนยันตัวตนด้วย API token (`Authorization: APIToken <token>`) |
+| State backend | `azurerm` (Azure Blob Storage), การยืนยันตัวตนด้วย access-key | สถานะที่คงทนและใช้ร่วมกันได้ ใช้บัญชีที่บูตสแตรปไว้สำหรับกรณีการใช้งาน DNS ซ้ำโดยใช้คีย์สถานะที่แตกต่างกัน |
+| Automation | GitHub Actions | Plan ในทุกพูลรีเควสต์ และ apply เมื่อ merge เข้า `main` แบ็กเอนด์ประสานงานและอินพุตมาจาก **variables** ของที่เก็บ ส่วนข้อมูลรับรองมาจาก **secrets** |
+
+<Aside type="note">
+รอบการทำซ้ำที่ 1 มุ่งเป้าไปที่ **staging tenant** (`https://nferreira.staging.volterra.us`) ซึ่ง
+เข้าถึงได้ผ่าน VPN เท่านั้น ระหว่างการสร้างต้นแบบ จะเรียกใช้ Terraform ในเครื่องผ่าน VPN ส่วน CI plan/apply กับ
+tenant นี้ต้องใช้ self-hosted runner บน VPN
+</Aside>
+
+## แผนงาน
+
+- **รอบการทำซ้ำที่ 1 (รอบนี้):** โหลดบาลานเซอร์ HTTP + ออริจินพูล → httpbin
+- **ถัดไป:** แนบไฟร์วอลล์เว็บแอปพลิเคชัน (`xcsh_app_firewall`)
+- **จากนั้น:** เพิ่มการป้องกัน API (`xcsh_api_definition`, การค้นพบ API)
+- **ภายหลัง:** เลื่อนขั้นจาก staging ไปยังสภาพแวดล้อม pre-production
+
+## เริ่มต้นที่ไหน
+
+[Demo](/webapp-api-protection/demo/) จะพาคุณผ่านการดีพลอยและตรวจสอบความถูกต้องของโหลดบาลานเซอร์
+แบบครบวงจรด้วย Terraform

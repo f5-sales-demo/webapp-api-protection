@@ -1,0 +1,50 @@
+---
+title: Überblick
+description: Wie der F5 Distributed Cloud Web-App- und API-Schutz-Anwendungsfall aufgebaut ist — ein xcsh-Provider-Terraform-Plan, der einen HTTP-Lastenausgleich und einen Origin-Pool bereitstellt, mit Status in Azure Blob Storage und GitHub Actions CI.
+sidebar:
+  order: 1
+  label: Überblick
+i18n:
+  sourceHash: 63716f1c09ee
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Dieser Anwendungsfall baut einen **abgesicherten Bereitstellungspfad für Webanwendungen auf F5 Distributed Cloud** mit
+Terraform auf, ein Steuerungselement nach dem anderen. Iteration 1 legt das Fundament: einen HTTP-Lastenausgleich mit
+einem Origin-Pool, hält seinen Status in **Azure Blob Storage** und führt Plan-on-Pull-Request /
+Apply-on-Merge über **GitHub Actions** aus. Nachfolgende Iterationen ergänzen eine Web Application Firewall
+und API-Schutz.
+
+## Was es verwaltet (Iteration 1)
+
+- Ein `xcsh_origin_pool`, das an den öffentlichen [httpbin](https://httpbin.org)-Dienst weiterleitet.
+- Ein `xcsh_http_loadbalancer`, das auf der öffentlichen F5 XC VIP annonciert und zu diesem Pool routet.
+- Remote-Terraform-Status in Azure, sodass Ausführungen zwischen dem Rechner eines Operators und CI gemeinsam genutzt werden können.
+
+## Architektur
+
+| Ebene | Wahl | Warum |
+| --- | --- | --- |
+| Provider | `f5-sales-demo/xcsh` (Terraform-Registry) | Aus der F5 XC OpenAPI generiert; liefert bereits `xcsh_http_loadbalancer`, `xcsh_origin_pool`, `xcsh_app_firewall` (WAF) und `xcsh_api_definition` (API-Schutz). Authentifiziert sich mit einem API-Token (`Authorization: APIToken <token>`). |
+| Status-Backend | `azurerm` (Azure Blob Storage), Zugriffsschlüssel-Authentifizierung | Dauerhafter, gemeinsam genutzter Status. Verwendet das für den DNS-Anwendungsfall bereitgestellte Konto mit einem eigenen Statusschlüssel erneut. |
+| Automatisierung | GitHub Actions | Plan bei jedem Pull Request, Apply beim Merge nach `main`. Backend-Koordinaten und Eingaben stammen aus Repository-**Variablen**; Anmeldedaten aus **Secrets**. |
+
+<Aside type="note">
+Iteration 1 zielt auf den **Staging-Tenant** (`https://nferreira.staging.volterra.us`) ab, der
+nur über VPN erreichbar ist. Während des Prototypings wird Terraform lokal über das VPN ausgeführt; CI-Plan/Apply gegen
+diesen Tenant erfordert einen selbstgehosteten Runner im VPN.
+</Aside>
+
+## Roadmap
+
+- **Iteration 1 (diese):** HTTP-Lastenausgleich + Origin-Pool → httpbin.
+- **Als Nächstes:** eine Web Application Firewall anhängen (`xcsh_app_firewall`).
+- **Danach:** API-Schutz hinzufügen (`xcsh_api_definition`, API-Discovery).
+- **Später:** von Staging in eine Vorproduktionsumgebung heraufstufen.
+
+## Wo anfangen
+
+Die [Demo](/webapp-api-protection/demo/) führt durch die End-to-End-Bereitstellung und -Validierung des Lastenausgleichs
+mit Terraform.

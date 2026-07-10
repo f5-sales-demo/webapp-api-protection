@@ -1,0 +1,50 @@
+---
+title: 개요
+description: F5 Distributed Cloud 웹 앱 및 API 보호 사용 사례가 구축되는 방식 — HTTP 로드 밸런서와 오리진 풀을 프로비저닝하는 xcsh 공급자 Terraform 계획으로, 상태는 Azure Blob Storage에, CI는 GitHub Actions에 있습니다.
+sidebar:
+  order: 1
+  label: 개요
+i18n:
+  sourceHash: 63716f1c09ee
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+이 사용 사례는 Terraform으로 **F5 Distributed Cloud에서 보안이 적용된 웹 애플리케이션 전달 경로**를
+한 번에 하나의 제어 항목씩 구축합니다. 반복 1에서는 기반을 마련합니다. 오리진 풀을 갖춘 HTTP 로드
+밸런서를 세우고, 그 상태를 **Azure Blob Storage**에 보관하며, **GitHub Actions**를 통해
+풀 리퀘스트 시 plan / 병합 시 apply를 실행합니다. 이후 반복에서는 웹 애플리케이션 방화벽과 API 보호를
+계층으로 추가합니다.
+
+## 관리 대상 (반복 1)
+
+- 공개 [httpbin](https://httpbin.org) 서비스로 전달하는 `xcsh_origin_pool`.
+- F5 XC 공개 VIP에 광고하고 해당 풀로 라우팅하는 `xcsh_http_loadbalancer`.
+- Azure의 원격 Terraform 상태로, 운영자의 머신과 CI 간에 실행을 공유할 수 있습니다.
+
+## 아키텍처
+
+| 계층 | 선택 | 이유 |
+| --- | --- | --- |
+| 공급자 | `f5-sales-demo/xcsh` (Terraform registry) | F5 XC OpenAPI에서 생성되었으며, 이미 `xcsh_http_loadbalancer`, `xcsh_origin_pool`, `xcsh_app_firewall` (WAF), `xcsh_api_definition` (API 보호)를 제공합니다. API 토큰(`Authorization: APIToken <token>`)으로 인증합니다. |
+| 상태 백엔드 | `azurerm` (Azure Blob Storage), 액세스 키 인증 | 내구성 있고 공유 가능한 상태. DNS 사용 사례를 위해 부트스트랩된 계정을 별도의 상태 키로 재사용합니다. |
+| 자동화 | GitHub Actions | 모든 풀 리퀘스트에서 plan, `main`에 병합 시 apply. 백엔드 조정과 입력은 리포지토리 **variables**에서, 자격 증명은 **secrets**에서 가져옵니다. |
+
+<Aside type="note">
+반복 1은 VPN으로만 접근 가능한 **스테이징 테넌트**(`https://nferreira.staging.volterra.us`)를
+대상으로 합니다. 프로토타이핑 중에는 Terraform을 VPN을 통해 로컬로 실행합니다. 이 테넌트에 대한 CI
+plan/apply에는 VPN에 연결된 자체 호스팅 러너가 필요합니다.
+</Aside>
+
+## 로드맵
+
+- **반복 1 (현재):** HTTP 로드 밸런서 + 오리진 풀 → httpbin.
+- **다음:** 웹 애플리케이션 방화벽(`xcsh_app_firewall`) 연결.
+- **그다음:** API 보호(`xcsh_api_definition`, API 검색) 추가.
+- **이후:** 스테이징에서 사전 프로덕션 환경으로 승격.
+
+## 시작 위치
+
+[데모](/webapp-api-protection/demo/)는 Terraform으로 로드 밸런서를 종단 간 배포하고 검증하는
+과정을 안내합니다.

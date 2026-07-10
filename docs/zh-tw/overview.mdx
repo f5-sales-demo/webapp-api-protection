@@ -1,0 +1,43 @@
+---
+title: 概觀
+description: F5 Distributed Cloud web 應用程式與 API 保護使用案例的建構方式——一個 xcsh-provider 的 Terraform 計畫，佈建 HTTP 負載平衡器與來源集區，狀態存放於 Azure Blob Storage，並透過 GitHub Actions 執行 CI。
+sidebar:
+  order: 1
+  label: 概觀
+i18n:
+  sourceHash: 63716f1c09ee
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+此使用案例以 Terraform 逐一控制項地建立起 **F5 Distributed Cloud 上受保護的 web 應用程式遞送路徑**。第 1 次迭代奠定基礎：建立一個帶有來源集區的 HTTP 負載平衡器，將其狀態保存在 **Azure Blob Storage** 中，並透過 **GitHub Actions** 執行 plan-on-pull-request / apply-on-merge。後續的迭代會疊加 web 應用程式防火牆與 API 保護。
+
+## 它管理什麼（第 1 次迭代）
+
+- 一個 `xcsh_origin_pool`，轉發至公開的 [httpbin](https://httpbin.org) 服務。
+- 一個 `xcsh_http_loadbalancer`，在 F5 XC 公用 VIP 上進行廣告並路由至該集區。
+- 位於 Azure 中的遠端 Terraform 狀態，讓運作人員的機器與 CI 之間可以共用執行結果。
+
+## 架構
+
+| 層級 | 選擇 | 原因 |
+| --- | --- | --- |
+| Provider | `f5-sales-demo/xcsh`（Terraform registry） | 由 F5 XC OpenAPI 產生；已內建 `xcsh_http_loadbalancer`、`xcsh_origin_pool`、`xcsh_app_firewall`（WAF）與 `xcsh_api_definition`（API 保護）。使用 API token 進行驗證（`Authorization: APIToken <token>`）。 |
+| 狀態後端 | `azurerm`（Azure Blob Storage），access-key 驗證 | 持久、共用的狀態。重複使用為 DNS 使用案例啟動的帳戶，並採用獨立的狀態金鑰。 |
+| 自動化 | GitHub Actions | 每個 pull request 都執行 plan，合併至 `main` 時執行 apply。後端協調與輸入來自儲存庫的**變數**；憑證來自**密鑰**。 |
+
+<Aside type="note">
+第 1 次迭代以 **staging tenant**（`https://nferreira.staging.volterra.us`）為目標，此租戶僅可透過 VPN 存取。在原型製作期間，Terraform 會透過 VPN 於本機執行；針對此租戶進行 CI plan/apply 需要一個位於 VPN 上的自架 runner。
+</Aside>
+
+## 藍圖
+
+- **第 1 次迭代（本次）：** HTTP 負載平衡器 + 來源集區 → httpbin。
+- **接下來：** 附加一個 web 應用程式防火牆（`xcsh_app_firewall`）。
+- **然後：** 加入 API 保護（`xcsh_api_definition`、API 探索）。
+- **稍後：** 從 staging 推進至 pre-production 環境。
+
+## 從哪裡開始
+
+[Demo](/webapp-api-protection/demo/) 會逐步帶你以 Terraform 端對端地部署並驗證負載平衡器。

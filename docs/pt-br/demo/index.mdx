@@ -1,0 +1,43 @@
+---
+title: Demo
+description: Um exercício de proteção de aplicações web e API orquestrado por Terraform no F5 Distributed Cloud — construa o balanceador de carga HTTP, valide-o e depois acrescente controles de segurança.
+sidebar:
+  order: 1
+  label: Visão geral
+i18n:
+  sourceHash: 109cbaf37abb
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Este guia percorre a construção de um **caminho seguro de entrega de aplicações web** no F5 Distributed
+Cloud, orquestrado por Terraform. A Iteração 1 cobre a base; as fases de segurança são adicionadas à medida que o plano
+amadurece. Cada fase é idempotente: reexecutá-la converge para o mesmo estado.
+
+## Fases do exercício
+
+| Fase | Objetivo | Status |
+| --- | --- | --- |
+| Construir | Implantar o balanceador de carga HTTP + pool de origem (httpbin) com Terraform; conectar estado remoto e CI | Iteração 1 |
+| Validar | Confirmar que o balanceador de carga serve o httpbin e que o plano é idempotente | Iteração 1 |
+| Proteger — WAF | Anexar um firewall de aplicações web (`xcsh_app_firewall`) | Planejado |
+| Proteger — API | Adicionar proteção de API (`xcsh_api_definition`, descoberta de API) | Planejado |
+| Desmontar | Destruir os objetos gerenciados após confirmação explícita | Iteração 1 |
+
+## Pré-requisitos
+
+- **Terraform** ≥ 1.5.
+- O provedor **`f5-sales-demo/xcsh`** ≥ 3.63.0, resolvido a partir do registro do Terraform — ou uma
+  compilação local via `dev_overrides`.
+- Um **token de API do F5 XC** para o tenant de staging e **acesso via VPN** para alcançá-lo.
+- A **Azure CLI** autenticada com Contributor na assinatura (o backend de estado é compartilhado com o
+  caso de uso de DNS e já está preparado).
+
+<Aside type="caution">
+A Iteração 1 tem como alvo o tenant de staging (não produção). Promova para pré-produção somente depois que o
+plano estiver livre de bugs contra o staging.
+</Aside>
+
+Consulte o [terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)
+para as etapas completas de construção, variáveis e secrets.

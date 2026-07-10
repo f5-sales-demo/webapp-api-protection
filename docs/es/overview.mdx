@@ -1,0 +1,50 @@
+---
+title: Visión general
+description: Cómo se construye el caso de uso de protección de aplicaciones web y API de F5 Distributed Cloud — un plan de Terraform con el proveedor xcsh que aprovisiona un balanceador de carga HTTP y un grupo de origen, con el estado en Azure Blob Storage y CI con GitHub Actions.
+sidebar:
+  order: 1
+  label: Visión general
+i18n:
+  sourceHash: 63716f1c09ee
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Este caso de uso construye una **ruta de entrega de aplicaciones web protegida en F5 Distributed Cloud** con
+Terraform, un control a la vez. La iteración 1 establece la base: un balanceador de carga HTTP con
+un grupo de origen, mantiene su estado en **Azure Blob Storage** y ejecuta plan-on-pull-request /
+apply-on-merge a través de **GitHub Actions**. Las iteraciones posteriores añaden un firewall de aplicaciones web
+y protección de API.
+
+## Qué gestiona (iteración 1)
+
+- Un `xcsh_origin_pool` que reenvía al servicio público [httpbin](https://httpbin.org).
+- Un `xcsh_http_loadbalancer` que se anuncia en la VIP pública de F5 XC y enruta a ese grupo.
+- Estado remoto de Terraform en Azure, para que las ejecuciones puedan compartirse entre la máquina de un operador y CI.
+
+## Arquitectura
+
+| Capa | Elección | Por qué |
+| --- | --- | --- |
+| Proveedor | `f5-sales-demo/xcsh` (registro de Terraform) | Generado a partir de la OpenAPI de F5 XC; ya incluye `xcsh_http_loadbalancer`, `xcsh_origin_pool`, `xcsh_app_firewall` (WAF) y `xcsh_api_definition` (protección de API). Se autentica con un token de API (`Authorization: APIToken <token>`). |
+| Backend de estado | `azurerm` (Azure Blob Storage), autenticación con clave de acceso | Estado duradero y compartido. Reutiliza la cuenta inicializada para el caso de uso de DNS con una clave de estado distinta. |
+| Automatización | GitHub Actions | Plan en cada pull request, apply al fusionar en `main`. La coordinación del backend y las entradas provienen de **variables** del repositorio; las credenciales, de **secretos**. |
+
+<Aside type="note">
+La iteración 1 apunta al **tenant de staging** (`https://nferreira.staging.volterra.us`), que solo es
+accesible por VPN. Durante la creación de prototipos, Terraform se ejecuta localmente a través de la VPN; ejecutar plan/apply de CI contra
+este tenant requiere un runner autoalojado en la VPN.
+</Aside>
+
+## Hoja de ruta
+
+- **Iteración 1 (esta):** balanceador de carga HTTP + grupo de origen → httpbin.
+- **Siguiente:** conectar un firewall de aplicaciones web (`xcsh_app_firewall`).
+- **Luego:** añadir protección de API (`xcsh_api_definition`, descubrimiento de API).
+- **Más adelante:** promover de staging a un entorno de preproducción.
+
+## Por dónde empezar
+
+La [Demostración](/webapp-api-protection/demo/) recorre la implementación y validación del balanceador de carga
+de principio a fin con Terraform.

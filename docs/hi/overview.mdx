@@ -1,0 +1,43 @@
+---
+title: अवलोकन
+description: F5 Distributed Cloud वेब ऐप और API सुरक्षा उपयोग-मामला कैसे बनाया गया है — एक xcsh-provider Terraform योजना जो एक HTTP लोड बैलेंसर और ओरिजिन पूल प्रावधानित करती है, जिसकी स्थिति Azure Blob Storage और GitHub Actions CI में होती है।
+sidebar:
+  order: 1
+  label: अवलोकन
+i18n:
+  sourceHash: 63716f1c09ee
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+यह उपयोग-मामला Terraform के साथ **F5 Distributed Cloud पर एक सुरक्षित वेब एप्लिकेशन डिलीवरी पथ** बनाता है, एक बार में एक नियंत्रण। इटरेशन 1 आधार खड़ा करता है: एक ओरिजिन पूल के साथ एक HTTP लोड बैलेंसर, अपनी स्थिति **Azure Blob Storage** में रखता है, और **GitHub Actions** के माध्यम से plan-on-pull-request / apply-on-merge चलाता है। बाद के इटरेशन एक वेब एप्लिकेशन फ़ायरवॉल और API सुरक्षा को परत-दर-परत जोड़ते हैं।
+
+## यह क्या प्रबंधित करता है (इटरेशन 1)
+
+- एक `xcsh_origin_pool` जो सार्वजनिक [httpbin](https://httpbin.org) सेवा को अग्रेषित करता है।
+- एक `xcsh_http_loadbalancer` जो F5 XC सार्वजनिक VIP पर विज्ञापन करता है और उस पूल तक रूट करता है।
+- Azure में रिमोट Terraform स्थिति, ताकि रन एक ऑपरेटर की मशीन और CI के बीच साझा किए जा सकें।
+
+## आर्किटेक्चर
+
+| परत | विकल्प | क्यों |
+| --- | --- | --- |
+| Provider | `f5-sales-demo/xcsh` (Terraform registry) | F5 XC OpenAPI से जनरेट किया गया; पहले से ही `xcsh_http_loadbalancer`, `xcsh_origin_pool`, `xcsh_app_firewall` (WAF) और `xcsh_api_definition` (API सुरक्षा) शिप करता है। एक API टोकन (`Authorization: APIToken <token>`) के साथ प्रमाणित होता है। |
+| State backend | `azurerm` (Azure Blob Storage), access-key प्रमाणन | टिकाऊ, साझा स्थिति। DNS उपयोग-मामले के लिए बूटस्ट्रैप किए गए खाते को एक अलग स्थिति कुंजी के साथ पुनः उपयोग करता है। |
+| Automation | GitHub Actions | हर पुल रिक्वेस्ट पर plan, `main` में merge पर apply। बैकएंड समन्वय और इनपुट रिपॉज़िटरी **variables** से आते हैं; क्रेडेंशियल **secrets** से। |
+
+<Aside type="note">
+इटरेशन 1 **staging tenant** (`https://nferreira.staging.volterra.us`) को लक्षित करता है, जो केवल VPN-सुलभ है। प्रोटोटाइपिंग के दौरान, Terraform को स्थानीय रूप से VPN पर चलाया जाता है; इस tenant के विरुद्ध CI plan/apply के लिए VPN पर एक self-hosted runner की आवश्यकता होती है।
+</Aside>
+
+## रोडमैप
+
+- **इटरेशन 1 (यह):** HTTP लोड बैलेंसर + ओरिजिन पूल → httpbin।
+- **अगला:** एक वेब एप्लिकेशन फ़ायरवॉल (`xcsh_app_firewall`) संलग्न करें।
+- **फिर:** API सुरक्षा जोड़ें (`xcsh_api_definition`, API discovery)।
+- **बाद में:** staging से एक pre-production वातावरण में प्रोन्नत करें।
+
+## कहाँ से शुरू करें
+
+[Demo](/webapp-api-protection/demo/) Terraform के साथ लोड बैलेंसर को end-to-end परिनियोजित और सत्यापित करने के माध्यम से चलता है।

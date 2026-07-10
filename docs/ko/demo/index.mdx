@@ -1,0 +1,44 @@
+---
+title: 데모
+description: F5 Distributed Cloud에서 Terraform으로 구동되는 웹 앱 및 API 보호 실습 — HTTP 로드 밸런서를 구축하고 검증한 다음 보안 제어를 계층으로 추가합니다.
+sidebar:
+  order: 1
+  label: 개요
+i18n:
+  sourceHash: 109cbaf37abb
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+이 가이드는 Terraform으로 구동되는 F5 Distributed Cloud에서 **보안이 적용된 웹 애플리케이션 전달
+경로**를 구축하는 과정을 안내합니다. 반복 1은 기반을 다루며, 계획이 성숙해짐에 따라 보안 단계가
+추가됩니다. 각 단계는 멱등적입니다. 다시 실행하면 동일한 상태로 수렴합니다.
+
+## 실습 단계
+
+| 단계 | 목표 | 상태 |
+| --- | --- | --- |
+| 구축 | Terraform으로 HTTP 로드 밸런서 + 오리진 풀(httpbin) 배포, 원격 상태 및 CI 연결 | 반복 1 |
+| 검증 | 로드 밸런서가 httpbin을 제공하고 계획이 멱등적인지 확인 | 반복 1 |
+| 보호 — WAF | 웹 애플리케이션 방화벽(`xcsh_app_firewall`) 연결 | 계획됨 |
+| 보호 — API | API 보호(`xcsh_api_definition`, API 검색) 추가 | 계획됨 |
+| 해체 | 명시적 확인 후 관리 대상 객체 삭제 | 반복 1 |
+
+## 사전 요구 사항
+
+- **Terraform** ≥ 1.5.
+- Terraform registry에서 확인된 **`f5-sales-demo/xcsh`** 공급자 ≥ 3.63.0 — 또는
+  `dev_overrides`를 통한 로컬 빌드.
+- 스테이징 테넌트용 **F5 XC API 토큰**과 이에 접근하기 위한 **VPN 접근 권한**.
+- 구독에 대한 Contributor 권한으로 로그인된 **Azure CLI** (상태 백엔드는 DNS 사용 사례와 공유되며
+  이미 부트스트랩되어 있습니다).
+
+<Aside type="caution">
+반복 1은 스테이징(비프로덕션) 테넌트를 대상으로 합니다. 계획이 스테이징에서 버그가 없는 것으로 확인된
+후에만 사전 프로덕션으로 승격하세요.
+</Aside>
+
+전체 구축 단계, 변수, 시크릿은
+[terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)를
+참조하세요.

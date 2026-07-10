@@ -1,0 +1,43 @@
+---
+title: 概要
+description: F5 Distributed Cloud の Web アプリケーションと API 保護のユースケースがどのように構築されているか — HTTP ロードバランサーとオリジンプールをプロビジョニングする xcsh プロバイダーの Terraform プランで、状態は Azure Blob Storage に、CI は GitHub Actions で実行します。
+sidebar:
+  order: 1
+  label: 概要
+i18n:
+  sourceHash: 63716f1c09ee
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+このユースケースでは、Terraform を使って **F5 Distributed Cloud 上の保護された Web アプリケーション配信経路** を、コントロールを 1 つずつ積み上げて構築します。イテレーション 1 では基盤を立ち上げます。オリジンプールを備えた HTTP ロードバランサーを構成し、その状態を **Azure Blob Storage** に保持し、**GitHub Actions** を通じてプルリクエスト時のプラン / マージ時の適用を実行します。以降のイテレーションでは、Web アプリケーションファイアウォールと API 保護を重ねていきます。
+
+## 管理する対象（イテレーション 1）
+
+- パブリックな [httpbin](https://httpbin.org) サービスへ転送する `xcsh_origin_pool`。
+- F5 XC のパブリック VIP でアドバタイズし、そのプールへルーティングする `xcsh_http_loadbalancer`。
+- Azure 上のリモート Terraform 状態。これにより、オペレーターのマシンと CI の間で実行結果を共有できます。
+
+## アーキテクチャ
+
+| レイヤー | 選択 | 理由 |
+| --- | --- | --- |
+| プロバイダー | `f5-sales-demo/xcsh`（Terraform レジストリ） | F5 XC の OpenAPI から生成されており、`xcsh_http_loadbalancer`、`xcsh_origin_pool`、`xcsh_app_firewall`（WAF）、`xcsh_api_definition`（API 保護）をすでに提供しています。API トークン（`Authorization: APIToken <token>`）で認証します。 |
+| 状態バックエンド | `azurerm`（Azure Blob Storage）、アクセスキー認証 | 永続的で共有される状態。DNS ユースケース向けにブートストラップされたアカウントを、別個の状態キーで再利用します。 |
+| 自動化 | GitHub Actions | プルリクエストごとにプランを実行し、`main` へのマージで適用します。バックエンドの調整と入力はリポジトリの **変数** から、認証情報は **シークレット** から取得します。 |
+
+<Aside type="note">
+イテレーション 1 は **ステージングテナント**（`https://nferreira.staging.volterra.us`）を対象とし、これは VPN 経由でのみアクセス可能です。プロトタイピング中は Terraform を VPN 越しにローカルで実行します。このテナントに対する CI でのプラン / 適用には、VPN 上のセルフホストランナーが必要です。
+</Aside>
+
+## ロードマップ
+
+- **イテレーション 1（本書）:** HTTP ロードバランサー + オリジンプール → httpbin。
+- **次:** Web アプリケーションファイアウォール（`xcsh_app_firewall`）を接続する。
+- **その次:** API 保護（`xcsh_api_definition`、API ディスカバリー）を追加する。
+- **後で:** ステージングからプリプロダクション環境へ昇格する。
+
+## どこから始めるか
+
+[デモ](/webapp-api-protection/demo/) では、Terraform を使ってロードバランサーをエンドツーエンドでデプロイし検証する手順を解説します。
