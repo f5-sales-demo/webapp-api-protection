@@ -37,3 +37,8 @@ output "csd_enabled" {
   description = "Whether Client-Side Defense JavaScript injection is enabled on the load balancer."
   value       = var.csd_enabled
 }
+
+output "mud_enabled" {
+  description = "Whether Malicious User Detection (with auto-mitigation) is enabled on the load balancer."
+  value       = var.mud_enabled
+}

@@ -27,7 +27,7 @@ internet-reachable), with remote state in Azure Blob Storage.
 
 ## Security controls
 
-The `http-lb` module attaches three F5 XC app-security controls to the load balancer:
+The `http-lb` module attaches four F5 XC app-security controls to the load balancer:
 
 - **WAF** — `xcsh_app_firewall.this` (`webapp-api-protection-waf`) is referenced by the
   load balancer's `app_firewall {}` block. Enforcement mode is set by the `waf_mode`
@@ -51,6 +51,16 @@ The `http-lb` module attaches three F5 XC app-security controls to the load bala
   is owned by a separate tenant plan. The served root domain is registered with the CSD
   reporting engine via `xcsh_protected_domain` (system namespace). Telemetry beacons and
   detected scripts appear in the console (Web App & API Protection → Client-Side Defense).
+- **Malicious User Detection** — the load balancer's `enable_malicious_user_detection {}`
+  block scores per-user behavior into threat levels (users identified by the server-default
+  client IP). Auto-mitigation is wired through the `enable_challenge` block, which references
+  an `xcsh_malicious_user_mitigation` policy (`webapp-api-protection-mud`) that escalates by
+  threat level: low → JavaScript challenge, medium → CAPTCHA, high → temporary block. Toggled
+  by the `mud_enabled` variable (default `true`). MUD is a WAAP capability: the plan asserts
+  the tenant WAAP entitlement via a `data xcsh_addon_service_activation_status` guard
+  (`f5xc-waap-standard`, state `AS_SUBSCRIBED`) rather than managing the subscription. Flagged
+  users and mitigation actions appear in the console (Web App & API Protection → Malicious
+  Users).
 
 ## Architecture
 
