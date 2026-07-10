@@ -20,6 +20,7 @@ run "plan_creates_loadbalancer_and_pool" {
     labels            = {}
     waf_mode          = "blocking"
     csd_enabled       = true
+    mud_enabled       = true
   }
 
   assert {
@@ -30,6 +31,11 @@ run "plan_creates_loadbalancer_and_pool" {
   assert {
     condition     = output.csd_enabled == true
     error_message = "Client-Side Defense should be enabled on the load balancer"
+  }
+
+  assert {
+    condition     = output.mud_enabled == true
+    error_message = "Malicious User Detection should be enabled on the load balancer"
   }
 
   assert {

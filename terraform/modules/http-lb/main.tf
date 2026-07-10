@@ -88,6 +88,46 @@ resource "xcsh_app_firewall" "this" {
   }
 }
 
+# Malicious User Detection mitigation policy — the actions F5 XC takes once a user
+# is scored into a threat level. Referenced by the load balancer's enable_challenge
+# block below (there is no top-level malicious_user_mitigation field on the LB; the
+# reference lives inside the challenge oneof). Escalating response by threat level:
+# low → JavaScript challenge, medium → CAPTCHA, high → temporary block. Based on the
+# acceptance-tested example xcsh_malicious_user_mitigation/with-mitigation-type.tf.
+resource "xcsh_malicious_user_mitigation" "mud" {
+  count     = var.mud_enabled ? 1 : 0
+  name      = "webapp-api-protection-mud"
+  namespace = var.namespace
+  labels    = var.labels
+
+  mitigation_type {
+    rules {
+      threat_level {
+        low {}
+      }
+      mitigation_action {
+        javascript_challenge {}
+      }
+    }
+    rules {
+      threat_level {
+        medium {}
+      }
+      mitigation_action {
+        captcha_challenge {}
+      }
+    }
+    rules {
+      threat_level {
+        high {}
+      }
+      mitigation_action {
+        block_temporarily {}
+      }
+    }
+  }
+}
+
 resource "xcsh_http_loadbalancer" "this" {
   name      = "webapp-api-protection"
   namespace = var.namespace
@@ -149,6 +189,30 @@ resource "xcsh_http_loadbalancer" "this" {
     content {
       policy {
         js_insert_all_pages {}
+      }
+    }
+  }
+
+  # Malicious User Detection — score per-user behavior into threat levels
+  # (malicious_user_detection oneof vs the server default disable_malicious_user_detection).
+  # User identification uses the server-default client IP (user_id_client_ip); both the
+  # disable marker and the client-IP default are suppressed by the provider on import, so
+  # when mud_enabled is false we emit NO block (no drift; do not declare them).
+  dynamic "enable_malicious_user_detection" {
+    for_each = var.mud_enabled ? [1] : []
+    content {}
+  }
+
+  # Auto-mitigation for detected malicious users. enable_challenge is the challenge
+  # oneof arm that carries the malicious_user_mitigation reference (peer to the server
+  # default no_challenge, which the provider suppresses on import). It points at the
+  # mitigation policy created above.
+  dynamic "enable_challenge" {
+    for_each = var.mud_enabled ? [1] : []
+    content {
+      malicious_user_mitigation {
+        name      = xcsh_malicious_user_mitigation.mud[0].name
+        namespace = xcsh_malicious_user_mitigation.mud[0].namespace
       }
     }
   }

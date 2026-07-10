@@ -47,6 +47,12 @@ variable "csd_enabled" {
   default     = true
 }
 
+variable "mud_enabled" {
+  description = "Enable Malicious User Detection: score per-user behavior into threat levels and auto-mitigate (JS challenge / CAPTCHA / temporary block) via a malicious_user_mitigation policy. Requires the tenant MUD addon (verified via a data-source guard, not managed here)."
+  type        = bool
+  default     = true
+}
+
 # ---------------------------------------------------------
 # Azure (origin server + traffic generator this plan deploys)
 # ---------------------------------------------------------
