@@ -53,6 +53,11 @@ env:
   TF_VAR_environment: ${{ vars.WEBAPP_ENVIRONMENT }}
   # Service principals can't resolve an Azure AD user, so name the deployer explicitly.
   TF_VAR_deployer: cicd
+  # Whether the Azure service-principal secrets are configured. The azurerm/azuread
+  # providers authenticate as the SP, so plan/apply need it; init + fmt + validate do
+  # not. Until an admin provisions the SP, plan/apply are skipped (not failed) and the
+  # config-validity gate still runs, keeping CI green while the plan is driven locally.
+  HAS_ARM_SP: ${{ secrets.ARM_CLIENT_ID != '' }}
 
 jobs:
   terraform:
@@ -95,8 +100,12 @@ jobs:
       - name: Validate
         run: terraform validate -no-color
 
+      - name: Azure SP not configured — plan/apply skipped
+        if: env.HAS_ARM_SP != 'true'
+        run: echo "::notice::ARM_* service-principal secrets are not set; terraform plan/apply are skipped (init/fmt/validate ran). Provision ARM_CLIENT_ID/ARM_CLIENT_SECRET/ARM_TENANT_ID/ARM_SUBSCRIPTION_ID to enable."
+
       - name: Plan
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && env.HAS_ARM_SP == 'true'
         env:
           ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
           XCSH_API_URL: ${{ secrets.XCSH_API_URL }}
@@ -104,7 +113,7 @@ jobs:
         run: terraform plan -input=false -no-color
 
       - name: Apply
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && env.HAS_ARM_SP == 'true'
         env:
           ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
           XCSH_API_URL: ${{ secrets.XCSH_API_URL }}
