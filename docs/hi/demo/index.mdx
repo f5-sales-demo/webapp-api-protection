@@ -1,0 +1,37 @@
+---
+title: डेमो
+description: F5 Distributed Cloud पर एक Terraform-संचालित वेब ऐप और API सुरक्षा अभ्यास — HTTP लोड बैलेंसर बनाएं, इसे सत्यापित करें, फिर सुरक्षा नियंत्रणों को परत-दर-परत जोड़ें।
+sidebar:
+  order: 1
+  label: अवलोकन
+i18n:
+  sourceHash: 109cbaf37abb
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+यह मार्गदर्शिका Terraform द्वारा संचालित, F5 Distributed Cloud पर एक **सुरक्षित वेब एप्लिकेशन डिलीवरी पथ** बनाने के माध्यम से चलती है। इटरेशन 1 आधार को कवर करता है; योजना के परिपक्व होने के साथ सुरक्षा चरण जोड़े जाते हैं। प्रत्येक चरण निष्क्रिय (idempotent) है: इसे फिर से चलाने पर यह उसी स्थिति में अभिसरित होता है।
+
+## अभ्यास चरण
+
+| चरण | लक्ष्य | स्थिति |
+| --- | --- | --- |
+| Build | Terraform के साथ HTTP लोड बैलेंसर + ओरिजिन पूल (httpbin) परिनियोजित करें; रिमोट स्थिति और CI को जोड़ें | इटरेशन 1 |
+| Validate | पुष्टि करें कि लोड बैलेंसर httpbin परोसता है और योजना निष्क्रिय है | इटरेशन 1 |
+| Protect — WAF | एक वेब एप्लिकेशन फ़ायरवॉल (`xcsh_app_firewall`) संलग्न करें | नियोजित |
+| Protect — API | API सुरक्षा जोड़ें (`xcsh_api_definition`, API discovery) | नियोजित |
+| Teardown | स्पष्ट पुष्टि के बाद प्रबंधित ऑब्जेक्ट्स को नष्ट करें | इटरेशन 1 |
+
+## पूर्वापेक्षाएँ
+
+- **Terraform** ≥ 1.5।
+- **`f5-sales-demo/xcsh`** provider ≥ 3.63.0, Terraform registry से हल किया गया — या `dev_overrides` के माध्यम से एक स्थानीय बिल्ड।
+- staging tenant के लिए एक **F5 XC API token**, और इस तक पहुँचने के लिए **VPN access**।
+- सब्सक्रिप्शन पर Contributor के साथ साइन इन किया हुआ **Azure CLI** (state backend DNS उपयोग-मामले के साथ साझा है और पहले से बूटस्ट्रैप किया गया है)।
+
+<Aside type="caution">
+इटरेशन 1 staging (गैर-उत्पादन) tenant को लक्षित करता है। staging के विरुद्ध योजना के बग-मुक्त होने के बाद ही pre-production में प्रोन्नत करें।
+</Aside>
+
+पूर्ण बिल्ड चरणों, variables, और secrets के लिए [terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md) देखें।

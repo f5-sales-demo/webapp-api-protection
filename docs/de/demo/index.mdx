@@ -1,0 +1,43 @@
+---
+title: Demo
+description: Eine Terraform-gesteuerte Web-App- und API-Schutz-Übung auf F5 Distributed Cloud — den HTTP-Lastenausgleich aufbauen, validieren und dann Sicherheitskontrollen ergänzen.
+sidebar:
+  order: 1
+  label: Überblick
+i18n:
+  sourceHash: 109cbaf37abb
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Diese Anleitung führt durch den Aufbau eines **abgesicherten Bereitstellungspfads für Webanwendungen** auf F5 Distributed
+Cloud, gesteuert durch Terraform. Iteration 1 deckt das Fundament ab; Sicherheitsphasen werden ergänzt, während der Plan
+reift. Jede Phase ist idempotent: Ein erneutes Ausführen konvergiert zum selben Status.
+
+## Übungsphasen
+
+| Phase | Ziel | Status |
+| --- | --- | --- |
+| Aufbau | Den HTTP-Lastenausgleich + Origin-Pool (httpbin) mit Terraform bereitstellen; Remote-Status und CI verdrahten | Iteration 1 |
+| Validieren | Bestätigen, dass der Lastenausgleich httpbin ausliefert und der Plan idempotent ist | Iteration 1 |
+| Schützen — WAF | Eine Web Application Firewall anhängen (`xcsh_app_firewall`) | Geplant |
+| Schützen — API | API-Schutz hinzufügen (`xcsh_api_definition`, API-Discovery) | Geplant |
+| Abbau | Die verwalteten Objekte nach ausdrücklicher Bestätigung zerstören | Iteration 1 |
+
+## Voraussetzungen
+
+- **Terraform** ≥ 1.5.
+- Der **`f5-sales-demo/xcsh`**-Provider ≥ 3.63.0, aufgelöst aus der Terraform-Registry — oder ein lokaler
+  Build über `dev_overrides`.
+- Ein **F5 XC API-Token** für den Staging-Tenant und **VPN-Zugang**, um ihn zu erreichen.
+- Die **Azure CLI**, angemeldet mit Contributor auf dem Abonnement (das Status-Backend wird mit dem
+  DNS-Anwendungsfall geteilt und ist bereits bereitgestellt).
+
+<Aside type="caution">
+Iteration 1 zielt auf den Staging-Tenant (nicht produktiv) ab. Erst dann in die Vorproduktion heraufstufen, wenn der
+Plan gegen Staging fehlerfrei ist.
+</Aside>
+
+Siehe [terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)
+für die vollständigen Aufbauschritte, Variablen und Secrets.
