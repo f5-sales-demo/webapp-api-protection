@@ -1,0 +1,43 @@
+---
+title: Demostración
+description: Un ejercicio de protección de aplicaciones web y API gestionado con Terraform en F5 Distributed Cloud — construye el balanceador de carga HTTP, valídalo y luego añade controles de seguridad.
+sidebar:
+  order: 1
+  label: Visión general
+i18n:
+  sourceHash: 109cbaf37abb
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Esta guía recorre la construcción de una **ruta de entrega de aplicaciones web protegida** en F5 Distributed
+Cloud, gestionada con Terraform. La iteración 1 cubre la base; las fases de seguridad se añaden a medida que el plan
+madura. Cada fase es idempotente: volver a ejecutarla converge al mismo estado.
+
+## Fases del ejercicio
+
+| Fase | Objetivo | Estado |
+| --- | --- | --- |
+| Construir | Implementar el balanceador de carga HTTP + grupo de origen (httpbin) con Terraform; conectar el estado remoto y CI | Iteración 1 |
+| Validar | Confirmar que el balanceador de carga sirve httpbin y que el plan es idempotente | Iteración 1 |
+| Proteger — WAF | Conectar un firewall de aplicaciones web (`xcsh_app_firewall`) | Planificado |
+| Proteger — API | Añadir protección de API (`xcsh_api_definition`, descubrimiento de API) | Planificado |
+| Desmontar | Destruir los objetos gestionados tras una confirmación explícita | Iteración 1 |
+
+## Requisitos previos
+
+- **Terraform** ≥ 1.5.
+- El proveedor **`f5-sales-demo/xcsh`** ≥ 3.63.0, resuelto desde el registro de Terraform — o una compilación local
+  mediante `dev_overrides`.
+- Un **token de API de F5 XC** para el tenant de staging y **acceso por VPN** para alcanzarlo.
+- La **Azure CLI** con sesión iniciada con el rol Contributor en la suscripción (el backend de estado se comparte con el
+  caso de uso de DNS y ya está inicializado).
+
+<Aside type="caution">
+La iteración 1 apunta al tenant de staging (no de producción). Promueve a preproducción solo después de que el
+plan esté libre de errores contra staging.
+</Aside>
+
+Consulta el [terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)
+para conocer los pasos completos de construcción, las variables y los secretos.

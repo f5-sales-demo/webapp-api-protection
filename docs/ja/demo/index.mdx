@@ -1,0 +1,37 @@
+---
+title: デモ
+description: F5 Distributed Cloud 上での Terraform 駆動の Web アプリケーションと API 保護の演習 — HTTP ロードバランサーを構築し、検証したうえで、セキュリティコントロールを重ねていきます。
+sidebar:
+  order: 1
+  label: 概要
+i18n:
+  sourceHash: 109cbaf37abb
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+このガイドでは、Terraform で駆動する **保護された Web アプリケーション配信経路** を F5 Distributed Cloud 上に構築する手順を解説します。イテレーション 1 では基盤を扱い、プランが成熟するにつれてセキュリティフェーズを追加していきます。各フェーズはべき等であり、再実行すると同じ状態に収束します。
+
+## 演習のフェーズ
+
+| フェーズ | 目標 | ステータス |
+| --- | --- | --- |
+| ビルド | HTTP ロードバランサー + オリジンプール（httpbin）を Terraform でデプロイし、リモート状態と CI を配線する | イテレーション 1 |
+| 検証 | ロードバランサーが httpbin を配信し、プランがべき等であることを確認する | イテレーション 1 |
+| 保護 — WAF | Web アプリケーションファイアウォール（`xcsh_app_firewall`）を接続する | 予定 |
+| 保護 — API | API 保護（`xcsh_api_definition`、API ディスカバリー）を追加する | 予定 |
+| 撤去 | 明示的な確認の後に、管理対象オブジェクトを破棄する | イテレーション 1 |
+
+## 前提条件
+
+- **Terraform** ≥ 1.5。
+- Terraform レジストリから解決される **`f5-sales-demo/xcsh`** プロバイダー ≥ 3.63.0 — または `dev_overrides` を用いたローカルビルド。
+- ステージングテナント向けの **F5 XC API トークン** と、それに到達するための **VPN アクセス**。
+- サブスクリプションに対する Contributor 権限でサインインした **Azure CLI**（状態バックエンドは DNS ユースケースと共有されており、すでにブートストラップ済みです）。
+
+<Aside type="caution">
+イテレーション 1 はステージング（非本番）テナントを対象とします。プランがステージングに対してバグのない状態になってから、プリプロダクションへ昇格してください。
+</Aside>
+
+完全なビルド手順、変数、シークレットについては、[terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md) を参照してください。

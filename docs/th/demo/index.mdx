@@ -1,0 +1,43 @@
+---
+title: เดโม
+description: แบบฝึกหัดการป้องกันเว็บแอปและ API ที่ขับเคลื่อนด้วย Terraform บน F5 Distributed Cloud — สร้างโหลดบาลานเซอร์ HTTP ตรวจสอบความถูกต้อง แล้วจึงเพิ่มการควบคุมด้านความปลอดภัยเป็นชั้น ๆ
+sidebar:
+  order: 1
+  label: ภาพรวม
+i18n:
+  sourceHash: 109cbaf37abb
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+คู่มือนี้จะพาคุณผ่านการสร้าง **เส้นทางการส่งมอบเว็บแอปพลิเคชันที่มีการรักษาความปลอดภัย** บน F5 Distributed
+Cloud ขับเคลื่อนด้วย Terraform รอบการทำซ้ำที่ 1 ครอบคลุมรากฐาน ส่วนเฟสด้านความปลอดภัยจะถูกเพิ่มเข้ามาเมื่อแผน
+มีความสมบูรณ์ขึ้น แต่ละเฟสเป็น idempotent: การเรียกใช้ซ้ำจะบรรจบไปสู่สถานะเดียวกัน
+
+## เฟสของแบบฝึกหัด
+
+| เฟส | เป้าหมาย | สถานะ |
+| --- | --- | --- |
+| Build | ดีพลอยโหลดบาลานเซอร์ HTTP + ออริจินพูล (httpbin) ด้วย Terraform เชื่อมต่อสถานะระยะไกลและ CI | รอบการทำซ้ำที่ 1 |
+| Validate | ยืนยันว่าโหลดบาลานเซอร์ให้บริการ httpbin และแผนเป็น idempotent | รอบการทำซ้ำที่ 1 |
+| Protect — WAF | แนบไฟร์วอลล์เว็บแอปพลิเคชัน (`xcsh_app_firewall`) | วางแผนไว้ |
+| Protect — API | เพิ่มการป้องกัน API (`xcsh_api_definition`, การค้นพบ API) | วางแผนไว้ |
+| Teardown | ทำลายอ็อบเจกต์ที่บริหารจัดการหลังจากยืนยันอย่างชัดเจน | รอบการทำซ้ำที่ 1 |
+
+## ข้อกำหนดเบื้องต้น
+
+- **Terraform** ≥ 1.5
+- Provider **`f5-sales-demo/xcsh`** ≥ 3.63.0 ที่แก้ไขได้จาก Terraform registry — หรือ build ในเครื่อง
+  ผ่าน `dev_overrides`
+- **F5 XC API token** สำหรับ staging tenant และ **การเข้าถึง VPN** เพื่อไปถึง
+- **Azure CLI** ที่ลงชื่อเข้าใช้พร้อมสิทธิ์ Contributor บนการสมัครสมาชิก (state backend ใช้ร่วมกับ
+  กรณีการใช้งาน DNS และบูตสแตรปไว้แล้ว)
+
+<Aside type="caution">
+รอบการทำซ้ำที่ 1 มุ่งเป้าไปที่ staging tenant (ไม่ใช่การใช้งานจริง) เลื่อนขั้นไปยัง pre-production เฉพาะหลังจากที่
+แผนปราศจากข้อบกพร่องเมื่อทดสอบกับ staging แล้วเท่านั้น
+</Aside>
+
+ดูที่ [terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)
+สำหรับขั้นตอนการ build variables และ secrets ทั้งหมด

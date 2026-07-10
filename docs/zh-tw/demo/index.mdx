@@ -1,0 +1,37 @@
+---
+title: Demo
+description: 一項由 Terraform 驅動的 F5 Distributed Cloud web 應用程式與 API 保護練習——建構 HTTP 負載平衡器、驗證它，然後疊加安全控制項。
+sidebar:
+  order: 1
+  label: 概觀
+i18n:
+  sourceHash: 109cbaf37abb
+  translator: machine
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+本指南逐步帶你在 F5 Distributed Cloud 上建構由 Terraform 驅動的 **受保護 web 應用程式遞送路徑**。第 1 次迭代涵蓋基礎；隨著計畫成熟會加入安全階段。每個階段都是冪等的：重新執行會收斂至相同的狀態。
+
+## 練習階段
+
+| 階段 | 目標 | 狀態 |
+| --- | --- | --- |
+| Build | 以 Terraform 部署 HTTP 負載平衡器 + 來源集區（httpbin）；接上遠端狀態與 CI | 第 1 次迭代 |
+| Validate | 確認負載平衡器提供 httpbin 服務且計畫具冪等性 | 第 1 次迭代 |
+| Protect — WAF | 附加一個 web 應用程式防火牆（`xcsh_app_firewall`） | 已規劃 |
+| Protect — API | 加入 API 保護（`xcsh_api_definition`、API 探索） | 已規劃 |
+| Teardown | 在明確確認後銷毀受管理的物件 | 第 1 次迭代 |
+
+## 先決條件
+
+- **Terraform** ≥ 1.5。
+- **`f5-sales-demo/xcsh`** provider ≥ 3.63.0，從 Terraform registry 解析——或透過 `dev_overrides` 進行本機建置。
+- 一組用於 staging tenant 的 **F5 XC API token**，以及可存取它的 **VPN access**。
+- 已以訂用帳戶上具 Contributor 權限登入的 **Azure CLI**（狀態後端與 DNS 使用案例共用且已啟動）。
+
+<Aside type="caution">
+第 1 次迭代以 staging（非生產）租戶為目標。僅在計畫針對 staging 無錯誤後，才推進至 pre-production。
+</Aside>
+
+如需完整的建構步驟、變數與密鑰，請參閱 [terraform/README](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)。
