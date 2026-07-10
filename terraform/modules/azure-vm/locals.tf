@@ -1,5 +1,5 @@
 locals {
-  component = "traffic-generator"
+  component = var.component
 
   # --- Deployer resolution (4-tier fallback) ---
   # 1. Explicit override via var.deployer

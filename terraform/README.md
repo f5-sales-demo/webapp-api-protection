@@ -1,7 +1,7 @@
 # webapp-api-protection Terraform reference plan
 
 A comprehensive, multi-provider reference plan that stands up a complete demo of
-F5 Distributed Cloud web-app & API protection **end to end**, deploying every
+F5 Distributed Cloud web-app & API protection **end-to-end**, deploying every
 piece itself — no shared/out-of-band dependency objects:
 
 - **Azure origin server** (`modules/origin-server`) — a Linux VM running nginx +

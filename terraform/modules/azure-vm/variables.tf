@@ -5,6 +5,11 @@
 # this config inherits the azurerm/azuread providers (and their subscription_id)
 # from the root module — see ../../providers.tf.
 
+variable "component" {
+  description = "Component name used in resource naming and tags (e.g. origin-server, traffic-generator)"
+  type        = string
+}
+
 variable "deployer" {
   description = "Override for deployer identifier (auto-resolved from Azure AD if empty). Required for service principal or managed identity authentication."
   type        = string
@@ -30,13 +35,37 @@ variable "tags" {
 }
 
 # ---------------------------------------------------------
+# Network
+# ---------------------------------------------------------
+
+variable "address_space" {
+  description = "Virtual network address space"
+  type        = list(string)
+}
+
+variable "subnet_prefixes" {
+  description = "Subnet address prefixes"
+  type        = list(string)
+}
+
+variable "security_rules" {
+  description = "Inbound NSG allow rules (Tcp from any). Each: name, priority, and destination port."
+  type = list(object({
+    name     = string
+    priority = number
+    port     = string
+  }))
+  default = []
+}
+
+# ---------------------------------------------------------
 # Compute
 # ---------------------------------------------------------
 
 variable "vm_size" {
-  description = "Azure VM size (F16s_v2: 16 vCPU compute-optimized, validated by benchmark)"
+  description = "Azure VM size"
   type        = string
-  default     = "Standard_F16s_v2"
+  default     = "Standard_D16s_v3"
 }
 
 variable "admin_username" {
@@ -54,31 +83,10 @@ variable "ssh_public_key_path" {
 variable "disk_size_gb" {
   description = "OS disk size in GB"
   type        = number
-  default     = 64
+  default     = 60
 }
 
-# ---------------------------------------------------------
-# Component-Specific
-# ---------------------------------------------------------
-
-variable "target_fqdn" {
-  description = "FQDN of the F5 XC load balancer to target"
+variable "custom_data" {
+  description = "Base64-encoded cloud-init custom data for the VM"
   type        = string
-}
-
-variable "target_origin_ip" {
-  description = "Direct origin IP for bypass testing"
-  type        = string
-  default     = ""
-}
-
-variable "tool_tier" {
-  description = "Tool installation tier: standard (default) or full (includes ZAP, Metasploit)"
-  type        = string
-  default     = "standard"
-
-  validation {
-    condition     = contains(["standard", "full"], var.tool_tier)
-    error_message = "tool_tier must be \"standard\" or \"full\"."
-  }
 }

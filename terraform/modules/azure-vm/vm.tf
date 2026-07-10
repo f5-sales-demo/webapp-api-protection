@@ -1,4 +1,6 @@
 resource "azurerm_linux_virtual_machine" "main" {
+  #checkov:skip=CKV_AZURE_50:Lab VM - no extensions required
+  #checkov:skip=CKV_AZURE_93:Lab VM - platform-managed encryption sufficient
   name                = local.name.virtual_machine
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
@@ -27,11 +29,7 @@ resource "azurerm_linux_virtual_machine" "main" {
     version   = "latest"
   }
 
-  custom_data = base64encode(templatefile("${path.module}/cloud-init.yaml", {
-    target_fqdn      = var.target_fqdn
-    target_origin_ip = var.target_origin_ip
-    tool_tier        = var.tool_tier
-  }))
+  custom_data = var.custom_data
 
   tags = azurerm_resource_group.main.tags
 }

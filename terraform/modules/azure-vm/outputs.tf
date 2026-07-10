@@ -76,17 +76,3 @@ output "environment" {
   description = "Environment label"
   value       = var.environment
 }
-
-# ---------------------------------------------------------
-# Component-Specific Outputs
-# ---------------------------------------------------------
-
-output "target_fqdn" {
-  description = "Target FQDN the traffic generator is configured to attack"
-  value       = var.target_fqdn
-}
-
-output "status_check" {
-  description = "SSH command to check provisioning status"
-  value       = "ssh ${var.admin_username}@${azurerm_public_ip.main.ip_address} cat /opt/traffic-generator/status.json"
-}

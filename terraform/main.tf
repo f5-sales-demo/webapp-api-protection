@@ -21,14 +21,28 @@
 
 # --- Azure origin server (the real backend the LB forwards to) -----------------
 module "origin_server" {
-  source = "./modules/origin-server"
+  source = "./modules/azure-vm"
+
+  component       = "origin-server"
+  address_space   = ["10.200.0.0/16"]
+  subnet_prefixes = ["10.200.1.0/24"]
 
   location            = var.location
   vm_size             = var.origin_vm_size
+  disk_size_gb        = 60
   ssh_public_key_path = var.ssh_public_key_path
   environment         = var.environment
   deployer            = var.deployer
   tags                = var.azure_tags
+
+  security_rules = [
+    { name = "AllowHTTP", priority = 100, port = "80" },
+    { name = "AllowHTTPS", priority = 110, port = "443" },
+    { name = "AllowSSH", priority = 120, port = "22" },
+    { name = "AllowCrAPI", priority = 130, port = "8888" },
+  ]
+
+  custom_data = base64encode(templatefile("${path.module}/cloud-init/origin-server.yaml", {}))
 }
 
 # --- F5 XC namespace + HTTP load balancer -------------------------------------
@@ -93,20 +107,31 @@ resource "xcsh_protected_domain" "csd" {
 
 # --- Azure traffic generator (drives live load at the load balancer) ----------
 module "traffic_generator" {
-  source = "./modules/traffic-generator"
+  source = "./modules/azure-vm"
 
-  # Target the LB FQDN, not the origin directly. lb_domains[0] is www.f5-sales-demo.com.
-  target_fqdn = var.lb_domains[0]
-  # Optional direct-origin baseline / bypass testing target.
-  target_origin_ip = module.origin_server.public_ip
+  component       = "traffic-generator"
+  address_space   = ["10.201.0.0/16"]
+  subnet_prefixes = ["10.201.1.0/24"]
 
   location            = var.location
   vm_size             = var.traffic_gen_vm_size
-  tool_tier           = var.traffic_gen_tool_tier
+  disk_size_gb        = 64
   ssh_public_key_path = var.ssh_public_key_path
   environment         = var.environment
   deployer            = var.deployer
   tags                = var.azure_tags
+
+  security_rules = [
+    { name = "AllowSSH", priority = 100, port = "22" },
+  ]
+
+  # Target the LB FQDN (lb_domains[0] = www.f5-sales-demo.com), not the origin directly;
+  # target_origin_ip is the optional direct-origin baseline / bypass-testing target.
+  custom_data = base64encode(templatefile("${path.module}/cloud-init/traffic-generator.yaml", {
+    target_fqdn      = var.lb_domains[0]
+    target_origin_ip = module.origin_server.public_ip
+    tool_tier        = var.traffic_gen_tool_tier
+  }))
 
   # The generator is only useful once the LB exists to receive its traffic.
   depends_on = [module.http_lb]

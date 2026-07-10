@@ -54,12 +54,12 @@ output "origin_server_ssh" {
 output "origin_server_urls" {
   description = "Direct URLs on the origin server (bypassing the load balancer)."
   value = {
-    health     = module.origin_server.health_check_url
-    httpbin    = module.origin_server.httpbin_url
-    juice_shop = module.origin_server.juice_shop_url
-    dvwa       = module.origin_server.dvwa_url
-    vampi      = module.origin_server.vampi_url
-    crapi      = module.origin_server.crapi_url
+    health     = "http://${module.origin_server.public_ip}/health"
+    httpbin    = "http://${module.origin_server.public_ip}/httpbin/"
+    juice_shop = "http://${module.origin_server.public_ip}/juice-shop/"
+    dvwa       = "http://${module.origin_server.public_ip}/dvwa/"
+    vampi      = "http://${module.origin_server.public_ip}/vampi/"
+    crapi      = "http://${module.origin_server.public_ip}:8888"
   }
 }
 
@@ -72,7 +72,7 @@ output "traffic_generator_public_ip" {
 
 output "traffic_generator_target" {
   description = "FQDN the traffic generator drives load at (the load balancer)."
-  value       = module.traffic_generator.target_fqdn
+  value       = var.lb_domains[0]
 }
 
 output "traffic_generator_ssh" {
