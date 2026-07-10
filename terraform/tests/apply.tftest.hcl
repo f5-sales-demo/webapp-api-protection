@@ -24,8 +24,9 @@ run "apply_to_tenant_creates_objects" {
     health_check_path = "/health"
     labels            = {}
     waf_mode          = "blocking"
-    # Keep this deliberate apply test addon-independent (CSD needs the tenant addon).
+    # Keep this deliberate apply test addon-independent (CSD/MUD need tenant addons).
     csd_enabled = false
+    mud_enabled = false
   }
 
   assert {

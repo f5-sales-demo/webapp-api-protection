@@ -47,3 +47,9 @@ variable "csd_enabled" {
   type        = bool
   default     = true
 }
+
+variable "mud_enabled" {
+  description = "Enable Malicious User Detection on the load balancer (score per-user behavior into threat levels and auto-mitigate via a malicious_user_mitigation policy). Requires the MUD tenant addon."
+  type        = bool
+  default     = true
+}

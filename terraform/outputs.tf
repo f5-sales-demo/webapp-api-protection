@@ -38,6 +38,11 @@ output "csd_enabled" {
   value       = module.http_lb.csd_enabled
 }
 
+output "mud_enabled" {
+  description = "Whether Malicious User Detection (with auto-mitigation) is enabled on the load balancer."
+  value       = module.http_lb.mud_enabled
+}
+
 
 # --- Azure origin server ------------------------------------------------------
 

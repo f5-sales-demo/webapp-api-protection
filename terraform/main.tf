@@ -64,11 +64,14 @@ module "http_lb" {
   labels            = var.labels
   waf_mode          = var.waf_mode
   csd_enabled       = var.csd_enabled
+  mud_enabled       = var.mud_enabled
 
   # Enabling client_side_defense on the LB requires a protected domain to already
   # exist in this namespace (F5 XC generates the CSD JS config from it), so the
-  # LB must be created/updated AFTER the protected domain.
-  depends_on = [xcsh_protected_domain.csd]
+  # LB must be created/updated AFTER the protected domain. The MUD entitlement
+  # guard is a prerequisite too: fail fast if the WAAP addon is not subscribed
+  # before the module creates the malicious_user_mitigation policy / LB.
+  depends_on = [xcsh_protected_domain.csd, data.xcsh_addon_service_activation_status.mud]
 }
 
 # --- Client-Side Defense tenant dependency (verified, NOT managed) ------------
@@ -103,6 +106,26 @@ resource "xcsh_protected_domain" "csd" {
   protected_domain = "f5-sales-demo.com"
 
   depends_on = [data.xcsh_addon_service_activation_status.csd]
+}
+
+# --- Malicious User Detection tenant dependency (verified, NOT managed) -------
+# MUD is a Web App & API Protection (WAAP) capability: enabling
+# enable_malicious_user_detection on the LB and creating the
+# xcsh_malicious_user_mitigation policy require the tenant to be subscribed to the
+# WAAP addon. As with CSD, tenant entitlement is owned by a separate tenant-level
+# plan, so here we only ASSERT the dependency (fail fast if not subscribed) rather
+# than managing the subscription. Confirmed live: the MUD feature maps to
+# f5xc-waap-standard (there is no MUD-specific addon; MUD is not bot defense).
+data "xcsh_addon_service_activation_status" "mud" {
+  count         = var.mud_enabled ? 1 : 0
+  addon_service = "f5xc-waap-standard"
+
+  lifecycle {
+    postcondition {
+      condition     = self.state == "AS_SUBSCRIBED"
+      error_message = "Malicious User Detection requires the WAAP addon, which is not subscribed on this tenant (state: ${self.state}). Enable it via the tenant entitlements plan before applying MUD."
+    }
+  }
 }
 
 # --- Azure traffic generator (drives live load at the load balancer) ----------
