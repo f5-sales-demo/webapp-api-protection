@@ -166,6 +166,67 @@ resource "xcsh_malicious_user_mitigation" "mud" {
   }
 }
 
+# User-identification policy — only when mud_user_id = user_identification. Exactly one
+# rule of the selected type: keyed rule-types set the matching string attribute; marker
+# rule-types are emitted as an empty block. Referenced by the LB's user_identification
+# block below. When mud_user_id = client_ip we create nothing and the LB uses the
+# server-default user_id_client_ip (import-suppressed).
+resource "xcsh_user_identification" "mud" {
+  count     = var.mud_enabled && var.mud_user_id == "user_identification" ? 1 : 0
+  name      = "webapp-api-protection-mud-userid"
+  namespace = var.namespace
+  labels    = var.labels
+
+  rules {
+    cookie_name             = var.mud_user_id_rule == "cookie_name" ? "x-mud-user" : null
+    http_header_name        = var.mud_user_id_rule == "http_header_name" ? "X-MUD-User" : null
+    ip_and_http_header_name = var.mud_user_id_rule == "ip_and_http_header_name" ? "X-MUD-User" : null
+    jwt_claim_name          = var.mud_user_id_rule == "jwt_claim_name" ? "sub" : null
+    query_param_key         = var.mud_user_id_rule == "query_param_key" ? "mud_user" : null
+
+    dynamic "client_asn" {
+      for_each = var.mud_user_id_rule == "client_asn" ? [1] : []
+      content {}
+    }
+    dynamic "client_city" {
+      for_each = var.mud_user_id_rule == "client_city" ? [1] : []
+      content {}
+    }
+    dynamic "client_country" {
+      for_each = var.mud_user_id_rule == "client_country" ? [1] : []
+      content {}
+    }
+    dynamic "client_ip" {
+      for_each = var.mud_user_id_rule == "client_ip" ? [1] : []
+      content {}
+    }
+    dynamic "client_region" {
+      for_each = var.mud_user_id_rule == "client_region" ? [1] : []
+      content {}
+    }
+    dynamic "tls_fingerprint" {
+      for_each = var.mud_user_id_rule == "tls_fingerprint" ? [1] : []
+      content {}
+    }
+    dynamic "ip_and_tls_fingerprint" {
+      for_each = var.mud_user_id_rule == "ip_and_tls_fingerprint" ? [1] : []
+      content {}
+    }
+    dynamic "ja4_tls_fingerprint" {
+      for_each = var.mud_user_id_rule == "ja4_tls_fingerprint" ? [1] : []
+      content {}
+    }
+    dynamic "ip_and_ja4_tls_fingerprint" {
+      for_each = var.mud_user_id_rule == "ip_and_ja4_tls_fingerprint" ? [1] : []
+      content {}
+    }
+    dynamic "none" {
+      for_each = var.mud_user_id_rule == "none" ? [1] : []
+      content {}
+    }
+  }
+}
+
 resource "xcsh_http_loadbalancer" "this" {
   name      = "webapp-api-protection"
   namespace = var.namespace
@@ -233,12 +294,24 @@ resource "xcsh_http_loadbalancer" "this" {
 
   # Malicious User Detection — score per-user behavior into threat levels
   # (malicious_user_detection oneof vs the server default disable_malicious_user_detection).
-  # User identification uses the server-default client IP (user_id_client_ip); both the
-  # disable marker and the client-IP default are suppressed by the provider on import, so
-  # when mud_enabled is false we emit NO block (no drift; do not declare them).
+  # (malicious_user_detection oneof vs the server default disable_malicious_user_detection).
+  # When mud_enabled is false we emit NO block — the server applies the disable marker,
+  # which the provider suppresses on import (no drift; do not declare it).
   dynamic "enable_malicious_user_detection" {
     for_each = var.mud_enabled ? [1] : []
     content {}
+  }
+
+  # User identification: reference a user_identification policy when mud_user_id is
+  # user_identification; otherwise emit nothing and the server applies the default
+  # user_id_client_ip (import-suppressed). (user_id oneof: user_id_client_ip vs
+  # user_identification.)
+  dynamic "user_identification" {
+    for_each = var.mud_enabled && var.mud_user_id == "user_identification" ? [1] : []
+    content {
+      name      = xcsh_user_identification.mud[0].name
+      namespace = xcsh_user_identification.mud[0].namespace
+    }
   }
 
   # Auto-mitigation for detected malicious users. enable_challenge is the challenge

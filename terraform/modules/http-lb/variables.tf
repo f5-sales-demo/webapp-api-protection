@@ -74,7 +74,8 @@ variable "mud_user_id_rule" {
     condition = contains([
       "cookie_name", "http_header_name", "ip_and_http_header_name", "jwt_claim_name",
       "query_param_key", "client_asn", "client_city", "client_country", "client_ip",
-      "client_region", "tls_fingerprint", "ip_and_tls_fingerprint", "none"
+      "client_region", "tls_fingerprint", "ip_and_tls_fingerprint", "ja4_tls_fingerprint",
+      "ip_and_ja4_tls_fingerprint", "none"
     ], var.mud_user_id_rule)
     error_message = "mud_user_id_rule must be one of the supported xcsh_user_identification rule types."
   }
