@@ -100,13 +100,29 @@ resource "xcsh_malicious_user_mitigation" "mud" {
   namespace = var.namespace
   labels    = var.labels
 
+  # One static rule per threat level (low/medium/high); the ACTION within each is chosen
+  # by var.mud_mitigation. The rules list is kept static (3 entries) because a dynamic
+  # rules list produces an unknown-typed value the generated provider model cannot handle
+  # (mitigation_type.rules → []RulesModel, not a ListValue). Action is a oneof; emit the
+  # selected member as an empty marker.
   mitigation_type {
     rules {
       threat_level {
         low {}
       }
       mitigation_action {
-        javascript_challenge {}
+        dynamic "block_temporarily" {
+          for_each = var.mud_mitigation.low == "block_temporarily" ? [1] : []
+          content {}
+        }
+        dynamic "captcha_challenge" {
+          for_each = var.mud_mitigation.low == "captcha_challenge" ? [1] : []
+          content {}
+        }
+        dynamic "javascript_challenge" {
+          for_each = var.mud_mitigation.low == "javascript_challenge" ? [1] : []
+          content {}
+        }
       }
     }
     rules {
@@ -114,7 +130,18 @@ resource "xcsh_malicious_user_mitigation" "mud" {
         medium {}
       }
       mitigation_action {
-        captcha_challenge {}
+        dynamic "block_temporarily" {
+          for_each = var.mud_mitigation.medium == "block_temporarily" ? [1] : []
+          content {}
+        }
+        dynamic "captcha_challenge" {
+          for_each = var.mud_mitigation.medium == "captcha_challenge" ? [1] : []
+          content {}
+        }
+        dynamic "javascript_challenge" {
+          for_each = var.mud_mitigation.medium == "javascript_challenge" ? [1] : []
+          content {}
+        }
       }
     }
     rules {
@@ -122,7 +149,18 @@ resource "xcsh_malicious_user_mitigation" "mud" {
         high {}
       }
       mitigation_action {
-        block_temporarily {}
+        dynamic "block_temporarily" {
+          for_each = var.mud_mitigation.high == "block_temporarily" ? [1] : []
+          content {}
+        }
+        dynamic "captcha_challenge" {
+          for_each = var.mud_mitigation.high == "captcha_challenge" ? [1] : []
+          content {}
+        }
+        dynamic "javascript_challenge" {
+          for_each = var.mud_mitigation.high == "javascript_challenge" ? [1] : []
+          content {}
+        }
       }
     }
   }
