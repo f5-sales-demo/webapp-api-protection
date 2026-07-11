@@ -42,3 +42,18 @@ output "mud_enabled" {
   description = "Whether Malicious User Detection (with auto-mitigation) is enabled on the load balancer."
   value       = var.mud_enabled
 }
+
+output "mud_user_id" {
+  description = "Effective MUD user-identification method (client_ip or user_identification)."
+  value       = var.mud_user_id
+}
+
+output "mud_mitigation" {
+  description = "Effective MUD mitigation action per threat level (low/medium/high)."
+  value       = var.mud_mitigation
+}
+
+output "mud_challenge_mode" {
+  description = "Effective MUD challenge mode (none/enable_challenge/policy_based_challenge)."
+  value       = var.mud_challenge_mode
+}
