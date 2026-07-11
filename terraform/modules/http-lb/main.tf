@@ -314,12 +314,22 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
-  # Auto-mitigation for detected malicious users. enable_challenge is the challenge
-  # oneof arm that carries the malicious_user_mitigation reference (peer to the server
-  # default no_challenge, which the provider suppresses on import). It points at the
-  # mitigation policy created above.
+  # Auto-mitigation for detected malicious users, via the challenge oneof. mud_challenge_mode
+  # selects enable_challenge (risk-based) or policy_based_challenge (policy-rule-based); both
+  # carry the malicious_user_mitigation reference. "none" emits neither → server default
+  # no_challenge (import-suppressed). Both arms are gated on mud_enabled.
   dynamic "enable_challenge" {
-    for_each = var.mud_enabled ? [1] : []
+    for_each = var.mud_enabled && var.mud_challenge_mode == "enable_challenge" ? [1] : []
+    content {
+      malicious_user_mitigation {
+        name      = xcsh_malicious_user_mitigation.mud[0].name
+        namespace = xcsh_malicious_user_mitigation.mud[0].namespace
+      }
+    }
+  }
+
+  dynamic "policy_based_challenge" {
+    for_each = var.mud_enabled && var.mud_challenge_mode == "policy_based_challenge" ? [1] : []
     content {
       malicious_user_mitigation {
         name      = xcsh_malicious_user_mitigation.mud[0].name
