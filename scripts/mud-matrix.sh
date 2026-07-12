@@ -12,8 +12,9 @@
 # no concurrent terraform against the shared state.
 set -uo pipefail
 
-cd "$(dirname "$0")/../terraform"
-export ARM_ACCESS_KEY=$(az storage account keys list -n f5salesdemotfstate -g f5-sales-demo-tfstate --query "[0].value" -o tsv)
+cd "$(dirname "$0")/../terraform" || exit 1
+ARM_ACCESS_KEY=$(az storage account keys list -n f5salesdemotfstate -g f5-sales-demo-tfstate --query "[0].value" -o tsv)
+export ARM_ACCESS_KEY
 
 NS="webapp-api-protection"
 COMMON=(-input=false -lock=true
