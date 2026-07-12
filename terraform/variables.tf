@@ -113,6 +113,12 @@ variable "mud_challenge_mode" {
   }
 }
 
+variable "mud_bad_traffic" {
+  description = "Have the traffic generator emit identifiable malicious-user traffic (WAF-triggering payloads, forbidden-path scanning, failed logins) so MUD flags a user and applies mitigation. Only takes effect when mud_enabled. Off by default to keep the baseline demo benign."
+  type        = bool
+  default     = false
+}
+
 # ---------------------------------------------------------
 # Azure (origin server + traffic generator this plan deploys)
 # ---------------------------------------------------------

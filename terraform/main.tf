@@ -158,6 +158,9 @@ module "traffic_generator" {
     target_fqdn      = var.lb_domains[0]
     target_origin_ip = module.origin_server.public_ip
     tool_tier        = var.traffic_gen_tool_tier
+    # Emit identifiable malicious-user traffic each burst so MUD scores a user and
+    # applies the configured mitigation (only meaningful when mud_enabled).
+    mud_bad_traffic = var.mud_enabled && var.mud_bad_traffic
   }))
 
   # The generator is only useful once the LB exists to receive its traffic.
