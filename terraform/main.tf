@@ -58,13 +58,17 @@ module "http_lb" {
   lb_domains = var.lb_domains
   # Point the origin pool at the Azure origin server's public IP (created above).
   # Terraform orders VM creation before the pool that references its IP.
-  origin_ip         = module.origin_server.public_ip
-  origin_port       = var.origin_port
-  health_check_path = var.health_check_path
-  labels            = var.labels
-  waf_mode          = var.waf_mode
-  csd_enabled       = var.csd_enabled
-  mud_enabled       = var.mud_enabled
+  origin_ip          = module.origin_server.public_ip
+  origin_port        = var.origin_port
+  health_check_path  = var.health_check_path
+  labels             = var.labels
+  waf_mode           = var.waf_mode
+  csd_enabled        = var.csd_enabled
+  mud_enabled        = var.mud_enabled
+  mud_user_id        = var.mud_user_id
+  mud_user_id_rule   = var.mud_user_id_rule
+  mud_mitigation     = var.mud_mitigation
+  mud_challenge_mode = var.mud_challenge_mode
 
   # Enabling client_side_defense on the LB requires a protected domain to already
   # exist in this namespace (F5 XC generates the CSD JS config from it), so the
@@ -154,6 +158,9 @@ module "traffic_generator" {
     target_fqdn      = var.lb_domains[0]
     target_origin_ip = module.origin_server.public_ip
     tool_tier        = var.traffic_gen_tool_tier
+    # Emit identifiable malicious-user traffic each burst so MUD scores a user and
+    # applies the configured mitigation (only meaningful when mud_enabled).
+    mud_bad_traffic = var.mud_enabled && var.mud_bad_traffic
   }))
 
   # The generator is only useful once the LB exists to receive its traffic.

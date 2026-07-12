@@ -196,6 +196,14 @@ write_files:
       CONTINUOUS_ENABLED=true
       CONTINUOUS_RATE=50
       CONTINUOUS_DURATION=30s
+      # --- Malicious-user profile (drives Malicious User Detection scoring) ---
+      # When true, each burst also emits identifiable bad-user traffic (WAF-triggering
+      # payloads, forbidden-path scanning, failed logins) carrying a stable identity via
+      # header/cookie/query so MUD attributes it to one user regardless of which
+      # user-identification rule is active. Read every run by tgen-continuous.
+      MUD_BAD_TRAFFIC=${mud_bad_traffic}
+      MUD_BAD_USER_ID=mud-attacker-01
+      MUD_BAD_ITERATIONS=40
 
   - path: /opt/traffic-generator/status.json
     content: |
@@ -296,6 +304,30 @@ write_files:
         while [ "$(date +%s)" -lt "$${end}" ]; do
           for ep in $${ENDPOINTS}; do curl -s -o /dev/null "$${BASE}$${ep}"; done
         done
+      fi
+      # --- Malicious-user burst: identifiable bad-user traffic to drive MUD scoring. ---
+      # Sends WAF-triggering / forbidden / high-error requests plus failed logins, all
+      # tagged with one identity (X-MUD-User header + x-mud-user cookie + mud_user query)
+      # so F5 XC attributes the abuse to a single user and raises its threat level.
+      if [ "$${MUD_BAD_TRAFFIC:-false}" = "true" ]; then
+        _uid="$${MUD_BAD_USER_ID:-mud-attacker-01}"
+        _hdr="X-MUD-User: $${_uid}"
+        _ck="x-mud-user=$${_uid}"
+        _iter="$${MUD_BAD_ITERATIONS:-40}"
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] malicious-user burst -> $${BASE} as $${_uid}" >> "$${LOG}"
+        for _n in $(seq 1 "$${_iter}"); do
+          for _p in "/?q=%27+OR+%271%27%3D%271" "/?x=%3Cscript%3Ealert(1)%3C%2Fscript%3E" "/admin" "/.env" "/wp-login.php" "/phpmyadmin/" "/httpbin/status/401" "/httpbin/status/403"; do
+            curl -s -o /dev/null -m 5 -H "$${_hdr}" -b "$${_ck}" "$${BASE}$${_p}"
+          done
+          # query-param identity variant (covers the query_param_key user-id rule)
+          curl -s -o /dev/null -m 5 -H "$${_hdr}" -b "$${_ck}" "$${BASE}/admin?mud_user=$${_uid}"
+          # failed-login pattern (credential stuffing) against juice-shop
+          curl -s -o /dev/null -m 5 -H "$${_hdr}" -b "$${_ck}" -X POST \
+            -H 'Content-Type: application/json' \
+            -d "{\"email\":\"admin@juice-sh.op\",\"password\":\"wrong$${_n}\"}" \
+            "$${BASE}/juice-shop/rest/user/login"
+        done
+        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] malicious-user burst complete" >> "$${LOG}"
       fi
       tail -n 2000 "$${LOG}" > "$${LOG}.tmp" 2>/dev/null && mv "$${LOG}.tmp" "$${LOG}"
       echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] burst complete" >> "$${LOG}"

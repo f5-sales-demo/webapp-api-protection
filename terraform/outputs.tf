@@ -43,6 +43,21 @@ output "mud_enabled" {
   value       = module.http_lb.mud_enabled
 }
 
+output "mud_user_id" {
+  description = "Effective MUD user-identification method."
+  value       = module.http_lb.mud_user_id
+}
+
+output "mud_mitigation" {
+  description = "Effective MUD mitigation action per threat level."
+  value       = module.http_lb.mud_mitigation
+}
+
+output "mud_challenge_mode" {
+  description = "Effective MUD challenge mode."
+  value       = module.http_lb.mud_challenge_mode
+}
+
 
 # --- Azure origin server ------------------------------------------------------
 
