@@ -175,3 +175,114 @@ variable "traffic_gen_tool_tier" {
   type        = string
   default     = "standard"
 }
+
+# ---------------------------------------------------------------------------
+# WAF (app_firewall) exhaustive-coverage passthrough to modules/http-lb.
+# Defaults reproduce the current live config (0-change no-op). Validation lives
+# in the module; these root declarations are lean type+default passthroughs.
+# ---------------------------------------------------------------------------
+variable "waf_allowed_response_codes_mode" {
+  description = "allowed_response_codes_choice arm: omit or list."
+  type        = string
+  default     = "omit"
+}
+variable "waf_allowed_response_codes" {
+  description = "Response codes when waf_allowed_response_codes_mode=list (1-48)."
+  type        = list(number)
+  default     = [200]
+}
+variable "waf_blocking_page_mode" {
+  description = "blocking_page_choice arm: omit or custom."
+  type        = string
+  default     = "omit"
+}
+variable "waf_blocking_page" {
+  description = "Custom blocking page (URL/HTML, <=4096) when waf_blocking_page_mode=custom."
+  type        = string
+  default     = "https://www.f5-sales-demo.com/blocked.html"
+}
+variable "waf_blocking_page_response_code" {
+  description = "HTTP status enum name for the custom blocking page."
+  type        = string
+  default     = "Forbidden"
+}
+variable "waf_bot_mode" {
+  description = "Top-level bot_protection_choice arm: omit or custom."
+  type        = string
+  default     = "omit"
+}
+variable "waf_bot_actions" {
+  description = "Per-class bot actions (BLOCK/REPORT/IGNORE) when waf_bot_mode=custom."
+  type        = object({ good = string, malicious = string, suspicious = string })
+  default     = { good = "REPORT", malicious = "BLOCK", suspicious = "REPORT" }
+}
+variable "waf_anonymization_mode" {
+  description = "anonymization_setting arm: omit or disable (custom pending provider fix)."
+  type        = string
+  default     = "omit"
+}
+variable "waf_ai_mode" {
+  description = "enhance_with_ai_choice arm: omit (=disable, server default) or enable."
+  type        = string
+  default     = "omit"
+}
+variable "waf_ai_risk_action" {
+  description = "risk_score_action_choice when waf_ai_mode=enable: high or high_medium."
+  type        = string
+  default     = "high"
+}
+variable "waf_detection_mode" {
+  description = "detection_setting_choice arm: default or custom."
+  type        = string
+  default     = "default"
+}
+variable "waf_violation_mode" {
+  description = "detection_settings violation arm: default or custom."
+  type        = string
+  default     = "default"
+}
+variable "waf_disabled_violation_types" {
+  description = "Disabled violation types when waf_violation_mode=custom (<=40)."
+  type        = list(string)
+  default     = []
+}
+variable "waf_staging_mode" {
+  description = "detection_settings staging arm: disable, new, or new_and_updated."
+  type        = string
+  default     = "disable"
+}
+variable "waf_staging_period" {
+  description = "Staging period (days) for new/new_and_updated staging."
+  type        = number
+  default     = 7
+}
+variable "waf_suppression" {
+  description = "detection_settings false_positive_suppression: enable or disable."
+  type        = string
+  default     = "enable"
+}
+variable "waf_threat_campaigns" {
+  description = "detection_settings threat_campaign_choice: enable or disable."
+  type        = string
+  default     = "enable"
+}
+variable "waf_detection_bot_mode" {
+  description = "detection_settings nested bot_protection_choice arm: default or custom."
+  type        = string
+  default     = "default"
+}
+variable "waf_signature_accuracy" {
+  description = "detection_settings signature accuracy: only_high, high_medium, or high_medium_low."
+  type        = string
+  default     = "high_medium"
+}
+variable "waf_attack_type_mode" {
+  description = "detection_settings attack_type_setting arm: default or custom."
+  type        = string
+  default     = "default"
+}
+variable "waf_disabled_attack_types" {
+  description = "Disabled attack types when waf_attack_type_mode=custom (<=22)."
+  type        = list(string)
+  default     = []
+}

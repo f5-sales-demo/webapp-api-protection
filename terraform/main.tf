@@ -58,17 +58,40 @@ module "http_lb" {
   lb_domains = var.lb_domains
   # Point the origin pool at the Azure origin server's public IP (created above).
   # Terraform orders VM creation before the pool that references its IP.
-  origin_ip          = module.origin_server.public_ip
-  origin_port        = var.origin_port
-  health_check_path  = var.health_check_path
-  labels             = var.labels
-  waf_mode           = var.waf_mode
-  csd_enabled        = var.csd_enabled
-  mud_enabled        = var.mud_enabled
-  mud_user_id        = var.mud_user_id
-  mud_user_id_rule   = var.mud_user_id_rule
-  mud_mitigation     = var.mud_mitigation
-  mud_challenge_mode = var.mud_challenge_mode
+  origin_ip         = module.origin_server.public_ip
+  origin_port       = var.origin_port
+  health_check_path = var.health_check_path
+  labels            = var.labels
+  waf_mode          = var.waf_mode
+  csd_enabled       = var.csd_enabled
+
+  # WAF (app_firewall) exhaustive-coverage passthrough.
+  waf_allowed_response_codes_mode = var.waf_allowed_response_codes_mode
+  waf_allowed_response_codes      = var.waf_allowed_response_codes
+  waf_blocking_page_mode          = var.waf_blocking_page_mode
+  waf_blocking_page               = var.waf_blocking_page
+  waf_blocking_page_response_code = var.waf_blocking_page_response_code
+  waf_bot_mode                    = var.waf_bot_mode
+  waf_bot_actions                 = var.waf_bot_actions
+  waf_anonymization_mode          = var.waf_anonymization_mode
+  waf_ai_mode                     = var.waf_ai_mode
+  waf_ai_risk_action              = var.waf_ai_risk_action
+  waf_detection_mode              = var.waf_detection_mode
+  waf_violation_mode              = var.waf_violation_mode
+  waf_disabled_violation_types    = var.waf_disabled_violation_types
+  waf_staging_mode                = var.waf_staging_mode
+  waf_staging_period              = var.waf_staging_period
+  waf_suppression                 = var.waf_suppression
+  waf_threat_campaigns            = var.waf_threat_campaigns
+  waf_detection_bot_mode          = var.waf_detection_bot_mode
+  waf_signature_accuracy          = var.waf_signature_accuracy
+  waf_attack_type_mode            = var.waf_attack_type_mode
+  waf_disabled_attack_types       = var.waf_disabled_attack_types
+  mud_enabled                     = var.mud_enabled
+  mud_user_id                     = var.mud_user_id
+  mud_user_id_rule                = var.mud_user_id_rule
+  mud_mitigation                  = var.mud_mitigation
+  mud_challenge_mode              = var.mud_challenge_mode
 
   # Enabling client_side_defense on the LB requires a protected domain to already
   # exist in this namespace (F5 XC generates the CSD JS config from it), so the
