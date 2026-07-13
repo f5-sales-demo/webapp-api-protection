@@ -76,8 +76,7 @@ resource "xcsh_app_firewall" "this" {
   namespace = var.namespace
   labels    = var.labels
 
-  default_detection_settings {}
-
+  # enforcement_mode_choice
   dynamic "blocking" {
     for_each = var.waf_mode == "blocking" ? [1] : []
     content {}
@@ -85,6 +84,161 @@ resource "xcsh_app_firewall" "this" {
   dynamic "monitoring" {
     for_each = var.waf_mode == "monitoring" ? [1] : []
     content {}
+  }
+
+  # allowed_response_codes_choice (omit => server default allow_all, suppressed)
+  dynamic "allowed_response_codes" {
+    for_each = var.waf_allowed_response_codes_mode == "list" ? [1] : []
+    content {
+      response_code = var.waf_allowed_response_codes
+    }
+  }
+
+  # blocking_page_choice (omit => server default use_default_blocking_page, suppressed)
+  dynamic "blocking_page" {
+    for_each = var.waf_blocking_page_mode == "custom" ? [1] : []
+    content {
+      blocking_page = var.waf_blocking_page
+      response_code = var.waf_blocking_page_response_code
+    }
+  }
+
+  # bot_protection_choice, top level (omit => server default default_bot_setting, suppressed)
+  dynamic "bot_protection_setting" {
+    for_each = var.waf_bot_mode == "custom" ? [1] : []
+    content {
+      good_bot_action       = var.waf_bot_actions.good
+      malicious_bot_action  = var.waf_bot_actions.malicious
+      suspicious_bot_action = var.waf_bot_actions.suspicious
+    }
+  }
+
+  # anonymization_setting (omit => server default default_anonymization, suppressed)
+  dynamic "disable_anonymization" {
+    for_each = var.waf_anonymization_mode == "disable" ? [1] : []
+    content {}
+  }
+  # NOTE: custom_anonymization is intentionally NOT rendered. The generated provider
+  # cannot build a value for its anonymization_config list-nested-block (Value
+  # Conversion Error: model []AppFirewall...AnonymizationConfigModel vs expected
+  # ListValue) for BOTH static and dynamic blocks — a lock-step provider codegen bug.
+  # waf_anonymization_mode therefore supports omit + disable until the provider is fixed.
+
+  # enhance_with_ai_choice. "omit" emits nothing: disable_ai_enhancements is the
+  # server default AND is import-suppressed, so emitting it explicitly drifts on
+  # round-trip import (config has it, imported state does not). omit therefore IS
+  # the disable state. Only the non-default enable arm is emitted.
+  dynamic "enable_ai_enhancements" {
+    for_each = var.waf_ai_mode == "enable" ? [1] : []
+    content {
+      dynamic "mitigate_high_risk_action" {
+        for_each = var.waf_ai_risk_action == "high" ? [1] : []
+        content {}
+      }
+      dynamic "mitigate_high_medium_risk_action" {
+        for_each = var.waf_ai_risk_action == "high_medium" ? [1] : []
+        content {}
+      }
+    }
+  }
+
+  # detection_setting_choice
+  dynamic "default_detection_settings" {
+    for_each = var.waf_detection_mode == "default" ? [1] : []
+    content {}
+  }
+  dynamic "detection_settings" {
+    for_each = var.waf_detection_mode == "custom" ? [1] : []
+    content {
+      # violation_detection_setting
+      dynamic "default_violation_settings" {
+        for_each = var.waf_violation_mode == "default" ? [1] : []
+        content {}
+      }
+      dynamic "violation_settings" {
+        for_each = var.waf_violation_mode == "custom" ? [1] : []
+        content {
+          disabled_violation_types = var.waf_disabled_violation_types
+        }
+      }
+
+      # signatures_staging_settings (disable => omit, server default)
+      dynamic "stage_new_signatures" {
+        for_each = var.waf_staging_mode == "new" ? [1] : []
+        content {
+          staging_period = var.waf_staging_period
+        }
+      }
+      dynamic "stage_new_and_updated_signatures" {
+        for_each = var.waf_staging_mode == "new_and_updated" ? [1] : []
+        content {
+          staging_period = var.waf_staging_period
+        }
+      }
+
+      # false_positive_suppression
+      dynamic "enable_suppression" {
+        for_each = var.waf_suppression == "enable" ? [1] : []
+        content {}
+      }
+      dynamic "disable_suppression" {
+        for_each = var.waf_suppression == "disable" ? [1] : []
+        content {}
+      }
+
+      # threat_campaign_choice
+      dynamic "enable_threat_campaigns" {
+        for_each = var.waf_threat_campaigns == "enable" ? [1] : []
+        content {}
+      }
+      dynamic "disable_threat_campaigns" {
+        for_each = var.waf_threat_campaigns == "disable" ? [1] : []
+        content {}
+      }
+
+      # bot_protection_choice, nested. "default" omits the block: nested
+      # default_bot_setting is import-suppressed (materialized by the server), so
+      # emitting it drifts on round-trip import. The custom arm (bot_protection_setting)
+      # requires the tenant Bot Defense add-on; without it the API silently normalizes
+      # custom actions back to default_bot_setting (verified live -> guaranteed import
+      # drift), so custom bot is only import-clean on Bot-Defense-entitled tenants.
+      dynamic "bot_protection_setting" {
+        for_each = var.waf_detection_bot_mode == "custom" ? [1] : []
+        content {
+          good_bot_action       = var.waf_bot_actions.good
+          malicious_bot_action  = var.waf_bot_actions.malicious
+          suspicious_bot_action = var.waf_bot_actions.suspicious
+        }
+      }
+
+      signature_selection_setting {
+        # signature_selection_by_accuracy
+        dynamic "only_high_accuracy_signatures" {
+          for_each = var.waf_signature_accuracy == "only_high" ? [1] : []
+          content {}
+        }
+        dynamic "high_medium_accuracy_signatures" {
+          for_each = var.waf_signature_accuracy == "high_medium" ? [1] : []
+          content {}
+        }
+        dynamic "high_medium_low_accuracy_signatures" {
+          for_each = var.waf_signature_accuracy == "high_medium_low" ? [1] : []
+          content {}
+        }
+
+        # attack_type_setting
+        dynamic "default_attack_type_settings" {
+          for_each = var.waf_attack_type_mode == "default" ? [1] : []
+          content {}
+        }
+        dynamic "attack_type_settings" {
+          for_each = var.waf_attack_type_mode == "custom" ? [1] : []
+          content {
+            disabled_attack_types = var.waf_disabled_attack_types
+          }
+        }
+      }
+    }
   }
 }
 

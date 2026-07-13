@@ -57,3 +57,33 @@ output "mud_challenge_mode" {
   description = "Effective MUD challenge mode (none/enable_challenge/policy_based_challenge)."
   value       = var.mud_challenge_mode
 }
+
+output "waf_allowed_response_codes_mode" {
+  description = "Effective allowed_response_codes_choice arm (omit or list)."
+  value       = var.waf_allowed_response_codes_mode
+}
+
+output "waf_blocking_page_mode" {
+  description = "Effective blocking_page_choice arm (omit or custom)."
+  value       = var.waf_blocking_page_mode
+}
+
+output "waf_bot_mode" {
+  description = "Effective top-level bot_protection_choice arm (omit or custom)."
+  value       = var.waf_bot_mode
+}
+
+output "waf_anonymization_mode" {
+  description = "Effective anonymization_setting arm (omit, disable, or custom)."
+  value       = var.waf_anonymization_mode
+}
+
+output "waf_ai_mode" {
+  description = "Effective enhance_with_ai_choice arm (omit, disable, or enable)."
+  value       = var.waf_ai_mode
+}
+
+output "waf_detection_mode" {
+  description = "Effective detection_setting_choice arm (default or custom)."
+  value       = var.waf_detection_mode
+}
