@@ -19,6 +19,6 @@ mud-verify:
 # Cycle the live app_firewall through the all-pairs + enum + min/max + maximal
 # WAF variant set and verify apply / idempotency / round-trip import. Runs in
 # batches: `make waf-matrix` (all) or `bash scripts/waf-matrix.sh START END`.
-# See scripts/waf-pairs.py (generator) and scripts/waf-matrix.sh (harness).
+# See scripts/waf_pairs.py (generator) and scripts/waf-matrix.sh (harness).
 waf-matrix:
 	bash scripts/waf-matrix.sh

@@ -116,11 +116,34 @@ ATTACK_TYPES = [
 ]  # first 22 of 27 (= maxItems 22)
 
 
+def _best_value(
+    values: list[str],
+    idx: int,
+    row: dict[int, str],
+    uncovered: set[tuple[int, str, int, str]],
+) -> str:
+    """Pick the value for dimension idx covering the most still-uncovered pairs.
+
+    Deterministic lowest-index tie-break: scan values in order and keep the first
+    that strictly improves on the best gain so far.
+    """
+    best_val, best_gain = values[0], -1
+    for val in values:
+        gain = 0
+        for pidx, pval in row.items():
+            a, b = sorted([(pidx, pval), (idx, val)])
+            if (a[0], a[1], b[0], b[1]) in uncovered:
+                gain += 1
+        if gain > best_gain:
+            best_gain, best_val = gain, val
+    return best_val
+
+
 def all_pairs(dims: dict[str, list[str]]) -> list[dict[str, str]]:
     """Return AETG-style greedy all-pairs rows ({dim: value})."""
     names = list(dims)
     # every unordered pair of (dim_i, val_i)-(dim_j, val_j) that must co-occur
-    uncovered = set()
+    uncovered: set[tuple[int, str, int, str]] = set()
     for i, j in itertools.combinations(range(len(names)), 2):
         for vi in dims[names[i]]:
             for vj in dims[names[j]]:
@@ -135,19 +158,9 @@ def all_pairs(dims: dict[str, list[str]]) -> list[dict[str, str]]:
         si, sv, sj, sv2 = min(uncovered)
         row = {si: sv, sj: sv2}
         # fill remaining dimensions greedily (fixed order, lowest-index tie-break)
-        for idx in range(len(names)):
-            if idx in row:
-                continue
-            best_val, best_gain = dims[names[idx]][0], -1
-            for val in dims[names[idx]]:
-                gain = 0
-                for pidx, pval in row.items():
-                    a, b = sorted([(pidx, pval), (idx, val)])
-                    if (a[0], a[1], b[0], b[1]) in uncovered:
-                        gain += 1
-                if gain > best_gain:
-                    best_gain, best_val = gain, val
-            row[idx] = best_val
+        for idx, name in enumerate(names):
+            if idx not in row:
+                row[idx] = _best_value(dims[name], idx, row, uncovered)
         # retire the pairs this row covers
         for i, j in itertools.combinations(sorted(row), 2):
             uncovered.discard((i, row[i], j, row[j]))

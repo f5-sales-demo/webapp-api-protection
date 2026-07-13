@@ -2,7 +2,7 @@
 # WAF (app_firewall) live coverage-matrix harness.
 #
 # Cycles the LIVE webapp-api-protection app_firewall through the all-pairs +
-# enum + min/max + maximal variant set (scripts/waf-pairs.py) and verifies each
+# enum + min/max + maximal variant set (scripts/waf_pairs.py) and verifies each
 # variant is (a) applies, (b) idempotent (immediate plan = No changes), and
 # (c) round-trip-import clean (state rm -> import -> plan clean) for
 # module.http_lb.xcsh_app_firewall.this. Entitlement/permission-rejected arms are
@@ -40,7 +40,7 @@ END="${2:-9999}"
 # blocking-page code). A 400 BAD_REQUEST (invalid arm combination) is a real FAIL.
 GATED_RE='entitlement|not subscribed|not entitled|not enabled for|permission denied|unauthorized|AS_NOT_SUBSCRIBED|status: 401|status: 403'
 
-count=$(python3 ../scripts/waf-pairs.py --emit "$VARDIR")
+count=$(python3 ../scripts/waf_pairs.py --emit "$VARDIR")
 echo "generated $count variants into $VARDIR (running [$START..$END])"
 
 round_trip() {
