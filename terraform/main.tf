@@ -93,6 +93,16 @@ module "http_lb" {
   mud_mitigation                  = var.mud_mitigation
   mud_challenge_mode              = var.mud_challenge_mode
 
+  # API Discovery & Crawler (SP1) passthrough. Defaults keep enable_api_discovery {}
+  # bare (0-change). The api-discovery matrix cycles the non-default arms.
+  api_discovery_choice              = var.api_discovery_choice
+  api_discovery_learn_from_redirect = var.api_discovery_learn_from_redirect
+  api_discovery_purge_duration      = var.api_discovery_purge_duration
+  api_discovery_auth_mode           = var.api_discovery_auth_mode
+  api_discovery_custom_auth_types   = var.api_discovery_custom_auth_types
+  api_crawler_domains               = var.api_crawler_domains
+  api_crawler_password              = var.api_crawler_password
+
   # Enabling client_side_defense on the LB requires a protected domain to already
   # exist in this namespace (F5 XC generates the CSD JS config from it), so the
   # LB must be created/updated AFTER the protected domain. The MUD entitlement

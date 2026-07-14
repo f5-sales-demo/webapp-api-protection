@@ -1,6 +1,6 @@
 # webapp-api-protection developer targets.
 
-.PHONY: mud-matrix mud-verify waf-matrix test
+.PHONY: mud-matrix mud-verify waf-matrix api-discovery-matrix api-crawl-verify test
 
 # Run the plan-level test suite (no tenant contact).
 test:
@@ -22,3 +22,17 @@ mud-verify:
 # See scripts/waf_pairs.py (generator) and scripts/waf-matrix.sh (harness).
 waf-matrix:
 	bash scripts/waf-matrix.sh
+
+# Cycle the live LB through the API discovery/crawler all-pairs variant set and
+# verify apply / idempotency / round-trip import (re-applying write-only crawler
+# secrets on import). Runs in batches: `make api-discovery-matrix` (all) or
+# `bash scripts/api-discovery-matrix.sh START END`. See scripts/api_discovery_pairs.py
+# (generator) and scripts/api-discovery-matrix.sh (harness).
+api-discovery-matrix:
+	bash scripts/api-discovery-matrix.sh
+
+# Staged blindfold verification: seal round-trip (a pre-sealed crawler credential
+# applies + is idempotent + import-clean) plus an authenticated-crawl attempt
+# against a real origin app. See scripts/api-crawl-verify.sh.
+api-crawl-verify:
+	bash scripts/api-crawl-verify.sh
