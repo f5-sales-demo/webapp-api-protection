@@ -54,3 +54,39 @@ run "client_matcher_rejects_bad_mode" {
   }
   expect_failures = [var.client_matcher]
 }
+
+# --- Rate limiting (Task 3) ---
+run "rate_limit_disabled_default" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  assert {
+    condition     = output.rate_limit_choice == "disable"
+    error_message = "rate_limit must default to disable (0-change)"
+  }
+}
+
+run "rate_limit_inline_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    rate_limit_choice            = "rate_limit"
+    rate_limit_total_number      = 500
+    rate_limit_unit              = "MINUTE"
+    rate_limit_period_multiplier = 1
+    rate_limit_burst_multiplier  = 2
+  }
+  assert {
+    condition     = output.rate_limit_choice == "rate_limit"
+    error_message = "inline rate_limit arm must render"
+  }
+}
+
+run "rate_limit_rejects_bad_unit" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    rate_limit_choice = "rate_limit"
+    rate_limit_unit   = "WEEK"
+  }
+  expect_failures = [var.rate_limit_unit]
+}

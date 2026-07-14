@@ -592,6 +592,27 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # Rate limiting (SP3, rate_limit_choice oneof: rate_limit vs the server default
+  # disable_rate_limit). Default omits the block — the server applies
+  # disable_rate_limit, which the provider suppresses on import (0-change; do not
+  # declare it). "rate_limit" emits the self-contained inline request rate limiter:
+  # no IP allow-list (no_ip_allowed_list) and no policy refs (no_policies), so the
+  # rate_limiter spec alone defines the limit. The per-endpoint api_rate_limit arm
+  # and the standalone xcsh_rate_limiter_policy are deferred (see sp3-findings.md).
+  dynamic "rate_limit" {
+    for_each = var.rate_limit_choice == "rate_limit" ? [1] : []
+    content {
+      no_ip_allowed_list {}
+      no_policies {}
+      rate_limiter {
+        total_number      = var.rate_limit_total_number
+        unit              = var.rate_limit_unit
+        period_multiplier = var.rate_limit_period_multiplier
+        burst_multiplier  = var.rate_limit_burst_multiplier
+      }
+    }
+  }
+
   # Client-Side Defense — inject the F5 XC telemetry JavaScript into served pages
   # to detect Magecart/formjacking/skimming (client_side_defense oneof vs the
   # server default disable_client_side_defense). Requires the CSD tenant addon
