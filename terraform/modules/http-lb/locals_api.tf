@@ -1,17 +1,31 @@
-# Renderer for the reusable clear/blindfold SecretType convention. use_blindfold
-# selects the SecretType arm; `location` is the pre-sealed offline blob (blindfold
-# arm), `url` is the base64 clear value (clear arm). Exactly one is non-null.
+# Reusable clear/blindfold SecretType renderer (DRY). Every secret-bearing option
+# registers its input (same object shape: {method, plaintext, location}) in
+# _secret_inputs and reads local.rendered_secret[<key>] -> {use_blindfold, url,
+# location}. ONE transform serves all secrets (crawler password, SCM access_token,
+# future TLS/origin secrets) instead of a per-field copy.
 #
+# use_blindfold selects the SecretType arm; `location` is the PRE-SEALED offline blob
+# (blindfold arm), `url` is the base64 clear value (clear arm). Exactly one is non-null.
 # The blindfold location is pinned (sealed once via scripts/blindfold-seal.sh), NOT
 # computed here: provider::xcsh::blindfold uses a random data key, so an inline call
-# would produce a new ciphertext every plan and drift. Pinning the sealed value is
-# the F5-documented offline-blindfold pattern and keeps apply idempotent + import-clean.
+# would produce a new ciphertext every plan and drift. Pinning is the F5-documented
+# offline-blindfold pattern and keeps apply idempotent + import-clean.
 locals {
-  api_crawler_password_secret = {
-    use_blindfold = var.api_crawler_password.method == "blindfold"
-    url = (var.api_crawler_password.method == "clear" && var.api_crawler_password.plaintext != null
-      ? "string:///${base64encode(var.api_crawler_password.plaintext)}"
-    : null)
-    location = var.api_crawler_password.method == "blindfold" ? var.api_crawler_password.location : null
+  _secret_inputs = {
+    api_crawler_password        = var.api_crawler_password
+    code_base_integration_token = var.code_base_integration_access_token
   }
+
+  rendered_secret = {
+    for k, s in local._secret_inputs : k => {
+      use_blindfold = s.method == "blindfold"
+      url = (s.method == "clear" && s.plaintext != null
+        ? "string:///${base64encode(s.plaintext)}"
+      : null)
+      location = s.method == "blindfold" ? s.location : null
+    }
+  }
+
+  # Named alias for the SP1 crawler consumer (keeps main.tf references stable).
+  api_crawler_password_secret = local.rendered_secret["api_crawler_password"]
 }
