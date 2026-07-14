@@ -14,7 +14,18 @@
 #   working dir to be initialized (the provider function is served by the provider).
 set -euo pipefail
 
-PLAINTEXT="${1:?usage: blindfold-seal.sh <plaintext> [policy_name] [policy_namespace]}"
+# Read the plaintext from the first arg OR, when it is omitted, from stdin. Prefer
+# stdin for real secrets: a positional arg is visible in `ps`/`/proc/<pid>/cmdline`
+# to any local user, whereas a piped value is not. (SP1 callers that seal a
+# non-secret demo credential still pass it positionally.)
+PLAINTEXT="${1-}"
+if [ -z "$PLAINTEXT" ]; then
+  PLAINTEXT="$(cat)"
+fi
+[ -n "$PLAINTEXT" ] || {
+  echo "usage: blindfold-seal.sh <plaintext | via stdin> [policy_name] [policy_namespace]" >&2
+  exit 1
+}
 POLICY="${2:-ves-io-allow-volterra}"
 NAMESPACE="${3:-shared}"
 

@@ -518,6 +518,34 @@ resource "xcsh_http_loadbalancer" "this" {
           }
         }
       }
+
+      # API discovery from source-code scan (SP2). Select the code_base_integration
+      # created in scm.tf and the repositories to scan. Off by default (emit no
+      # block). The code_base_integration object-ref keeps its Computed tenant
+      # across apply via provider #1091 (>= 3.71.2), same class as api_discovery_ref.
+      dynamic "api_discovery_from_code_scan" {
+        for_each = var.api_discovery_code_scan != "off" ? [1] : []
+        content {
+          code_base_integrations {
+            code_base_integration {
+              name      = xcsh_code_base_integration.github[0].name
+              namespace = var.namespace
+            }
+
+            # repo-selection oneof: all_repos vs selected_repos.
+            dynamic "all_repos" {
+              for_each = var.api_discovery_code_scan == "all" ? [1] : []
+              content {}
+            }
+            dynamic "selected_repos" {
+              for_each = var.api_discovery_code_scan == "selected" ? [1] : []
+              content {
+                api_code_repo = var.api_discovery_code_scan_repos
+              }
+            }
+          }
+        }
+      }
     }
   }
 
@@ -525,6 +553,43 @@ resource "xcsh_http_loadbalancer" "this" {
   dynamic "disable_api_discovery" {
     for_each = var.api_discovery_choice == "disable" ? [1] : []
     content {}
+  }
+
+  # API schema enforcement (api_definition_choice oneof: api_specification vs the
+  # server default disable_api_definition). Default omits the block entirely, so the
+  # server applies disable_api_definition, which the provider suppresses on import
+  # (0-change; do not declare it). "specification" references the xcsh_api_definition
+  # created in api_definition.tf; the api_definition object-ref keeps its Computed
+  # tenant across apply via provider #1091 (>= 3.71.2), the same class as the SP1
+  # api_discovery_ref. validation_target_choice picks how strictly to validate:
+  # validation_disabled (define but do not enforce) or validation_all_spec_endpoints
+  # (enforce every endpoint, fall-through allow). The per-endpoint custom-rule arm
+  # (validation_custom_list) is API-protection rule authoring, deferred to SP3.
+  dynamic "api_specification" {
+    for_each = var.api_definition_choice == "specification" ? [1] : []
+    content {
+      api_definition {
+        name      = xcsh_api_definition.this[0].name
+        namespace = var.namespace
+      }
+
+      dynamic "validation_disabled" {
+        for_each = var.api_specification_validation == "disabled" ? [1] : []
+        content {}
+      }
+
+      dynamic "validation_all_spec_endpoints" {
+        for_each = var.api_specification_validation == "all_spec_endpoints" ? [1] : []
+        content {
+          fall_through_mode {
+            fall_through_mode_allow {}
+          }
+          validation_mode {
+            skip_validation {}
+          }
+        }
+      }
+    }
   }
 
   # Client-Side Defense — inject the F5 XC telemetry JavaScript into served pages
@@ -595,6 +660,22 @@ resource "xcsh_http_loadbalancer" "this" {
     precondition {
       condition     = length(var.api_crawler_domains) == 0 || local.api_crawler_password_secret.url != null || local.api_crawler_password_secret.location != null
       error_message = "api_crawler_domains is set but api_crawler_password has no value: set plaintext (clear) or location (blindfold)."
+    }
+
+    # Code-scan discovery lives inside enable_api_discovery and references the
+    # code_base_integration, so it requires discovery enabled AND the integration
+    # created — cross-variable checks the per-variable validation cannot express.
+    precondition {
+      condition     = var.api_discovery_code_scan == "off" || var.api_discovery_choice == "enable"
+      error_message = "api_discovery_code_scan requires api_discovery_choice=\"enable\" (code scan is part of enable_api_discovery)."
+    }
+    precondition {
+      condition     = var.api_discovery_code_scan == "off" || var.code_base_integration_enabled
+      error_message = "api_discovery_code_scan requires code_base_integration_enabled=true (it references the code_base_integration)."
+    }
+    precondition {
+      condition     = var.api_discovery_code_scan != "selected" || length(var.api_discovery_code_scan_repos) > 0
+      error_message = "api_discovery_code_scan=\"selected\" requires api_discovery_code_scan_repos to be non-empty."
     }
   }
 }
