@@ -587,4 +587,14 @@ resource "xcsh_http_loadbalancer" "this" {
       }
     }
   }
+
+  # Fail fast at plan if a crawler domain is configured without a usable password
+  # value — a cross-variable check the api_crawler_password variable validation cannot
+  # express (clear needs plaintext; blindfold needs location).
+  lifecycle {
+    precondition {
+      condition     = length(var.api_crawler_domains) == 0 || local.api_crawler_password_secret.url != null || local.api_crawler_password_secret.location != null
+      error_message = "api_crawler_domains is set but api_crawler_password has no value: set plaintext (clear) or location (blindfold)."
+    }
+  }
 }
