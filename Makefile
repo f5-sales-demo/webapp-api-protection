@@ -1,6 +1,6 @@
 # webapp-api-protection developer targets.
 
-.PHONY: mud-matrix mud-verify waf-matrix api-discovery-matrix api-definition-matrix api-crawl-verify test
+.PHONY: mud-matrix mud-verify waf-matrix api-discovery-matrix api-definition-matrix api-protection-matrix api-crawl-verify test
 
 # Run the plan-level test suite (no tenant contact).
 test:
@@ -39,6 +39,14 @@ api-discovery-matrix:
 # scripts/api_definition_pairs.py (generator) and scripts/api-definition-matrix.sh.
 api-definition-matrix:
 	bash scripts/api-definition-matrix.sh
+
+# Cycle the live LB through the API Protection (SP3) all-pairs variant set (rate
+# limiting, sensitive data / data guard, api_protection_rules, validation_custom_list)
+# and verify apply / idempotency / round-trip import. Runs in batches:
+# `make api-protection-matrix` (all) or `bash scripts/api-protection-matrix.sh START END`.
+# See scripts/api_protection_pairs.py (generator) and scripts/api-protection-matrix.sh.
+api-protection-matrix:
+	bash scripts/api-protection-matrix.sh
 
 # Staged blindfold verification: seal round-trip (a pre-sealed crawler credential
 # applies + is idempotent + import-clean) plus an authenticated-crawl attempt
