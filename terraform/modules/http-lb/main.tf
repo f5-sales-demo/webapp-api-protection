@@ -381,6 +381,24 @@ resource "xcsh_user_identification" "mud" {
   }
 }
 
+# Standalone API discovery object holding custom auth types. Created only when
+# api_discovery_auth_mode=custom, and referenced by the LB's enable_api_discovery
+# custom_api_auth_discovery.api_discovery_ref. When default, we create nothing and
+# emit no arm (server default default_api_auth_discovery is import-suppressed).
+resource "xcsh_api_discovery" "this" {
+  count     = var.api_discovery_auth_mode == "custom" ? 1 : 0
+  name      = "${var.namespace}-api-discovery"
+  namespace = var.namespace
+
+  dynamic "custom_auth_types" {
+    for_each = var.api_discovery_custom_auth_types
+    content {
+      parameter_name = custom_auth_types.value.parameter_name
+      parameter_type = custom_auth_types.value.parameter_type
+    }
+  }
+}
+
 resource "xcsh_http_loadbalancer" "this" {
   name      = "webapp-api-protection"
   namespace = var.namespace
@@ -429,7 +447,85 @@ resource "xcsh_http_loadbalancer" "this" {
   # (default_api_auth_discovery, disable_learn_from_redirect_traffic) on the
   # import path. That suppression was added in lock-step — see
   # terraform-provider-xcsh tools/import-default-suppressions.json (HTTPLoadBalancer).
-  enable_api_discovery {}
+  #
+  # SP1 extends this from a bare toggle to full discovery/crawler coverage. When
+  # no api_crawler_domains are set we emit NO api_crawler block, so the rendered
+  # config is identical to the bare form (server default disable_api_crawler,
+  # suppressed on import) — a 0-change no-op.
+  # api_discovery_choice oneof: enable_api_discovery vs disable_api_discovery.
+  # Default (enable, no inner arms) renders an empty enable_api_discovery {} —
+  # identical to the prior bare form, so a normal apply is a 0-change no-op.
+  dynamic "enable_api_discovery" {
+    for_each = var.api_discovery_choice == "enable" ? [1] : []
+    content {
+      # Inline API crawler (api_crawler oneof: api_crawler_config vs disable_api_crawler).
+      # The password uses the reusable clear/blindfold SecretType convention
+      # (locals_api.tf): exactly one of blindfold_secret_info / clear_secret_info.
+      dynamic "api_crawler" {
+        for_each = length(var.api_crawler_domains) > 0 ? [1] : []
+        content {
+          api_crawler_config {
+            dynamic "domains" {
+              for_each = var.api_crawler_domains
+              content {
+                domain = domains.value.domain
+                simple_login {
+                  user = domains.value.user
+                  password {
+                    dynamic "blindfold_secret_info" {
+                      for_each = local.api_crawler_password_secret.use_blindfold ? [1] : []
+                      content {
+                        location = local.api_crawler_password_secret.location
+                      }
+                    }
+                    dynamic "clear_secret_info" {
+                      for_each = local.api_crawler_password_secret.use_blindfold ? [] : [1]
+                      content {
+                        url = local.api_crawler_password_secret.url
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      # learn_from_redirect_traffic oneof. omit => emit NEITHER arm (server default
+      # disable_learn_from_redirect_traffic is import-suppressed). enable => emit enable arm.
+      dynamic "enable_learn_from_redirect_traffic" {
+        for_each = var.api_discovery_learn_from_redirect == "enable" ? [1] : []
+        content {}
+      }
+
+      # discovered_api_settings — omitted entirely unless a purge duration is set.
+      dynamic "discovered_api_settings" {
+        for_each = var.api_discovery_purge_duration != null ? [1] : []
+        content {
+          purge_duration_for_inactive_discovered_apis = var.api_discovery_purge_duration
+        }
+      }
+
+      # api-auth-discovery oneof: omit (suppressed default_api_auth_discovery) or
+      # custom_api_auth_discovery referencing the standalone xcsh_api_discovery.
+      dynamic "custom_api_auth_discovery" {
+        for_each = var.api_discovery_auth_mode == "custom" ? [1] : []
+        content {
+          api_discovery_ref {
+            name      = xcsh_api_discovery.this[0].name
+            namespace = var.namespace
+          }
+        }
+      }
+    }
+  }
+
+  # disable_api_discovery — the other arm of api_discovery_choice.
+  dynamic "disable_api_discovery" {
+    for_each = var.api_discovery_choice == "disable" ? [1] : []
+    content {}
+  }
 
   # Client-Side Defense — inject the F5 XC telemetry JavaScript into served pages
   # to detect Magecart/formjacking/skimming (client_side_defense oneof vs the
