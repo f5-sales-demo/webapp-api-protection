@@ -50,3 +50,26 @@ run "discovery_purge_duration" {
     error_message = "discovered_api_settings purge duration must render"
   }
 }
+
+run "discovery_auth_mode_default" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  assert {
+    condition     = output.api_discovery_auth_mode == "default"
+    error_message = "default api_discovery_auth_mode must be the suppressed default arm"
+  }
+}
+
+run "discovery_auth_mode_custom" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_discovery_auth_mode         = "custom"
+    api_discovery_custom_auth_types = [{ parameter_name = "X-API-Key", parameter_type = "HEADER" }]
+  }
+  assert {
+    condition     = output.api_discovery_custom_auth_type_count == 1
+    error_message = "custom_api_auth_discovery with a custom auth type must render"
+  }
+}
+

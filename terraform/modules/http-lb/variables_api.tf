@@ -69,3 +69,34 @@ variable "api_discovery_purge_duration" {
   type        = number
   default     = null
 }
+
+# api-auth-discovery oneof. default = server default default_api_auth_discovery
+# (import-suppressed, so we emit NEITHER arm). custom = create a standalone
+# xcsh_api_discovery object and reference it via custom_api_auth_discovery.api_discovery_ref.
+variable "api_discovery_auth_mode" {
+  description = "enable_api_discovery auth-discovery: default (suppressed server default) or custom (custom_auth_types via a referenced xcsh_api_discovery)."
+  type        = string
+  default     = "default"
+
+  validation {
+    condition     = contains(["default", "custom"], var.api_discovery_auth_mode)
+    error_message = "api_discovery_auth_mode must be \"default\" or \"custom\"."
+  }
+}
+
+variable "api_discovery_custom_auth_types" {
+  description = "Custom auth types for the referenced xcsh_api_discovery when api_discovery_auth_mode=custom."
+  type = list(object({
+    parameter_name = string
+    parameter_type = string
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for t in var.api_discovery_custom_auth_types :
+      contains(["QUERY_PARAMETER", "HEADER", "COOKIE"], t.parameter_type)
+    ])
+    error_message = "each parameter_type must be QUERY_PARAMETER, HEADER, or COOKIE."
+  }
+}

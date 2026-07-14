@@ -34,3 +34,13 @@ output "api_discovery_purge_duration" {
   description = "Effective discovered_api_settings purge duration (null when omitted)."
   value       = var.api_discovery_purge_duration
 }
+
+output "api_discovery_auth_mode" {
+  description = "Effective api-auth-discovery arm (default or custom)."
+  value       = var.api_discovery_auth_mode
+}
+
+output "api_discovery_custom_auth_type_count" {
+  description = "Number of custom auth types on the referenced xcsh_api_discovery (0 when auth mode is default)."
+  value       = var.api_discovery_auth_mode == "custom" ? length(var.api_discovery_custom_auth_types) : 0
+}

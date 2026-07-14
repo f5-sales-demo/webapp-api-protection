@@ -381,6 +381,24 @@ resource "xcsh_user_identification" "mud" {
   }
 }
 
+# Standalone API discovery object holding custom auth types. Created only when
+# api_discovery_auth_mode=custom, and referenced by the LB's enable_api_discovery
+# custom_api_auth_discovery.api_discovery_ref. When default, we create nothing and
+# emit no arm (server default default_api_auth_discovery is import-suppressed).
+resource "xcsh_api_discovery" "this" {
+  count     = var.api_discovery_auth_mode == "custom" ? 1 : 0
+  name      = "${var.namespace}-api-discovery"
+  namespace = var.namespace
+
+  dynamic "custom_auth_types" {
+    for_each = var.api_discovery_custom_auth_types
+    content {
+      parameter_name = custom_auth_types.value.parameter_name
+      parameter_type = custom_auth_types.value.parameter_type
+    }
+  }
+}
+
 resource "xcsh_http_loadbalancer" "this" {
   name      = "webapp-api-protection"
   namespace = var.namespace
@@ -486,6 +504,18 @@ resource "xcsh_http_loadbalancer" "this" {
         for_each = var.api_discovery_purge_duration != null ? [1] : []
         content {
           purge_duration_for_inactive_discovered_apis = var.api_discovery_purge_duration
+        }
+      }
+
+      # api-auth-discovery oneof: omit (suppressed default_api_auth_discovery) or
+      # custom_api_auth_discovery referencing the standalone xcsh_api_discovery.
+      dynamic "custom_api_auth_discovery" {
+        for_each = var.api_discovery_auth_mode == "custom" ? [1] : []
+        content {
+          api_discovery_ref {
+            name      = xcsh_api_discovery.this[0].name
+            namespace = var.namespace
+          }
         }
       }
     }
