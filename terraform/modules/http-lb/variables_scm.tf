@@ -36,3 +36,24 @@ variable "code_base_integration_access_token" {
     error_message = "blindfold method requires a pre-sealed location (run scripts/blindfold-seal.sh)."
   }
 }
+
+# API discovery from source-code scan (SP2): wire enable_api_discovery.
+# api_discovery_from_code_scan.code_base_integrations[] to the code_base_integration.
+# "off" (default) emits no block (0-change). "selected" scans the repos in
+# api_discovery_code_scan_repos; "all" scans every repo the integration can see.
+variable "api_discovery_code_scan" {
+  description = "API discovery from code scan: off, selected (scan api_discovery_code_scan_repos), or all (all repos)."
+  type        = string
+  default     = "off"
+
+  validation {
+    condition     = contains(["off", "selected", "all"], var.api_discovery_code_scan)
+    error_message = "api_discovery_code_scan must be \"off\", \"selected\", or \"all\"."
+  }
+}
+
+variable "api_discovery_code_scan_repos" {
+  description = "Repositories to scan when api_discovery_code_scan=selected (e.g. [\"api-catalog\"])."
+  type        = list(string)
+  default     = []
+}

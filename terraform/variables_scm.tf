@@ -23,3 +23,15 @@ variable "code_base_integration_access_token" {
   default   = { method = "clear", plaintext = null }
   sensitive = true
 }
+
+variable "api_discovery_code_scan" {
+  description = "API discovery from code scan: off, selected, or all."
+  type        = string
+  default     = "off"
+}
+
+variable "api_discovery_code_scan_repos" {
+  description = "Repositories to scan when api_discovery_code_scan=selected (e.g. [\"api-catalog\"])."
+  type        = list(string)
+  default     = []
+}
