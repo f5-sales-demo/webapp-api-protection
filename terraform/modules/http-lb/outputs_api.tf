@@ -19,3 +19,18 @@ output "api_crawler_domain_count" {
   description = "Number of authenticated domains configured for the inline API crawler."
   value       = length(var.api_crawler_domains)
 }
+
+output "api_discovery_choice" {
+  description = "Effective api_discovery_choice arm (enable or disable)."
+  value       = var.api_discovery_choice
+}
+
+output "api_discovery_learn_from_redirect" {
+  description = "Effective learn-from-redirect arm (omit or enable)."
+  value       = var.api_discovery_learn_from_redirect
+}
+
+output "api_discovery_purge_duration" {
+  description = "Effective discovered_api_settings purge duration (null when omitted)."
+  value       = var.api_discovery_purge_duration
+}

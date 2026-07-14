@@ -35,3 +35,37 @@ variable "api_crawler_domains" {
   }))
   default = []
 }
+
+# api_discovery_choice oneof: enable_api_discovery vs disable_api_discovery.
+# Default "enable" reproduces the current bare enable_api_discovery {} (0-change).
+variable "api_discovery_choice" {
+  description = "api_discovery_choice: enable (learn the API schema) or disable."
+  type        = string
+  default     = "enable"
+
+  validation {
+    condition     = contains(["enable", "disable"], var.api_discovery_choice)
+    error_message = "api_discovery_choice must be \"enable\" or \"disable\"."
+  }
+}
+
+# learn_from_redirect_traffic oneof. omit = server default disable_learn_from_redirect_traffic
+# (import-suppressed, so we emit NEITHER arm); enable = enable_learn_from_redirect_traffic.
+variable "api_discovery_learn_from_redirect" {
+  description = "enable_api_discovery learn-from-redirect: omit (server default disable, suppressed) or enable."
+  type        = string
+  default     = "omit"
+
+  validation {
+    condition     = contains(["omit", "enable"], var.api_discovery_learn_from_redirect)
+    error_message = "api_discovery_learn_from_redirect must be \"omit\" or \"enable\"."
+  }
+}
+
+# discovered_api_settings.purge_duration_for_inactive_discovered_apis. null = omit the
+# discovered_api_settings block entirely (server default, no drift).
+variable "api_discovery_purge_duration" {
+  description = "Days to purge inactive discovered APIs (discovered_api_settings.purge_duration_for_inactive_discovered_apis). null = omit."
+  type        = number
+  default     = null
+}
