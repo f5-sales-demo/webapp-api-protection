@@ -562,9 +562,9 @@ resource "xcsh_http_loadbalancer" "this" {
   # created in api_definition.tf; the api_definition object-ref keeps its Computed
   # tenant across apply via provider #1091 (>= 3.71.2), the same class as the SP1
   # api_discovery_ref. validation_target_choice picks how strictly to validate:
-  # validation_disabled (define but do not enforce) or validation_all_spec_endpoints
-  # (enforce every endpoint, fall-through allow). The per-endpoint custom-rule arm
-  # (validation_custom_list) is API-protection rule authoring, deferred to SP3.
+  # validation_disabled (define but do not enforce), validation_all_spec_endpoints
+  # (enforce every endpoint, fall-through allow), or validation_custom_list (SP3:
+  # per-endpoint OpenAPI validation rules with a fall-through-allow default).
   dynamic "api_specification" {
     for_each = var.api_definition_choice == "specification" ? [1] : []
     content {
@@ -586,6 +586,52 @@ resource "xcsh_http_loadbalancer" "this" {
           }
           validation_mode {
             skip_validation {}
+          }
+        }
+      }
+
+      # validation_custom_list (SP3): per-endpoint rules + fall-through allow for
+      # unlisted endpoints. Each rule matches an api_endpoint (method/path) and
+      # applies action_block | action_report | action_skip.
+      dynamic "validation_custom_list" {
+        for_each = var.api_specification_validation == "custom_list" ? [1] : []
+        content {
+          fall_through_mode {
+            fall_through_mode_allow {}
+          }
+          dynamic "open_api_validation_rules" {
+            for_each = var.validation_custom_rules
+            content {
+              metadata {
+                name = "validation-rule-${open_api_validation_rules.key}"
+              }
+              any_domain {}
+              api_endpoint {
+                methods = open_api_validation_rules.value.methods
+                path    = open_api_validation_rules.value.path
+              }
+              # action via validation_mode: skip = skip_validation; block/report =
+              # validation_mode_active with enforcement_block / enforcement_report.
+              validation_mode {
+                dynamic "skip_validation" {
+                  for_each = open_api_validation_rules.value.action == "skip" ? [1] : []
+                  content {}
+                }
+                dynamic "validation_mode_active" {
+                  for_each = contains(["block", "report"], open_api_validation_rules.value.action) ? [1] : []
+                  content {
+                    dynamic "enforcement_block" {
+                      for_each = open_api_validation_rules.value.action == "block" ? [1] : []
+                      content {}
+                    }
+                    dynamic "enforcement_report" {
+                      for_each = open_api_validation_rules.value.action == "report" ? [1] : []
+                      content {}
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

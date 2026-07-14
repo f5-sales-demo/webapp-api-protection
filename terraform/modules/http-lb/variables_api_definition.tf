@@ -113,15 +113,45 @@ variable "api_definition_schema_origin" {
 
 # validation_target_choice arm for LB api_specification. "disabled" (default)
 # defines the spec without enforcing it; "all_spec_endpoints" validates all
-# endpoints (fall-through allow). The per-endpoint custom-rule arm
-# (validation_custom_list) is API-protection rule authoring — deferred to SP3.
+# endpoints (fall-through allow); "custom_list" (SP3) applies per-endpoint OpenAPI
+# validation rules (validation_custom_rules) with a fall-through-allow default.
 variable "api_specification_validation" {
-  description = "api_specification validation_target_choice: disabled or all_spec_endpoints. (custom_list = SP3 protection rules.)"
+  description = "api_specification validation_target_choice: disabled, all_spec_endpoints, or custom_list."
   type        = string
   default     = "disabled"
 
   validation {
-    condition     = contains(["disabled", "all_spec_endpoints"], var.api_specification_validation)
-    error_message = "api_specification_validation must be \"disabled\" or \"all_spec_endpoints\" (custom_list is deferred to SP3)."
+    condition     = contains(["disabled", "all_spec_endpoints", "custom_list"], var.api_specification_validation)
+    error_message = "api_specification_validation must be \"disabled\", \"all_spec_endpoints\", or \"custom_list\"."
+  }
+}
+
+# Per-endpoint OpenAPI validation rules for the custom_list arm (SP3). Each rule
+# targets an api_endpoint (method + path) with an action: block (enforce), report
+# (monitor), or skip (exempt). fall-through for unlisted endpoints is allow.
+variable "validation_custom_rules" {
+  description = "validation_custom_list.open_api_validation_rules: list of {path, methods, action block|report|skip}."
+  type = list(object({
+    path    = string
+    methods = optional(list(string), ["ANY"])
+    action  = optional(string, "report")
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for r in var.validation_custom_rules : contains(["block", "report", "skip"], r.action)
+    ])
+    error_message = "each validation_custom_rules action must be block, report, or skip."
+  }
+
+  validation {
+    condition = alltrue([
+      for r in var.validation_custom_rules : alltrue([
+        for m in r.methods :
+        contains(["ANY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH", "COPY"], m)
+      ])
+    ])
+    error_message = "each validation_custom_rules method must be a valid HTTP method."
   }
 }

@@ -195,3 +195,32 @@ run "api_protection_rejects_bad_action" {
   }
   expect_failures = [var.api_protection_rules]
 }
+
+# --- OpenAPI validation custom_list (Task 7 — SP2 deferral) ---
+run "validation_custom_list_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_definition_choice        = "specification"
+    api_specification_validation = "custom_list"
+    validation_custom_rules = [
+      { path = "/api/health", methods = ["GET"], action = "report" },
+      { path = "/api/admin", methods = ["POST"], action = "block" },
+    ]
+  }
+  assert {
+    condition     = output.api_specification_validation == "custom_list"
+    error_message = "validation_custom_list arm must render"
+  }
+}
+
+run "validation_custom_rules_reject_bad_action" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_definition_choice        = "specification"
+    api_specification_validation = "custom_list"
+    validation_custom_rules      = [{ path = "/x", action = "quarantine" }]
+  }
+  expect_failures = [var.validation_custom_rules]
+}
