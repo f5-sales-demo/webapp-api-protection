@@ -429,7 +429,46 @@ resource "xcsh_http_loadbalancer" "this" {
   # (default_api_auth_discovery, disable_learn_from_redirect_traffic) on the
   # import path. That suppression was added in lock-step — see
   # terraform-provider-xcsh tools/import-default-suppressions.json (HTTPLoadBalancer).
-  enable_api_discovery {}
+  #
+  # SP1 extends this from a bare toggle to full discovery/crawler coverage. When
+  # no api_crawler_domains are set we emit NO api_crawler block, so the rendered
+  # config is identical to the bare form (server default disable_api_crawler,
+  # suppressed on import) — a 0-change no-op.
+  enable_api_discovery {
+    # Inline API crawler (api_crawler oneof: api_crawler_config vs disable_api_crawler).
+    # The password uses the reusable clear/blindfold SecretType convention
+    # (locals_api.tf): exactly one of blindfold_secret_info / clear_secret_info.
+    dynamic "api_crawler" {
+      for_each = length(var.api_crawler_domains) > 0 ? [1] : []
+      content {
+        api_crawler_config {
+          dynamic "domains" {
+            for_each = var.api_crawler_domains
+            content {
+              domain = domains.value.domain
+              simple_login {
+                user = domains.value.user
+                password {
+                  dynamic "blindfold_secret_info" {
+                    for_each = local.api_crawler_password_secret.use_blindfold ? [1] : []
+                    content {
+                      location = local.api_crawler_password_secret.location
+                    }
+                  }
+                  dynamic "clear_secret_info" {
+                    for_each = local.api_crawler_password_secret.use_blindfold ? [] : [1]
+                    content {
+                      url = local.api_crawler_password_secret.url
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
   # Client-Side Defense — inject the F5 XC telemetry JavaScript into served pages
   # to detect Magecart/formjacking/skimming (client_side_defense oneof vs the
