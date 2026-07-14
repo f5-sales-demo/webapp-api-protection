@@ -13,7 +13,7 @@ output "rate_limit_choice" {
 
 output "sensitive_data_policy_created" {
   description = "Whether a standalone xcsh_sensitive_data_policy is created."
-  value       = var.sensitive_data_policy_enabled
+  value       = var.sensitive_data_policy_choice == "custom"
 }
 
 output "sensitive_data_policy_choice" {

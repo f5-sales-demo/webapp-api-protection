@@ -126,7 +126,6 @@ module "http_lb" {
   rate_limit_unit                    = var.rate_limit_unit
   rate_limit_period_multiplier       = var.rate_limit_period_multiplier
   rate_limit_burst_multiplier        = var.rate_limit_burst_multiplier
-  sensitive_data_policy_enabled      = var.sensitive_data_policy_enabled
   sensitive_data_compliances         = var.sensitive_data_compliances
   sensitive_data_disabled_predefined = var.sensitive_data_disabled_predefined
   sensitive_data_policy_choice       = var.sensitive_data_policy_choice

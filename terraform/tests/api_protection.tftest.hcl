@@ -105,9 +105,8 @@ run "sensitive_data_custom_policy" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
-    sensitive_data_policy_enabled = true
-    sensitive_data_policy_choice  = "custom"
-    sensitive_data_compliances    = ["GDPR", "PCI_DSS"]
+    sensitive_data_policy_choice = "custom"
+    sensitive_data_compliances   = ["GDPR", "PCI_DSS"]
   }
   assert {
     condition     = output.sensitive_data_policy_created == true && output.sensitive_data_policy_choice == "custom"
@@ -119,8 +118,8 @@ run "sensitive_data_rejects_bad_compliance" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
-    sensitive_data_policy_enabled = true
-    sensitive_data_compliances    = ["NOT_A_FRAMEWORK"]
+    sensitive_data_policy_choice = "custom"
+    sensitive_data_compliances   = ["NOT_A_FRAMEWORK"]
   }
   expect_failures = [var.sensitive_data_compliances]
 }

@@ -97,7 +97,6 @@ def payloads(v: Mapping[str, object]) -> dict[str, object]:
         out["client_matcher"] = {"mode": "ip_threat", "ip_threat_categories": ["BOTNETS"]}
 
     if v.get("sensitive_data") == "custom":
-        out["sensitive_data_policy_enabled"] = True
         out["sensitive_data_policy_choice"] = "custom"
         out["sensitive_data_compliances"] = ["GDPR", "PCI_DSS"]
 

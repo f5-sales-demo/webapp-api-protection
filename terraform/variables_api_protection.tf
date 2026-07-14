@@ -44,12 +44,6 @@ variable "rate_limit_burst_multiplier" {
   default     = 1
 }
 
-variable "sensitive_data_policy_enabled" {
-  description = "Create a standalone xcsh_sensitive_data_policy."
-  type        = bool
-  default     = false
-}
-
 variable "sensitive_data_compliances" {
   description = "Compliance frameworks on the sensitive_data_policy."
   type        = list(string)

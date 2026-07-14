@@ -5,12 +5,6 @@
 # (omitted when empty). custom_data_types on the policy are object-refs to separate
 # xcsh_custom_data_type objects — deferred this cycle (see sp3-findings.md).
 
-variable "sensitive_data_policy_enabled" {
-  description = "Create a standalone xcsh_sensitive_data_policy (compliances + disabled predefined types) for the custom sensitive_data_policy_choice arm."
-  type        = bool
-  default     = false
-}
-
 variable "sensitive_data_compliances" {
   description = "Compliance frameworks to monitor on the sensitive_data_policy (GDPR, HIPAA, PCI_DSS, ...)."
   type        = list(string)
