@@ -44,11 +44,20 @@ run "discovery_learn_from_redirect_enable" {
 run "discovery_purge_duration" {
   command = plan
   module { source = "./modules/http-lb" }
-  variables { api_discovery_purge_duration = 48 }
+  variables { api_discovery_purge_duration = 7 }
   assert {
-    condition     = output.api_discovery_purge_duration == 48
+    condition     = output.api_discovery_purge_duration == 7
     error_message = "discovered_api_settings purge duration must render"
   }
+}
+
+# Server rule is 1..7 days; an out-of-range value must fail validation (fail fast at
+# plan) rather than reach the API as a 400 BAD_REQUEST.
+run "discovery_purge_duration_out_of_range" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { api_discovery_purge_duration = 48 }
+  expect_failures = [var.api_discovery_purge_duration]
 }
 
 run "discovery_auth_mode_default" {

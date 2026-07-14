@@ -131,16 +131,17 @@ def build() -> list[dict[str, object]]:
     for i, row in enumerate(all_pairs(DIMENSIONS)):
         variants.append({"name": f"pair-{i:03d}", "vars": payloads(row)})
 
-    # discovered_api_settings purge-duration bound (enable arm, no crawler).
-    variants.append(
+    # discovered_api_settings purge-duration bounds (server rule: 1..7 days).
+    variants.extend(
         {
-            "name": "bound-purge-duration",
+            "name": f"bound-purge-{label}",
             "vars": {
                 "api_discovery_choice": "enable",
                 "api_crawler_domains": [],
-                "api_discovery_purge_duration": 48,
+                "api_discovery_purge_duration": days,
             },
         }
+        for label, days in (("min", 1), ("max", 7))
     )
 
     variants.append({"name": "canonical-restore", "vars": canonical()})

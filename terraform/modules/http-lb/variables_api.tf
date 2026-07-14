@@ -72,11 +72,18 @@ variable "api_discovery_learn_from_redirect" {
 }
 
 # discovered_api_settings.purge_duration_for_inactive_discovered_apis. null = omit the
-# discovered_api_settings block entirely (server default, no drift).
+# discovered_api_settings block entirely (server default, no drift). Server validation
+# rule ves.io.schema.rules.uint32 gte=1 lte=7, so mirror it here to fail fast at plan
+# instead of a live 400 BAD_REQUEST.
 variable "api_discovery_purge_duration" {
-  description = "Days to purge inactive discovered APIs (discovered_api_settings.purge_duration_for_inactive_discovered_apis). null = omit."
+  description = "Days (1-7) to purge inactive discovered APIs (discovered_api_settings.purge_duration_for_inactive_discovered_apis). null = omit."
   type        = number
   default     = null
+
+  validation {
+    condition     = var.api_discovery_purge_duration == null || (var.api_discovery_purge_duration >= 1 && var.api_discovery_purge_duration <= 7)
+    error_message = "api_discovery_purge_duration must be between 1 and 7 (days), or null to omit."
+  }
 }
 
 # api-auth-discovery oneof. default = server default default_api_auth_discovery
