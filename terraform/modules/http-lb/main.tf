@@ -613,6 +613,52 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # Sensitive-data protection (SP3, sensitive_data_policy_choice oneof: custom
+  # sensitive_data_policy vs the server default default_sensitive_data_policy).
+  # Default omits the block (default_sensitive_data_policy is import-suppressed;
+  # 0-change). "custom" references the standalone xcsh_sensitive_data_policy; the
+  # object-ref keeps its Computed tenant across apply via provider #1091.
+  dynamic "sensitive_data_policy" {
+    for_each = var.sensitive_data_policy_choice == "custom" ? [1] : []
+    content {
+      sensitive_data_policy_ref {
+        name      = xcsh_sensitive_data_policy.this[0].name
+        namespace = var.namespace
+      }
+    }
+  }
+
+  # Data Guard — mask sensitive values (credit-card/SSN/...) in responses per
+  # domain + path. Omitted when the list is empty (0-change). domain matcher is a
+  # oneof (any_domain | exact_value | suffix_value); action is apply_data_guard vs
+  # skip_data_guard. The deeper sensitive_data_disclosure_rules (per-endpoint body
+  # field masking) are deferred this cycle — see sp3-findings.md.
+  dynamic "data_guard_rules" {
+    for_each = var.data_guard_rules
+    content {
+      metadata {
+        name = "data-guard-${data_guard_rules.key}"
+      }
+      dynamic "any_domain" {
+        for_each = data_guard_rules.value.domain_mode == "any" ? [1] : []
+        content {}
+      }
+      exact_value  = data_guard_rules.value.domain_mode == "exact" ? data_guard_rules.value.domain : null
+      suffix_value = data_guard_rules.value.domain_mode == "suffix" ? data_guard_rules.value.domain : null
+      path {
+        path = data_guard_rules.value.path
+      }
+      dynamic "apply_data_guard" {
+        for_each = data_guard_rules.value.apply ? [1] : []
+        content {}
+      }
+      dynamic "skip_data_guard" {
+        for_each = data_guard_rules.value.apply ? [] : [1]
+        content {}
+      }
+    }
+  }
+
   # Client-Side Defense — inject the F5 XC telemetry JavaScript into served pages
   # to detect Magecart/formjacking/skimming (client_side_defense oneof vs the
   # server default disable_client_side_defense). Requires the CSD tenant addon

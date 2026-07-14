@@ -90,3 +90,61 @@ run "rate_limit_rejects_bad_unit" {
   }
   expect_failures = [var.rate_limit_unit]
 }
+
+# --- Sensitive data & data guard (Tasks 4-5) ---
+run "sensitive_data_default" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  assert {
+    condition     = output.sensitive_data_policy_choice == "default" && output.sensitive_data_policy_created == false
+    error_message = "sensitive data must default to the suppressed default policy (0-change)"
+  }
+}
+
+run "sensitive_data_custom_policy" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    sensitive_data_policy_enabled = true
+    sensitive_data_policy_choice  = "custom"
+    sensitive_data_compliances    = ["GDPR", "PCI_DSS"]
+  }
+  assert {
+    condition     = output.sensitive_data_policy_created == true && output.sensitive_data_policy_choice == "custom"
+    error_message = "custom sensitive_data_policy must render + create the standalone policy"
+  }
+}
+
+run "sensitive_data_rejects_bad_compliance" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    sensitive_data_policy_enabled = true
+    sensitive_data_compliances    = ["NOT_A_FRAMEWORK"]
+  }
+  expect_failures = [var.sensitive_data_compliances]
+}
+
+run "data_guard_rules_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    data_guard_rules = [
+      { domain_mode = "any", path = "/api/pay", apply = true },
+      { domain_mode = "suffix", domain = "f5-sales-demo.com", path = "/api/ssn", apply = false },
+    ]
+  }
+  assert {
+    condition     = output.data_guard_rule_count == 2
+    error_message = "data_guard_rules must render"
+  }
+}
+
+run "data_guard_exact_requires_domain" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    data_guard_rules = [{ domain_mode = "exact", path = "/x" }]
+  }
+  expect_failures = [var.data_guard_rules]
+}
