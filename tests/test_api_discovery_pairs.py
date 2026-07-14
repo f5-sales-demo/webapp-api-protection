@@ -39,11 +39,14 @@ def test_both_secret_arms_exercised_with_a_crawler() -> None:
 
 
 def test_payloads_strip_pseudo_dimensions() -> None:
-    """Pseudo-dimensions never leak into emitted tfvars."""
+    """Pseudo-dimensions never leak; blindfold omits plaintext (harness seals location)."""
     out = payloads({"api_crawler": "one", "secret_method": "blindfold"})
     assert "api_crawler" not in out
     assert "secret_method" not in out
-    assert out["api_crawler_password"] == {
-        "method": "blindfold",
+    assert out["api_crawler_password"] == {"method": "blindfold"}
+
+    clear = payloads({"api_crawler": "one", "secret_method": "clear"})
+    assert clear["api_crawler_password"] == {
+        "method": "clear",
         "plaintext": "Sp1-Cr@wl-Demo",
     }

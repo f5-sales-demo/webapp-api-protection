@@ -98,10 +98,15 @@ def payloads(v: Mapping[str, object]) -> dict[str, object]:
         out["api_crawler_domains"] = [
             {"domain": _CRAWLER_DOMAIN, "user": _CRAWLER_USER}
         ]
-        out["api_crawler_password"] = {
-            "method": v.get("secret_method", "clear"),
-            "plaintext": _CRAWLER_PLAINTEXT,
-        }
+        if v.get("secret_method") == "blindfold":
+            # location is injected by the matrix harness (sealed once via
+            # scripts/blindfold-seal.sh) — the generator is offline and cannot seal.
+            out["api_crawler_password"] = {"method": "blindfold"}
+        else:
+            out["api_crawler_password"] = {
+                "method": "clear",
+                "plaintext": _CRAWLER_PLAINTEXT,
+            }
     else:
         out["api_crawler_domains"] = []
     if v.get("api_discovery_auth_mode") == "custom":

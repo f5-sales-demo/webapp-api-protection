@@ -31,16 +31,15 @@ run "clear_secret_selects_clear_arm" {
   }
 }
 
-# Blindfold arm: exercises the provider::xcsh::blindfold function against the live
-# tenant (fetches the public key + secret policy, seals offline). Proves the
-# blindfold_secret_info arm renders a valid string:/// sealed location. Requires
-# XCSH creds even at plan (the function contacts the API).
+# Blindfold arm: uses a PRE-SEALED location (offline-sealed once via
+# scripts/blindfold-seal.sh). Renders blindfold_secret_info { location } and is
+# idempotent (the location is pinned, not re-sealed each plan). Offline test.
 run "blindfold_secret_selects_blindfold_arm" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
     api_crawler_domains  = [{ domain = "https://www.f5-sales-demo.com/dvwa/", user = "admin" }]
-    api_crawler_password = { method = "blindfold", plaintext = "password" }
+    api_crawler_password = { method = "blindfold", location = "string:///eyJrZXlfdmVyc2lvbiI6MX0=" }
   }
   assert {
     condition     = output.api_crawler_password_use_blindfold == true
@@ -50,4 +49,16 @@ run "blindfold_secret_selects_blindfold_arm" {
     condition     = output.api_crawler_password_method == "blindfold"
     error_message = "effective method must be blindfold"
   }
+}
+
+# blindfold without a pre-sealed location must fail validation (fail fast rather
+# than render an empty/invalid secret block).
+run "blindfold_requires_location" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_crawler_domains  = [{ domain = "https://www.f5-sales-demo.com/dvwa/", user = "admin" }]
+    api_crawler_password = { method = "blindfold" }
+  }
+  expect_failures = [var.api_crawler_password]
 }

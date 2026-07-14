@@ -7,16 +7,20 @@
 # Reusable clear/blindfold SecretType input shape. This exact object type + the
 # locals renderer (locals_api.tf) + the dynamic blindfold/clear blocks are the
 # DRY convention reused for every secret-bearing option (crawler password now;
-# SCM access_token / TLS keys later). method=clear emits clear_secret_info{url};
-# method=blindfold seals plaintext OFFLINE via provider::xcsh::blindfold and emits
-# blindfold_secret_info{location} (cleartext never leaves the machine).
+# SCM access_token / TLS keys later).
+#   method=clear      -> clear_secret_info { url = "string:///<base64 plaintext>" }
+#   method=blindfold  -> blindfold_secret_info { location = <pre-sealed value> }
+# IMPORTANT: provider::xcsh::blindfold seals with a random data key, so calling it
+# inline every plan would re-seal and drift (non-idempotent). Blindfold secrets are
+# therefore sealed ONCE, offline, and the resulting "string:///..." location is
+# pinned here (produced by scripts/blindfold-seal.sh). This is the F5-documented
+# offline-blindfold pattern and is idempotent + import-clean.
 variable "api_crawler_password" {
-  description = "API crawler login password as a selectable clear/blindfold secret."
+  description = "API crawler login password. clear: set plaintext. blindfold: set location to a pre-sealed 'string:///...' value from scripts/blindfold-seal.sh."
   type = object({
-    method                     = optional(string, "clear")
-    plaintext                  = optional(string)
-    blindfold_policy_namespace = optional(string, "shared")
-    blindfold_policy_name      = optional(string, "ves-io-allow-volterra")
+    method    = optional(string, "clear")
+    plaintext = optional(string) # clear arm
+    location  = optional(string) # blindfold arm: pre-sealed string:///...
   })
   default   = { method = "clear", plaintext = null }
   sensitive = true
@@ -24,6 +28,11 @@ variable "api_crawler_password" {
   validation {
     condition     = contains(["clear", "blindfold"], var.api_crawler_password.method)
     error_message = "api_crawler_password.method must be \"clear\" or \"blindfold\"."
+  }
+
+  validation {
+    condition     = var.api_crawler_password.method != "blindfold" || var.api_crawler_password.location != null
+    error_message = "blindfold method requires a pre-sealed location (run scripts/blindfold-seal.sh)."
   }
 }
 
