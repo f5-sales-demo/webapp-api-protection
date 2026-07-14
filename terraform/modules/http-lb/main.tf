@@ -562,9 +562,9 @@ resource "xcsh_http_loadbalancer" "this" {
   # created in api_definition.tf; the api_definition object-ref keeps its Computed
   # tenant across apply via provider #1091 (>= 3.71.2), the same class as the SP1
   # api_discovery_ref. validation_target_choice picks how strictly to validate:
-  # validation_disabled (define but do not enforce) or validation_all_spec_endpoints
-  # (enforce every endpoint, fall-through allow). The per-endpoint custom-rule arm
-  # (validation_custom_list) is API-protection rule authoring, deferred to SP3.
+  # validation_disabled (define but do not enforce), validation_all_spec_endpoints
+  # (enforce every endpoint, fall-through allow), or validation_custom_list (SP3:
+  # per-endpoint OpenAPI validation rules with a fall-through-allow default).
   dynamic "api_specification" {
     for_each = var.api_definition_choice == "specification" ? [1] : []
     content {
@@ -586,6 +586,190 @@ resource "xcsh_http_loadbalancer" "this" {
           }
           validation_mode {
             skip_validation {}
+          }
+        }
+      }
+
+      # validation_custom_list (SP3): per-endpoint rules + fall-through allow for
+      # unlisted endpoints. Each rule matches an api_endpoint (method/path) and
+      # applies action_block | action_report | action_skip.
+      dynamic "validation_custom_list" {
+        for_each = var.api_specification_validation == "custom_list" ? [1] : []
+        content {
+          fall_through_mode {
+            fall_through_mode_allow {}
+          }
+          dynamic "open_api_validation_rules" {
+            for_each = var.validation_custom_rules
+            content {
+              metadata {
+                name = "validation-rule-${open_api_validation_rules.key}"
+              }
+              any_domain {}
+              api_endpoint {
+                methods = open_api_validation_rules.value.methods
+                path    = open_api_validation_rules.value.path
+              }
+              # action via validation_mode: skip = skip_validation; block/report =
+              # validation_mode_active with enforcement_block / enforcement_report.
+              validation_mode {
+                dynamic "skip_validation" {
+                  for_each = open_api_validation_rules.value.action == "skip" ? [1] : []
+                  content {}
+                }
+                dynamic "validation_mode_active" {
+                  for_each = contains(["block", "report"], open_api_validation_rules.value.action) ? [1] : []
+                  content {
+                    # request_validation_properties has SizeAtLeast(1): validate the
+                    # common request properties against the OpenAPI spec.
+                    request_validation_properties = [
+                      "PROPERTY_QUERY_PARAMETERS",
+                      "PROPERTY_PATH_PARAMETERS",
+                      "PROPERTY_HTTP_HEADERS",
+                      "PROPERTY_HTTP_BODY",
+                    ]
+                    dynamic "enforcement_block" {
+                      for_each = open_api_validation_rules.value.action == "block" ? [1] : []
+                      content {}
+                    }
+                    dynamic "enforcement_report" {
+                      for_each = open_api_validation_rules.value.action == "report" ? [1] : []
+                      content {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  # Rate limiting (SP3, rate_limit_choice oneof: rate_limit vs the server default
+  # disable_rate_limit). Default omits the block — the server applies
+  # disable_rate_limit, which the provider suppresses on import (0-change; do not
+  # declare it). "rate_limit" emits the self-contained inline request rate limiter:
+  # no IP allow-list (no_ip_allowed_list) and no policy refs (no_policies), so the
+  # rate_limiter spec alone defines the limit. The per-endpoint api_rate_limit arm
+  # and the standalone xcsh_rate_limiter_policy are deferred (see sp3-findings.md).
+  dynamic "rate_limit" {
+    for_each = var.rate_limit_choice == "rate_limit" ? [1] : []
+    content {
+      no_ip_allowed_list {}
+      no_policies {}
+      rate_limiter {
+        total_number      = var.rate_limit_total_number
+        unit              = var.rate_limit_unit
+        period_multiplier = var.rate_limit_period_multiplier
+        burst_multiplier  = var.rate_limit_burst_multiplier
+      }
+    }
+  }
+
+  # Sensitive-data protection (SP3, sensitive_data_policy_choice oneof: custom
+  # sensitive_data_policy vs the server default default_sensitive_data_policy).
+  # Default omits the block (default_sensitive_data_policy is import-suppressed;
+  # 0-change). "custom" references the standalone xcsh_sensitive_data_policy; the
+  # object-ref keeps its Computed tenant across apply via provider #1091.
+  dynamic "sensitive_data_policy" {
+    for_each = var.sensitive_data_policy_choice == "custom" ? [1] : []
+    content {
+      sensitive_data_policy_ref {
+        name      = xcsh_sensitive_data_policy.this[0].name
+        namespace = var.namespace
+      }
+    }
+  }
+
+  # Data Guard — mask sensitive values (credit-card/SSN/...) in responses per
+  # domain + path. Omitted when the list is empty (0-change). domain matcher is a
+  # oneof (any_domain | exact_value | suffix_value); action is apply_data_guard vs
+  # skip_data_guard. The deeper sensitive_data_disclosure_rules (per-endpoint body
+  # field masking) are deferred this cycle — see sp3-findings.md.
+  dynamic "data_guard_rules" {
+    for_each = var.data_guard_rules
+    content {
+      metadata {
+        name = "data-guard-${data_guard_rules.key}"
+      }
+      dynamic "any_domain" {
+        for_each = data_guard_rules.value.domain_mode == "any" ? [1] : []
+        content {}
+      }
+      exact_value  = data_guard_rules.value.domain_mode == "exact" ? data_guard_rules.value.domain : null
+      suffix_value = data_guard_rules.value.domain_mode == "suffix" ? data_guard_rules.value.domain : null
+      path {
+        path = data_guard_rules.value.path
+      }
+      dynamic "apply_data_guard" {
+        for_each = data_guard_rules.value.apply ? [1] : []
+        content {}
+      }
+      dynamic "skip_data_guard" {
+        for_each = data_guard_rules.value.apply ? [] : [1]
+        content {}
+      }
+    }
+  }
+
+  # API protection rules (SP3) — allow/deny access to specific API endpoints,
+  # scoped by the shared client-matcher. Omitted when the list is empty (0-change).
+  # client_matcher is emitted only for the ip_prefix / ip_threat modes; "any" omits
+  # it (server default any_client) to stay import-clean.
+  dynamic "api_protection_rules" {
+    for_each = length(var.api_protection_rules) > 0 ? [1] : []
+    content {
+      dynamic "api_endpoint_rules" {
+        for_each = var.api_protection_rules
+        content {
+          metadata {
+            name = "api-protection-${api_endpoint_rules.key}"
+          }
+          api_endpoint_path = api_endpoint_rules.value.path
+
+          dynamic "any_domain" {
+            for_each = api_endpoint_rules.value.domain_mode == "any" ? [1] : []
+            content {}
+          }
+          specific_domain = api_endpoint_rules.value.domain_mode == "specific" ? api_endpoint_rules.value.domain : null
+
+          api_endpoint_method {
+            # invert_matcher is a server-defaulted Optional bool: omitting it makes
+            # the provider report "was null, now false" (Optional-scalar-not-Computed
+            # codegen gap — see sp3-findings.md). Set it explicitly (non-inverted).
+            invert_matcher = false
+            methods        = api_endpoint_rules.value.methods
+          }
+
+          action {
+            dynamic "allow" {
+              for_each = api_endpoint_rules.value.action == "allow" ? [1] : []
+              content {}
+            }
+            dynamic "deny" {
+              for_each = api_endpoint_rules.value.action == "deny" ? [1] : []
+              content {}
+            }
+          }
+
+          dynamic "client_matcher" {
+            for_each = local.rendered_client_matcher.use_any ? [] : [1]
+            content {
+              dynamic "ip_prefix_list" {
+                for_each = local.rendered_client_matcher.use_ip_prefix ? [1] : []
+                content {
+                  ip_prefixes  = local.rendered_client_matcher.ip_prefixes
+                  invert_match = local.rendered_client_matcher.invert
+                }
+              }
+              dynamic "ip_threat_category_list" {
+                for_each = local.rendered_client_matcher.use_ip_threat ? [1] : []
+                content {
+                  ip_threat_categories = local.rendered_client_matcher.ip_threat_categories
+                }
+              }
+            }
           }
         }
       }
