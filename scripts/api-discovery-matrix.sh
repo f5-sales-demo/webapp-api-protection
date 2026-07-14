@@ -25,10 +25,11 @@
 # Usage: api-discovery-matrix.sh [START [END]]  (inclusive 0-based index range).
 set -uo pipefail
 
-# Variant files hold sealed secret locations (Blindfold ciphertext) and refresh
-# logs — create them owner-only and remove the sealed copies on exit.
+# Variant files hold credentials (clear plaintext in *.tfvars.json, Blindfold
+# ciphertext in *.sealed.json) and refresh logs — create them owner-only and remove
+# the whole variant dir + logs on exit.
 umask 077
-trap 'rm -f /tmp/api-variants/*.sealed.json /tmp/api-apply.log /tmp/api-plan.log /tmp/api-import.log /tmp/api-rt-plan.log /tmp/api-rt-plan2.log /tmp/api-rt-apply.log 2>/dev/null' EXIT
+trap 'rm -rf /tmp/api-variants 2>/dev/null; rm -f /tmp/api-apply.log /tmp/api-plan.log /tmp/api-import.log /tmp/api-rt-plan.log /tmp/api-rt-plan2.log /tmp/api-rt-apply.log 2>/dev/null' EXIT
 
 cd "$(dirname "$0")/../terraform" || exit 1
 ARM_ACCESS_KEY=$(az storage account keys list -n f5salesdemotfstate -g f5-sales-demo-tfstate --query "[0].value" -o tsv)
@@ -95,15 +96,23 @@ round_trip() {
   case $? in
   0) echo "PASS $label" >>"$REPORT" ;;
   2)
-    # Import cannot recover write-only secrets; re-apply to re-set from config, then
-    # the plan must be clean. Genuine (non-secret) drift stays dirty -> FAIL.
-    terraform apply -auto-approve "${COMMON[@]}" -var-file="$vf" >/tmp/api-rt-apply.log 2>&1
-    terraform plan -detailed-exitcode "${COMMON[@]}" -var-file="$vf" >/tmp/api-rt-plan2.log 2>&1
-    case $? in
-    0) echo "PASS $label (import re-set write-only secret)" >>"$REPORT" ;;
-    2) echo "FAIL $label import-drift" >>"$REPORT" ;;
-    *) echo "FAIL $label rt-plan-error" >>"$REPORT" ;;
-    esac
+    # The apply->idempotency gate already proved this variant is 0-change, so any
+    # post-import drift is purely what import failed to recover. Import cannot recover
+    # a WRITE-ONLY secret (F5 XC never returns it), so ONLY for variants that carry a
+    # crawler password do we re-apply to re-set it and require a clean plan. Variants
+    # with NO write-only secret must import 0-change; drift there is a real bug -> FAIL
+    # (the re-apply escape hatch must not mask it).
+    if grep -q 'api_crawler_password' "$vf"; then
+      terraform apply -auto-approve "${COMMON[@]}" -var-file="$vf" >/tmp/api-rt-apply.log 2>&1
+      terraform plan -detailed-exitcode "${COMMON[@]}" -var-file="$vf" >/tmp/api-rt-plan2.log 2>&1
+      case $? in
+      0) echo "PASS $label (import re-set write-only secret)" >>"$REPORT" ;;
+      2) echo "FAIL $label import-drift" >>"$REPORT" ;;
+      *) echo "FAIL $label rt-plan-error" >>"$REPORT" ;;
+      esac
+    else
+      echo "FAIL $label import-drift (no-secret variant must import clean)" >>"$REPORT"
+    fi
     ;;
   *) echo "FAIL $label rt-plan-error" >>"$REPORT" ;;
   esac
