@@ -620,6 +620,14 @@ resource "xcsh_http_loadbalancer" "this" {
                 dynamic "validation_mode_active" {
                   for_each = contains(["block", "report"], open_api_validation_rules.value.action) ? [1] : []
                   content {
+                    # request_validation_properties has SizeAtLeast(1): validate the
+                    # common request properties against the OpenAPI spec.
+                    request_validation_properties = [
+                      "PROPERTY_QUERY_PARAMETERS",
+                      "PROPERTY_PATH_PARAMETERS",
+                      "PROPERTY_HTTP_HEADERS",
+                      "PROPERTY_HTTP_BODY",
+                    ]
                     dynamic "enforcement_block" {
                       for_each = open_api_validation_rules.value.action == "block" ? [1] : []
                       content {}
@@ -715,6 +723,9 @@ resource "xcsh_http_loadbalancer" "this" {
       dynamic "api_endpoint_rules" {
         for_each = var.api_protection_rules
         content {
+          metadata {
+            name = "api-protection-${api_endpoint_rules.key}"
+          }
           api_endpoint_path = api_endpoint_rules.value.path
 
           dynamic "any_domain" {
@@ -724,7 +735,11 @@ resource "xcsh_http_loadbalancer" "this" {
           specific_domain = api_endpoint_rules.value.domain_mode == "specific" ? api_endpoint_rules.value.domain : null
 
           api_endpoint_method {
-            methods = api_endpoint_rules.value.methods
+            # invert_matcher is a server-defaulted Optional bool: omitting it makes
+            # the provider report "was null, now false" (Optional-scalar-not-Computed
+            # codegen gap — see sp3-findings.md). Set it explicitly (non-inverted).
+            invert_matcher = false
+            methods        = api_endpoint_rules.value.methods
           }
 
           action {
