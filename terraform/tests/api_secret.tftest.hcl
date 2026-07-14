@@ -62,3 +62,15 @@ run "blindfold_requires_location" {
   }
   expect_failures = [var.api_crawler_password]
 }
+
+# Cross-variable: a crawler domain with a clear method but no plaintext must fail the
+# resource precondition (fail fast at plan) rather than send an empty secret to XC.
+run "crawler_domain_without_password_fails" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_crawler_domains  = [{ domain = "www.f5-sales-demo.com", user = "admin" }]
+    api_crawler_password = { method = "clear", plaintext = null }
+  }
+  expect_failures = [xcsh_http_loadbalancer.this]
+}
