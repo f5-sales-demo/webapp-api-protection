@@ -38,8 +38,9 @@ DIMENSIONS = {
     "api_discovery_auth_mode": ["default", "custom"],
 }
 
-# A benign but real URL for the crawler target; F5 XC accepts the string at apply.
-_CRAWLER_DOMAIN = "https://api.f5-sales-demo.com"
+# The crawler `domain` is a bare FQDN (an LB-served domain), NOT a URL with scheme/
+# path — F5 XC rejects the URL form with 400 (verified live). Use a served domain.
+_CRAWLER_DOMAIN = "www.f5-sales-demo.com"
 _CRAWLER_USER = "apitester"
 _CRAWLER_PLAINTEXT = "Sp1-Cr@wl-Demo"  # demo credential; matrix files are gitignored
 
