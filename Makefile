@@ -1,6 +1,6 @@
 # webapp-api-protection developer targets.
 
-.PHONY: mud-matrix mud-verify waf-matrix api-discovery-matrix api-crawl-verify test
+.PHONY: mud-matrix mud-verify waf-matrix api-discovery-matrix api-definition-matrix api-crawl-verify test
 
 # Run the plan-level test suite (no tenant contact).
 test:
@@ -30,6 +30,15 @@ waf-matrix:
 # (generator) and scripts/api-discovery-matrix.sh (harness).
 api-discovery-matrix:
 	bash scripts/api-discovery-matrix.sh
+
+# Cycle the live LB through the API Definition & spec-enforcement (SP2) all-pairs
+# variant set and verify apply / idempotency / round-trip import (re-applying the
+# write-only code_base_integration access_token on import; blindfold token = SKIP).
+# Requires GH_TOKEN in the environment. Runs in batches: `make api-definition-matrix`
+# (all) or `bash scripts/api-definition-matrix.sh START END`. See
+# scripts/api_definition_pairs.py (generator) and scripts/api-definition-matrix.sh.
+api-definition-matrix:
+	bash scripts/api-definition-matrix.sh
 
 # Staged blindfold verification: seal round-trip (a pre-sealed crawler credential
 # applies + is idempotent + import-clean) plus an authenticated-crawl attempt
