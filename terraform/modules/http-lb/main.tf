@@ -659,6 +659,62 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # API protection rules (SP3) — allow/deny access to specific API endpoints,
+  # scoped by the shared client-matcher. Omitted when the list is empty (0-change).
+  # client_matcher is emitted only for the ip_prefix / ip_threat modes; "any" omits
+  # it (server default any_client) to stay import-clean.
+  dynamic "api_protection_rules" {
+    for_each = length(var.api_protection_rules) > 0 ? [1] : []
+    content {
+      dynamic "api_endpoint_rules" {
+        for_each = var.api_protection_rules
+        content {
+          api_endpoint_path = api_endpoint_rules.value.path
+
+          dynamic "any_domain" {
+            for_each = api_endpoint_rules.value.domain_mode == "any" ? [1] : []
+            content {}
+          }
+          specific_domain = api_endpoint_rules.value.domain_mode == "specific" ? api_endpoint_rules.value.domain : null
+
+          api_endpoint_method {
+            methods = api_endpoint_rules.value.methods
+          }
+
+          action {
+            dynamic "allow" {
+              for_each = api_endpoint_rules.value.action == "allow" ? [1] : []
+              content {}
+            }
+            dynamic "deny" {
+              for_each = api_endpoint_rules.value.action == "deny" ? [1] : []
+              content {}
+            }
+          }
+
+          dynamic "client_matcher" {
+            for_each = local.rendered_client_matcher.use_any ? [] : [1]
+            content {
+              dynamic "ip_prefix_list" {
+                for_each = local.rendered_client_matcher.use_ip_prefix ? [1] : []
+                content {
+                  ip_prefixes  = local.rendered_client_matcher.ip_prefixes
+                  invert_match = local.rendered_client_matcher.invert
+                }
+              }
+              dynamic "ip_threat_category_list" {
+                for_each = local.rendered_client_matcher.use_ip_threat ? [1] : []
+                content {
+                  ip_threat_categories = local.rendered_client_matcher.ip_threat_categories
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   # Client-Side Defense — inject the F5 XC telemetry JavaScript into served pages
   # to detect Magecart/formjacking/skimming (client_side_defense oneof vs the
   # server default disable_client_side_defense). Requires the CSD tenant addon

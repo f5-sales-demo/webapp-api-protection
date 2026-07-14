@@ -25,3 +25,8 @@ output "data_guard_rule_count" {
   description = "Number of data_guard_rules configured."
   value       = length(var.data_guard_rules)
 }
+
+output "api_protection_rule_count" {
+  description = "Number of api_protection_rules (api_endpoint_rules) configured."
+  value       = length(var.api_protection_rules)
+}

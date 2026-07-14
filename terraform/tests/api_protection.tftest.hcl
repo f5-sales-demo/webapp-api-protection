@@ -148,3 +148,50 @@ run "data_guard_exact_requires_domain" {
   }
   expect_failures = [var.data_guard_rules]
 }
+
+# --- API protection rules (Task 6) ---
+run "api_protection_rules_default_empty" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  assert {
+    condition     = output.api_protection_rule_count == 0
+    error_message = "api_protection_rules must default to empty (0-change)"
+  }
+}
+
+run "api_protection_allow_and_deny" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_rules = [
+      { path = "/api/health", domain_mode = "any", methods = ["GET"], action = "allow" },
+      { path = "/api/admin", domain_mode = "specific", domain = "api.f5-sales-demo.com", methods = ["POST", "DELETE"], action = "deny" },
+    ]
+  }
+  assert {
+    condition     = output.api_protection_rule_count == 2
+    error_message = "allow + deny api_protection_rules must render"
+  }
+}
+
+run "api_protection_with_ip_threat_matcher" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    client_matcher       = { mode = "ip_threat", ip_threat_categories = ["BOTNETS", "TOR_PROXY"] }
+    api_protection_rules = [{ path = "/api/pay", action = "deny" }]
+  }
+  assert {
+    condition     = output.api_protection_rule_count == 1 && output.client_matcher_mode == "ip_threat"
+    error_message = "api_protection_rules with ip_threat client-matcher must render"
+  }
+}
+
+run "api_protection_rejects_bad_action" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_rules = [{ path = "/x", action = "block" }]
+  }
+  expect_failures = [var.api_protection_rules]
+}
