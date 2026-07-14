@@ -30,3 +30,24 @@ run "clear_secret_selects_clear_arm" {
     error_message = "crawler domain must render"
   }
 }
+
+# Blindfold arm: exercises the provider::xcsh::blindfold function against the live
+# tenant (fetches the public key + secret policy, seals offline). Proves the
+# blindfold_secret_info arm renders a valid string:/// sealed location. Requires
+# XCSH creds even at plan (the function contacts the API).
+run "blindfold_secret_selects_blindfold_arm" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_crawler_domains  = [{ domain = "https://www.f5-sales-demo.com/dvwa/", user = "admin" }]
+    api_crawler_password = { method = "blindfold", plaintext = "password" }
+  }
+  assert {
+    condition     = output.api_crawler_password_use_blindfold == true
+    error_message = "blindfold method must select the blindfold arm"
+  }
+  assert {
+    condition     = output.api_crawler_password_method == "blindfold"
+    error_message = "effective method must be blindfold"
+  }
+}
