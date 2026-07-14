@@ -119,6 +119,21 @@ module "http_lb" {
   api_definition_schema_origin       = var.api_definition_schema_origin
   api_specification_validation       = var.api_specification_validation
 
+  # API Protection (SP3) passthrough. Defaults keep every control off/suppressed (0-change).
+  client_matcher                     = var.client_matcher
+  rate_limit_choice                  = var.rate_limit_choice
+  rate_limit_total_number            = var.rate_limit_total_number
+  rate_limit_unit                    = var.rate_limit_unit
+  rate_limit_period_multiplier       = var.rate_limit_period_multiplier
+  rate_limit_burst_multiplier        = var.rate_limit_burst_multiplier
+  sensitive_data_policy_enabled      = var.sensitive_data_policy_enabled
+  sensitive_data_compliances         = var.sensitive_data_compliances
+  sensitive_data_disabled_predefined = var.sensitive_data_disabled_predefined
+  sensitive_data_policy_choice       = var.sensitive_data_policy_choice
+  data_guard_rules                   = var.data_guard_rules
+  api_protection_rules               = var.api_protection_rules
+  validation_custom_rules            = var.validation_custom_rules
+
   # Enabling client_side_defense on the LB requires a protected domain to already
   # exist in this namespace (F5 XC generates the CSD JS config from it), so the
   # LB must be created/updated AFTER the protected domain. The MUD entitlement
