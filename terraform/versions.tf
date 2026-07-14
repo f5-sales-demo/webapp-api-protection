@@ -6,12 +6,14 @@ terraform {
   required_providers {
     xcsh = {
       source = "f5-sales-demo/xcsh"
-      # >= 3.71.1: carries the nested-list value-conversion fix (#1083) — nested
-      # ListNestedBlocks (e.g. the inline api_crawler domains) are modeled as
-      # types.List so they hold plan-time unknowns; without it the API crawler
-      # block fails with a Value Conversion Error. (Supersedes the >= 3.64.0
-      # nested Optional+Computed scalar fix.) Locally consumed via dev_overrides.
-      version = ">= 3.71.1"
+      # >= 3.71.2: carries the object-ref tenant reconstruction fix (#1091, PR
+      # #1092) — object-refs at any nesting depth (LB api_specification.
+      # api_definition, enable_api_discovery...code_base_integrations[], and the
+      # standalone code_base_integration/api_definition refs) keep their Computed
+      # `tenant` from surviving apply, so SP2's LB wiring plans clean. Builds on
+      # 3.71.1's nested-list value-conversion fix (#1083) for the inline
+      # api_crawler domains. Locally consumed via dev_overrides.
+      version = ">= 3.71.2"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which

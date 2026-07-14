@@ -103,6 +103,22 @@ module "http_lb" {
   api_crawler_domains               = var.api_crawler_domains
   api_crawler_password              = var.api_crawler_password
 
+  # API spec source-control integration (SP2) passthrough. Default disabled (0-change).
+  code_base_integration_enabled      = var.code_base_integration_enabled
+  code_base_integration_username     = var.code_base_integration_username
+  code_base_integration_access_token = var.code_base_integration_access_token
+  api_discovery_code_scan            = var.api_discovery_code_scan
+  api_discovery_code_scan_repos      = var.api_discovery_code_scan_repos
+
+  # API Definition & spec enforcement (SP2) passthrough. Default disable (0-change).
+  api_definition_choice              = var.api_definition_choice
+  api_definition_swagger_specs       = var.api_definition_swagger_specs
+  api_definition_inventory_inclusion = var.api_definition_inventory_inclusion
+  api_definition_inventory_exclusion = var.api_definition_inventory_exclusion
+  api_definition_non_api_endpoints   = var.api_definition_non_api_endpoints
+  api_definition_schema_origin       = var.api_definition_schema_origin
+  api_specification_validation       = var.api_specification_validation
+
   # Enabling client_side_defense on the LB requires a protected domain to already
   # exist in this namespace (F5 XC generates the CSD JS config from it), so the
   # LB must be created/updated AFTER the protected domain. The MUD entitlement
