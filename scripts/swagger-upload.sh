@@ -66,14 +66,12 @@ ns, name, listing = sys.argv[1], sys.argv[2], sys.argv[3]
 with open(listing, "r", encoding="utf-8") as fh:
     data = json.load(fh)
 want = f"{ns}/{name}"
-for item in data.get("items", []):
-    if item.get("name") != want:
-        continue
-    versions = item.get("versions", [])
-    latest = next((v for v in versions if v.get("latest_version")), versions[-1] if versions else None)
-    if latest:
-        print(f"/api/object_store/namespaces/{ns}/stored_objects/swagger/{name}/{latest['version']}")
-        break
-else:
-    sys.exit("uploaded object not found in listing")
+item = next((i for i in data.get("items", []) if i.get("name") == want), None)
+if item is None:
+    sys.exit(f"uploaded object {want} not found in listing")
+versions = item.get("versions", [])
+latest = next((v for v in versions if v.get("latest_version")), versions[-1] if versions else None)
+if latest is None:
+    sys.exit(f"uploaded object {want} has no version in listing")
+print(f"/api/object_store/namespaces/{ns}/stored_objects/swagger/{name}/{latest['version']}")
 PY

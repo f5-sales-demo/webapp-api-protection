@@ -28,12 +28,13 @@
 set -uo pipefail
 
 umask 077
-trap 'rm -rf /tmp/apidef-variants 2>/dev/null; rm -f /tmp/apidef-*.log /tmp/apidef-*.json 2>/dev/null' EXIT
+trap 'rm -rf /tmp/apidef-variants /tmp/apidef-bf.loc /tmp/apidef-swagger.path 2>/dev/null; rm -f /tmp/apidef-*.log /tmp/apidef-*.json 2>/dev/null' EXIT
 
 cd "$(dirname "$0")/../terraform" || exit 1
 ARM_ACCESS_KEY=$(az storage account keys list -n f5salesdemotfstate -g f5-sales-demo-tfstate --query "[0].value" -o tsv)
 export ARM_ACCESS_KEY
 : "${GH_TOKEN:?GH_TOKEN must be set (clear code_base_integration access_token)}"
+export GH_TOKEN # so jq can read it via env.GH_TOKEN (never passed on argv)
 
 NS="webapp-api-protection"
 LB_ADDR="module.http_lb.xcsh_http_loadbalancer.this"
@@ -52,24 +53,32 @@ mkdir -p ../reports
 START="${1:-0}"
 END="${2:-9999}"
 
+# Truncate the report on a full run; a batched range run (args given) appends.
+[ "$#" -eq 0 ] && : >"$REPORT"
+
 count=$(python3 ../scripts/api_definition_pairs.py --emit "$VARDIR")
 echo "generated $count variants into $VARDIR (running [$START..$END])"
 
-BF_LOCATION=""
+# Seal/upload ONCE and persist to sentinel files. prep_varfile runs in a command
+# substitution (a subshell), so in-memory globals would not survive between
+# variants — the sentinel files do. Blindfold is non-deterministic, so re-sealing
+# per variant would drift; the swagger store is content-addressed (re-upload is a
+# no-op) but we still upload once. The token is piped via stdin (never argv).
+BF_LOC_FILE=/tmp/apidef-bf.loc
 seal_once() {
-  [ -n "$BF_LOCATION" ] && return 0
-  BF_LOCATION=$(../scripts/blindfold-seal.sh "$GH_TOKEN" 2>/dev/null)
-  [ -n "$BF_LOCATION" ]
+  [ -s "$BF_LOC_FILE" ] && return 0
+  printf '%s' "$GH_TOKEN" | ../scripts/blindfold-seal.sh 2>/dev/null >"$BF_LOC_FILE"
+  [ -s "$BF_LOC_FILE" ]
 }
 
-SWAGGER_PATH=""
+SWAGGER_PATH_FILE=/tmp/apidef-swagger.path
 upload_swagger_once() {
-  [ -n "$SWAGGER_PATH" ] && return 0
+  [ -s "$SWAGGER_PATH_FILE" ] && return 0
   # A tiny valid OpenAPI doc is enough to exercise the swagger_specs supply path.
   local spec=/tmp/apidef-spec.json
   printf '%s' '{"openapi":"3.0.0","info":{"title":"webapp-api-protection-matrix","version":"1.0.0"},"paths":{"/health":{"get":{"responses":{"200":{"description":"ok"}}}}}}' >"$spec"
-  SWAGGER_PATH=$(../scripts/swagger-upload.sh matrix-probe "$spec" "$NS" 2>/dev/null)
-  [ -n "$SWAGGER_PATH" ]
+  ../scripts/swagger-upload.sh matrix-probe "$spec" "$NS" 2>/dev/null >"$SWAGGER_PATH_FILE"
+  [ -s "$SWAGGER_PATH_FILE" ]
 }
 
 # Inject live secret/path values; print the var-file to use.
@@ -77,15 +86,18 @@ prep_varfile() {
   local vf="$1" out="${1%.json}.live.json"
   cp "$vf" "$out"
   if grep -q '"method": "clear"' "$out"; then
-    jq --arg t "$GH_TOKEN" '.code_base_integration_access_token.plaintext = $t' "$out" >"${out}.tmp" && mv "${out}.tmp" "$out"
+    # Read the token from the environment (env.GH_TOKEN), never argv — a positional
+    # --arg is visible in /proc/<pid>/cmdline to any local user; the environment is
+    # readable only by the process owner and root.
+    jq '.code_base_integration_access_token.plaintext = env.GH_TOKEN' "$out" >"${out}.tmp" && mv "${out}.tmp" "$out"
   fi
   if grep -q '"method": "blindfold"' "$out" && ! grep -q '"location"' "$out"; then
     seal_once || return 1
-    jq --arg loc "$BF_LOCATION" '.code_base_integration_access_token.location = $loc' "$out" >"${out}.tmp" && mv "${out}.tmp" "$out"
+    jq --arg loc "$(cat "$BF_LOC_FILE")" '.code_base_integration_access_token.location = $loc' "$out" >"${out}.tmp" && mv "${out}.tmp" "$out"
   fi
   if grep -q '__SWAGGER_PATH__' "$out"; then
     upload_swagger_once || return 1
-    jq --arg p "$SWAGGER_PATH" '.api_definition_swagger_specs = [$p]' "$out" >"${out}.tmp" && mv "${out}.tmp" "$out"
+    jq --arg p "$(cat "$SWAGGER_PATH_FILE")" '.api_definition_swagger_specs = [$p]' "$out" >"${out}.tmp" && mv "${out}.tmp" "$out"
   fi
   echo "$out"
 }
@@ -115,7 +127,7 @@ round_trip() {
     # Only a code_base_integration variant carries a write-only secret (access_token)
     # that import cannot recover — re-apply to re-set it, then require a clean plan.
     # Any other post-import drift is a real bug (no escape hatch).
-    if grep -q 'code_base_integration_enabled' "$vf" && grep -q 'true' "$vf"; then
+    if grep -q '"code_base_integration_enabled": true' "$vf"; then
       terraform apply -auto-approve "${COMMON[@]}" -var-file="$vf" >/tmp/apidef-rt-apply.log 2>&1
       terraform plan -detailed-exitcode "${COMMON[@]}" -var-file="$vf" >/tmp/apidef-rt-plan2.log 2>&1
       case $? in

@@ -116,6 +116,21 @@ run "code_scan_selected_to_api_catalog" {
   }
 }
 
+run "code_scan_all_repos" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    code_base_integration_enabled      = true
+    code_base_integration_username     = "f5-sales-demo-bot"
+    code_base_integration_access_token = { method = "clear", plaintext = "ghp_example_token" }
+    api_discovery_code_scan            = "all"
+  }
+  assert {
+    condition     = output.api_discovery_code_scan == "all" && output.api_discovery_code_scan_repo_count == 0
+    error_message = "all_repos code scan must render (repo_count 0 since no explicit repo list)"
+  }
+}
+
 run "code_scan_requires_integration" {
   command = plan
   module { source = "./modules/http-lb" }
