@@ -94,7 +94,10 @@ def payloads(v: Mapping[str, object]) -> dict[str, object]:
     if v.get("client_matcher") == "ip_prefix":
         out["client_matcher"] = {"mode": "ip_prefix", "ip_prefixes": ["10.0.0.0/8"]}
     elif v.get("client_matcher") == "ip_threat":
-        out["client_matcher"] = {"mode": "ip_threat", "ip_threat_categories": ["BOTNETS"]}
+        out["client_matcher"] = {
+            "mode": "ip_threat",
+            "ip_threat_categories": ["BOTNETS"],
+        }
 
     if v.get("sensitive_data") == "custom":
         out["sensitive_data_policy_choice"] = "custom"
