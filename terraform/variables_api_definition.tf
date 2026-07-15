@@ -49,7 +49,7 @@ variable "api_definition_schema_origin" {
 }
 
 variable "api_specification_validation" {
-  description = "api_specification validation_target_choice: disabled or all_spec_endpoints."
+  description = "api_specification validation_target_choice: disabled | all_spec_endpoints | custom_list. all_spec_endpoints/custom_list enforcement is controlled by the api_validation_* vars (request/response mode, properties, fall-through, settings)."
   type        = string
   default     = "disabled"
 }

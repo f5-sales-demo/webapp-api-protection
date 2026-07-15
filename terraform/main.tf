@@ -119,6 +119,15 @@ module "http_lb" {
   api_definition_schema_origin       = var.api_definition_schema_origin
   api_specification_validation       = var.api_specification_validation
 
+  # OpenAPI validation enforcement (Batch A) passthrough.
+  api_validation_request_mode        = var.api_validation_request_mode
+  api_validation_request_properties  = var.api_validation_request_properties
+  api_validation_response_mode       = var.api_validation_response_mode
+  api_validation_response_properties = var.api_validation_response_properties
+  api_validation_fall_through        = var.api_validation_fall_through
+  api_validation_oversized_body      = var.api_validation_oversized_body
+  api_validation_additional_params   = var.api_validation_additional_params
+
   # API Protection (SP3) passthrough. Defaults keep every control off/suppressed (0-change).
   client_matcher                     = var.client_matcher
   rate_limit_choice                  = var.rate_limit_choice
