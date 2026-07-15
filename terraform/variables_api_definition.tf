@@ -17,29 +17,20 @@ variable "api_definition_swagger_specs" {
 
 variable "api_definition_inventory_inclusion" {
   description = "api_inventory_inclusion_list entries ({method, path})."
-  type = list(object({
-    method = optional(string, "ANY")
-    path   = string
-  }))
-  default = []
+  type        = any
+  default     = []
 }
 
 variable "api_definition_inventory_exclusion" {
   description = "api_inventory_exclusion_list entries ({method, path})."
-  type = list(object({
-    method = optional(string, "ANY")
-    path   = string
-  }))
-  default = []
+  type        = any
+  default     = []
 }
 
 variable "api_definition_non_api_endpoints" {
   description = "non_api_endpoints entries ({method, path})."
-  type = list(object({
-    method = optional(string, "ANY")
-    path   = string
-  }))
-  default = []
+  type        = any
+  default     = []
 }
 
 variable "api_definition_schema_origin" {

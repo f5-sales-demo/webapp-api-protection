@@ -105,7 +105,11 @@ module "http_lb" {
 
   # API spec source-control integration (SP2) passthrough. Default disabled (0-change).
   code_base_integration_enabled      = var.code_base_integration_enabled
+  code_base_integration_provider     = var.code_base_integration_provider
   code_base_integration_username     = var.code_base_integration_username
+  code_base_integration_hostname     = var.code_base_integration_hostname
+  code_base_integration_url          = var.code_base_integration_url
+  code_base_integration_verify_ssl   = var.code_base_integration_verify_ssl
   code_base_integration_access_token = var.code_base_integration_access_token
   api_discovery_code_scan            = var.api_discovery_code_scan
   api_discovery_code_scan_repos      = var.api_discovery_code_scan_repos

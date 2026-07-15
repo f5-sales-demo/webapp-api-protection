@@ -53,13 +53,8 @@ variable "sensitive_data_policy_choice" {
 
 variable "data_guard_rules" {
   description = "data_guard_rules: list of {domain_mode any|exact|suffix, domain, path, apply}."
-  type = list(object({
-    domain_mode = optional(string, "any")
-    domain      = optional(string)
-    path        = string
-    apply       = optional(bool, true)
-  }))
-  default = []
+  type        = any
+  default     = []
 }
 
 # API protection rules (Coverage Batch D) root passthrough. Thin passthrough: the

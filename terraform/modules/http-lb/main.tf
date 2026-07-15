@@ -528,7 +528,7 @@ resource "xcsh_http_loadbalancer" "this" {
         content {
           code_base_integrations {
             code_base_integration {
-              name      = xcsh_code_base_integration.github[0].name
+              name      = xcsh_code_base_integration.this[0].name
               namespace = var.namespace
             }
 

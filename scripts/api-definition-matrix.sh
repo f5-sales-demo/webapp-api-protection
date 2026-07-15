@@ -41,7 +41,7 @@ LB_ADDR="module.http_lb.xcsh_http_loadbalancer.this"
 LB_ID="${NS}/${NS}"
 DEF_ADDR="module.http_lb.xcsh_api_definition.this[0]"
 DEF_ID="${NS}/${NS}-api-def"
-SCM_ADDR="module.http_lb.xcsh_code_base_integration.github[0]"
+SCM_ADDR="module.http_lb.xcsh_code_base_integration.this[0]"
 SCM_ID="${NS}/${NS}-api-catalog"
 COMMON=(-input=false -lock=true
   -var 'lb_domains=["www.f5-sales-demo.com","api.f5-sales-demo.com"]'
