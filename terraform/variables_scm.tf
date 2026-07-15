@@ -40,9 +40,12 @@ variable "code_base_integration_verify_ssl" {
 variable "code_base_integration_access_token" {
   description = "GitHub access token as a selectable clear/blindfold secret (clear: plaintext; blindfold: pre-sealed location)."
   type = object({
-    method    = optional(string, "clear")
-    plaintext = optional(string)
-    location  = optional(string)
+    method              = optional(string, "clear")
+    plaintext           = optional(string)
+    location            = optional(string)
+    store_provider      = optional(string)
+    decryption_provider = optional(string)
+    provider_ref        = optional(string)
   })
   default   = { method = "clear", plaintext = null }
   sensitive = true

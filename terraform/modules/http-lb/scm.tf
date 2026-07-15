@@ -20,13 +20,16 @@ resource "xcsh_code_base_integration" "this" {
           dynamic "blindfold_secret_info" {
             for_each = local.scm_token_blindfold
             content {
-              location = blindfold_secret_info.value
+              location            = blindfold_secret_info.value.location
+              store_provider      = blindfold_secret_info.value.store_provider
+              decryption_provider = blindfold_secret_info.value.decryption_provider
             }
           }
           dynamic "clear_secret_info" {
             for_each = local.scm_token_clear
             content {
-              url = clear_secret_info.value
+              url          = clear_secret_info.value.url
+              provider_ref = clear_secret_info.value.provider_ref
             }
           }
         }
@@ -41,13 +44,16 @@ resource "xcsh_code_base_integration" "this" {
           dynamic "blindfold_secret_info" {
             for_each = local.scm_token_blindfold
             content {
-              location = blindfold_secret_info.value
+              location            = blindfold_secret_info.value.location
+              store_provider      = blindfold_secret_info.value.store_provider
+              decryption_provider = blindfold_secret_info.value.decryption_provider
             }
           }
           dynamic "clear_secret_info" {
             for_each = local.scm_token_clear
             content {
-              url = clear_secret_info.value
+              url          = clear_secret_info.value.url
+              provider_ref = clear_secret_info.value.provider_ref
             }
           }
         }
@@ -60,13 +66,16 @@ resource "xcsh_code_base_integration" "this" {
           dynamic "blindfold_secret_info" {
             for_each = local.scm_token_blindfold
             content {
-              location = blindfold_secret_info.value
+              location            = blindfold_secret_info.value.location
+              store_provider      = blindfold_secret_info.value.store_provider
+              decryption_provider = blindfold_secret_info.value.decryption_provider
             }
           }
           dynamic "clear_secret_info" {
             for_each = local.scm_token_clear
             content {
-              url = clear_secret_info.value
+              url          = clear_secret_info.value.url
+              provider_ref = clear_secret_info.value.provider_ref
             }
           }
         }
@@ -80,13 +89,16 @@ resource "xcsh_code_base_integration" "this" {
           dynamic "blindfold_secret_info" {
             for_each = local.scm_token_blindfold
             content {
-              location = blindfold_secret_info.value
+              location            = blindfold_secret_info.value.location
+              store_provider      = blindfold_secret_info.value.store_provider
+              decryption_provider = blindfold_secret_info.value.decryption_provider
             }
           }
           dynamic "clear_secret_info" {
             for_each = local.scm_token_clear
             content {
-              url = clear_secret_info.value
+              url          = clear_secret_info.value.url
+              provider_ref = clear_secret_info.value.provider_ref
             }
           }
         }
@@ -99,13 +111,16 @@ resource "xcsh_code_base_integration" "this" {
           dynamic "blindfold_secret_info" {
             for_each = local.scm_token_blindfold
             content {
-              location = blindfold_secret_info.value
+              location            = blindfold_secret_info.value.location
+              store_provider      = blindfold_secret_info.value.store_provider
+              decryption_provider = blindfold_secret_info.value.decryption_provider
             }
           }
           dynamic "clear_secret_info" {
             for_each = local.scm_token_clear
             content {
-              url = clear_secret_info.value
+              url          = clear_secret_info.value.url
+              provider_ref = clear_secret_info.value.provider_ref
             }
           }
         }
@@ -119,13 +134,16 @@ resource "xcsh_code_base_integration" "this" {
           dynamic "blindfold_secret_info" {
             for_each = local.scm_token_blindfold
             content {
-              location = blindfold_secret_info.value
+              location            = blindfold_secret_info.value.location
+              store_provider      = blindfold_secret_info.value.store_provider
+              decryption_provider = blindfold_secret_info.value.decryption_provider
             }
           }
           dynamic "clear_secret_info" {
             for_each = local.scm_token_clear
             content {
-              url = clear_secret_info.value
+              url          = clear_secret_info.value.url
+              provider_ref = clear_secret_info.value.provider_ref
             }
           }
         }
@@ -141,13 +159,16 @@ resource "xcsh_code_base_integration" "this" {
           dynamic "blindfold_secret_info" {
             for_each = local.scm_token_blindfold
             content {
-              location = blindfold_secret_info.value
+              location            = blindfold_secret_info.value.location
+              store_provider      = blindfold_secret_info.value.store_provider
+              decryption_provider = blindfold_secret_info.value.decryption_provider
             }
           }
           dynamic "clear_secret_info" {
             for_each = local.scm_token_clear
             content {
-              url = clear_secret_info.value
+              url          = clear_secret_info.value.url
+              provider_ref = clear_secret_info.value.provider_ref
             }
           }
         }

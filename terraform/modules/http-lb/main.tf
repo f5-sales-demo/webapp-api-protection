@@ -480,13 +480,16 @@ resource "xcsh_http_loadbalancer" "this" {
                     dynamic "blindfold_secret_info" {
                       for_each = local.api_crawler_password_secret.use_blindfold ? [1] : []
                       content {
-                        location = local.api_crawler_password_secret.location
+                        location            = local.api_crawler_password_secret.location
+                        store_provider      = local.api_crawler_password_secret.store_provider
+                        decryption_provider = local.api_crawler_password_secret.decryption_provider
                       }
                     }
                     dynamic "clear_secret_info" {
                       for_each = local.api_crawler_password_secret.use_blindfold ? [] : [1]
                       content {
-                        url = local.api_crawler_password_secret.url
+                        url          = local.api_crawler_password_secret.url
+                        provider_ref = local.api_crawler_password_secret.provider_ref
                       }
                     }
                   }
