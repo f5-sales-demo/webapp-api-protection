@@ -400,9 +400,14 @@ resource "xcsh_api_discovery" "this" {
 }
 
 resource "xcsh_http_loadbalancer" "this" {
-  name      = "webapp-api-protection"
+  name      = local.lb_name
   namespace = var.namespace
   labels    = var.labels
+
+  # api_groups_rules reference app_api_groups by name, which F5 XC validates at LB
+  # apply — so the groups must exist first. app_api_group references the LB by static
+  # name (local.lb_name), not this resource, so there is no cycle.
+  depends_on = [xcsh_app_api_group.this]
 
   domains = var.lb_domains
 
