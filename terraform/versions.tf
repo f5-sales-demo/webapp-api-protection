@@ -15,7 +15,15 @@ terraform {
       # spine blocks + nested-list elements and suppresses those markers on import, so
       # the SP3 matrix is 13/13 idempotent + round-trip-import clean. Builds on 3.71.2's
       # object-ref tenant reconstruction (#1091). Locally consumed via dev_overrides.
-      version = ">= 3.71.3"
+      #
+      # >= 3.71.4: SP4 API-Testing read-back fix (provider #1099, PR #1100). Applying an
+      # xcsh_api_testing / LB api_testing credential previously failed apply ("inconsistent
+      # result": server-echoed credentials_choice base marker `standard`; dropped write-only
+      # api_key.value secret) and drifted on import. 3.71.4 threads prior-state into lists
+      # nested in LIST elements (domains[].credentials[]) and preserves list-element empty
+      # markers' absence, + suppresses `standard` on import. SP4 matrix idempotent +
+      # round-trip-import clean.
+      version = ">= 3.71.4"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which
