@@ -146,6 +146,13 @@ run "api_testing_rejects_bad_auth_type" {
   expect_failures = [var.api_testing_domains]
 }
 
+run "api_testing_rejects_lb_enabled_without_domains" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { api_testing_choice = "enabled" } # api_testing_domains defaults to []
+  expect_failures = [xcsh_http_loadbalancer.this]
+}
+
 run "api_testing_rejects_domain_without_credentials" {
   command = plan
   module { source = "./modules/http-lb" }

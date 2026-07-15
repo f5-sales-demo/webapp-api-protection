@@ -936,5 +936,15 @@ resource "xcsh_http_loadbalancer" "this" {
       condition     = var.api_discovery_code_scan != "selected" || length(var.api_discovery_code_scan_repos) > 0
       error_message = "api_discovery_code_scan=\"selected\" requires api_discovery_code_scan_repos to be non-empty."
     }
+
+    # API testing (both surfaces) needs real domains — F5 XC rejects a domain with no
+    # credentials (500) and an api_testing block with no domains is meaningless. The
+    # standalone resource guards this in its own precondition; mirror it for the LB
+    # inline block so api_testing_choice="enabled" fails fast at plan (cross-variable,
+    # symmetric with the standalone path).
+    precondition {
+      condition     = var.api_testing_choice != "enabled" || length(var.api_testing_domains) > 0
+      error_message = "api_testing_choice=\"enabled\" requires at least one api_testing_domains entry."
+    }
   }
 }
