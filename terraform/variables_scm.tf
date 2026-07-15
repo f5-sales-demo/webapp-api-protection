@@ -2,15 +2,39 @@
 # Defaults keep it disabled (0-change). Matrix supplies these via -var-file.
 
 variable "code_base_integration_enabled" {
-  description = "Create an xcsh_code_base_integration (github) to pull API specs from source control (api-catalog)."
+  description = "Create an xcsh_code_base_integration to pull API specs from source control (api-catalog)."
   type        = bool
   default     = false
 }
 
+variable "code_base_integration_provider" {
+  description = "SCM provider arm (github | github_enterprise | gitlab | gitlab_enterprise | azure_repos | bitbucket | bitbucket_server). Validated in the module."
+  type        = string
+  default     = "github"
+}
+
 variable "code_base_integration_username" {
-  description = "GitHub username for the code_base_integration."
+  description = "SCM username (github, github_enterprise, bitbucket, bitbucket_server arms)."
   type        = string
   default     = ""
+}
+
+variable "code_base_integration_hostname" {
+  description = "SCM hostname (github_enterprise arm)."
+  type        = string
+  default     = ""
+}
+
+variable "code_base_integration_url" {
+  description = "SCM base URL (gitlab_enterprise, bitbucket_server arms)."
+  type        = string
+  default     = ""
+}
+
+variable "code_base_integration_verify_ssl" {
+  description = "Verify the SCM server TLS certificate (github, bitbucket_server arms)."
+  type        = bool
+  default     = true
 }
 
 variable "code_base_integration_access_token" {

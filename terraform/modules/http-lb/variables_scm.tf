@@ -5,15 +5,49 @@
 # the identical SecretType shape as the crawler password (DRY, second consumer).
 
 variable "code_base_integration_enabled" {
-  description = "Create an xcsh_code_base_integration (github) F5 XC uses to pull API specs from source control (e.g. the api-catalog repo)."
+  description = "Create an xcsh_code_base_integration F5 XC uses to pull API specs from source control (e.g. the api-catalog repo)."
   type        = bool
   default     = false
 }
 
+# Coverage Batch E: SCM provider selector. The token (code_base_integration_access_token)
+# is sent as access_token for github/github_enterprise/gitlab/gitlab_enterprise/azure_repos
+# and as passwd for bitbucket/bitbucket_server. Per-arm fields: username (github,
+# github_enterprise, bitbucket, bitbucket_server), hostname (github_enterprise),
+# url (gitlab_enterprise, bitbucket_server), verify_ssl (github, bitbucket_server).
+variable "code_base_integration_provider" {
+  description = "SCM provider: github | github_enterprise | gitlab | gitlab_enterprise | azure_repos | bitbucket | bitbucket_server."
+  type        = string
+  default     = "github"
+
+  validation {
+    condition     = contains(["github", "github_enterprise", "gitlab", "gitlab_enterprise", "azure_repos", "bitbucket", "bitbucket_server"], var.code_base_integration_provider)
+    error_message = "code_base_integration_provider must be one of github, github_enterprise, gitlab, gitlab_enterprise, azure_repos, bitbucket, bitbucket_server."
+  }
+}
+
 variable "code_base_integration_username" {
-  description = "GitHub username for the code_base_integration (github arm)."
+  description = "SCM username (github, github_enterprise, bitbucket, bitbucket_server arms)."
   type        = string
   default     = ""
+}
+
+variable "code_base_integration_hostname" {
+  description = "SCM hostname (github_enterprise arm)."
+  type        = string
+  default     = ""
+}
+
+variable "code_base_integration_url" {
+  description = "SCM base URL (gitlab_enterprise, bitbucket_server arms)."
+  type        = string
+  default     = ""
+}
+
+variable "code_base_integration_verify_ssl" {
+  description = "Verify the SCM server TLS certificate (github, bitbucket_server arms)."
+  type        = bool
+  default     = true
 }
 
 variable "code_base_integration_access_token" {

@@ -26,6 +26,13 @@ locals {
     }
   }
 
-  # Named alias for the SP1 crawler consumer (keeps main.tf references stable).
+  # Named aliases for consumers (keep references stable/short).
   api_crawler_password_secret = local.rendered_secret["api_crawler_password"]
+  scm_token                   = local.rendered_secret["code_base_integration_token"]
+
+  # Precomputed single-element (or empty) selectors for the SCM token secret arm, so
+  # each of the 7 provider arms renders the same compact blindfold/clear dynamic pair
+  # (one selection expression, not a repeated ternary per arm).
+  scm_token_blindfold = local.scm_token.use_blindfold ? [local.scm_token.location] : []
+  scm_token_clear     = local.scm_token.use_blindfold ? [] : [local.scm_token.url]
 }
