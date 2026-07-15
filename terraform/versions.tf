@@ -23,7 +23,15 @@ terraform {
       # nested in LIST elements (domains[].credentials[]) and preserves list-element empty
       # markers' absence, + suppresses `standard` on import. SP4 matrix idempotent +
       # round-trip-import clean.
-      version = ">= 3.71.4"
+      #
+      # >= 3.72.0: Coverage Batch B rate limiting (provider #1104, PR #1105). A
+      # standalone xcsh_rate_limiter_policy rule that omits a client matcher drifted on
+      # import (server materializes the any_asn/any_country/any_ip base marker of each
+      # client-matcher oneof; cascaded custom_rate_limiter.tenant to known-after-apply).
+      # 3.72.0 suppresses those RateLimiterPolicy markers on import, so the standalone
+      # policy round-trips 0-change. LB rate_limit allow-lists/policies + api_rate_limit
+      # arm needed no provider change (any_client/any_ip already suppressed).
+      version = ">= 3.72.0"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which

@@ -757,13 +757,465 @@ resource "xcsh_http_loadbalancer" "this" {
   dynamic "rate_limit" {
     for_each = var.rate_limit_choice == "rate_limit" ? [1] : []
     content {
-      no_ip_allowed_list {}
-      no_policies {}
+      # IP-allow-list oneof: no_ip_allowed_list (default) | ip_allowed_list (inline
+      # prefixes) | custom_ip_allowed_list (refs to ip_prefix_set objects).
+      dynamic "no_ip_allowed_list" {
+        for_each = (length(var.rate_limit_ip_allowed_prefixes) == 0 && length(var.rate_limit_custom_ip_prefix_sets) == 0) ? [1] : []
+        content {}
+      }
+      dynamic "ip_allowed_list" {
+        for_each = length(var.rate_limit_ip_allowed_prefixes) > 0 ? [1] : []
+        content {
+          prefixes = var.rate_limit_ip_allowed_prefixes
+        }
+      }
+      dynamic "custom_ip_allowed_list" {
+        for_each = length(var.rate_limit_custom_ip_prefix_sets) > 0 ? [1] : []
+        content {
+          dynamic "rate_limiter_allowed_prefixes" {
+            for_each = var.rate_limit_custom_ip_prefix_sets
+            content {
+              name      = rate_limiter_allowed_prefixes.value.name
+              namespace = coalesce(rate_limiter_allowed_prefixes.value.namespace, var.namespace)
+            }
+          }
+        }
+      }
+
+      # policies oneof: no_policies (default) | policies (refs to xcsh_rate_limiter_policy).
+      dynamic "no_policies" {
+        for_each = length(var.rate_limit_policy_refs) == 0 ? [1] : []
+        content {}
+      }
+      dynamic "policies" {
+        for_each = length(var.rate_limit_policy_refs) > 0 ? [1] : []
+        content {
+          dynamic "policies" {
+            for_each = var.rate_limit_policy_refs
+            iterator = pol
+            content {
+              name      = xcsh_rate_limiter_policy.this[pol.value].name
+              namespace = var.namespace
+            }
+          }
+        }
+      }
+
       rate_limiter {
         total_number      = var.rate_limit_total_number
         unit              = var.rate_limit_unit
         period_multiplier = var.rate_limit_period_multiplier
         burst_multiplier  = var.rate_limit_burst_multiplier
+      }
+    }
+  }
+
+  # Per-endpoint API rate limiting (Coverage Batch B, api_rate_limit arm). Selected
+  # with rate_limit_choice="api_rate_limit". api_endpoint_rules + bypass rules +
+  # server_url_rules, each with the shared client_matcher oneof (any_client default,
+  # import-suppressed). See variables_api_rate_limit.tf.
+  dynamic "api_rate_limit" {
+    for_each = var.rate_limit_choice == "api_rate_limit" ? [1] : []
+    content {
+      dynamic "api_endpoint_rules" {
+        for_each = var.api_rate_limit_endpoint_rules
+        iterator = ep
+        content {
+          api_endpoint_path = ep.value.api_endpoint_path
+          specific_domain   = ep.value.specific_domain
+          dynamic "any_domain" {
+            for_each = ep.value.specific_domain == null ? [1] : []
+            content {}
+          }
+          dynamic "api_endpoint_method" {
+            for_each = length(ep.value.methods) > 0 ? [1] : []
+            content {
+              methods        = ep.value.methods
+              invert_matcher = ep.value.methods_invert
+            }
+          }
+          dynamic "ref_rate_limiter" {
+            for_each = ep.value.ref_rate_limiter != null ? [1] : []
+            content {
+              name      = xcsh_rate_limiter.this[ep.value.ref_rate_limiter].name
+              namespace = var.namespace
+            }
+          }
+          dynamic "inline_rate_limiter" {
+            for_each = ep.value.inline_threshold != null ? [1] : []
+            content {
+              threshold = ep.value.inline_threshold
+              unit      = ep.value.inline_unit
+              dynamic "use_http_lb_user_id" {
+                for_each = ep.value.inline_user_id == "http_lb" ? [1] : []
+                content {}
+              }
+              dynamic "ref_user_id" {
+                for_each = ep.value.inline_user_id == "ref" ? [1] : []
+                content {
+                  name      = ep.value.inline_user_ref
+                  namespace = var.namespace
+                }
+              }
+            }
+          }
+          dynamic "client_matcher" {
+            for_each = ep.value.client_matcher != null && ep.value.client_matcher.mode != null ? [ep.value.client_matcher] : []
+            iterator = cm
+            content {
+              dynamic "any_ip" {
+                for_each = cm.value.mode == "any_ip" ? [1] : []
+                content {}
+              }
+              dynamic "asn_list" {
+                for_each = cm.value.mode == "asn_list" ? [1] : []
+                content { as_numbers = cm.value.as_numbers }
+              }
+              dynamic "asn_matcher" {
+                for_each = cm.value.mode == "asn_matcher" ? [1] : []
+                content {
+                  dynamic "asn_sets" {
+                    for_each = cm.value.asn_sets
+                    content {
+                      name      = asn_sets.value.name
+                      namespace = coalesce(asn_sets.value.namespace, var.namespace)
+                    }
+                  }
+                }
+              }
+              dynamic "client_selector" {
+                for_each = cm.value.mode == "client_selector" ? [1] : []
+                content { expressions = cm.value.selector_expressions }
+              }
+              dynamic "ip_matcher" {
+                for_each = cm.value.mode == "ip_matcher" ? [1] : []
+                content {
+                  invert_matcher = cm.value.ip_invert
+                  dynamic "prefix_sets" {
+                    for_each = cm.value.ip_prefix_sets
+                    content {
+                      name      = prefix_sets.value.name
+                      namespace = coalesce(prefix_sets.value.namespace, var.namespace)
+                    }
+                  }
+                }
+              }
+              dynamic "ip_prefix_list" {
+                for_each = cm.value.mode == "ip_prefix_list" ? [1] : []
+                content {
+                  ip_prefixes  = cm.value.ip_prefixes
+                  invert_match = cm.value.ip_invert
+                }
+              }
+              dynamic "ip_threat_category_list" {
+                for_each = cm.value.mode == "ip_threat_category_list" ? [1] : []
+                content { ip_threat_categories = cm.value.ip_threat_categories }
+              }
+              dynamic "tls_fingerprint_matcher" {
+                for_each = cm.value.mode == "tls_fingerprint_matcher" ? [1] : []
+                content {
+                  classes         = length(cm.value.tls_classes) > 0 ? cm.value.tls_classes : null
+                  exact_values    = length(cm.value.tls_exact_values) > 0 ? cm.value.tls_exact_values : null
+                  excluded_values = length(cm.value.tls_excluded_values) > 0 ? cm.value.tls_excluded_values : null
+                }
+              }
+            }
+          }
+          dynamic "request_matcher" {
+            for_each = ep.value.request_matcher != null ? [ep.value.request_matcher] : []
+            iterator = rm
+            content {
+              dynamic "cookie_matchers" {
+                for_each = rm.value.cookies
+                iterator = m
+                content {
+                  name           = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+              dynamic "headers" {
+                for_each = rm.value.headers
+                iterator = m
+                content {
+                  name           = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+              dynamic "jwt_claims" {
+                for_each = rm.value.jwt_claims
+                iterator = m
+                content {
+                  name           = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+              dynamic "query_params" {
+                for_each = rm.value.query_params
+                iterator = m
+                content {
+                  key            = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "bypass_rate_limiting_rules" {
+        for_each = length(var.api_rate_limit_bypass_rules) > 0 ? [1] : []
+        content {
+          dynamic "bypass_rate_limiting_rules" {
+            for_each = var.api_rate_limit_bypass_rules
+            iterator = bp
+            content {
+              base_path       = bp.value.target == "base_path" ? bp.value.base_path : null
+              specific_domain = bp.value.specific_domain
+              dynamic "any_domain" {
+                for_each = bp.value.specific_domain == null ? [1] : []
+                content {}
+              }
+              dynamic "any_url" {
+                for_each = bp.value.target == "any_url" ? [1] : []
+                content {}
+              }
+              dynamic "api_endpoint" {
+                for_each = bp.value.target == "api_endpoint" ? [1] : []
+                content {
+                  path    = bp.value.endpoint_path
+                  methods = length(bp.value.endpoint_methods) > 0 ? bp.value.endpoint_methods : null
+                }
+              }
+              dynamic "api_groups" {
+                for_each = bp.value.target == "api_groups" ? [1] : []
+                content { api_groups = bp.value.api_groups }
+              }
+              dynamic "client_matcher" {
+                for_each = bp.value.client_matcher != null && bp.value.client_matcher.mode != null ? [bp.value.client_matcher] : []
+                iterator = cm
+                content {
+                  dynamic "any_ip" {
+                    for_each = cm.value.mode == "any_ip" ? [1] : []
+                    content {}
+                  }
+                  dynamic "asn_list" {
+                    for_each = cm.value.mode == "asn_list" ? [1] : []
+                    content { as_numbers = cm.value.as_numbers }
+                  }
+                  dynamic "asn_matcher" {
+                    for_each = cm.value.mode == "asn_matcher" ? [1] : []
+                    content {
+                      dynamic "asn_sets" {
+                        for_each = cm.value.asn_sets
+                        content {
+                          name      = asn_sets.value.name
+                          namespace = coalesce(asn_sets.value.namespace, var.namespace)
+                        }
+                      }
+                    }
+                  }
+                  dynamic "client_selector" {
+                    for_each = cm.value.mode == "client_selector" ? [1] : []
+                    content { expressions = cm.value.selector_expressions }
+                  }
+                  dynamic "ip_matcher" {
+                    for_each = cm.value.mode == "ip_matcher" ? [1] : []
+                    content {
+                      invert_matcher = cm.value.ip_invert
+                      dynamic "prefix_sets" {
+                        for_each = cm.value.ip_prefix_sets
+                        content {
+                          name      = prefix_sets.value.name
+                          namespace = coalesce(prefix_sets.value.namespace, var.namespace)
+                        }
+                      }
+                    }
+                  }
+                  dynamic "ip_prefix_list" {
+                    for_each = cm.value.mode == "ip_prefix_list" ? [1] : []
+                    content {
+                      ip_prefixes  = cm.value.ip_prefixes
+                      invert_match = cm.value.ip_invert
+                    }
+                  }
+                  dynamic "ip_threat_category_list" {
+                    for_each = cm.value.mode == "ip_threat_category_list" ? [1] : []
+                    content { ip_threat_categories = cm.value.ip_threat_categories }
+                  }
+                  dynamic "tls_fingerprint_matcher" {
+                    for_each = cm.value.mode == "tls_fingerprint_matcher" ? [1] : []
+                    content {
+                      classes         = length(cm.value.tls_classes) > 0 ? cm.value.tls_classes : null
+                      exact_values    = length(cm.value.tls_exact_values) > 0 ? cm.value.tls_exact_values : null
+                      excluded_values = length(cm.value.tls_excluded_values) > 0 ? cm.value.tls_excluded_values : null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "server_url_rules" {
+        for_each = var.api_rate_limit_server_url_rules
+        iterator = su
+        content {
+          api_group       = su.value.api_group
+          base_path       = su.value.base_path
+          specific_domain = su.value.specific_domain
+          dynamic "any_domain" {
+            for_each = su.value.specific_domain == null ? [1] : []
+            content {}
+          }
+          dynamic "ref_rate_limiter" {
+            for_each = su.value.ref_rate_limiter != null ? [1] : []
+            content {
+              name      = xcsh_rate_limiter.this[su.value.ref_rate_limiter].name
+              namespace = var.namespace
+            }
+          }
+          dynamic "inline_rate_limiter" {
+            for_each = su.value.inline_threshold != null ? [1] : []
+            content {
+              threshold = su.value.inline_threshold
+              unit      = su.value.inline_unit
+              dynamic "use_http_lb_user_id" {
+                for_each = su.value.inline_user_id == "http_lb" ? [1] : []
+                content {}
+              }
+              dynamic "ref_user_id" {
+                for_each = su.value.inline_user_id == "ref" ? [1] : []
+                content {
+                  name      = su.value.inline_user_ref
+                  namespace = var.namespace
+                }
+              }
+            }
+          }
+          dynamic "client_matcher" {
+            for_each = su.value.client_matcher != null && su.value.client_matcher.mode != null ? [su.value.client_matcher] : []
+            iterator = cm
+            content {
+              dynamic "any_ip" {
+                for_each = cm.value.mode == "any_ip" ? [1] : []
+                content {}
+              }
+              dynamic "asn_list" {
+                for_each = cm.value.mode == "asn_list" ? [1] : []
+                content { as_numbers = cm.value.as_numbers }
+              }
+              dynamic "asn_matcher" {
+                for_each = cm.value.mode == "asn_matcher" ? [1] : []
+                content {
+                  dynamic "asn_sets" {
+                    for_each = cm.value.asn_sets
+                    content {
+                      name      = asn_sets.value.name
+                      namespace = coalesce(asn_sets.value.namespace, var.namespace)
+                    }
+                  }
+                }
+              }
+              dynamic "client_selector" {
+                for_each = cm.value.mode == "client_selector" ? [1] : []
+                content { expressions = cm.value.selector_expressions }
+              }
+              dynamic "ip_matcher" {
+                for_each = cm.value.mode == "ip_matcher" ? [1] : []
+                content {
+                  invert_matcher = cm.value.ip_invert
+                  dynamic "prefix_sets" {
+                    for_each = cm.value.ip_prefix_sets
+                    content {
+                      name      = prefix_sets.value.name
+                      namespace = coalesce(prefix_sets.value.namespace, var.namespace)
+                    }
+                  }
+                }
+              }
+              dynamic "ip_prefix_list" {
+                for_each = cm.value.mode == "ip_prefix_list" ? [1] : []
+                content {
+                  ip_prefixes  = cm.value.ip_prefixes
+                  invert_match = cm.value.ip_invert
+                }
+              }
+              dynamic "ip_threat_category_list" {
+                for_each = cm.value.mode == "ip_threat_category_list" ? [1] : []
+                content { ip_threat_categories = cm.value.ip_threat_categories }
+              }
+              dynamic "tls_fingerprint_matcher" {
+                for_each = cm.value.mode == "tls_fingerprint_matcher" ? [1] : []
+                content {
+                  classes         = length(cm.value.tls_classes) > 0 ? cm.value.tls_classes : null
+                  exact_values    = length(cm.value.tls_exact_values) > 0 ? cm.value.tls_exact_values : null
+                  excluded_values = length(cm.value.tls_excluded_values) > 0 ? cm.value.tls_excluded_values : null
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -1053,6 +1505,43 @@ resource "xcsh_http_loadbalancer" "this" {
     precondition {
       condition     = var.api_validation_fall_through != "custom" || length(var.validation_custom_rules) > 0
       error_message = "api_validation_fall_through=\"custom\" requires at least one validation_custom_rules entry."
+    }
+
+    # rate_limit.policies references standalone rate_limiter_policies by name; each ref
+    # must resolve to a created policy, and policies only apply on the rate_limit arm.
+    precondition {
+      condition     = length(var.rate_limit_ip_allowed_prefixes) == 0 || length(var.rate_limit_custom_ip_prefix_sets) == 0
+      error_message = "set only one of rate_limit_ip_allowed_prefixes (inline) or rate_limit_custom_ip_prefix_sets (refs), not both."
+    }
+    precondition {
+      condition     = length(var.rate_limit_policy_refs) == 0 || var.rate_limit_choice == "rate_limit"
+      error_message = "rate_limit_policy_refs requires rate_limit_choice=\"rate_limit\"."
+    }
+    precondition {
+      condition     = (length(var.rate_limit_ip_allowed_prefixes) == 0 && length(var.rate_limit_custom_ip_prefix_sets) == 0) || var.rate_limit_choice == "rate_limit"
+      error_message = "rate_limit_ip_allowed_prefixes / rate_limit_custom_ip_prefix_sets require rate_limit_choice=\"rate_limit\"."
+    }
+    precondition {
+      condition     = var.rate_limit_choice != "api_rate_limit" || (length(var.api_rate_limit_endpoint_rules) + length(var.api_rate_limit_bypass_rules) + length(var.api_rate_limit_server_url_rules)) > 0
+      error_message = "rate_limit_choice=\"api_rate_limit\" requires at least one api_rate_limit_endpoint_rules / bypass_rules / server_url_rules entry."
+    }
+    precondition {
+      condition     = alltrue([for r in var.rate_limit_policy_refs : contains([for p in var.rate_limiter_policies : p.name], r)])
+      error_message = "every rate_limit_policy_refs entry must name a rate_limiter_policies entry."
+    }
+
+    # The api_rate_limit rule lists only apply on the api_rate_limit arm, and every
+    # ref_rate_limiter must resolve to a created xcsh_rate_limiter.
+    precondition {
+      condition     = var.rate_limit_choice == "api_rate_limit" || (length(var.api_rate_limit_endpoint_rules) == 0 && length(var.api_rate_limit_bypass_rules) == 0 && length(var.api_rate_limit_server_url_rules) == 0)
+      error_message = "api_rate_limit_* rules require rate_limit_choice=\"api_rate_limit\"."
+    }
+    precondition {
+      condition = alltrue(concat(
+        [for r in var.api_rate_limit_endpoint_rules : contains(keys(xcsh_rate_limiter.this), r.ref_rate_limiter) if r.ref_rate_limiter != null],
+        [for r in var.api_rate_limit_server_url_rules : contains(keys(xcsh_rate_limiter.this), r.ref_rate_limiter) if r.ref_rate_limiter != null],
+      ))
+      error_message = "every api_rate_limit ref_rate_limiter must name a rate_limiters entry."
     }
   }
 }
