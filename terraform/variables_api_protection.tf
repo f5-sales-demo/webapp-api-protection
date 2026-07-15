@@ -94,3 +94,26 @@ variable "validation_custom_rules" {
   }))
   default = []
 }
+
+# LB rate_limit allow-list + policy refs (Coverage Batch B) root passthrough.
+# Validation lives in the module. Empty defaults keep no_ip_allowed_list + no_policies.
+variable "rate_limit_ip_allowed_prefixes" {
+  description = "rate_limit.ip_allowed_list.prefixes: IP prefixes exempt from rate limiting."
+  type        = list(string)
+  default     = []
+}
+
+variable "rate_limit_custom_ip_prefix_sets" {
+  description = "rate_limit.custom_ip_allowed_list refs to existing ip_prefix_set objects."
+  type = list(object({
+    name      = string
+    namespace = optional(string)
+  }))
+  default = []
+}
+
+variable "rate_limit_policy_refs" {
+  description = "rate_limit.policies: names of rate_limiter_policies to attach to the LB."
+  type        = list(string)
+  default     = []
+}

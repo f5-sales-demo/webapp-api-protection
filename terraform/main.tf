@@ -135,6 +135,14 @@ module "http_lb" {
   rate_limit_unit                    = var.rate_limit_unit
   rate_limit_period_multiplier       = var.rate_limit_period_multiplier
   rate_limit_burst_multiplier        = var.rate_limit_burst_multiplier
+  rate_limit_ip_allowed_prefixes     = var.rate_limit_ip_allowed_prefixes
+  rate_limit_custom_ip_prefix_sets   = var.rate_limit_custom_ip_prefix_sets
+  rate_limit_policy_refs             = var.rate_limit_policy_refs
+  api_rate_limit_endpoint_rules      = var.api_rate_limit_endpoint_rules
+  api_rate_limit_bypass_rules        = var.api_rate_limit_bypass_rules
+  api_rate_limit_server_url_rules    = var.api_rate_limit_server_url_rules
+  rate_limiters                      = var.rate_limiters
+  rate_limiter_policies              = var.rate_limiter_policies
   sensitive_data_compliances         = var.sensitive_data_compliances
   sensitive_data_disabled_predefined = var.sensitive_data_disabled_predefined
   sensitive_data_policy_choice       = var.sensitive_data_policy_choice
