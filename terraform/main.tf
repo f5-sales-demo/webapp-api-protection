@@ -155,6 +155,7 @@ module "http_lb" {
   data_guard_rules                   = var.data_guard_rules
   api_protection_rules               = var.api_protection_rules
   api_protection_group_rules         = var.api_protection_group_rules
+  app_api_groups                     = var.app_api_groups
   validation_custom_rules            = var.validation_custom_rules
 
   # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing
