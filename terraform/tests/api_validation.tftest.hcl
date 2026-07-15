@@ -153,3 +153,22 @@ run "validation_rejects_empty_request_properties" {
   variables { api_validation_request_properties = [] }
   expect_failures = [var.api_validation_request_properties]
 }
+
+run "validation_rejects_empty_response_properties" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { api_validation_response_properties = [] }
+  expect_failures = [var.api_validation_response_properties]
+}
+
+run "validation_rejects_custom_fall_through_without_rules" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_definition_choice        = "specification"
+    api_specification_validation = "all_spec_endpoints"
+    api_validation_fall_through  = "custom"
+    # validation_custom_rules defaults to [] -> precondition must fail
+  }
+  expect_failures = [xcsh_http_loadbalancer.this]
+}

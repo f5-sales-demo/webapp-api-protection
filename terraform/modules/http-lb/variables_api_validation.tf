@@ -1,9 +1,9 @@
 # ---------------------------------------------------------------------------
-# OpenAPI validation enforcement (Coverage Batch A). Shared config for BOTH the
-# api_specification validation arms: validation_all_spec_endpoints (one validation_mode
-# for every spec endpoint) and validation_custom_list (per-rule action + shared
-# settings / fall-through). Fixes the correctness gap where all_spec_endpoints
-# hardcoded skip_validation (built inventory but enforced nothing).
+# OpenAPI validation enforcement (Coverage Batch A). Drives validation_all_spec_endpoints
+# (one validation_mode for every spec endpoint, plus fall_through + settings). Fixes the
+# correctness gap where all_spec_endpoints hardcoded skip_validation (built inventory but
+# enforced nothing). Only api_validation_request_properties is ALSO shared with
+# validation_custom_list (whose fall_through/per-rule action stay in its own arm).
 # ---------------------------------------------------------------------------
 
 # The 8 OpenAPI properties the LB can validate (request or response side).
@@ -72,6 +72,11 @@ variable "api_validation_response_properties" {
       contains(["PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE"], p)
     ])
     error_message = "each api_validation_response_properties value must be a valid PROPERTY_* enum."
+  }
+
+  validation {
+    condition     = length(var.api_validation_response_properties) > 0
+    error_message = "api_validation_response_properties must be non-empty (SizeAtLeast 1) when response validation is active."
   }
 }
 

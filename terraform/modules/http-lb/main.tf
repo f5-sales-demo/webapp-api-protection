@@ -1047,5 +1047,12 @@ resource "xcsh_http_loadbalancer" "this" {
       condition     = var.api_testing_choice != "enabled" || length(var.api_testing_domains) > 0
       error_message = "api_testing_choice=\"enabled\" requires at least one api_testing_domains entry."
     }
+
+    # Custom OpenAPI fall-through / custom_list needs rules to emit — an empty
+    # fall_through_mode_custom {} (or custom_list with no rules) fails at apply.
+    precondition {
+      condition     = var.api_validation_fall_through != "custom" || length(var.validation_custom_rules) > 0
+      error_message = "api_validation_fall_through=\"custom\" requires at least one validation_custom_rules entry."
+    }
   }
 }

@@ -17,6 +17,6 @@ output "api_validation_fall_through" {
 }
 
 output "api_validation_enforces" {
-  description = "Whether validation actually enforces (request or response active), i.e. not skip/omit only."
-  value       = local.rendered_api_validation.req_active || (local.rendered_api_validation.resp_emit && local.rendered_api_validation.resp_active)
+  description = "Whether all_spec_endpoints validation actually enforces (request or response active), i.e. not skip/omit only. False unless api_specification_validation=all_spec_endpoints is the active arm."
+  value       = var.api_specification_validation == "all_spec_endpoints" && (local.rendered_api_validation.req_active || (local.rendered_api_validation.resp_emit && local.rendered_api_validation.resp_active))
 }
