@@ -1,7 +1,9 @@
 # Plan-level tests for API Testing (SP4): LB api_testing_choice inline block, the
-# standalone xcsh_api_testing resource + schedule oneof, and the 5-arm credential
-# auth oneof (admin/standard/api_key/basic_auth/bearer_token) with clear/blindfold
-# SecretType. Targets ./modules/http-lb with a dummy origin.
+# standalone xcsh_api_testing resource + schedule oneof, and the credential auth oneof
+# (api_key/basic_auth/bearer_token — the only valid F5 XC credentials_choice members;
+# admin/standard 400 and are excluded) with clear/blindfold SecretType. Every domain
+# requires >=1 credential and every credential a secret (verified live). Targets
+# ./modules/http-lb with a dummy origin.
 variables {
   namespace         = "webapp-api-protection"
   lb_domains        = ["www.f5-sales-demo.com"]
@@ -28,74 +30,12 @@ run "api_testing_default_disabled" {
 }
 
 # --- LB inline api_testing block ---
-run "api_testing_lb_enabled_admin" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  variables {
-    api_testing_choice = "enabled"
-    api_testing_domains = [{
-      domain      = "api.f5-sales-demo.com"
-      credentials = [{ credential_name = "c-admin", auth_type = "admin" }]
-    }]
-  }
-  assert {
-    condition     = output.api_testing_choice == "enabled" && output.api_testing_credential_count == 1
-    error_message = "LB api_testing block must render with one admin credential"
-  }
-}
-
-run "api_testing_lb_custom_header" {
+run "api_testing_lb_enabled_api_key" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
     api_testing_choice              = "enabled"
     api_testing_custom_header_value = "sp4-tests"
-    api_testing_domains             = [{ domain = "api.f5-sales-demo.com" }]
-  }
-  assert {
-    condition     = output.api_testing_domain_count == 1
-    error_message = "custom_header_value + a domain must render"
-  }
-}
-
-# --- Standalone resource + schedule arms ---
-run "api_testing_standalone_every_day" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  variables {
-    api_testing_standalone_enabled = true
-    api_testing_schedule           = "every_day"
-    api_testing_domains = [{
-      domain      = "api.f5-sales-demo.com"
-      credentials = [{ credential_name = "c-std", auth_type = "standard" }]
-    }]
-  }
-  assert {
-    condition     = output.api_testing_standalone_created == true && output.api_testing_schedule == "every_day"
-    error_message = "standalone xcsh_api_testing with every_day schedule must render"
-  }
-}
-
-run "api_testing_standalone_every_month" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  variables {
-    api_testing_standalone_enabled = true
-    api_testing_schedule           = "every_month"
-    api_testing_domains            = [{ domain = "api.f5-sales-demo.com" }]
-  }
-  assert {
-    condition     = output.api_testing_schedule == "every_month"
-    error_message = "every_month schedule must render"
-  }
-}
-
-# --- Credential auth arms with SecretType ---
-run "api_testing_api_key_clear" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  variables {
-    api_testing_choice = "enabled"
     api_testing_domains = [{
       domain = "api.f5-sales-demo.com"
       credentials = [{
@@ -107,16 +47,18 @@ run "api_testing_api_key_clear" {
     }]
   }
   assert {
-    condition     = output.api_testing_credential_count == 1
-    error_message = "api_key credential (clear secret) must render"
+    condition     = output.api_testing_choice == "enabled" && output.api_testing_credential_count == 1
+    error_message = "LB api_testing block must render with one api_key credential"
   }
 }
 
-run "api_testing_basic_auth_clear" {
+# --- Standalone resource + schedule arms ---
+run "api_testing_standalone_every_day_basic_auth" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
-    api_testing_choice = "enabled"
+    api_testing_standalone_enabled = true
+    api_testing_schedule           = "every_day"
     api_testing_domains = [{
       domain = "api.f5-sales-demo.com"
       credentials = [{
@@ -128,16 +70,17 @@ run "api_testing_basic_auth_clear" {
     }]
   }
   assert {
-    condition     = output.api_testing_credential_count == 1
-    error_message = "basic_auth credential must render"
+    condition     = output.api_testing_standalone_created == true && output.api_testing_schedule == "every_day"
+    error_message = "standalone xcsh_api_testing with every_day schedule must render"
   }
 }
 
-run "api_testing_bearer_blindfold" {
+run "api_testing_standalone_every_month_bearer_blindfold" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
     api_testing_standalone_enabled = true
+    api_testing_schedule           = "every_month"
     api_testing_domains = [{
       domain = "api.f5-sales-demo.com"
       credentials = [{
@@ -148,8 +91,31 @@ run "api_testing_bearer_blindfold" {
     }]
   }
   assert {
-    condition     = output.api_testing_credential_count == 1
-    error_message = "bearer_token credential (blindfold secret) must render"
+    condition     = output.api_testing_schedule == "every_month" && output.api_testing_credential_count == 1
+    error_message = "every_month + bearer_token blindfold credential must render"
+  }
+}
+
+# --- both surfaces at once ---
+run "api_testing_both_surfaces" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_testing_choice             = "enabled"
+    api_testing_standalone_enabled = true
+    api_testing_domains = [{
+      domain = "api.f5-sales-demo.com"
+      credentials = [{
+        credential_name = "c-key"
+        auth_type       = "api_key"
+        api_key_name    = "X-API-Key"
+        secret          = { method = "clear", plaintext = "s3cr3t" }
+      }]
+    }]
+  }
+  assert {
+    condition     = output.api_testing_choice == "enabled" && output.api_testing_standalone_created == true
+    error_message = "both surfaces must render from one shared domains/credentials input"
   }
 }
 
@@ -174,32 +140,17 @@ run "api_testing_rejects_bad_auth_type" {
   variables {
     api_testing_domains = [{
       domain      = "api.f5-sales-demo.com"
-      credentials = [{ credential_name = "c", auth_type = "oauth" }]
-    }]
-  }
-  expect_failures = [var.api_testing_domains]
-}
-
-run "api_testing_rejects_api_key_without_secret" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  variables {
-    api_testing_domains = [{
-      domain      = "api.f5-sales-demo.com"
-      credentials = [{ credential_name = "c", auth_type = "api_key", api_key_name = "X" }]
-    }]
-  }
-  expect_failures = [var.api_testing_domains]
-}
-
-run "api_testing_rejects_admin_with_secret" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  variables {
-    api_testing_domains = [{
-      domain      = "api.f5-sales-demo.com"
       credentials = [{ credential_name = "c", auth_type = "admin", secret = { method = "clear", plaintext = "x" } }]
     }]
+  }
+  expect_failures = [var.api_testing_domains]
+}
+
+run "api_testing_rejects_domain_without_credentials" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_testing_domains = [{ domain = "api.f5-sales-demo.com", credentials = [] }]
   }
   expect_failures = [var.api_testing_domains]
 }
@@ -223,6 +174,18 @@ run "api_testing_rejects_api_key_without_name" {
     api_testing_domains = [{
       domain      = "api.f5-sales-demo.com"
       credentials = [{ credential_name = "c", auth_type = "api_key", secret = { method = "clear", plaintext = "x" } }]
+    }]
+  }
+  expect_failures = [var.api_testing_domains]
+}
+
+run "api_testing_rejects_clear_without_plaintext" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_testing_domains = [{
+      domain      = "api.f5-sales-demo.com"
+      credentials = [{ credential_name = "c", auth_type = "bearer_token", secret = { method = "clear" } }]
     }]
   }
   expect_failures = [var.api_testing_domains]

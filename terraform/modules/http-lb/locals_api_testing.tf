@@ -12,20 +12,16 @@ locals {
       credentials = [
         for c in d.credentials : {
           credential_name = c.credential_name
-          use_admin       = c.auth_type == "admin"
-          use_standard    = c.auth_type == "standard"
           use_api_key     = c.auth_type == "api_key"
           use_basic_auth  = c.auth_type == "basic_auth"
           use_bearer      = c.auth_type == "bearer_token"
           api_key_name    = c.api_key_name
           user            = c.user
           # SecretType (api_key value / basic_auth password / bearer_token token):
-          # exactly one of url (clear) / location (blindfold) is non-null when present.
-          secret_use_blindfold = c.secret != null && try(c.secret.method, "clear") == "blindfold"
-          secret_url = (c.secret != null && try(c.secret.method, "clear") == "clear" && try(c.secret.plaintext, null) != null
-            ? "string:///${base64encode(c.secret.plaintext)}"
-          : null)
-          secret_location = c.secret != null && try(c.secret.method, "clear") == "blindfold" ? c.secret.location : null
+          # exactly one of url (clear) / location (blindfold) is non-null.
+          secret_use_blindfold = c.secret.method == "blindfold"
+          secret_url           = c.secret.method == "clear" ? "string:///${base64encode(c.secret.plaintext)}" : null
+          secret_location      = c.secret.method == "blindfold" ? c.secret.location : null
         }
       ]
     }

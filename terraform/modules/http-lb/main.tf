@@ -797,14 +797,6 @@ resource "xcsh_http_loadbalancer" "this" {
             content {
               credential_name = credentials.value.credential_name
 
-              dynamic "admin" {
-                for_each = credentials.value.use_admin ? [1] : []
-                content {}
-              }
-              dynamic "standard" {
-                for_each = credentials.value.use_standard ? [1] : []
-                content {}
-              }
               dynamic "api_key" {
                 for_each = credentials.value.use_api_key ? [1] : []
                 content {

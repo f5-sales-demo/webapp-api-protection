@@ -53,55 +53,51 @@ variable "api_testing_custom_header_value" {
 }
 
 # Shared testing domains + credentials, consumed by BOTH surfaces (DRY). Each
-# credential selects exactly one auth arm; the secret arms (api_key value /
-# basic_auth password / bearer_token token) carry a clear/blindfold SecretType.
-# allow_destructive_methods defaults false (destructive tests can DELETE data).
+# credential selects exactly one auth arm; every arm carries a clear/blindfold
+# SecretType. Verified live against the F5 XC api_testings API: credentials_choice =
+# {api_key, basic_auth, bearer_token} ONLY — the schema's `admin`/`standard` blocks
+# are NOT valid credentials_choice members (POST 400 "credentials_choice ... got
+# nil"), so they are excluded; and a domain with zero credentials 500s, so >=1
+# credential is required. allow_destructive_methods defaults false (can DELETE data).
 variable "api_testing_domains" {
-  description = "Testing domains: {domain, allow_destructive_methods, credentials[]}. credentials: {credential_name, auth_type admin|standard|api_key|basic_auth|bearer_token, api_key_name, user, secret {method,plaintext,location}}."
+  description = "Testing domains: {domain, allow_destructive_methods, credentials[]}. credentials: {credential_name, auth_type api_key|basic_auth|bearer_token, api_key_name, user, secret {method,plaintext,location}}. >=1 credential per domain."
   type = list(object({
     domain                    = string
     allow_destructive_methods = optional(bool, false)
-    credentials = optional(list(object({
+    credentials = list(object({
       credential_name = string
-      auth_type       = string           # admin | standard | api_key | basic_auth | bearer_token
+      auth_type       = string           # api_key | basic_auth | bearer_token
       api_key_name    = optional(string) # api_key: header/query key name
       user            = optional(string) # basic_auth: username
-      secret = optional(object({         # api_key value / basic_auth password / bearer_token token
+      secret = object({                  # api_key value / basic_auth password / bearer_token token
         method    = optional(string, "clear")
         plaintext = optional(string)
         location  = optional(string)
-      }))
-    })), [])
+      })
+    }))
   }))
   default   = []
   sensitive = true # credentials carry secret plaintext
 
   validation {
-    condition = alltrue(flatten([
-      for d in var.api_testing_domains : [
-        for c in d.credentials :
-        contains(["admin", "standard", "api_key", "basic_auth", "bearer_token"], c.auth_type)
-      ]
-    ]))
-    error_message = "each credential auth_type must be admin, standard, api_key, basic_auth, or bearer_token."
+    condition     = alltrue([for d in var.api_testing_domains : length(d.credentials) > 0])
+    error_message = "each api_testing_domains entry requires at least one credential (F5 XC rejects a domain with zero credentials)."
   }
 
   validation {
     condition = alltrue(flatten([
       for d in var.api_testing_domains : [
         for c in d.credentials :
-        # secret-bearing arms require a secret; marker arms (admin/standard) must not carry one
-        (contains(["api_key", "basic_auth", "bearer_token"], c.auth_type)) == (c.secret != null)
+        contains(["api_key", "basic_auth", "bearer_token"], c.auth_type)
       ]
     ]))
-    error_message = "api_key/basic_auth/bearer_token require a secret{}; admin/standard must omit it."
+    error_message = "each credential auth_type must be api_key, basic_auth, or bearer_token (admin/standard are not valid F5 XC credentials_choice members)."
   }
 
   validation {
     condition = alltrue(flatten([
       for d in var.api_testing_domains : [
-        for c in d.credentials :
-        c.secret == null || contains(["clear", "blindfold"], c.secret.method)
+        for c in d.credentials : contains(["clear", "blindfold"], c.secret.method)
       ]
     ]))
     error_message = "credential secret.method must be \"clear\" or \"blindfold\"."
@@ -111,10 +107,20 @@ variable "api_testing_domains" {
     condition = alltrue(flatten([
       for d in var.api_testing_domains : [
         for c in d.credentials :
-        c.secret == null || c.secret.method != "blindfold" || c.secret.location != null
+        c.secret.method != "blindfold" || c.secret.location != null
       ]
     ]))
     error_message = "blindfold credential secret requires a pre-sealed location (scripts/blindfold-seal.sh)."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for d in var.api_testing_domains : [
+        for c in d.credentials :
+        c.secret.method != "clear" || c.secret.plaintext != null
+      ]
+    ]))
+    error_message = "clear credential secret requires plaintext."
   }
 
   validation {

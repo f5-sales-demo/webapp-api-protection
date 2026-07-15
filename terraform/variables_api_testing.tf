@@ -31,17 +31,17 @@ variable "api_testing_domains" {
   type = list(object({
     domain                    = string
     allow_destructive_methods = optional(bool, false)
-    credentials = optional(list(object({
+    credentials = list(object({
       credential_name = string
       auth_type       = string
       api_key_name    = optional(string)
       user            = optional(string)
-      secret = optional(object({
+      secret = object({
         method    = optional(string, "clear")
         plaintext = optional(string)
         location  = optional(string)
-      }))
-    })), [])
+      })
+    }))
   }))
   default   = []
   sensitive = true

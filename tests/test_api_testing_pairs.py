@@ -47,24 +47,20 @@ def test_canonical_restore_is_last_and_off() -> None:
 
 
 def test_flags_match_secret_arms() -> None:
-    """admin/standard => LIVE; clear secret arm => SECRET; blindfold => SKIP."""
+    """Every credential carries a secret; clear => SECRET, blindfold => SKIP."""
     for v in m.build():
         if v["name"] == "canonical-restore":
+            assert v["flag"] == "LIVE"
             continue
         creds = v["vars"]["api_testing_domains"][0]["credentials"][0]
-        auth = creds["auth_type"]
-        flag = v["flag"]
-        if auth in ("admin", "standard"):
-            assert flag == "LIVE"
-            assert "secret" not in creds
+        assert creds["auth_type"] in ("api_key", "basic_auth", "bearer_token")
+        secret = creds["secret"]
+        if secret["method"] == "blindfold":
+            assert v["flag"].startswith("SKIP:")
+            assert secret["location"] == m.BF_PLACEHOLDER
         else:
-            secret = creds["secret"]
-            if secret["method"] == "blindfold":
-                assert flag.startswith("SKIP:")
-                assert secret["location"] == m.BF_PLACEHOLDER
-            else:
-                assert flag == "SECRET"
-                assert secret["plaintext"] == m.CLEAR_VALUE_MARKER
+            assert v["flag"] == "SECRET"
+            assert secret["plaintext"] == m.CLEAR_VALUE_MARKER
 
 
 def test_secret_never_holds_real_value() -> None:

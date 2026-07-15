@@ -32,8 +32,9 @@ trap 'rm -rf /tmp/apitest-variants 2>/dev/null; rm -f /tmp/apitest-*.log /tmp/ap
 cd "$(dirname "$0")/../terraform" || exit 1
 ARM_ACCESS_KEY=$(az storage account keys list -n f5salesdemotfstate -g f5-sales-demo-tfstate --query "[0].value" -o tsv)
 export ARM_ACCESS_KEY
-# Throwaway secret for API-testing credentials (dev env). Not a real credential.
-export API_TEST_SECRET="${API_TEST_SECRET:-sp4-matrix-probe-$RANDOM}"
+# Throwaway secret for API-testing credentials (dev env). Not a real credential, but
+# generated from a CSPRNG (not $RANDOM) so it is high-entropy either way.
+export API_TEST_SECRET="${API_TEST_SECRET:-$(python3 -c 'import secrets; print("sp4-" + secrets.token_urlsafe(24))')}"
 
 NS="webapp-api-protection"
 LB_ADDR="module.http_lb.xcsh_http_loadbalancer.this"

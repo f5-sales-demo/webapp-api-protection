@@ -8,18 +8,20 @@ Coverage model (see docs/superpowers/specs/2026-07-14-sp4-api-testing-design.md)
 
 Pairwise dimensions:
   surface   lb | standalone | both   -> api_testing_choice + api_testing_standalone_enabled
-  auth      admin | standard | api_key | basic_auth | bearer_token  (per credential)
-  secret    clear | blindfold        (only for api_key/basic_auth/bearer_token)
+  auth      api_key | basic_auth | bearer_token  (the only valid F5 XC credentials_choice
+            members — verified live; admin/standard 400 and are excluded)
+  secret    clear | blindfold        (every credential carries a SecretType)
   schedule  every_week | every_day | every_month  (standalone surfaces only)
 
-Secret values are NEVER in the manifest — the harness injects them (placeholders
-below), exactly as the SP1/SP2 matrices inject sealed/clear secrets. Manifest flag:
-  LIVE   - no write-only secret (admin/standard): must import 0-change.
-  SECRET - clear api_key/basic_auth/bearer_token: F5 XC never returns the secret on
-           read, so the harness re-applies after import to re-set it, then requires a
-           clean plan (write-only-secret gate).
+Every domain requires >=1 credential (a credential-less domain 500s), and every
+credential carries a write-only secret. Secret values are NEVER in the manifest — the
+harness injects them (placeholders below). Manifest flag:
+  SECRET - clear secret: F5 XC never returns the secret on read, so the harness
+           re-applies after import to re-set it, then requires a clean plan.
   SKIP:<reason> - blindfold secret: F5 XC 500s on offline-sealed API-testing secrets
-           (same platform limitation as SP1 crawler / SP2 access_token); plan-tested only.
+           (same platform limitation as SP1 crawler / SP2 access_token); attempted
+           live, recorded SKIP on the 500.
+  LIVE   - canonical-restore only (API testing off; secret-free).
 
 payloads() reconciles module constraints so every emitted variant is a valid root
 config, and dedups byte-identical payloads. Deterministic (no RNG).
@@ -35,14 +37,13 @@ from pathlib import Path
 
 DIMENSIONS = {
     "surface": ["lb", "standalone", "both"],
-    "auth": ["admin", "standard", "api_key", "basic_auth", "bearer_token"],
+    "auth": ["api_key", "basic_auth", "bearer_token"],
     "secret": ["clear", "blindfold"],
     "schedule": ["every_week", "every_day", "every_month"],
 }
 
 CLEAR_VALUE_MARKER = "__TEST_SECRET__"  # clear plaintext, injected from env
 BF_PLACEHOLDER = "__BF_LOCATION__"  # blindfold sealed location, injected
-SECRET_ARMS = ("api_key", "basic_auth", "bearer_token")
 
 
 def _best_value(
@@ -102,18 +103,16 @@ def payloads(v: Mapping[str, object]) -> tuple[dict[str, object], str]:
         out["api_testing_schedule"] = v.get("schedule")
 
     cred: dict[str, object] = {"credential_name": f"c-{auth}", "auth_type": auth}
-    flag = "LIVE"
     if auth == "api_key":
         cred["api_key_name"] = "X-API-Key"
     if auth == "basic_auth":
         cred["user"] = "tester"
-    if auth in SECRET_ARMS:
-        if method_sel == "blindfold":
-            cred["secret"] = {"method": "blindfold", "location": BF_PLACEHOLDER}
-            flag = "SKIP:blindfold API-testing secret 500s on F5 XC (platform limitation); clear is the live path"
-        else:
-            cred["secret"] = {"method": "clear", "plaintext": CLEAR_VALUE_MARKER}
-            flag = "SECRET"
+    if method_sel == "blindfold":
+        cred["secret"] = {"method": "blindfold", "location": BF_PLACEHOLDER}
+        flag = "SKIP:blindfold API-testing secret 500s on F5 XC (platform limitation); clear is the live path"
+    else:
+        cred["secret"] = {"method": "clear", "plaintext": CLEAR_VALUE_MARKER}
+        flag = "SECRET"
 
     out["api_testing_domains"] = [
         {"domain": "api.f5-sales-demo.com", "credentials": [cred]}
