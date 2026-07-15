@@ -581,11 +581,116 @@ resource "xcsh_http_loadbalancer" "this" {
       dynamic "validation_all_spec_endpoints" {
         for_each = var.api_specification_validation == "all_spec_endpoints" ? [1] : []
         content {
-          fall_through_mode {
-            fall_through_mode_allow {}
-          }
+          # ONE validation_mode applied to every spec endpoint (Batch A: this used to
+          # hardcode skip_validation and enforce nothing). Request + response are
+          # independent oneofs; response omitted entirely unless response_mode set.
           validation_mode {
-            skip_validation {}
+            dynamic "skip_validation" {
+              for_each = local.rendered_api_validation.req_skip ? [1] : []
+              content {}
+            }
+            dynamic "validation_mode_active" {
+              for_each = local.rendered_api_validation.req_active ? [1] : []
+              content {
+                request_validation_properties = local.rendered_api_validation.req_props
+                dynamic "enforcement_block" {
+                  for_each = local.rendered_api_validation.req_block ? [1] : []
+                  content {}
+                }
+                dynamic "enforcement_report" {
+                  for_each = local.rendered_api_validation.req_report ? [1] : []
+                  content {}
+                }
+              }
+            }
+            dynamic "skip_response_validation" {
+              for_each = local.rendered_api_validation.resp_emit && local.rendered_api_validation.resp_skip ? [1] : []
+              content {}
+            }
+            dynamic "response_validation_mode_active" {
+              for_each = local.rendered_api_validation.resp_emit && local.rendered_api_validation.resp_active ? [1] : []
+              content {
+                response_validation_properties = local.rendered_api_validation.resp_props
+                dynamic "enforcement_block" {
+                  for_each = local.rendered_api_validation.resp_block ? [1] : []
+                  content {}
+                }
+                dynamic "enforcement_report" {
+                  for_each = local.rendered_api_validation.resp_report ? [1] : []
+                  content {}
+                }
+              }
+            }
+          }
+
+          fall_through_mode {
+            dynamic "fall_through_mode_allow" {
+              for_each = local.rendered_api_validation.ft_custom ? [] : [1]
+              content {}
+            }
+            # fall_through_mode_custom rules use action_block/report/skip (NOT the
+            # per-rule validation_mode used by validation_custom_list). Reuse the
+            # shared validation_custom_rules, mapping action -> action_*.
+            dynamic "fall_through_mode_custom" {
+              for_each = local.rendered_api_validation.ft_custom ? [1] : []
+              content {
+                dynamic "open_api_validation_rules" {
+                  for_each = var.validation_custom_rules
+                  content {
+                    metadata {
+                      name = "fallthrough-rule-${open_api_validation_rules.key}"
+                    }
+                    api_endpoint {
+                      methods = open_api_validation_rules.value.methods
+                      path    = open_api_validation_rules.value.path
+                    }
+                    dynamic "action_block" {
+                      for_each = open_api_validation_rules.value.action == "block" ? [1] : []
+                      content {}
+                    }
+                    dynamic "action_report" {
+                      for_each = open_api_validation_rules.value.action == "report" ? [1] : []
+                      content {}
+                    }
+                    dynamic "action_skip" {
+                      for_each = open_api_validation_rules.value.action == "skip" ? [1] : []
+                      content {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          # OpenAPI settings (oversized body + additional query parameters). Emitted
+          # only when a knob is set, so the default stays 0-change / import-clean.
+          dynamic "settings" {
+            for_each = local.rendered_api_validation.settings_emit ? [1] : []
+            content {
+              dynamic "oversized_body_fail_validation" {
+                for_each = local.rendered_api_validation.oversized_fail ? [1] : []
+                content {}
+              }
+              dynamic "oversized_body_skip_validation" {
+                for_each = local.rendered_api_validation.oversized_skip ? [1] : []
+                content {}
+              }
+              dynamic "property_validation_settings_custom" {
+                for_each = local.rendered_api_validation.params_custom ? [1] : []
+                content {
+                  query_parameters {
+                    dynamic "allow_additional_parameters" {
+                      for_each = local.rendered_api_validation.params_allow ? [1] : []
+                      content {}
+                    }
+                    dynamic "disallow_additional_parameters" {
+                      for_each = local.rendered_api_validation.params_disallow ? [1] : []
+                      content {}
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -620,14 +725,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 dynamic "validation_mode_active" {
                   for_each = contains(["block", "report"], open_api_validation_rules.value.action) ? [1] : []
                   content {
-                    # request_validation_properties has SizeAtLeast(1): validate the
-                    # common request properties against the OpenAPI spec.
-                    request_validation_properties = [
-                      "PROPERTY_QUERY_PARAMETERS",
-                      "PROPERTY_PATH_PARAMETERS",
-                      "PROPERTY_HTTP_HEADERS",
-                      "PROPERTY_HTTP_BODY",
-                    ]
+                    # request_validation_properties has SizeAtLeast(1); shared with
+                    # all_spec_endpoints via var.api_validation_request_properties
+                    # (Batch A: was hardcoded).
+                    request_validation_properties = var.api_validation_request_properties
                     dynamic "enforcement_block" {
                       for_each = open_api_validation_rules.value.action == "block" ? [1] : []
                       content {}
