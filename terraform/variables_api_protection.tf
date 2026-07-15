@@ -65,7 +65,7 @@ variable "data_guard_rules" {
 # API protection rules (Coverage Batch D) root passthrough. Thin passthrough: the
 # full object type + validation live once in the module
 # (modules/http-lb/variables_api_protection_rules.tf), so the root wrapper uses
-# type=any to avoid re-declaring (and drifting from) the module's contract.
+# type=any to avoid redeclaring (and drifting from) the module's contract.
 variable "api_protection_rules" {
   description = "api_protection_rules.api_endpoint_rules passthrough (typed+validated in the module)."
   type        = any

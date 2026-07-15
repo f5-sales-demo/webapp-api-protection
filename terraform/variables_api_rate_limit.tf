@@ -1,7 +1,7 @@
 # Root passthrough for the per-endpoint api_rate_limit arm (Coverage Batch B).
 # Thin passthrough: the full object type + validation live once in the module
 # (modules/http-lb/variables_api_rate_limit.tf), so the root wrapper uses type=any
-# to avoid re-declaring the module's contract. Empty defaults keep the arm off.
+# to avoid redeclaring the module's contract. Empty defaults keep the arm off.
 variable "api_rate_limit_endpoint_rules" {
   description = "api_rate_limit.api_endpoint_rules passthrough (typed+validated in the module)."
   type        = any
