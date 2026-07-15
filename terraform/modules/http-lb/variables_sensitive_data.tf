@@ -64,3 +64,34 @@ variable "data_guard_rules" {
     error_message = "data_guard_rules with domain_mode exact/suffix require a domain."
   }
 }
+
+# --- Custom data types on the policy + LB response disclosure rules (Batch C) ---
+
+# Names of var.data_types to attach to the sensitive_data_policy as custom_data_types
+# (custom_data_type_ref). Requires sensitive_data_policy_choice="custom". Empty => none.
+variable "sensitive_data_custom_type_refs" {
+  description = "Names of var.data_types to attach to the sensitive_data_policy custom_data_types."
+  type        = list(string)
+  default     = []
+}
+
+# LB sensitive_data_disclosure_rules.sensitive_data_types_in_response: for a given
+# api_endpoint (path + methods) and response body fields, mask or report disclosed
+# sensitive data. Empty => omit the block (0-change).
+variable "sensitive_data_disclosure_rules" {
+  description = "LB response sensitive-data disclosure rules: list of {path, methods, fields, action mask|report}."
+  type = list(object({
+    path    = string
+    methods = optional(list(string), [])
+    fields  = optional(list(string), [])
+    action  = optional(string, "mask") # mask | report
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for r in var.sensitive_data_disclosure_rules : contains(["mask", "report"], r.action)
+    ])
+    error_message = "sensitive_data_disclosure_rules action must be mask or report."
+  }
+}
