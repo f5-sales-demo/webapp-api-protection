@@ -133,6 +133,14 @@ module "http_lb" {
   api_protection_rules               = var.api_protection_rules
   validation_custom_rules            = var.validation_custom_rules
 
+  # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing
+  # suppressed => 0-change) and create no standalone resource.
+  api_testing_choice              = var.api_testing_choice
+  api_testing_standalone_enabled  = var.api_testing_standalone_enabled
+  api_testing_schedule            = var.api_testing_schedule
+  api_testing_custom_header_value = var.api_testing_custom_header_value
+  api_testing_domains             = var.api_testing_domains
+
   # Enabling client_side_defense on the LB requires a protected domain to already
   # exist in this namespace (F5 XC generates the CSD JS config from it), so the
   # LB must be created/updated AFTER the protected domain. The MUD entitlement
