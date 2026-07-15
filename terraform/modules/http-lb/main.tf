@@ -776,6 +776,81 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # API Testing (SP4) — LB api_testing_choice oneof: the inline api_testing block
+  # (scheduled/triggered API tests against domains with credentials) vs the server
+  # default disable_api_testing (import-suppressed => omit => 0-change). Shares the
+  # rendered domains/credentials with the standalone xcsh_api_testing resource (DRY);
+  # the LB surface carries no schedule. Emit only when api_testing_choice = "enabled".
+  dynamic "api_testing" {
+    for_each = var.api_testing_choice == "enabled" ? [1] : []
+    content {
+      custom_header_value = var.api_testing_custom_header_value
+
+      dynamic "domains" {
+        for_each = local.rendered_api_testing
+        content {
+          domain                    = domains.value.domain
+          allow_destructive_methods = domains.value.allow_destructive_methods
+
+          dynamic "credentials" {
+            for_each = domains.value.credentials
+            content {
+              credential_name = credentials.value.credential_name
+
+              dynamic "api_key" {
+                for_each = credentials.value.use_api_key ? [1] : []
+                content {
+                  key = credentials.value.api_key_name
+                  value {
+                    dynamic "blindfold_secret_info" {
+                      for_each = credentials.value.secret_use_blindfold ? [1] : []
+                      content { location = credentials.value.secret_location }
+                    }
+                    dynamic "clear_secret_info" {
+                      for_each = credentials.value.secret_use_blindfold ? [] : [1]
+                      content { url = credentials.value.secret_url }
+                    }
+                  }
+                }
+              }
+              dynamic "basic_auth" {
+                for_each = credentials.value.use_basic_auth ? [1] : []
+                content {
+                  user = credentials.value.user
+                  password {
+                    dynamic "blindfold_secret_info" {
+                      for_each = credentials.value.secret_use_blindfold ? [1] : []
+                      content { location = credentials.value.secret_location }
+                    }
+                    dynamic "clear_secret_info" {
+                      for_each = credentials.value.secret_use_blindfold ? [] : [1]
+                      content { url = credentials.value.secret_url }
+                    }
+                  }
+                }
+              }
+              dynamic "bearer_token" {
+                for_each = credentials.value.use_bearer ? [1] : []
+                content {
+                  token {
+                    dynamic "blindfold_secret_info" {
+                      for_each = credentials.value.secret_use_blindfold ? [1] : []
+                      content { location = credentials.value.secret_location }
+                    }
+                    dynamic "clear_secret_info" {
+                      for_each = credentials.value.secret_use_blindfold ? [] : [1]
+                      content { url = credentials.value.secret_url }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   # Client-Side Defense — inject the F5 XC telemetry JavaScript into served pages
   # to detect Magecart/formjacking/skimming (client_side_defense oneof vs the
   # server default disable_client_side_defense). Requires the CSD tenant addon
@@ -860,6 +935,16 @@ resource "xcsh_http_loadbalancer" "this" {
     precondition {
       condition     = var.api_discovery_code_scan != "selected" || length(var.api_discovery_code_scan_repos) > 0
       error_message = "api_discovery_code_scan=\"selected\" requires api_discovery_code_scan_repos to be non-empty."
+    }
+
+    # API testing (both surfaces) needs real domains — F5 XC rejects a domain with no
+    # credentials (500) and an api_testing block with no domains is meaningless. The
+    # standalone resource guards this in its own precondition; mirror it for the LB
+    # inline block so api_testing_choice="enabled" fails fast at plan (cross-variable,
+    # symmetric with the standalone path).
+    precondition {
+      condition     = var.api_testing_choice != "enabled" || length(var.api_testing_domains) > 0
+      error_message = "api_testing_choice=\"enabled\" requires at least one api_testing_domains entry."
     }
   }
 }
