@@ -128,8 +128,7 @@ module "http_lb" {
   api_validation_oversized_body      = var.api_validation_oversized_body
   api_validation_additional_params   = var.api_validation_additional_params
 
-  # API Protection (SP3) passthrough. Defaults keep every control off/suppressed (0-change).
-  client_matcher                     = var.client_matcher
+  # API Protection passthrough. Defaults keep every control off/suppressed (0-change).
   rate_limit_choice                  = var.rate_limit_choice
   rate_limit_total_number            = var.rate_limit_total_number
   rate_limit_unit                    = var.rate_limit_unit
@@ -151,6 +150,7 @@ module "http_lb" {
   sensitive_data_disclosure_rules    = var.sensitive_data_disclosure_rules
   data_guard_rules                   = var.data_guard_rules
   api_protection_rules               = var.api_protection_rules
+  api_protection_group_rules         = var.api_protection_group_rules
   validation_custom_rules            = var.validation_custom_rules
 
   # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing

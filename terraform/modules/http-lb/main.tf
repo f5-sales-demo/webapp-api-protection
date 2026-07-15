@@ -1301,60 +1301,384 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
-  # API protection rules (SP3) — allow/deny access to specific API endpoints,
-  # scoped by the shared client-matcher. Omitted when the list is empty (0-change).
-  # client_matcher is emitted only for the ip_prefix / ip_threat modes; "any" omits
-  # it (server default any_client) to stay import-clean.
+  # API protection rules (Coverage Batch D) — allow/deny access to API endpoints
+  # (api_endpoint_rules) or API groups / base paths (api_groups_rules), each scoped by
+  # a PER-RULE client_matcher (full oneof) + request_matcher. Omitted when both lists
+  # are empty (0-change). Omit a client_matcher for "match any" (server default
+  # any_client, import-suppressed). invert_matcher is now per-rule (methods_invert).
   dynamic "api_protection_rules" {
-    for_each = length(var.api_protection_rules) > 0 ? [1] : []
+    for_each = (length(var.api_protection_rules) + length(var.api_protection_group_rules)) > 0 ? [1] : []
     content {
       dynamic "api_endpoint_rules" {
         for_each = var.api_protection_rules
+        iterator = ep
         content {
           metadata {
-            name = "api-protection-${api_endpoint_rules.key}"
+            name = "api-protection-${ep.key}"
           }
-          api_endpoint_path = api_endpoint_rules.value.path
-
+          api_endpoint_path = ep.value.path
           dynamic "any_domain" {
-            for_each = api_endpoint_rules.value.domain_mode == "any" ? [1] : []
+            for_each = ep.value.domain_mode == "any" ? [1] : []
             content {}
           }
-          specific_domain = api_endpoint_rules.value.domain_mode == "specific" ? api_endpoint_rules.value.domain : null
-
+          specific_domain = ep.value.domain_mode == "specific" ? ep.value.domain : null
           api_endpoint_method {
-            # invert_matcher is a server-defaulted Optional bool: omitting it makes
-            # the provider report "was null, now false" (Optional-scalar-not-Computed
-            # codegen gap — see sp3-findings.md). Set it explicitly (non-inverted).
-            invert_matcher = false
-            methods        = api_endpoint_rules.value.methods
+            invert_matcher = ep.value.methods_invert
+            methods        = ep.value.methods
           }
-
           action {
             dynamic "allow" {
-              for_each = api_endpoint_rules.value.action == "allow" ? [1] : []
+              for_each = ep.value.action == "allow" ? [1] : []
               content {}
             }
             dynamic "deny" {
-              for_each = api_endpoint_rules.value.action == "deny" ? [1] : []
+              for_each = ep.value.action == "deny" ? [1] : []
               content {}
             }
           }
-
           dynamic "client_matcher" {
-            for_each = local.rendered_client_matcher.use_any ? [] : [1]
+            for_each = ep.value.client_matcher != null && ep.value.client_matcher.mode != null ? [ep.value.client_matcher] : []
+            iterator = cm
             content {
-              dynamic "ip_prefix_list" {
-                for_each = local.rendered_client_matcher.use_ip_prefix ? [1] : []
+              dynamic "any_ip" {
+                for_each = cm.value.mode == "any_ip" ? [1] : []
+                content {}
+              }
+              dynamic "asn_list" {
+                for_each = cm.value.mode == "asn_list" ? [1] : []
+                content { as_numbers = cm.value.as_numbers }
+              }
+              dynamic "asn_matcher" {
+                for_each = cm.value.mode == "asn_matcher" ? [1] : []
                 content {
-                  ip_prefixes  = local.rendered_client_matcher.ip_prefixes
-                  invert_match = local.rendered_client_matcher.invert
+                  dynamic "asn_sets" {
+                    for_each = cm.value.asn_sets
+                    content {
+                      name      = asn_sets.value.name
+                      namespace = coalesce(asn_sets.value.namespace, var.namespace)
+                    }
+                  }
+                }
+              }
+              dynamic "client_selector" {
+                for_each = cm.value.mode == "client_selector" ? [1] : []
+                content { expressions = cm.value.selector_expressions }
+              }
+              dynamic "ip_matcher" {
+                for_each = cm.value.mode == "ip_matcher" ? [1] : []
+                content {
+                  invert_matcher = cm.value.ip_invert
+                  dynamic "prefix_sets" {
+                    for_each = cm.value.ip_prefix_sets
+                    content {
+                      name      = prefix_sets.value.name
+                      namespace = coalesce(prefix_sets.value.namespace, var.namespace)
+                    }
+                  }
+                }
+              }
+              dynamic "ip_prefix_list" {
+                for_each = cm.value.mode == "ip_prefix_list" ? [1] : []
+                content {
+                  ip_prefixes  = cm.value.ip_prefixes
+                  invert_match = cm.value.ip_invert
                 }
               }
               dynamic "ip_threat_category_list" {
-                for_each = local.rendered_client_matcher.use_ip_threat ? [1] : []
+                for_each = cm.value.mode == "ip_threat_category_list" ? [1] : []
+                content { ip_threat_categories = cm.value.ip_threat_categories }
+              }
+              dynamic "tls_fingerprint_matcher" {
+                for_each = cm.value.mode == "tls_fingerprint_matcher" ? [1] : []
                 content {
-                  ip_threat_categories = local.rendered_client_matcher.ip_threat_categories
+                  classes         = length(cm.value.tls_classes) > 0 ? cm.value.tls_classes : null
+                  exact_values    = length(cm.value.tls_exact_values) > 0 ? cm.value.tls_exact_values : null
+                  excluded_values = length(cm.value.tls_excluded_values) > 0 ? cm.value.tls_excluded_values : null
+                }
+              }
+            }
+          }
+          dynamic "request_matcher" {
+            for_each = ep.value.request_matcher != null ? [ep.value.request_matcher] : []
+            iterator = rm
+            content {
+              dynamic "cookie_matchers" {
+                for_each = rm.value.cookies
+                iterator = m
+                content {
+                  name           = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+              dynamic "headers" {
+                for_each = rm.value.headers
+                iterator = m
+                content {
+                  name           = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+              dynamic "jwt_claims" {
+                for_each = rm.value.jwt_claims
+                iterator = m
+                content {
+                  name           = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+              dynamic "query_params" {
+                for_each = rm.value.query_params
+                iterator = m
+                content {
+                  key            = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      dynamic "api_groups_rules" {
+        for_each = var.api_protection_group_rules
+        iterator = gp
+        content {
+          metadata {
+            name = "api-protection-group-${gp.key}"
+          }
+          api_group = gp.value.api_group
+          base_path = gp.value.base_path
+          dynamic "any_domain" {
+            for_each = gp.value.domain_mode == "any" ? [1] : []
+            content {}
+          }
+          specific_domain = gp.value.domain_mode == "specific" ? gp.value.domain : null
+          action {
+            dynamic "allow" {
+              for_each = gp.value.action == "allow" ? [1] : []
+              content {}
+            }
+            dynamic "deny" {
+              for_each = gp.value.action == "deny" ? [1] : []
+              content {}
+            }
+          }
+          dynamic "client_matcher" {
+            for_each = gp.value.client_matcher != null && gp.value.client_matcher.mode != null ? [gp.value.client_matcher] : []
+            iterator = cm
+            content {
+              dynamic "any_ip" {
+                for_each = cm.value.mode == "any_ip" ? [1] : []
+                content {}
+              }
+              dynamic "asn_list" {
+                for_each = cm.value.mode == "asn_list" ? [1] : []
+                content { as_numbers = cm.value.as_numbers }
+              }
+              dynamic "asn_matcher" {
+                for_each = cm.value.mode == "asn_matcher" ? [1] : []
+                content {
+                  dynamic "asn_sets" {
+                    for_each = cm.value.asn_sets
+                    content {
+                      name      = asn_sets.value.name
+                      namespace = coalesce(asn_sets.value.namespace, var.namespace)
+                    }
+                  }
+                }
+              }
+              dynamic "client_selector" {
+                for_each = cm.value.mode == "client_selector" ? [1] : []
+                content { expressions = cm.value.selector_expressions }
+              }
+              dynamic "ip_matcher" {
+                for_each = cm.value.mode == "ip_matcher" ? [1] : []
+                content {
+                  invert_matcher = cm.value.ip_invert
+                  dynamic "prefix_sets" {
+                    for_each = cm.value.ip_prefix_sets
+                    content {
+                      name      = prefix_sets.value.name
+                      namespace = coalesce(prefix_sets.value.namespace, var.namespace)
+                    }
+                  }
+                }
+              }
+              dynamic "ip_prefix_list" {
+                for_each = cm.value.mode == "ip_prefix_list" ? [1] : []
+                content {
+                  ip_prefixes  = cm.value.ip_prefixes
+                  invert_match = cm.value.ip_invert
+                }
+              }
+              dynamic "ip_threat_category_list" {
+                for_each = cm.value.mode == "ip_threat_category_list" ? [1] : []
+                content { ip_threat_categories = cm.value.ip_threat_categories }
+              }
+              dynamic "tls_fingerprint_matcher" {
+                for_each = cm.value.mode == "tls_fingerprint_matcher" ? [1] : []
+                content {
+                  classes         = length(cm.value.tls_classes) > 0 ? cm.value.tls_classes : null
+                  exact_values    = length(cm.value.tls_exact_values) > 0 ? cm.value.tls_exact_values : null
+                  excluded_values = length(cm.value.tls_excluded_values) > 0 ? cm.value.tls_excluded_values : null
+                }
+              }
+            }
+          }
+          dynamic "request_matcher" {
+            for_each = gp.value.request_matcher != null ? [gp.value.request_matcher] : []
+            iterator = rm
+            content {
+              dynamic "headers" {
+                for_each = rm.value.headers
+                iterator = m
+                content {
+                  name           = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+              dynamic "cookie_matchers" {
+                for_each = rm.value.cookies
+                iterator = m
+                content {
+                  name           = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+              dynamic "jwt_claims" {
+                for_each = rm.value.jwt_claims
+                iterator = m
+                content {
+                  name           = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
+                }
+              }
+              dynamic "query_params" {
+                for_each = rm.value.query_params
+                iterator = m
+                content {
+                  key            = m.value.name
+                  invert_matcher = m.value.invert
+                  dynamic "check_present" {
+                    for_each = m.value.presence == "present" ? [1] : []
+                    content {}
+                  }
+                  dynamic "check_not_present" {
+                    for_each = m.value.presence == "absent" ? [1] : []
+                    content {}
+                  }
+                  dynamic "item" {
+                    for_each = m.value.presence == "match" ? [1] : []
+                    content {
+                      exact_values = length(m.value.exact_values) > 0 ? m.value.exact_values : null
+                      regex_values = length(m.value.regex_values) > 0 ? m.value.regex_values : null
+                    }
+                  }
                 }
               }
             }

@@ -1,6 +1,6 @@
-# Plan-level tests for API Protection (SP3): shared client-matcher, rate limiting,
-# sensitive data / data guard, api_protection_rules, validation_custom_list.
-# Targets ./modules/http-lb with a dummy origin.
+# Plan-level tests for API Protection: rate limiting, sensitive data / data guard,
+# api_protection_rules (per-rule client_matcher + request_matcher + api_groups_rules,
+# Coverage Batch D), validation_custom_list. Targets ./modules/http-lb.
 variables {
   namespace         = "webapp-api-protection"
   lb_domains        = ["www.f5-sales-demo.com"]
@@ -10,49 +10,6 @@ variables {
   labels            = {}
   csd_enabled       = false
   mud_enabled       = false
-}
-
-# --- Shared client-matcher (Task 1) ---
-run "client_matcher_any_default" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  assert {
-    condition     = output.client_matcher_mode == "any"
-    error_message = "client_matcher must default to any"
-  }
-}
-
-run "client_matcher_ip_prefix" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  variables {
-    client_matcher = { mode = "ip_prefix", ip_prefixes = ["10.0.0.0/8"], invert = false }
-  }
-  assert {
-    condition     = output.client_matcher_mode == "ip_prefix"
-    error_message = "ip_prefix client_matcher must render"
-  }
-}
-
-run "client_matcher_ip_threat" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  variables {
-    client_matcher = { mode = "ip_threat", ip_threat_categories = ["SPAM_SOURCES", "BOTNETS"] }
-  }
-  assert {
-    condition     = output.client_matcher_mode == "ip_threat"
-    error_message = "ip_threat client_matcher must render"
-  }
-}
-
-run "client_matcher_rejects_bad_mode" {
-  command = plan
-  module { source = "./modules/http-lb" }
-  variables {
-    client_matcher = { mode = "asn" }
-  }
-  expect_failures = [var.client_matcher]
 }
 
 # --- Rate limiting (Task 3) ---
@@ -173,16 +130,89 @@ run "api_protection_allow_and_deny" {
   }
 }
 
-run "api_protection_with_ip_threat_matcher" {
+run "api_protection_per_rule_ip_threat_and_invert" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
-    client_matcher       = { mode = "ip_threat", ip_threat_categories = ["BOTNETS", "TOR_PROXY"] }
-    api_protection_rules = [{ path = "/api/pay", action = "deny" }]
+    api_protection_rules = [{
+      path           = "/api/pay"
+      action         = "deny"
+      methods        = ["POST"]
+      methods_invert = true
+      client_matcher = { mode = "ip_threat_category_list", ip_threat_categories = ["BOTNETS", "TOR_PROXY"] }
+    }]
   }
   assert {
-    condition     = output.api_protection_rule_count == 1 && output.client_matcher_mode == "ip_threat"
-    error_message = "api_protection_rules with ip_threat client-matcher must render"
+    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].client_matcher.ip_threat_category_list != null && xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].api_endpoint_method.invert_matcher == true
+    error_message = "per-rule ip_threat client_matcher + methods_invert must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].action.deny != null && xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].action.allow == null
+    error_message = "action=deny must render (and allow omitted)"
+  }
+}
+
+run "api_protection_deep_matchers_and_request_matcher" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_rules = [{
+      path           = "/api/orders"
+      action         = "allow"
+      client_matcher = { mode = "asn_matcher", asn_sets = [{ name = "corp-asns" }] }
+      request_matcher = {
+        headers      = [{ name = "x-tenant", presence = "present" }]
+        query_params = [{ name = "debug", presence = "match", exact_values = ["1"] }]
+      }
+    }]
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].client_matcher.asn_matcher != null
+    error_message = "asn_matcher (ref sets) must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].request_matcher.headers[0].check_present != null && xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].request_matcher.query_params[0].item != null
+    error_message = "request_matcher header(present) + query_param(match) must render"
+  }
+}
+
+run "api_protection_tls_fingerprint_matcher" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_rules = [{
+      path           = "/api/bot"
+      action         = "deny"
+      client_matcher = { mode = "tls_fingerprint_matcher", tls_classes = ["ANY_MALICIOUS_FINGERPRINT"] }
+    }]
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].client_matcher.tls_fingerprint_matcher != null
+    error_message = "tls_fingerprint_matcher must render"
+  }
+}
+
+run "api_protection_rejects_bad_tls_class" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_rules = [{ path = "/x", client_matcher = { mode = "tls_fingerprint_matcher", tls_classes = ["Automated"] } }]
+  }
+  expect_failures = [var.api_protection_rules]
+}
+
+run "api_protection_group_rules_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_group_rules = [
+      { api_group = "sensitive", action = "deny", client_matcher = { mode = "ip_prefix_list", ip_prefixes = ["10.0.0.0/8"] } },
+      { base_path = "/api/internal", action = "allow" },
+    ]
+  }
+  assert {
+    condition     = output.api_protection_group_rule_count == 2 && xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].client_matcher.ip_prefix_list != null
+    error_message = "api_groups_rules (allow/deny + client_matcher) must render"
   }
 }
 
@@ -193,6 +223,78 @@ run "api_protection_rejects_bad_action" {
     api_protection_rules = [{ path = "/x", action = "block" }]
   }
   expect_failures = [var.api_protection_rules]
+}
+
+run "api_protection_rejects_bad_client_matcher_mode" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_rules = [{ path = "/x", client_matcher = { mode = "ip_prefixlist" } }]
+  }
+  expect_failures = [var.api_protection_rules]
+}
+
+run "api_protection_rejects_client_matcher_empty_payload" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_rules = [{ path = "/x", client_matcher = { mode = "asn_list" } }]
+  }
+  expect_failures = [var.api_protection_rules]
+}
+
+run "api_protection_group_rejects_no_target" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_group_rules = [{ action = "deny" }]
+  }
+  expect_failures = [var.api_protection_group_rules]
+}
+
+run "api_protection_group_rejects_client_matcher_empty_payload" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_group_rules = [{ base_path = "/x", client_matcher = { mode = "ip_prefix_list" } }]
+  }
+  expect_failures = [var.api_protection_group_rules]
+}
+
+run "api_protection_group_rejects_bad_tls_class" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_group_rules = [{ base_path = "/x", client_matcher = { mode = "tls_fingerprint_matcher", tls_classes = ["Nope"] } }]
+  }
+  expect_failures = [var.api_protection_group_rules]
+}
+
+run "api_protection_rejects_bad_ip_threat_category" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_rules = [{ path = "/x", client_matcher = { mode = "ip_threat_category_list", ip_threat_categories = ["MALWARE"] } }]
+  }
+  expect_failures = [var.api_protection_rules]
+}
+
+run "api_protection_rejects_bad_request_matcher_presence" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_rules = [{ path = "/x", request_matcher = { headers = [{ name = "x", presence = "maybe" }] } }]
+  }
+  expect_failures = [var.api_protection_rules]
+}
+
+run "api_protection_group_rejects_specific_without_domain" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_group_rules = [{ base_path = "/x", domain_mode = "specific" }]
+  }
+  expect_failures = [var.api_protection_group_rules]
 }
 
 # --- OpenAPI validation custom_list (Task 7 — SP2 deferral) ---
