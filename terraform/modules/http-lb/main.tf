@@ -1235,6 +1235,41 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # Sensitive-data disclosure (Batch C): for a given api_endpoint (path + methods)
+  # and response body fields, mask or report disclosed sensitive data. Omitted when
+  # the list is empty (0-change).
+  dynamic "sensitive_data_disclosure_rules" {
+    for_each = length(var.sensitive_data_disclosure_rules) > 0 ? [1] : []
+    content {
+      dynamic "sensitive_data_types_in_response" {
+        for_each = var.sensitive_data_disclosure_rules
+        iterator = d
+        content {
+          api_endpoint {
+            methods = length(d.value.methods) > 0 ? d.value.methods : null
+            path    = d.value.path
+          }
+          # body.fields requires >= 1 item; omit the whole body block when no fields
+          # are named (rule then applies to the whole response body).
+          dynamic "body" {
+            for_each = length(d.value.fields) > 0 ? [1] : []
+            content {
+              fields = d.value.fields
+            }
+          }
+          dynamic "mask" {
+            for_each = d.value.action == "mask" ? [1] : []
+            content {}
+          }
+          dynamic "report" {
+            for_each = d.value.action == "report" ? [1] : []
+            content {}
+          }
+        }
+      }
+    }
+  }
+
   # Data Guard — mask sensitive values (credit-card/SSN/...) in responses per
   # domain + path. Omitted when the list is empty (0-change). domain matcher is a
   # oneof (any_domain | exact_value | suffix_value); action is apply_data_guard vs
@@ -1542,6 +1577,14 @@ resource "xcsh_http_loadbalancer" "this" {
         [for r in var.api_rate_limit_server_url_rules : contains(keys(xcsh_rate_limiter.this), r.ref_rate_limiter) if r.ref_rate_limiter != null],
       ))
       error_message = "every api_rate_limit ref_rate_limiter must name a rate_limiters entry."
+    }
+
+    # custom_data_types attach to the standalone sensitive_data_policy, so they need
+    # that policy selected. The ref-exists check lives on xcsh_sensitive_data_policy
+    # (the resource that indexes xcsh_data_type), so it is not duplicated here.
+    precondition {
+      condition     = length(var.sensitive_data_custom_type_refs) == 0 || var.sensitive_data_policy_choice == "custom"
+      error_message = "sensitive_data_custom_type_refs requires sensitive_data_policy_choice=\"custom\"."
     }
   }
 }

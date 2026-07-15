@@ -146,6 +146,9 @@ module "http_lb" {
   sensitive_data_compliances         = var.sensitive_data_compliances
   sensitive_data_disabled_predefined = var.sensitive_data_disabled_predefined
   sensitive_data_policy_choice       = var.sensitive_data_policy_choice
+  data_types                         = var.data_types
+  sensitive_data_custom_type_refs    = var.sensitive_data_custom_type_refs
+  sensitive_data_disclosure_rules    = var.sensitive_data_disclosure_rules
   data_guard_rules                   = var.data_guard_rules
   api_protection_rules               = var.api_protection_rules
   validation_custom_rules            = var.validation_custom_rules
