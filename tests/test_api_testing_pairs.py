@@ -2,6 +2,7 @@
 
 import itertools
 import json
+from typing import Any, cast
 
 import api_testing_pairs as m
 
@@ -42,8 +43,9 @@ def test_canonical_restore_is_last_and_off() -> None:
     """The final variant restores canonical (API testing off)."""
     last = m.build()[-1]
     assert last["name"] == "canonical-restore"
-    assert last["vars"]["api_testing_choice"] == "disable"
-    assert last["vars"]["api_testing_standalone_enabled"] is False
+    variant_vars = cast("dict[str, Any]", last["vars"])
+    assert variant_vars["api_testing_choice"] == "disable"
+    assert variant_vars["api_testing_standalone_enabled"] is False
 
 
 def test_flags_match_secret_arms() -> None:
@@ -52,23 +54,26 @@ def test_flags_match_secret_arms() -> None:
         if v["name"] == "canonical-restore":
             assert v["flag"] == "LIVE"
             continue
-        creds = v["vars"]["api_testing_domains"][0]["credentials"][0]
+        variant_vars = cast("dict[str, Any]", v["vars"])
+        creds = variant_vars["api_testing_domains"][0]["credentials"][0]
         assert creds["auth_type"] in ("api_key", "basic_auth", "bearer_token")
         secret = creds["secret"]
+        flag = cast(str, v["flag"])
         if secret["method"] == "blindfold":
-            assert v["flag"].startswith("SKIP:")
+            assert flag.startswith("SKIP:")
             assert secret["location"] == m.BF_PLACEHOLDER
         else:
-            assert v["flag"] == "SECRET"
+            assert flag == "SECRET"
             assert secret["plaintext"] == m.CLEAR_VALUE_MARKER
 
 
 def test_secret_never_holds_real_value() -> None:
     """The manifest must carry only placeholders, never a real secret."""
     for v in m.build():
-        blob = json_dump(v["vars"])
-        for cred in (
-            v["vars"].get("api_testing_domains", [{}])[0].get("credentials", [])
+        variant_vars = cast("dict[str, Any]", v["vars"])
+        blob = json_dump(variant_vars)
+        for cred in variant_vars.get("api_testing_domains", [{}])[0].get(
+            "credentials", []
         ):
             sec = cred.get("secret")
             if sec and sec["method"] == "clear":
@@ -78,7 +83,7 @@ def test_secret_never_holds_real_value() -> None:
 def test_schedule_only_on_standalone_surfaces() -> None:
     """schedule is emitted only when a standalone resource exists."""
     for v in m.build():
-        vs = v["vars"]
+        vs = cast("dict[str, Any]", v["vars"])
         if vs.get("api_testing_standalone_enabled"):
             assert "api_testing_schedule" in vs
         elif v["name"] != "canonical-restore":
