@@ -4,16 +4,11 @@
 # correctness gap where all_spec_endpoints hardcoded skip_validation (built inventory but
 # enforced nothing). Only api_validation_request_properties is ALSO shared with
 # validation_custom_list (whose fall_through/per-rule action stay in its own arm).
+# The 8 OpenAPI properties the LB can validate (request or response side):
+# PROPERTY_QUERY_PARAMETERS, PROPERTY_PATH_PARAMETERS, PROPERTY_CONTENT_TYPE,
+# PROPERTY_COOKIE_PARAMETERS, PROPERTY_HTTP_HEADERS, PROPERTY_HTTP_BODY,
+# PROPERTY_SECURITY_SCHEMA, PROPERTY_RESPONSE_CODE.
 # ---------------------------------------------------------------------------
-
-# The 8 OpenAPI properties the LB can validate (request or response side).
-locals {
-  _api_validation_properties = [
-    "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE",
-    "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY",
-    "PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE",
-  ]
-}
 
 # Request-side enforcement for validation_all_spec_endpoints:
 #   skip   -> validation_mode { skip_validation {} }               (no enforcement)
