@@ -26,6 +26,10 @@ locals {
     }
   }
 
+  # LB name — shared by the LB resource and app_api_group (which references the LB by
+  # this static name to avoid a resource-dependency cycle; see app_api_group.tf).
+  lb_name = "webapp-api-protection"
+
   # Named aliases for consumers (keep references stable/short).
   api_crawler_password_secret = local.rendered_secret["api_crawler_password"]
   scm_token                   = local.rendered_secret["code_base_integration_token"]
