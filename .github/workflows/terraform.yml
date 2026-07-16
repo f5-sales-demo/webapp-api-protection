@@ -31,10 +31,12 @@ permissions:
 
 env:
   TF_IN_AUTOMATION: 'true'
-  # terraform test configures the xcsh provider; the plan-level tests do not call the API,
-  # so a placeholder token suffices and CI needs no real credentials of any kind.
-  XCSH_API_URL: https://placeholder.local
-  XCSH_API_TOKEN: ci-plan-tests-placeholder
+  # terraform test configures the xcsh provider; the plan-level tests are command = plan and
+  # do not call the API, but the provider still needs the vars set to configure. Reference the
+  # existing XCSH secrets (never hardcode a token-shaped value in the workflow — trivy/checkov
+  # flag that). No Azure credentials are used anywhere in this workflow.
+  XCSH_API_URL: ${{ secrets.XCSH_API_URL }}
+  XCSH_API_TOKEN: ${{ secrets.XCSH_API_TOKEN }}
 
 jobs:
   validate:
