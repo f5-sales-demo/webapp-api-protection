@@ -332,6 +332,27 @@ run "action_skip_arms_render" {
   }
 }
 
+# waf skip with bot/mum OMITTED under ALLOW is valid (bot/mum are independent of waf —
+# the SPol-4a all-or-nothing precondition was a misdiagnosis of the DENY rejection).
+run "action_skip_omit_bot_mum_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name  = "spol4i", rule_handling = "rule_list"
+      rules = [{ name = "r0", action = "ALLOW", waf_action_mode = "skip" }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4i"].rule_list.rules[0].spec.waf_action.waf_skip_processing != null
+    error_message = "waf skip with omitted bot/mum must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4i"].rule_list.rules[0].spec.bot_action == null && xcsh_service_policy.this["spol4i"].rule_list.rules[0].spec.mum_action == null
+    error_message = "omitted bot/mum must stay null alongside waf skip"
+  }
+}
+
 run "action_default_waf_none_no_bot_mum" {
   command = plan
   module { source = "./modules/http-lb" }
@@ -357,11 +378,169 @@ run "action_rejects_bad_waf_mode" {
   expect_failures = [var.service_policies]
 }
 
-run "action_rejects_partial_skip" {
+# A configured WAF action (skip or detection_control) on a DENY rule is rejected by F5 XC.
+run "action_rejects_waf_on_deny" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
-    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", waf_action_mode = "skip", bot_action_mode = "omit", mum_action_mode = "skip" }] }]
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", action = "DENY", waf_action_mode = "skip" }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+# --- SPol-4b: detection_control renders all four exclusion lists ---
+run "detection_control_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name          = "spol4b-dc"
+      rule_handling = "rule_list"
+      rules = [{
+        name                             = "r0", action = "ALLOW", waf_action_mode = "detection_control"
+        waf_exclude_attack_type_contexts = [{ context = "CONTEXT_ANY", exclude_attack_type = "ATTACK_TYPE_SQL_INJECTION" }]
+        waf_exclude_violation_contexts   = [{ context = "CONTEXT_HEADER", context_name = "x-h", exclude_violation = "VIOL_JSON_MALFORMED" }]
+        waf_exclude_signature_contexts   = [{ context = "CONTEXT_URL", signature_id = 200000001 }]
+        waf_exclude_bot_names            = ["curl"]
+      }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4b-dc"].rule_list.rules[0].spec.waf_action.app_firewall_detection_control.exclude_attack_type_contexts[0].exclude_attack_type == "ATTACK_TYPE_SQL_INJECTION"
+    error_message = "detection_control attack-type exclusion must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4b-dc"].rule_list.rules[0].spec.waf_action.app_firewall_detection_control.exclude_bot_name_contexts[0].bot_name == "curl"
+    error_message = "detection_control bot-name exclusion must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4b-dc"].rule_list.rules[0].spec.waf_action.app_firewall_detection_control.exclude_signature_contexts[0].signature_id == 200000001
+    error_message = "detection_control signature exclusion must render"
+  }
+}
+
+# --- SPol-4b: segment_policy markers render ---
+run "segment_policy_markers_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name          = "spol4b-seg"
+      rule_handling = "rule_list"
+      rules         = [{ name = "r0", action = "DENY", segment_src = "any", segment_dst = "any" }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4b-seg"].rule_list.rules[0].spec.segment_policy.src_any != null && xcsh_service_policy.this["spol4b-seg"].rule_list.rules[0].spec.segment_policy.dst_any != null
+    error_message = "segment_policy src_any/dst_any markers must render"
+  }
+}
+
+run "segment_policy_omitted_by_default" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "spol4b-nseg", rule_handling = "rule_list", rules = [{ name = "r0", action = "DENY" }] }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4b-nseg"].rule_list.rules[0].spec.segment_policy == null
+    error_message = "segment_policy must be omitted (null) when no marker selected"
+  }
+}
+
+# --- SPol-4b: request_constraints emits exceeds where set + none markers elsewhere ---
+run "request_constraints_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name          = "spol4b-rc"
+      rule_handling = "rule_list"
+      rules         = [{ name = "r0", action = "DENY", request_constraints_enabled = true, max_url_size = 2048 }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4b-rc"].rule_list.rules[0].spec.request_constraints.max_url_size_exceeds == 2048
+    error_message = "request_constraints set dimension must render max_*_exceeds"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4b-rc"].rule_list.rules[0].spec.request_constraints.max_cookie_count_none != null
+    error_message = "request_constraints unset dimension must render max_*_none marker"
+  }
+}
+
+run "request_constraints_omitted_by_default" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "spol4b-nrc", rule_handling = "rule_list", rules = [{ name = "r0", action = "DENY" }] }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4b-nrc"].rule_list.rules[0].spec.request_constraints == null
+    error_message = "request_constraints must be omitted (null) when not enabled"
+  }
+}
+
+# --- SPol-4b validation rejections ---
+run "detection_control_rejects_deny" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", action = "DENY", waf_action_mode = "detection_control", waf_exclude_bot_names = ["curl"] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "detection_control_rejects_empty" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", action = "ALLOW", waf_action_mode = "detection_control" }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "detection_control_rejects_exclusions_without_mode" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", action = "DENY", waf_exclude_bot_names = ["curl"] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "detection_control_rejects_bad_context" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", action = "ALLOW", waf_action_mode = "detection_control", waf_exclude_violation_contexts = [{ context = "CONTEXT_BOGUS", exclude_violation = "VIOL_NONE" }] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "detection_control_rejects_bad_attack_type" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", action = "ALLOW", waf_action_mode = "detection_control", waf_exclude_attack_type_contexts = [{ exclude_attack_type = "ATTACK_TYPE_BOGUS" }] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "detection_control_rejects_bad_signature_id" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", action = "ALLOW", waf_action_mode = "detection_control", waf_exclude_signature_contexts = [{ signature_id = 42 }] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "segment_policy_rejects_bad_src" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", action = "DENY", segment_src = "segments" }] }]
   }
   expect_failures = [var.service_policies]
 }

@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
-"""Generate the service_policy action-side (SPol-4a) coverage matrix.
+"""Generate the service_policy action-side + constraints (SPol-4a/4b) coverage matrix.
 
-AETG all-pairs over the four per-rule matcher oneofs, each variant a rule_list policy
-with one rule exercising the (client, asn, ip, tls) combination, LB-detached
-(service_policies_choice=omit) so the standalone policy destroys cleanly without the
-two-phase detach the attached case needs. Plus canonical restore.
+AETG all-pairs over the per-rule action-side oneofs and constraint blocks, each variant a
+rule_list policy with one rule, LB-detached (service_policies_choice=omit) so the standalone
+policy destroys cleanly without the two-phase detach the attached case needs. Plus canonical
+restore.
 
-Matcher dimensions (inline arms; asn_matcher/ip_matcher bgp_asn_set/ip_prefix_set refs
-are SPol-2b):
-  client  any | selector | name | name_matcher | ip_threat
-  asn     any | list
-  ip      any | prefix_list
-  tls     none | matcher | ja4
+Dimensions:
+  waf  none | skip | detection_control   (waf_action arm)
+  bot  omit | skip                        (bot_action)
+  mum  omit | skip                        (mum_action)
+  seg  omit | any | intra                 (segment_policy markers; segments refs deferred)
+  rc   off | on                           (request_constraints, exceeds + none markers)
+
+The rule action is derived from waf: a configured WAF action (skip/detection_control) is
+rejected by F5 XC on a DENY rule ("WAF Action cannot be configured for a rule with action
+DENY" — live-verified), so waf!=none => action ALLOW, else DENY. bot/mum are independent of
+waf and of each other (the SPol-4a all-or-nothing rule was a misdiagnosis of that DENY
+rejection). All generated combinations are therefore valid; no combos are filtered.
 
 Deterministic (no RNG). Output: JSON to stdout, or files via --emit.
 """
@@ -25,9 +31,11 @@ from pathlib import Path
 POLICY_NAME = "matrix-spol-a"
 
 DIMENSIONS = {
-    "waf": ["none", "skip"],
+    "waf": ["none", "skip", "detection_control"],
     "bot": ["omit", "skip"],
     "mum": ["omit", "skip"],
+    "seg": ["omit", "any", "intra"],
+    "rc": ["off", "on"],
 }
 
 
@@ -73,14 +81,40 @@ def all_pairs(dims: dict[str, list[str]]) -> list[dict[str, str]]:
 
 
 def rule(v: Mapping[str, object]) -> dict[str, object]:
-    """Build one rule from an action-side row."""
-    return {
+    """Build one rule from an action-side + constraints row."""
+    waf = v["waf"]
+    # A configured WAF action requires a non-DENY rule (F5 XC constraint).
+    r: dict[str, object] = {
         "name": "r0",
-        "action": "DENY",
-        "waf_action_mode": v["waf"],
-        "bot_action_mode": v["bot"],
-        "mum_action_mode": v["mum"],
+        "action": "DENY" if waf == "none" else "ALLOW",
+        "waf_action_mode": waf,
     }
+    if waf == "detection_control":
+        # Exercise all four exclusion list types: attack-type (default CONTEXT_ANY), violation
+        # (CONTEXT_HEADER), signature (CONTEXT_URL + id), and bot-name.
+        r["waf_exclude_attack_type_contexts"] = [
+            {"exclude_attack_type": "ATTACK_TYPE_SQL_INJECTION"}
+        ]
+        r["waf_exclude_violation_contexts"] = [
+            {"context": "CONTEXT_HEADER", "exclude_violation": "VIOL_JSON_MALFORMED"}
+        ]
+        r["waf_exclude_signature_contexts"] = [
+            {"context": "CONTEXT_URL", "signature_id": 200000001}
+        ]
+        r["waf_exclude_bot_names"] = ["curl"]
+    if v["bot"] == "skip":
+        r["bot_action_mode"] = "skip"
+    if v["mum"] == "skip":
+        r["mum_action_mode"] = "skip"
+    if v["seg"] == "any":
+        r["segment_src"] = "any"
+        r["segment_dst"] = "any"
+    elif v["seg"] == "intra":
+        r["segment_intra"] = True
+    if v["rc"] == "on":
+        r["request_constraints_enabled"] = True
+        r["max_url_size"] = 2048
+    return r
 
 
 def payloads(v: Mapping[str, object]) -> dict[str, object]:
@@ -104,10 +138,8 @@ def build() -> list[dict[str, object]]:
     seen: set[str] = set()
     idx = 0
     for row in all_pairs(DIMENSIONS):
-        # F5 XC skip-processing is all-or-nothing: waf=skip requires bot=skip AND mum=skip
-        # (live-verified). Skip invalid combos the module precondition rejects.
-        if row["waf"] == "skip" and not (row["bot"] == "skip" and row["mum"] == "skip"):
-            continue
+        # All combinations are valid (action is derived from waf to satisfy the DENY
+        # coupling; bot/mum/seg/rc are independent) — nothing to filter.
         vars_ = payloads(row)
         key = json.dumps(vars_, sort_keys=True)
         if key in seen:
