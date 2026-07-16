@@ -442,6 +442,29 @@ resource "xcsh_http_loadbalancer" "this" {
     namespace = xcsh_app_firewall.this.namespace
   }
 
+  # Service policies (SPol effort) — service_policies_choice oneof:
+  #   omit   => emit neither arm; server applies default service_policies_from_namespace
+  #             (import-suppressed) — a 0-change no-op.
+  #   none   => no_service_policies {} (also import-suppressed on the empty arm).
+  #   active => active_service_policies referencing var.service_policy_active in order
+  #             (evaluation is top-to-bottom). tenant is Computed — omit it.
+  dynamic "no_service_policies" {
+    for_each = var.service_policies_choice == "none" ? [1] : []
+    content {}
+  }
+  dynamic "active_service_policies" {
+    for_each = var.service_policies_choice == "active" ? [1] : []
+    content {
+      dynamic "policies" {
+        for_each = var.service_policy_active
+        content {
+          name      = xcsh_service_policy.this[policies.value].name
+          namespace = var.namespace
+        }
+      }
+    }
+  }
+
   # Enable API Discovery — learn the API schema from live traffic. This is the
   # discovery oneof (enable vs disable_api_discovery); independent of
   # api_specification / xcsh_api_definition (that path is enforcement, not
@@ -1895,6 +1918,21 @@ resource "xcsh_http_loadbalancer" "this" {
     precondition {
       condition     = alltrue([for r in var.rate_limit_policy_refs : contains([for p in var.rate_limiter_policies : p.name], r)])
       error_message = "every rate_limit_policy_refs entry must name a rate_limiter_policies entry."
+    }
+
+    # active_service_policies references standalone service_policies by name, in order;
+    # every ref must resolve to a created policy, and names only apply on the active arm.
+    precondition {
+      condition     = alltrue([for r in var.service_policy_active : contains([for p in var.service_policies : p.name], r)])
+      error_message = "every service_policy_active entry must name a service_policies entry."
+    }
+    precondition {
+      condition     = length(var.service_policy_active) == 0 || var.service_policies_choice == "active"
+      error_message = "service_policy_active requires service_policies_choice=\"active\"."
+    }
+    precondition {
+      condition     = var.service_policies_choice != "active" || length(var.service_policy_active) > 0
+      error_message = "service_policies_choice=\"active\" requires at least one service_policy_active entry."
     }
 
     # The api_rate_limit rule lists only apply on the api_rate_limit arm, and every

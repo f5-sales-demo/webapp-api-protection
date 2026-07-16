@@ -38,7 +38,14 @@ terraform {
       # shadowed the outer map var, sending "http_loadbalancer": {} and dropping the LB
       # association -> 400. 3.72.1 names the marshal map var by nesting path so the outer
       # map carries the populated ref, so xcsh_app_api_group applies.
-      version = ">= 3.72.1"
+      #
+      # >= 3.72.4: SPol-1 service_policy foundation (provider #1117, PR #1118). Seeds the
+      # xcsh_service_policy / xcsh_service_policy_rule server-default empty markers
+      # (any_server/any_client/any_asn/any_ip, waf/bot none, mum default, segment
+      # src_any/dst_any/intra_segment, per-list check_present/not_present, 13
+      # request_constraints max_*_none) so the standalone service policies this module
+      # now creates are round-trip-import clean.
+      version = ">= 3.72.4"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which
