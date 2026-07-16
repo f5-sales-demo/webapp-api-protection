@@ -283,6 +283,108 @@ run "ref_ip_matcher_rejects_undefined_set" {
   expect_failures = [var.service_policies]
 }
 
+# ============================================================================
+# SPol-3b: remaining rule matchers
+# ============================================================================
+
+run "spol3b_list_matchers_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name          = "spol3b-l"
+      rule_handling = "rule_list"
+      rules = [{
+        name            = "r0", action = "DENY"
+        arg_matchers    = [{ name = "q", presence = "match", exact_values = ["1"], transformers = ["LOWER_CASE"] }]
+        cookie_matchers = [{ name = "sid", presence = "present" }]
+        jwt_claims      = [{ name = "sub", presence = "match", exact_values = ["admin"] }]
+      }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3b-l"].rule_list.rules[0].spec.arg_matchers[0].item.transformers[0] == "LOWER_CASE"
+    error_message = "arg_matchers item transformers must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3b-l"].rule_list.rules[0].spec.cookie_matchers[0].check_present != null
+    error_message = "cookie_matchers present marker must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3b-l"].rule_list.rules[0].spec.jwt_claims[0].item.exact_values[0] == "admin"
+    error_message = "jwt_claims item must render"
+  }
+}
+
+run "spol3b_single_matchers_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name          = "spol3b-s"
+      rule_handling = "rule_list"
+      rules = [{
+        name                = "r0", action = "DENY"
+        body_regex          = [".*evil.*"]
+        user_identity_exact = ["u1"]
+        label_keys          = ["env"]
+        port_ports          = ["443"]
+        api_groups          = ["grp1"]
+      }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3b-s"].rule_list.rules[0].spec.body_matcher.regex_values[0] == ".*evil.*"
+    error_message = "body_matcher must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3b-s"].rule_list.rules[0].spec.user_identity_matcher.exact_values[0] == "u1"
+    error_message = "user_identity_matcher must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3b-s"].rule_list.rules[0].spec.label_matcher.keys[0] == "env"
+    error_message = "label_matcher must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3b-s"].rule_list.rules[0].spec.port_matcher.ports[0] == "443"
+    error_message = "port_matcher must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3b-s"].rule_list.rules[0].spec.api_group_matcher.match[0] == "grp1"
+    error_message = "api_group_matcher must render"
+  }
+}
+
+run "spol3b_matchers_omitted_by_default" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "spol3b-n", rule_handling = "rule_list", rules = [{ name = "r0", action = "DENY" }] }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3b-n"].rule_list.rules[0].spec.port_matcher == null && xcsh_service_policy.this["spol3b-n"].rule_list.rules[0].spec.body_matcher == null
+    error_message = "SPol-3b matchers must be omitted (null) when unset"
+  }
+}
+
+run "spol3b_rejects_bad_transformer" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", arg_matchers = [{ name = "q", exact_values = ["1"], transformers = ["ROT13"] }] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "spol3b_rejects_bad_presence" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", cookie_matchers = [{ name = "sid", presence = "maybe" }] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
 run "matcher_rejects_bad_tls_class" {
   command = plan
   module { source = "./modules/http-lb" }
