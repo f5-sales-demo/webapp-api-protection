@@ -51,11 +51,15 @@ variable "code_base_integration_verify_ssl" {
 }
 
 variable "code_base_integration_access_token" {
-  description = "GitHub access token as a selectable clear/blindfold secret. clear: set plaintext. blindfold: set location to a pre-sealed 'string:///...' from scripts/blindfold-seal.sh."
+  description = "SCM access token/passwd as a selectable clear/blindfold secret. clear: set plaintext (or provider_ref). blindfold: set location to a pre-sealed 'string:///...' from scripts/blindfold-seal.sh (optionally store_provider/decryption_provider for an external secret backend)."
   type = object({
     method    = optional(string, "clear")
     plaintext = optional(string)
     location  = optional(string)
+    # Optional external secret-management backend refs (Batch G):
+    store_provider      = optional(string)
+    decryption_provider = optional(string)
+    provider_ref        = optional(string)
   })
   default   = { method = "clear", plaintext = null }
   sensitive = true
@@ -68,6 +72,16 @@ variable "code_base_integration_access_token" {
   validation {
     condition     = var.code_base_integration_access_token.method != "blindfold" || var.code_base_integration_access_token.location != null
     error_message = "blindfold method requires a pre-sealed location (run scripts/blindfold-seal.sh)."
+  }
+
+  validation {
+    condition     = var.code_base_integration_access_token.method == "blindfold" || (var.code_base_integration_access_token.store_provider == null && var.code_base_integration_access_token.decryption_provider == null)
+    error_message = "store_provider/decryption_provider are blindfold-only secret backends."
+  }
+
+  validation {
+    condition     = var.code_base_integration_access_token.method == "clear" || var.code_base_integration_access_token.provider_ref == null
+    error_message = "provider_ref is a clear-secret backend only."
   }
 }
 

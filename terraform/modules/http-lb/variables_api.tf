@@ -16,11 +16,15 @@
 # pinned here (produced by scripts/blindfold-seal.sh). This is the F5-documented
 # offline-blindfold pattern and is idempotent + import-clean.
 variable "api_crawler_password" {
-  description = "API crawler login password. clear: set plaintext. blindfold: set location to a pre-sealed 'string:///...' value from scripts/blindfold-seal.sh."
+  description = "API crawler login password. clear: set plaintext (or provider_ref for an external secret-mgmt provider). blindfold: set location to a pre-sealed 'string:///...' value from scripts/blindfold-seal.sh (optionally store_provider/decryption_provider for an external secret backend)."
   type = object({
     method    = optional(string, "clear")
     plaintext = optional(string) # clear arm
     location  = optional(string) # blindfold arm: pre-sealed string:///...
+    # Optional external secret-management backend refs (Batch G):
+    store_provider      = optional(string) # blindfold: store the sealed secret lives in
+    decryption_provider = optional(string) # blindfold: provider that decrypts it
+    provider_ref        = optional(string) # clear: secret-mgmt provider serving the value
   })
   default   = { method = "clear", plaintext = null }
   sensitive = true
@@ -33,6 +37,16 @@ variable "api_crawler_password" {
   validation {
     condition     = var.api_crawler_password.method != "blindfold" || var.api_crawler_password.location != null
     error_message = "blindfold method requires a pre-sealed location (run scripts/blindfold-seal.sh)."
+  }
+
+  validation {
+    condition     = var.api_crawler_password.method == "blindfold" || (var.api_crawler_password.store_provider == null && var.api_crawler_password.decryption_provider == null)
+    error_message = "store_provider/decryption_provider are blindfold-only secret backends."
+  }
+
+  validation {
+    condition     = var.api_crawler_password.method == "clear" || var.api_crawler_password.provider_ref == null
+    error_message = "provider_ref is a clear-secret backend only."
   }
 }
 

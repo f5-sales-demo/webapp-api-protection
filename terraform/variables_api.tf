@@ -47,9 +47,12 @@ variable "api_crawler_domains" {
 variable "api_crawler_password" {
   description = "API crawler login password. clear: set plaintext. blindfold: set location to a pre-sealed 'string:///...' from scripts/blindfold-seal.sh."
   type = object({
-    method    = optional(string, "clear")
-    plaintext = optional(string)
-    location  = optional(string)
+    method              = optional(string, "clear")
+    plaintext           = optional(string)
+    location            = optional(string)
+    store_provider      = optional(string)
+    decryption_provider = optional(string)
+    provider_ref        = optional(string)
   })
   default   = { method = "clear", plaintext = null }
   sensitive = true
