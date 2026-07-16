@@ -51,7 +51,7 @@ sys.exit(0 if active is not None and n > 0 else 1)
 
 echo "== 2) Drive traffic (deny path expect 403, control expect non-403) =="
 url="${TARGET_PROTOCOL}://${TARGET}"
-CURL=(curl -sk --max-time 10 -o /dev/null -w '%{http_code}' -A "spol5-verify")
+CURL=(curl -s --max-time 10 -o /dev/null -w '%{http_code}' -A "spol5-verify")
 blocked=0
 for i in 1 2 3; do
   code=$("${CURL[@]}" "${url}${DENY_PATH}" || echo "000")
