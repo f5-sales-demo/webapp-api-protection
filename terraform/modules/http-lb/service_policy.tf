@@ -60,11 +60,32 @@ resource "xcsh_service_policy" "this" {
           }
           spec {
             action = rules.value.action
-            # F5 XC requires an action-side block on every rule; waf_action { none {} }
-            # is the minimal "no WAF action" form (the server-default base member, which
-            # the provider suppresses on import). SPol-4 parameterizes waf/bot/mum actions.
+            # F5 XC requires waf_action on every rule (SPol-1). SPol-4a parameterizes the
+            # arm: none (no WAF action) or skip (waf_skip_processing). detection-control
+            # exclusions are SPol-4b.
             waf_action {
-              none {}
+              dynamic "none" {
+                for_each = rules.value.waf_action_mode == "none" ? [1] : []
+                content {}
+              }
+              dynamic "waf_skip_processing" {
+                for_each = rules.value.waf_action_mode == "skip" ? [1] : []
+                content {}
+              }
+            }
+            # bot_action / mum_action: omitted by default (server returns null); a concrete
+            # skip arm emits the block. SPol-4b adds any further arms.
+            dynamic "bot_action" {
+              for_each = rules.value.bot_action_mode == "skip" ? [1] : []
+              content {
+                bot_skip_processing {}
+              }
+            }
+            dynamic "mum_action" {
+              for_each = rules.value.mum_action_mode == "skip" ? [1] : []
+              content {
+                skip_processing {}
+              }
             }
 
             # --- SPol-2 client matcher oneof (omit => server-default any_client, suppressed) ---
