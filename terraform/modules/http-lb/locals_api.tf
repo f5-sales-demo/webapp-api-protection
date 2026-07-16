@@ -23,6 +23,10 @@ locals {
         ? "string:///${base64encode(s.plaintext)}"
       : null)
       location = s.method == "blindfold" ? s.location : null
+      # Optional external secret-management backend refs (Batch G); null unless set.
+      store_provider      = s.method == "blindfold" ? s.store_provider : null
+      decryption_provider = s.method == "blindfold" ? s.decryption_provider : null
+      provider_ref        = s.method == "clear" ? s.provider_ref : null
     }
   }
 
@@ -36,7 +40,8 @@ locals {
 
   # Precomputed single-element (or empty) selectors for the SCM token secret arm, so
   # each of the 7 provider arms renders the same compact blindfold/clear dynamic pair
-  # (one selection expression, not a repeated ternary per arm).
-  scm_token_blindfold = local.scm_token.use_blindfold ? [local.scm_token.location] : []
-  scm_token_clear     = local.scm_token.use_blindfold ? [] : [local.scm_token.url]
+  # (one selection expression, not a repeated ternary per arm). The element is the whole
+  # rendered secret so each block can also emit the optional backend fields (Batch G).
+  scm_token_blindfold = local.scm_token.use_blindfold ? [local.scm_token] : []
+  scm_token_clear     = local.scm_token.use_blindfold ? [] : [local.scm_token]
 }
