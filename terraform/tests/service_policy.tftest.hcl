@@ -248,3 +248,59 @@ run "matcher_rejects_bad_client_selector_arm" {
   }
   expect_failures = [var.service_policies]
 }
+
+# ============================================================================
+# SPol-3: rule request matchers
+# ============================================================================
+
+run "request_matchers_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name = "spol3", rule_handling = "rule_list"
+      rules = [{
+        name         = "r0", action = "DENY"
+        http_methods = ["POST", "DELETE"]
+        path_prefix  = ["/admin"]
+        domain_exact = ["www.f5-sales-demo.com"]
+        headers      = [{ name = "x-test", presence = "match", exact_values = ["v1"] }, { name = "x-must", presence = "present" }]
+        query_params = [{ key = "debug", presence = "match", exact_values = ["1"] }]
+      }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3"].rule_list.rules[0].spec.http_method.methods[0] == "POST"
+    error_message = "http_method must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3"].rule_list.rules[0].spec.path.prefix_values[0] == "/admin"
+    error_message = "path.prefix_values must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3"].rule_list.rules[0].spec.headers[0].item.exact_values[0] == "v1"
+    error_message = "header item exact_values must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol3"].rule_list.rules[0].spec.headers[1].check_present != null
+    error_message = "header presence=present must render check_present"
+  }
+}
+
+run "request_rejects_bad_http_method" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", http_methods = ["FETCH"] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "request_rejects_bad_header_presence" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", headers = [{ name = "h", presence = "maybe" }] }] }]
+  }
+  expect_failures = [var.service_policies]
+}

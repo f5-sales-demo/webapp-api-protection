@@ -43,6 +43,30 @@ variable "service_policies" {
       tls_exact    = optional(list(string), [])
       tls_excluded = optional(list(string), [])
       ja4_exact    = optional(list(string), [])
+      # SPol-3 request matchers (additive AND within a rule; omitted = no constraint).
+      http_methods        = optional(list(string), []) # ANY|GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH|COPY
+      http_methods_invert = optional(bool, false)
+      path_exact          = optional(list(string), []) # path oneof: parallel *_values lists
+      path_prefix         = optional(list(string), [])
+      path_regex          = optional(list(string), [])
+      path_suffix         = optional(list(string), [])
+      path_invert         = optional(bool, false)
+      domain_exact        = optional(list(string), [])
+      domain_regex        = optional(list(string), [])
+      headers = optional(list(object({
+        name         = string
+        presence     = optional(string, "match") # match|present|absent
+        invert       = optional(bool, false)
+        exact_values = optional(list(string), [])
+        regex_values = optional(list(string), [])
+      })), [])
+      query_params = optional(list(object({
+        key          = string
+        presence     = optional(string, "match") # match|present|absent
+        invert       = optional(bool, false)
+        exact_values = optional(list(string), [])
+        regex_values = optional(list(string), [])
+      })), [])
     })), [])
   }))
   default = []
@@ -117,6 +141,29 @@ variable "service_policies" {
       ])
     ])])
     error_message = "each rule.tls_classes entry must be a valid KnownTlsFingerprintClass (e.g. TRICKBOT, ANY_MALICIOUS_FINGERPRINT)."
+  }
+
+  # SPol-3 http_method enum (ves.io.schema.HttpMethod).
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : alltrue([
+        for m in coalesce(r.http_methods, []) : contains([
+          "ANY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH", "COPY"
+        ], m)
+      ])
+    ])])
+    error_message = "each rule.http_methods entry must be a valid HTTP method (GET, POST, DELETE, ANY, ...)."
+  }
+
+  # SPol-3 header/query-param presence selector (match=item exact/regex, present/absent=marker).
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : alltrue(concat(
+        [for h in coalesce(r.headers, []) : contains(["match", "present", "absent"], h.presence)],
+        [for q in coalesce(r.query_params, []) : contains(["match", "present", "absent"], q.presence)]
+      ))
+    ])])
+    error_message = "each rule.headers[]/query_params[] presence must be match, present, or absent."
   }
 }
 
