@@ -60,6 +60,12 @@ resource "xcsh_service_policy" "this" {
           }
           spec {
             action = rules.value.action
+            # F5 XC requires an action-side block on every rule; waf_action { none {} }
+            # is the minimal "no WAF action" form (the server-default base member, which
+            # the provider suppresses on import). SPol-4 parameterizes waf/bot/mum actions.
+            waf_action {
+              none {}
+            }
           }
         }
       }

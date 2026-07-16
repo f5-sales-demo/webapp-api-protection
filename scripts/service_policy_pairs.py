@@ -95,6 +95,29 @@ def payloads(v: Mapping[str, object]) -> dict[str, object]:
     return out
 
 
+def detach() -> dict[str, object]:
+    """Detach the policy from the LB while keeping it defined.
+
+    F5 XC refuses to delete a service policy an LB still references (referential
+    integrity), and terraform's single-apply ordering does not reliably update the LB
+    (drop active_service_policies) before destroying the policy — the destroy hits a
+    referential 400 and the provider's bounded delete-retry exhausts. So teardown is
+    two-phase: this detach (LB -> server default, policy kept), then canonical (destroy
+    the now-unreferenced policy). Verified live on f5-sales-demo.
+    """
+    return {
+        "service_policies": [
+            {
+                "name": POLICY_NAME,
+                "rule_handling": "allow_all",
+                "server_scope": "any_server",
+            }
+        ],
+        "service_policies_choice": "omit",
+        "service_policy_active": [],
+    }
+
+
 def canonical() -> dict[str, object]:
     """Return the live-canonical end state (no service policy; LB server default)."""
     return {
@@ -117,6 +140,9 @@ def build() -> list[dict[str, object]]:
         seen.add(key)
         variants.append({"name": f"pair-{idx:03d}", "vars": vars_})
         idx += 1
+    # Two-phase teardown: detach the policy from the LB before destroying it (F5 XC
+    # refuses to delete a referenced policy; see detach()).
+    variants.append({"name": "detach", "vars": detach()})
     variants.append({"name": "canonical-restore", "vars": canonical()})
     return variants
 
