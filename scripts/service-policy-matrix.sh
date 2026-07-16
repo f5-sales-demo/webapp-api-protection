@@ -65,7 +65,7 @@ round_trip() {
   esac
 }
 
-while read -r idx name vf; do
+while read -r idx name vf _flag; do
   [ "$idx" -lt "$START" ] && continue
   [ "$idx" -gt "$END" ] && continue
   label="$idx-$name"
