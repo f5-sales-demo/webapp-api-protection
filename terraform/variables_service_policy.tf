@@ -20,3 +20,15 @@ variable "service_policy_active" {
   type        = list(string)
   default     = []
 }
+
+variable "service_policy_bgp_asn_sets" {
+  description = "bgp_asn_set objects for SPol-2b asn_matcher ref arms (see module for shape)."
+  type        = any
+  default     = []
+}
+
+variable "service_policy_ip_prefix_sets" {
+  description = "ip_prefix_set objects for SPol-2b ip_matcher ref arms (see module for shape)."
+  type        = any
+  default     = []
+}
