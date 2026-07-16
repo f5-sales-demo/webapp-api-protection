@@ -121,6 +121,76 @@ resource "xcsh_service_policy" "this" {
                 exact_values = rules.value.ja4_exact
               }
             }
+
+            # --- SPol-3 request matchers (additive AND; omitted = no constraint) ---
+            dynamic "http_method" {
+              for_each = length(rules.value.http_methods) > 0 ? [1] : []
+              content {
+                methods        = rules.value.http_methods
+                invert_matcher = rules.value.http_methods_invert
+              }
+            }
+            dynamic "path" {
+              for_each = (length(rules.value.path_exact) + length(rules.value.path_prefix) + length(rules.value.path_regex) + length(rules.value.path_suffix)) > 0 ? [1] : []
+              content {
+                exact_values   = length(rules.value.path_exact) > 0 ? rules.value.path_exact : null
+                prefix_values  = length(rules.value.path_prefix) > 0 ? rules.value.path_prefix : null
+                regex_values   = length(rules.value.path_regex) > 0 ? rules.value.path_regex : null
+                suffix_values  = length(rules.value.path_suffix) > 0 ? rules.value.path_suffix : null
+                invert_matcher = rules.value.path_invert
+              }
+            }
+            dynamic "domain_matcher" {
+              for_each = (length(rules.value.domain_exact) + length(rules.value.domain_regex)) > 0 ? [1] : []
+              content {
+                exact_values = length(rules.value.domain_exact) > 0 ? rules.value.domain_exact : null
+                regex_values = length(rules.value.domain_regex) > 0 ? rules.value.domain_regex : null
+              }
+            }
+            dynamic "headers" {
+              for_each = rules.value.headers
+              content {
+                name           = headers.value.name
+                invert_matcher = headers.value.invert
+                dynamic "check_present" {
+                  for_each = headers.value.presence == "present" ? [1] : []
+                  content {}
+                }
+                dynamic "check_not_present" {
+                  for_each = headers.value.presence == "absent" ? [1] : []
+                  content {}
+                }
+                dynamic "item" {
+                  for_each = headers.value.presence == "match" ? [1] : []
+                  content {
+                    exact_values = length(headers.value.exact_values) > 0 ? headers.value.exact_values : null
+                    regex_values = length(headers.value.regex_values) > 0 ? headers.value.regex_values : null
+                  }
+                }
+              }
+            }
+            dynamic "query_params" {
+              for_each = rules.value.query_params
+              content {
+                key            = query_params.value.key
+                invert_matcher = query_params.value.invert
+                dynamic "check_present" {
+                  for_each = query_params.value.presence == "present" ? [1] : []
+                  content {}
+                }
+                dynamic "check_not_present" {
+                  for_each = query_params.value.presence == "absent" ? [1] : []
+                  content {}
+                }
+                dynamic "item" {
+                  for_each = query_params.value.presence == "match" ? [1] : []
+                  content {
+                    exact_values = length(query_params.value.exact_values) > 0 ? query_params.value.exact_values : null
+                    regex_values = length(query_params.value.regex_values) > 0 ? query_params.value.regex_values : null
+                  }
+                }
+              }
+            }
           }
         }
       }
