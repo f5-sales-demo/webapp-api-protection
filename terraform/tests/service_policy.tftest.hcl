@@ -304,3 +304,64 @@ run "request_rejects_bad_header_presence" {
   }
   expect_failures = [var.service_policies]
 }
+
+# ============================================================================
+# SPol-4a: rule action-side (waf_action / bot_action / mum_action)
+# ============================================================================
+
+run "action_skip_arms_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name  = "spol4", rule_handling = "rule_list"
+      rules = [{ name = "r0", action = "ALLOW", waf_action_mode = "skip", bot_action_mode = "skip", mum_action_mode = "skip" }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4"].rule_list.rules[0].spec.waf_action.waf_skip_processing != null
+    error_message = "waf_action skip must render waf_skip_processing"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4"].rule_list.rules[0].spec.bot_action.bot_skip_processing != null
+    error_message = "bot_action skip must render bot_skip_processing"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4"].rule_list.rules[0].spec.mum_action.skip_processing != null
+    error_message = "mum_action skip must render skip_processing"
+  }
+}
+
+run "action_default_waf_none_no_bot_mum" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "spol4d", rule_handling = "rule_list", rules = [{ name = "r0", action = "DENY" }] }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4d"].rule_list.rules[0].spec.waf_action.none != null
+    error_message = "default waf_action must be none"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol4d"].rule_list.rules[0].spec.bot_action == null && xcsh_service_policy.this["spol4d"].rule_list.rules[0].spec.mum_action == null
+    error_message = "default bot_action/mum_action must be omitted (null)"
+  }
+}
+
+run "action_rejects_bad_waf_mode" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", waf_action_mode = "block" }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "action_rejects_partial_skip" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", waf_action_mode = "skip", bot_action_mode = "omit", mum_action_mode = "skip" }] }]
+  }
+  expect_failures = [var.service_policies]
+}

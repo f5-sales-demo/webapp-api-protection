@@ -67,6 +67,13 @@ variable "service_policies" {
         exact_values = optional(list(string), [])
         regex_values = optional(list(string), [])
       })), [])
+      # SPol-4a action-side oneofs. waf_action is required on every rule (none default |
+      # skip = waf_skip_processing; app_firewall_detection_control is SPol-4b). bot_action
+      # /mum_action are omitted by default (server returns null; a concrete arm emits the
+      # block): skip = bot_skip_processing / skip_processing.
+      waf_action_mode = optional(string, "none") # none|skip
+      bot_action_mode = optional(string, "omit") # omit|skip
+      mum_action_mode = optional(string, "omit") # omit|skip
     })), [])
   }))
   default = []
@@ -164,6 +171,32 @@ variable "service_policies" {
       ))
     ])])
     error_message = "each rule.headers[]/query_params[] presence must be match, present, or absent."
+  }
+
+  # SPol-4a action-side selectors.
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : contains(["none", "skip"], r.waf_action_mode)
+    ])])
+    error_message = "each rule.waf_action_mode must be none or skip."
+  }
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : contains(["omit", "skip"], r.bot_action_mode) && contains(["omit", "skip"], r.mum_action_mode)
+    ])])
+    error_message = "each rule.bot_action_mode / mum_action_mode must be omit or skip."
+  }
+
+  # F5 XC "skip processing" is all-or-nothing: waf_action=waf_skip_processing requires
+  # bot_action and mum_action to ALSO skip (the API returns 400 otherwise — verified live:
+  # (skip,skip,skip) applies, but (skip,omit,*)/(skip,*,omit) are rejected). With
+  # waf_action=none, bot/mum are independent.
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) :
+      r.waf_action_mode != "skip" || (r.bot_action_mode == "skip" && r.mum_action_mode == "skip")
+    ])])
+    error_message = "waf_action_mode=\"skip\" requires bot_action_mode=\"skip\" and mum_action_mode=\"skip\" (F5 XC skip-processing is all-or-nothing)."
   }
 }
 
