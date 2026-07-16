@@ -60,9 +60,12 @@ resource "xcsh_service_policy" "this" {
           }
           spec {
             action = rules.value.action
-            # F5 XC requires waf_action on every rule (SPol-1). SPol-4a parameterizes the
-            # arm: none (no WAF action) or skip (waf_skip_processing). detection-control
-            # exclusions are SPol-4b.
+            # F5 XC requires waf_action on every rule (SPol-1). Arm: none (no WAF action) |
+            # skip (waf_skip_processing) | detection_control (app_firewall_detection_control
+            # exclusions, SPol-4b). skip/detection_control require action != DENY (enforced in
+            # variables_service_policy.tf). context is always emitted (server keeps the enum,
+            # default CONTEXT_ANY); context_name is emitted null-when-empty because the provider
+            # reads the server's empty string back as null (an explicit "" would drift on import).
             waf_action {
               dynamic "none" {
                 for_each = rules.value.waf_action_mode == "none" ? [1] : []
@@ -71,6 +74,41 @@ resource "xcsh_service_policy" "this" {
               dynamic "waf_skip_processing" {
                 for_each = rules.value.waf_action_mode == "skip" ? [1] : []
                 content {}
+              }
+              dynamic "app_firewall_detection_control" {
+                for_each = rules.value.waf_action_mode == "detection_control" ? [1] : []
+                content {
+                  dynamic "exclude_attack_type_contexts" {
+                    for_each = rules.value.waf_exclude_attack_type_contexts
+                    content {
+                      context             = exclude_attack_type_contexts.value.context
+                      context_name        = exclude_attack_type_contexts.value.context_name != "" ? exclude_attack_type_contexts.value.context_name : null
+                      exclude_attack_type = exclude_attack_type_contexts.value.exclude_attack_type
+                    }
+                  }
+                  dynamic "exclude_violation_contexts" {
+                    for_each = rules.value.waf_exclude_violation_contexts
+                    content {
+                      context           = exclude_violation_contexts.value.context
+                      context_name      = exclude_violation_contexts.value.context_name != "" ? exclude_violation_contexts.value.context_name : null
+                      exclude_violation = exclude_violation_contexts.value.exclude_violation
+                    }
+                  }
+                  dynamic "exclude_signature_contexts" {
+                    for_each = rules.value.waf_exclude_signature_contexts
+                    content {
+                      context      = exclude_signature_contexts.value.context
+                      context_name = exclude_signature_contexts.value.context_name != "" ? exclude_signature_contexts.value.context_name : null
+                      signature_id = exclude_signature_contexts.value.signature_id
+                    }
+                  }
+                  dynamic "exclude_bot_name_contexts" {
+                    for_each = rules.value.waf_exclude_bot_names
+                    content {
+                      bot_name = exclude_bot_name_contexts.value
+                    }
+                  }
+                }
               }
             }
             # bot_action / mum_action: omitted by default (server returns null); a concrete
@@ -209,6 +247,101 @@ resource "xcsh_service_policy" "this" {
                     exact_values = length(query_params.value.exact_values) > 0 ? query_params.value.exact_values : null
                     regex_values = length(query_params.value.regex_values) > 0 ? query_params.value.regex_values : null
                   }
+                }
+              }
+            }
+
+            # --- SPol-4b segment_policy (source/destination markers; segments refs deferred).
+            # Emitted only when a marker is selected; read-back is exact (no provider change). ---
+            dynamic "segment_policy" {
+              for_each = (rules.value.segment_src != "omit" || rules.value.segment_dst != "omit" || rules.value.segment_intra) ? [1] : []
+              content {
+                dynamic "src_any" {
+                  for_each = rules.value.segment_src == "any" ? [1] : []
+                  content {}
+                }
+                dynamic "dst_any" {
+                  for_each = rules.value.segment_dst == "any" ? [1] : []
+                  content {}
+                }
+                dynamic "intra_segment" {
+                  for_each = rules.value.segment_intra ? [1] : []
+                  content {}
+                }
+              }
+            }
+
+            # --- SPol-4b request_constraints. When enabled, every dimension is emitted as a
+            # oneof: a set max_* value => max_*_exceeds, an unset one => max_*_none marker. The
+            # server echoes the none marker for each unset dimension, so emitting all 13 keeps
+            # the plan import-clean. ---
+            dynamic "request_constraints" {
+              for_each = rules.value.request_constraints_enabled ? [1] : []
+              content {
+                max_cookie_count_exceeds = rules.value.max_cookie_count
+                dynamic "max_cookie_count_none" {
+                  for_each = rules.value.max_cookie_count == null ? [1] : []
+                  content {}
+                }
+                max_cookie_key_size_exceeds = rules.value.max_cookie_key_size
+                dynamic "max_cookie_key_size_none" {
+                  for_each = rules.value.max_cookie_key_size == null ? [1] : []
+                  content {}
+                }
+                max_cookie_value_size_exceeds = rules.value.max_cookie_value_size
+                dynamic "max_cookie_value_size_none" {
+                  for_each = rules.value.max_cookie_value_size == null ? [1] : []
+                  content {}
+                }
+                max_header_count_exceeds = rules.value.max_header_count
+                dynamic "max_header_count_none" {
+                  for_each = rules.value.max_header_count == null ? [1] : []
+                  content {}
+                }
+                max_header_key_size_exceeds = rules.value.max_header_key_size
+                dynamic "max_header_key_size_none" {
+                  for_each = rules.value.max_header_key_size == null ? [1] : []
+                  content {}
+                }
+                max_header_value_size_exceeds = rules.value.max_header_value_size
+                dynamic "max_header_value_size_none" {
+                  for_each = rules.value.max_header_value_size == null ? [1] : []
+                  content {}
+                }
+                max_parameter_count_exceeds = rules.value.max_parameter_count
+                dynamic "max_parameter_count_none" {
+                  for_each = rules.value.max_parameter_count == null ? [1] : []
+                  content {}
+                }
+                max_parameter_name_size_exceeds = rules.value.max_parameter_name_size
+                dynamic "max_parameter_name_size_none" {
+                  for_each = rules.value.max_parameter_name_size == null ? [1] : []
+                  content {}
+                }
+                max_parameter_value_size_exceeds = rules.value.max_parameter_value_size
+                dynamic "max_parameter_value_size_none" {
+                  for_each = rules.value.max_parameter_value_size == null ? [1] : []
+                  content {}
+                }
+                max_query_size_exceeds = rules.value.max_query_size
+                dynamic "max_query_size_none" {
+                  for_each = rules.value.max_query_size == null ? [1] : []
+                  content {}
+                }
+                max_request_line_size_exceeds = rules.value.max_request_line_size
+                dynamic "max_request_line_size_none" {
+                  for_each = rules.value.max_request_line_size == null ? [1] : []
+                  content {}
+                }
+                max_request_size_exceeds = rules.value.max_request_size
+                dynamic "max_request_size_none" {
+                  for_each = rules.value.max_request_size == null ? [1] : []
+                  content {}
+                }
+                max_url_size_exceeds = rules.value.max_url_size
+                dynamic "max_url_size_none" {
+                  for_each = rules.value.max_url_size == null ? [1] : []
+                  content {}
                 }
               }
             }
