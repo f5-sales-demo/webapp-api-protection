@@ -225,6 +225,64 @@ run "matcher_rejects_bad_ip_threat_category" {
   expect_failures = [var.service_policies]
 }
 
+# --- SPol-2b: ref matcher arms (asn_matcher -> bgp_asn_set, ip_matcher -> ip_prefix_set) ---
+run "ref_matchers_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policy_bgp_asn_sets   = [{ name = "m-asn", as_numbers = [64512] }]
+    service_policy_ip_prefix_sets = [{ name = "m-ip", ipv4_prefixes = ["10.0.0.0/8"] }]
+    service_policies = [{
+      name  = "spol2b", rule_handling = "rule_list"
+      rules = [{ name = "r0", action = "DENY", asn = "matcher", asn_sets = ["m-asn"], ip = "matcher", ip_prefix_sets = ["m-ip"], ip_invert = true }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol2b"].rule_list.rules[0].spec.asn_matcher.asn_sets[0].name == "m-asn"
+    error_message = "asn_matcher must reference the bgp_asn_set by name"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol2b"].rule_list.rules[0].spec.ip_matcher.prefix_sets[0].name == "m-ip"
+    error_message = "ip_matcher must reference the ip_prefix_set by name"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol2b"].rule_list.rules[0].spec.ip_matcher.invert_matcher == true
+    error_message = "ip_matcher invert_matcher must render from ip_invert"
+  }
+  assert {
+    condition     = xcsh_bgp_asn_set.this["m-asn"].as_numbers[0] == 64512
+    error_message = "bgp_asn_set ref object must be created"
+  }
+}
+
+run "ref_asn_matcher_rejects_empty_sets" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", asn = "matcher" }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "ref_asn_matcher_rejects_undefined_set" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policy_bgp_asn_sets = [{ name = "known", as_numbers = [64512] }]
+    service_policies            = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", asn = "matcher", asn_sets = ["ghost"] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "ref_ip_matcher_rejects_undefined_set" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{ name = "x", rule_handling = "rule_list", rules = [{ name = "r0", ip = "matcher", ip_prefix_sets = ["ghost"] }] }]
+  }
+  expect_failures = [var.service_policies]
+}
+
 run "matcher_rejects_bad_tls_class" {
   command = plan
   module { source = "./modules/http-lb" }

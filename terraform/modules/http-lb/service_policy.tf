@@ -148,20 +148,50 @@ resource "xcsh_service_policy" "this" {
               }
             }
 
-            # --- SPol-2 ASN matcher oneof (omit => server-default any_asn, suppressed) ---
+            # --- ASN matcher oneof (omit => server-default any_asn, suppressed) ---
             dynamic "asn_list" {
               for_each = rules.value.asn == "list" ? [1] : []
               content {
                 as_numbers = rules.value.asn_numbers
               }
             }
+            # SPol-2b asn_matcher: reference bgp_asn_set objects (created in service_policy_refs.tf)
+            # by name. The resource ref creates the dependency so sets exist before the policy;
+            # server-filled kind/tenant/uid are provider-computed and round-trip import-clean.
+            dynamic "asn_matcher" {
+              for_each = rules.value.asn == "matcher" ? [1] : []
+              content {
+                dynamic "asn_sets" {
+                  for_each = rules.value.asn_sets
+                  content {
+                    name      = xcsh_bgp_asn_set.this[asn_sets.value].name
+                    namespace = var.namespace
+                  }
+                }
+              }
+            }
 
-            # --- SPol-2 IP matcher oneof (omit => server-default any_ip, suppressed) ---
+            # --- IP matcher oneof (omit => server-default any_ip, suppressed) ---
             dynamic "ip_prefix_list" {
               for_each = rules.value.ip == "prefix_list" ? [1] : []
               content {
                 ip_prefixes  = rules.value.ip_prefixes
                 invert_match = rules.value.ip_invert
+              }
+            }
+            # SPol-2b ip_matcher: reference ip_prefix_set objects by name (invert_matcher reuses
+            # the rule's ip_invert knob).
+            dynamic "ip_matcher" {
+              for_each = rules.value.ip == "matcher" ? [1] : []
+              content {
+                invert_matcher = rules.value.ip_invert
+                dynamic "prefix_sets" {
+                  for_each = rules.value.ip_prefix_sets
+                  content {
+                    name      = xcsh_ip_prefix_set.this[prefix_sets.value].name
+                    namespace = var.namespace
+                  }
+                }
               }
             }
 
