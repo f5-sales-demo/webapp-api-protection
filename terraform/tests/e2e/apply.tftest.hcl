@@ -4,7 +4,10 @@
 # pre-existing namespace (pass -var namespace=<ns>). It targets ./modules/http-lb
 # (not the root) so it does NOT create Azure VMs.
 #
-# Run deliberately with `terraform test`. It creates and removes REAL objects named
+# Lives under tests/e2e/ so the default `terraform test` (the CI gate, which has no Azure
+# credentials) does NOT run it. Run it deliberately with a real token:
+#   terraform init && terraform test -test-directory=tests/e2e -var namespace=<throwaway-ns>
+# It creates and removes REAL objects named
 # origin-pool / origin-healthcheck / webapp-api-protection in the given namespace,
 # so DO NOT run it while the real deployment using those names exists — it will
 # collide. Use a throwaway namespace for this test.
