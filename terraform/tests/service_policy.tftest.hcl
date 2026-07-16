@@ -159,3 +159,92 @@ run "rejects_active_name_not_created" {
   }
   expect_failures = [xcsh_http_loadbalancer.this]
 }
+
+# ============================================================================
+# SPol-2: rule client/asn/ip/tls matchers
+# ============================================================================
+
+run "matcher_ip_threat_and_asn_and_ip_and_tls_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name          = "spol2"
+      rule_handling = "rule_list"
+      rules = [{
+        name   = "r0", action = "DENY"
+        client = "ip_threat", ip_threat_categories = ["BOTNETS"]
+        asn    = "list", asn_numbers = [64512]
+        ip     = "prefix_list", ip_prefixes = ["10.0.0.0/8"]
+        tls    = "matcher", tls_classes = ["TRICKBOT"]
+      }]
+    }]
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol2"].rule_list.rules[0].spec.ip_threat_category_list.ip_threat_categories[0] == "BOTNETS"
+    error_message = "ip_threat_category_list must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol2"].rule_list.rules[0].spec.asn_list.as_numbers[0] == 64512
+    error_message = "asn_list must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol2"].rule_list.rules[0].spec.ip_prefix_list.ip_prefixes[0] == "10.0.0.0/8"
+    error_message = "ip_prefix_list must render"
+  }
+  assert {
+    condition     = xcsh_service_policy.this["spol2"].rule_list.rules[0].spec.tls_fingerprint_matcher.classes[0] == "TRICKBOT"
+    error_message = "tls_fingerprint_matcher.classes must render"
+  }
+}
+
+run "matcher_client_selector_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name  = "spol2s", rule_handling = "rule_list"
+      rules = [{ name = "r0", action = "ALLOW", client = "selector", client_selector = ["app in (webapp)"] }]
+    }]
+  }
+  assert {
+    condition     = length(xcsh_service_policy.this["spol2s"].rule_list.rules[0].spec.client_selector.expressions) == 1
+    error_message = "client_selector.expressions must render"
+  }
+}
+
+run "matcher_rejects_bad_ip_threat_category" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name  = "x", rule_handling = "rule_list"
+      rules = [{ name = "r0", client = "ip_threat", ip_threat_categories = ["NOT_A_CATEGORY"] }]
+    }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "matcher_rejects_bad_tls_class" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name  = "x", rule_handling = "rule_list"
+      rules = [{ name = "r0", tls = "matcher", tls_classes = ["MALWARE_X"] }]
+    }]
+  }
+  expect_failures = [var.service_policies]
+}
+
+run "matcher_rejects_bad_client_selector_arm" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    service_policies = [{
+      name  = "x", rule_handling = "rule_list"
+      rules = [{ name = "r0", client = "cookie" }]
+    }]
+  }
+  expect_failures = [var.service_policies]
+}

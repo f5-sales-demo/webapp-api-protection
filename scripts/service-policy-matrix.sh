@@ -25,13 +25,17 @@ ARM_ACCESS_KEY=$(az storage account keys list -n f5salesdemotfstate -g f5-sales-
 export ARM_ACCESS_KEY
 
 NS="webapp-api-protection"
-SPOL_ADDR="module.http_lb.xcsh_service_policy.this[\"matrix-spol\"]"
-SPOL_ID="${NS}/matrix-spol"
+# Overridable so the same runner drives the SPol-1 outer-oneof matrix and the SPol-2
+# matcher matrix (service_policy_matcher_pairs.py, policy "matrix-spol-m").
+PAIRS_SCRIPT="${PAIRS_SCRIPT:-service_policy_pairs.py}"
+SPOL_NAME="${SPOL_NAME:-matrix-spol}"
+VARDIR="${VARDIR:-/tmp/service-policy-variants}"
+SPOL_ADDR="module.http_lb.xcsh_service_policy.this[\"${SPOL_NAME}\"]"
+SPOL_ID="${NS}/${SPOL_NAME}"
 COMMON=(-input=false -lock=true
   -var 'lb_domains=["www.f5-sales-demo.com","api.f5-sales-demo.com"]'
   -var 'subscription_id=75f86c46-9cbc-4f6c-85ea-195e3d3c8ac0')
-VARDIR=/tmp/service-policy-variants
-REPORT=../reports/service-policy-matrix.txt
+REPORT="../reports/${REPORT_NAME:-service-policy-matrix.txt}"
 mkdir -p ../reports
 
 START="${1:-0}"
@@ -39,7 +43,7 @@ END="${2:-9999}"
 
 GATED_RE='entitlement|not subscribed|not entitled|not enabled for|permission denied|unauthorized|AS_NOT_SUBSCRIBED|status: 401|status: 403'
 
-count=$(python3 ../scripts/service_policy_pairs.py --emit "$VARDIR")
+count=$(python3 "../scripts/${PAIRS_SCRIPT}" --emit "$VARDIR")
 echo "generated $count variants into $VARDIR (running [$START..$END])"
 
 round_trip() {
