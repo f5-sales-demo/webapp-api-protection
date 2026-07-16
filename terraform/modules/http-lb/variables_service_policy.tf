@@ -71,6 +71,46 @@ variable "service_policies" {
         exact_values = optional(list(string), [])
         regex_values = optional(list(string), [])
       })), [])
+      # SPol-3b list matchers arg_matchers / cookie_matchers / jwt_claims: same present/absent/
+      # item(exact/regex/transformers) shape as headers/query_params, keyed by name. invert is
+      # always emitted (server echoes false). transformers is a WAF transform enum.
+      arg_matchers = optional(list(object({
+        name         = string
+        presence     = optional(string, "match") # match|present|absent
+        invert       = optional(bool, false)
+        exact_values = optional(list(string), [])
+        regex_values = optional(list(string), [])
+        transformers = optional(list(string), [])
+      })), [])
+      cookie_matchers = optional(list(object({
+        name         = string
+        presence     = optional(string, "match") # match|present|absent
+        invert       = optional(bool, false)
+        exact_values = optional(list(string), [])
+        regex_values = optional(list(string), [])
+        transformers = optional(list(string), [])
+      })), [])
+      jwt_claims = optional(list(object({
+        name         = string
+        presence     = optional(string, "match") # match|present|absent
+        invert       = optional(bool, false)
+        exact_values = optional(list(string), [])
+        regex_values = optional(list(string), [])
+        transformers = optional(list(string), [])
+      })), [])
+      # SPol-3b single-value matchers (emitted null-when-empty; block omitted when unset).
+      body_exact          = optional(list(string), [])
+      body_regex          = optional(list(string), [])
+      body_transformers   = optional(list(string), [])
+      user_identity_exact = optional(list(string), [])
+      user_identity_regex = optional(list(string), [])
+      label_keys          = optional(list(string), []) # label_matcher.keys
+      # SPol-3b port_matcher (invert always emitted) and api_group_matcher (match = api group
+      # names, free-form). Blocks omitted when their list is empty.
+      port_ports       = optional(list(string), [])
+      port_invert      = optional(bool, false)
+      api_groups       = optional(list(string), [])
+      api_group_invert = optional(bool, false)
       # Action-side waf_action oneof (required on every rule): none default | skip =
       # waf_skip_processing | detection_control = app_firewall_detection_control. skip and
       # detection_control require action != DENY (F5 XC: "WAF Action cannot be configured for
@@ -241,6 +281,32 @@ variable "service_policies" {
       ))
     ])])
     error_message = "each rule.headers[]/query_params[] presence must be match, present, or absent."
+  }
+
+  # SPol-3b list-matcher presence selector (arg_matchers/cookie_matchers/jwt_claims).
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : alltrue([
+        for m in concat(r.arg_matchers, r.cookie_matchers, r.jwt_claims) : contains(["match", "present", "absent"], m.presence)
+      ])
+    ])])
+    error_message = "each rule.arg_matchers[]/cookie_matchers[]/jwt_claims[] presence must be match, present, or absent."
+  }
+
+  # SPol-3b transformers enum (ves.io.schema.policy Transformer) on the item/body matchers.
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : alltrue([
+        for t in concat(
+          flatten([for m in concat(r.arg_matchers, r.cookie_matchers, r.jwt_claims) : m.transformers]),
+          r.body_transformers
+          ) : contains([
+            "LOWER_CASE", "UPPER_CASE", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE",
+            "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"
+        ], t)
+      ])
+    ])])
+    error_message = "each transformers entry must be a valid WAF transformer (LOWER_CASE, URL_DECODE, TRIM, ...)."
   }
 
   # Action-side selectors.

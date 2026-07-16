@@ -281,6 +281,116 @@ resource "xcsh_service_policy" "this" {
               }
             }
 
+            # --- SPol-3b list matchers: arg_matchers / cookie_matchers / jwt_claims (same
+            # present/absent/item shape as headers, keyed by name, item adds transformers).
+            # invert_matcher always emitted; item lists null-when-empty. ---
+            dynamic "arg_matchers" {
+              for_each = rules.value.arg_matchers
+              content {
+                name           = arg_matchers.value.name
+                invert_matcher = arg_matchers.value.invert
+                dynamic "check_present" {
+                  for_each = arg_matchers.value.presence == "present" ? [1] : []
+                  content {}
+                }
+                dynamic "check_not_present" {
+                  for_each = arg_matchers.value.presence == "absent" ? [1] : []
+                  content {}
+                }
+                dynamic "item" {
+                  for_each = arg_matchers.value.presence == "match" ? [1] : []
+                  content {
+                    exact_values = length(arg_matchers.value.exact_values) > 0 ? arg_matchers.value.exact_values : null
+                    regex_values = length(arg_matchers.value.regex_values) > 0 ? arg_matchers.value.regex_values : null
+                    transformers = length(arg_matchers.value.transformers) > 0 ? arg_matchers.value.transformers : null
+                  }
+                }
+              }
+            }
+            dynamic "cookie_matchers" {
+              for_each = rules.value.cookie_matchers
+              content {
+                name           = cookie_matchers.value.name
+                invert_matcher = cookie_matchers.value.invert
+                dynamic "check_present" {
+                  for_each = cookie_matchers.value.presence == "present" ? [1] : []
+                  content {}
+                }
+                dynamic "check_not_present" {
+                  for_each = cookie_matchers.value.presence == "absent" ? [1] : []
+                  content {}
+                }
+                dynamic "item" {
+                  for_each = cookie_matchers.value.presence == "match" ? [1] : []
+                  content {
+                    exact_values = length(cookie_matchers.value.exact_values) > 0 ? cookie_matchers.value.exact_values : null
+                    regex_values = length(cookie_matchers.value.regex_values) > 0 ? cookie_matchers.value.regex_values : null
+                    transformers = length(cookie_matchers.value.transformers) > 0 ? cookie_matchers.value.transformers : null
+                  }
+                }
+              }
+            }
+            dynamic "jwt_claims" {
+              for_each = rules.value.jwt_claims
+              content {
+                name           = jwt_claims.value.name
+                invert_matcher = jwt_claims.value.invert
+                dynamic "check_present" {
+                  for_each = jwt_claims.value.presence == "present" ? [1] : []
+                  content {}
+                }
+                dynamic "check_not_present" {
+                  for_each = jwt_claims.value.presence == "absent" ? [1] : []
+                  content {}
+                }
+                dynamic "item" {
+                  for_each = jwt_claims.value.presence == "match" ? [1] : []
+                  content {
+                    exact_values = length(jwt_claims.value.exact_values) > 0 ? jwt_claims.value.exact_values : null
+                    regex_values = length(jwt_claims.value.regex_values) > 0 ? jwt_claims.value.regex_values : null
+                    transformers = length(jwt_claims.value.transformers) > 0 ? jwt_claims.value.transformers : null
+                  }
+                }
+              }
+            }
+
+            # --- SPol-3b single-value matchers (block omitted when its lists are empty) ---
+            dynamic "body_matcher" {
+              for_each = (length(rules.value.body_exact) + length(rules.value.body_regex) + length(rules.value.body_transformers)) > 0 ? [1] : []
+              content {
+                exact_values = length(rules.value.body_exact) > 0 ? rules.value.body_exact : null
+                regex_values = length(rules.value.body_regex) > 0 ? rules.value.body_regex : null
+                transformers = length(rules.value.body_transformers) > 0 ? rules.value.body_transformers : null
+              }
+            }
+            dynamic "user_identity_matcher" {
+              for_each = (length(rules.value.user_identity_exact) + length(rules.value.user_identity_regex)) > 0 ? [1] : []
+              content {
+                exact_values = length(rules.value.user_identity_exact) > 0 ? rules.value.user_identity_exact : null
+                regex_values = length(rules.value.user_identity_regex) > 0 ? rules.value.user_identity_regex : null
+              }
+            }
+            dynamic "label_matcher" {
+              for_each = length(rules.value.label_keys) > 0 ? [1] : []
+              content {
+                keys = rules.value.label_keys
+              }
+            }
+            dynamic "port_matcher" {
+              for_each = length(rules.value.port_ports) > 0 ? [1] : []
+              content {
+                invert_matcher = rules.value.port_invert
+                ports          = rules.value.port_ports
+              }
+            }
+            dynamic "api_group_matcher" {
+              for_each = length(rules.value.api_groups) > 0 ? [1] : []
+              content {
+                invert_matcher = rules.value.api_group_invert
+                match          = rules.value.api_groups
+              }
+            }
+
             # --- SPol-4b segment_policy (source/destination markers; segments refs deferred).
             # Emitted only when a marker is selected; read-back is exact (no provider change). ---
             dynamic "segment_policy" {
