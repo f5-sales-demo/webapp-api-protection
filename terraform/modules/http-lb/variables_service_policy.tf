@@ -27,15 +27,19 @@ variable "service_policies" {
       client_name_exact    = optional(list(string), [])
       client_name_regex    = optional(list(string), [])
       ip_threat_categories = optional(list(string), [])
-      # SPol-2 ASN matcher oneof: any (default) | list (inline as_numbers). asn_matcher
-      # (bgp_asn_set ref) is SPol-2b.
-      asn         = optional(string, "any") # any|list
+      # ASN matcher oneof: any (default) | list (inline as_numbers) | matcher (asn_matcher
+      # referencing bgp_asn_set objects by name, SPol-2b). asn_sets names must be defined in
+      # var.service_policy_bgp_asn_sets.
+      asn         = optional(string, "any") # any|list|matcher
       asn_numbers = optional(list(number), [])
-      # SPol-2 IP matcher oneof: any (default) | prefix_list (inline). ip_matcher
-      # (ip_prefix_set ref) is SPol-2b.
-      ip          = optional(string, "any") # any|prefix_list
-      ip_prefixes = optional(list(string), [])
-      ip_invert   = optional(bool, false)
+      asn_sets    = optional(list(string), [])
+      # IP matcher oneof: any (default) | prefix_list (inline) | matcher (ip_matcher
+      # referencing ip_prefix_set objects by name, SPol-2b). ip_prefix_sets names must be
+      # defined in var.service_policy_ip_prefix_sets.
+      ip             = optional(string, "any") # any|prefix_list|matcher
+      ip_prefixes    = optional(list(string), [])
+      ip_prefix_sets = optional(list(string), [])
+      ip_invert      = optional(bool, false)
       # SPol-2 TLS-fingerprint matcher oneof: none (default, omit) | matcher (classes/exact/
       # excluded) | ja4 (exact JA4 hashes).
       tls          = optional(string, "none") # none|matcher|ja4
@@ -150,15 +154,35 @@ variable "service_policies" {
   }
   validation {
     condition = alltrue([for p in var.service_policies : alltrue([
-      for r in coalesce(p.rules, []) : contains(["any", "list"], r.asn)
+      for r in coalesce(p.rules, []) : contains(["any", "list", "matcher"], r.asn)
     ])])
-    error_message = "each rule.asn must be any or list."
+    error_message = "each rule.asn must be any, list, or matcher."
   }
   validation {
     condition = alltrue([for p in var.service_policies : alltrue([
-      for r in coalesce(p.rules, []) : contains(["any", "prefix_list"], r.ip)
+      for r in coalesce(p.rules, []) : contains(["any", "prefix_list", "matcher"], r.ip)
     ])])
-    error_message = "each rule.ip must be any or prefix_list."
+    error_message = "each rule.ip must be any, prefix_list, or matcher."
+  }
+  # SPol-2b ref-arm integrity: a matcher arm needs >= 1 referenced set, and every referenced
+  # name must be defined in the corresponding set variable (fail fast instead of a live 404).
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) :
+      r.asn != "matcher" || (length(r.asn_sets) > 0 && alltrue([
+        for n in r.asn_sets : contains([for s in var.service_policy_bgp_asn_sets : s.name], n)
+      ]))
+    ])])
+    error_message = "rule.asn=\"matcher\" requires asn_sets to name >= 1 set defined in service_policy_bgp_asn_sets."
+  }
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) :
+      r.ip != "matcher" || (length(r.ip_prefix_sets) > 0 && alltrue([
+        for n in r.ip_prefix_sets : contains([for s in var.service_policy_ip_prefix_sets : s.name], n)
+      ]))
+    ])])
+    error_message = "rule.ip=\"matcher\" requires ip_prefix_sets to name >= 1 set defined in service_policy_ip_prefix_sets."
   }
   validation {
     condition = alltrue([for p in var.service_policies : alltrue([
@@ -336,6 +360,24 @@ variable "service_policies" {
     ])])
     error_message = "each rule.segment_src / segment_dst must be omit or any (segments refs are deferred)."
   }
+}
+
+variable "service_policy_bgp_asn_sets" {
+  description = "bgp_asn_set objects to create for SPol-2b asn_matcher ref arms. Referenced by name from a rule's asn_sets when asn=\"matcher\"."
+  type = list(object({
+    name       = string
+    as_numbers = list(number)
+  }))
+  default = []
+}
+
+variable "service_policy_ip_prefix_sets" {
+  description = "ip_prefix_set objects to create for SPol-2b ip_matcher ref arms. Referenced by name from a rule's ip_prefix_sets when ip=\"matcher\"."
+  type = list(object({
+    name          = string
+    ipv4_prefixes = list(string)
+  }))
+  default = []
 }
 
 variable "service_policies_choice" {

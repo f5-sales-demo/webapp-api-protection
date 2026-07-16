@@ -160,9 +160,11 @@ module "http_lb" {
 
   # Service policies (SPol effort) passthrough. Defaults create nothing and emit no LB
   # block (server default service_policies_from_namespace, import-suppressed => 0-change).
-  service_policies        = var.service_policies
-  service_policies_choice = var.service_policies_choice
-  service_policy_active   = var.service_policy_active
+  service_policies              = var.service_policies
+  service_policies_choice       = var.service_policies_choice
+  service_policy_active         = var.service_policy_active
+  service_policy_bgp_asn_sets   = var.service_policy_bgp_asn_sets
+  service_policy_ip_prefix_sets = var.service_policy_ip_prefix_sets
 
   # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing
   # suppressed => 0-change) and create no standalone resource.
