@@ -67,13 +67,59 @@ variable "service_policies" {
         exact_values = optional(list(string), [])
         regex_values = optional(list(string), [])
       })), [])
-      # SPol-4a action-side oneofs. waf_action is required on every rule (none default |
-      # skip = waf_skip_processing; app_firewall_detection_control is SPol-4b). bot_action
-      # /mum_action are omitted by default (server returns null; a concrete arm emits the
-      # block): skip = bot_skip_processing / skip_processing.
-      waf_action_mode = optional(string, "none") # none|skip
+      # Action-side waf_action oneof (required on every rule): none default | skip =
+      # waf_skip_processing | detection_control = app_firewall_detection_control. skip and
+      # detection_control require action != DENY (F5 XC: "WAF Action cannot be configured for
+      # a rule with action DENY" — live-verified). bot_action/mum_action are omitted by
+      # default (server returns null; a concrete skip arm emits the block) and are INDEPENDENT
+      # of waf_action and each other (the SPol-4a all-or-nothing precondition was a
+      # misdiagnosis of the DENY rejection — corrected here).
+      waf_action_mode = optional(string, "none") # none|skip|detection_control
       bot_action_mode = optional(string, "omit") # omit|skip
       mum_action_mode = optional(string, "omit") # omit|skip
+      # SPol-4b detection_control (waf_action_mode="detection_control") exclusion lists. Each
+      # entry excludes a signature/violation/attack-type/bot-name from triggering. context
+      # defaults CONTEXT_ANY and context_name "" (server-filled) — emitted explicitly to stay
+      # import-clean. Requires >= 1 exclusion when the mode is selected.
+      waf_exclude_attack_type_contexts = optional(list(object({
+        context             = optional(string, "CONTEXT_ANY")
+        context_name        = optional(string, "")
+        exclude_attack_type = string
+      })), [])
+      waf_exclude_violation_contexts = optional(list(object({
+        context           = optional(string, "CONTEXT_ANY")
+        context_name      = optional(string, "")
+        exclude_violation = string
+      })), [])
+      waf_exclude_signature_contexts = optional(list(object({
+        context      = optional(string, "CONTEXT_ANY")
+        context_name = optional(string, "")
+        signature_id = number # 0 or 200000001-299999999
+      })), [])
+      waf_exclude_bot_names = optional(list(string), [])
+      # SPol-4b segment_policy source/destination markers (src_segments/dst_segments Segment
+      # refs deferred to a later ref slice). Any combination is accepted; the block is emitted
+      # only when a marker is selected. Read-back is exact (no provider change).
+      segment_src   = optional(string, "omit") # omit|any
+      segment_dst   = optional(string, "omit") # omit|any
+      segment_intra = optional(bool, false)
+      # SPol-4b request_constraints: when enabled, ALL 13 dimensions are emitted (a set max_*
+      # value => max_*_exceeds, an unset one => max_*_none marker). The server echoes the none
+      # marker for every unset dimension, so emitting all 13 keeps the plan import-clean.
+      request_constraints_enabled = optional(bool, false)
+      max_cookie_count            = optional(number)
+      max_cookie_key_size         = optional(number)
+      max_cookie_value_size       = optional(number)
+      max_header_count            = optional(number)
+      max_header_key_size         = optional(number)
+      max_header_value_size       = optional(number)
+      max_parameter_count         = optional(number)
+      max_parameter_name_size     = optional(number)
+      max_parameter_value_size    = optional(number)
+      max_query_size              = optional(number)
+      max_request_line_size       = optional(number)
+      max_request_size            = optional(number)
+      max_url_size                = optional(number)
     })), [])
   }))
   default = []
@@ -173,12 +219,12 @@ variable "service_policies" {
     error_message = "each rule.headers[]/query_params[] presence must be match, present, or absent."
   }
 
-  # SPol-4a action-side selectors.
+  # Action-side selectors.
   validation {
     condition = alltrue([for p in var.service_policies : alltrue([
-      for r in coalesce(p.rules, []) : contains(["none", "skip"], r.waf_action_mode)
+      for r in coalesce(p.rules, []) : contains(["none", "skip", "detection_control"], r.waf_action_mode)
     ])])
-    error_message = "each rule.waf_action_mode must be none or skip."
+    error_message = "each rule.waf_action_mode must be none, skip, or detection_control."
   }
   validation {
     condition = alltrue([for p in var.service_policies : alltrue([
@@ -187,16 +233,108 @@ variable "service_policies" {
     error_message = "each rule.bot_action_mode / mum_action_mode must be omit or skip."
   }
 
-  # F5 XC "skip processing" is all-or-nothing: waf_action=waf_skip_processing requires
-  # bot_action and mum_action to ALSO skip (the API returns 400 otherwise — verified live:
-  # (skip,skip,skip) applies, but (skip,omit,*)/(skip,*,omit) are rejected). With
-  # waf_action=none, bot/mum are independent.
+  # F5 XC: a configured WAF action (waf_skip_processing or app_firewall_detection_control)
+  # cannot be attached to a DENY rule — "WAF Action cannot be configured for a rule with
+  # action DENY" (live-verified). waf_action_mode=none is unconstrained; bot_action and
+  # mum_action are independent of waf_action and of each other.
   validation {
     condition = alltrue([for p in var.service_policies : alltrue([
       for r in coalesce(p.rules, []) :
-      r.waf_action_mode != "skip" || (r.bot_action_mode == "skip" && r.mum_action_mode == "skip")
+      r.waf_action_mode == "none" || r.action != "DENY"
     ])])
-    error_message = "waf_action_mode=\"skip\" requires bot_action_mode=\"skip\" and mum_action_mode=\"skip\" (F5 XC skip-processing is all-or-nothing)."
+    error_message = "rule.waf_action_mode \"skip\"/\"detection_control\" requires action != DENY (F5 XC rejects a WAF action on a DENY rule)."
+  }
+
+  # SPol-4b detection_control needs at least one exclusion when selected (an empty block is
+  # meaningless), and the exclusion lists are only valid under that mode.
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) :
+      r.waf_action_mode != "detection_control" || (
+        length(r.waf_exclude_attack_type_contexts) + length(r.waf_exclude_violation_contexts) +
+        length(r.waf_exclude_signature_contexts) + length(r.waf_exclude_bot_names) > 0
+      )
+    ])])
+    error_message = "rule.waf_action_mode=\"detection_control\" requires at least one waf_exclude_* entry."
+  }
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) :
+      r.waf_action_mode == "detection_control" || (
+        length(r.waf_exclude_attack_type_contexts) + length(r.waf_exclude_violation_contexts) +
+        length(r.waf_exclude_signature_contexts) + length(r.waf_exclude_bot_names) == 0
+      )
+    ])])
+    error_message = "rule.waf_exclude_* is only valid when waf_action_mode=\"detection_control\"."
+  }
+
+  # SPol-4b detection_control enum validations (fail fast at plan instead of a live 400).
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : alltrue([
+        for c in concat(r.waf_exclude_attack_type_contexts, r.waf_exclude_violation_contexts, r.waf_exclude_signature_contexts) :
+        contains([
+          "CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER",
+          "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI"
+        ], c.context)
+      ])
+    ])])
+    error_message = "each waf_exclude_*.context must be a valid WAF exclusion context (CONTEXT_ANY, CONTEXT_HEADER, CONTEXT_URL, ...)."
+  }
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : alltrue([
+        for c in r.waf_exclude_attack_type_contexts : contains([
+          "ATTACK_TYPE_NONE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS",
+          "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_VULNERABILITY_SCAN",
+          "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS",
+          "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_INFORMATION_LEAKAGE",
+          "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_XPATH_INJECTION",
+          "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_COMMAND_EXECUTION",
+          "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_DENIAL_OF_SERVICE",
+          "ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING",
+          "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD",
+          "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK"
+        ], c.exclude_attack_type)
+      ])
+    ])])
+    error_message = "each waf_exclude_attack_type_contexts[].exclude_attack_type must be a valid ATTACK_TYPE_* value."
+  }
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : alltrue([
+        for c in r.waf_exclude_violation_contexts : contains([
+          "VIOL_NONE", "VIOL_FILETYPE", "VIOL_METHOD", "VIOL_MANDATORY_HEADER", "VIOL_HTTP_RESPONSE_STATUS",
+          "VIOL_REQUEST_MAX_LENGTH", "VIOL_FILE_UPLOAD", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_XML_MALFORMED",
+          "VIOL_JSON_MALFORMED", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS",
+          "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT",
+          "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION",
+          "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_EVASION_DIRECTORY_TRAVERSALS",
+          "VIOL_MALFORMED_REQUEST", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_DATA_GUARD",
+          "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_COOKIE_MODIFIED", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS",
+          "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_EVASION_BARE_BYTE_DECODING",
+          "VIOL_EVASION_BAD_UNESCAPE", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_ENCODING",
+          "VIOL_COOKIE_MALFORMED", "VIOL_GRAPHQL_FORMAT", "VIOL_GRAPHQL_MALFORMED", "VIOL_GRAPHQL_INTROSPECTION_QUERY"
+        ], c.exclude_violation)
+      ])
+    ])])
+    error_message = "each waf_exclude_violation_contexts[].exclude_violation must be a valid VIOL_* value."
+  }
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : alltrue([
+        for c in r.waf_exclude_signature_contexts : c.signature_id == 0 || (c.signature_id >= 200000001 && c.signature_id <= 299999999)
+      ])
+    ])])
+    error_message = "each waf_exclude_signature_contexts[].signature_id must be 0 or in 200000001-299999999."
+  }
+
+  # SPol-4b segment_policy source/destination marker selectors.
+  validation {
+    condition = alltrue([for p in var.service_policies : alltrue([
+      for r in coalesce(p.rules, []) : contains(["omit", "any"], r.segment_src) && contains(["omit", "any"], r.segment_dst)
+    ])])
+    error_message = "each rule.segment_src / segment_dst must be omit or any (segments refs are deferred)."
   }
 }
 
