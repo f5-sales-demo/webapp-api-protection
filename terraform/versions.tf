@@ -39,13 +39,14 @@ terraform {
       # association -> 400. 3.72.1 names the marshal map var by nesting path so the outer
       # map carries the populated ref, so xcsh_app_api_group applies.
       #
-      # >= 3.72.4: SPol-1 service_policy foundation (provider #1117, PR #1118). Seeds the
-      # xcsh_service_policy / xcsh_service_policy_rule server-default empty markers
-      # (any_server/any_client/any_asn/any_ip, waf/bot none, mum default, segment
-      # src_any/dst_any/intra_segment, per-list check_present/not_present, 13
-      # request_constraints max_*_none) so the standalone service policies this module
-      # now creates are round-trip-import clean.
-      version = ">= 3.72.4"
+      # >= 3.72.4: SPol-1 service_policy foundation (provider #1118) — seeds the
+      # xcsh_service_policy import-default suppressions.
+      # >= 3.72.5: SPol-1 correction (provider #1122). The v3.72.4 seed over-suppressed —
+      # it dropped DECLARED oneof members (waf_action.none, mum_action.default, segment /
+      # request_constraints bases) on import. Live GET proved only any_server/any_client/
+      # any_asn/any_ip are echoed-on-omit; v3.72.5 suppresses just those, so a rule_list
+      # rule (which must declare waf_action { none {} }) round-trip-imports clean.
+      version = ">= 3.72.5"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which
