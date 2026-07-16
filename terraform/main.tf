@@ -158,6 +158,12 @@ module "http_lb" {
   app_api_groups                     = var.app_api_groups
   validation_custom_rules            = var.validation_custom_rules
 
+  # Service policies (SPol effort) passthrough. Defaults create nothing and emit no LB
+  # block (server default service_policies_from_namespace, import-suppressed => 0-change).
+  service_policies        = var.service_policies
+  service_policies_choice = var.service_policies_choice
+  service_policy_active   = var.service_policy_active
+
   # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing
   # suppressed => 0-change) and create no standalone resource.
   api_testing_choice              = var.api_testing_choice
