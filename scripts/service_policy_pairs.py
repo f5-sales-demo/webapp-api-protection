@@ -107,7 +107,11 @@ def detach() -> dict[str, object]:
     """
     return {
         "service_policies": [
-            {"name": POLICY_NAME, "rule_handling": "allow_all", "server_scope": "any_server"}
+            {
+                "name": POLICY_NAME,
+                "rule_handling": "allow_all",
+                "server_scope": "any_server",
+            }
         ],
         "service_policies_choice": "omit",
         "service_policy_active": [],

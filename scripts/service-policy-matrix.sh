@@ -44,8 +44,12 @@ echo "generated $count variants into $VARDIR (running [$START..$END])"
 
 round_trip() {
   local label="$1" vf="$2"
-  # Skip variants that create no service policy (canonical-restore): nothing to import.
-  if ! terraform state list | grep -qF "$SPOL_ADDR"; then
+  # Skip variants that define no service policy (canonical-restore): nothing to import.
+  # Decide from the variant CONFIG (deterministic), not a live `state list` read (which
+  # can transiently return empty and silently skip a real import).
+  local has_policy
+  has_policy=$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1])).get("service_policies",[])))' "$vf" 2>/dev/null)
+  if [ "${has_policy:-0}" -eq 0 ]; then
     echo "PASS $label (no-policy variant, nothing to import)" >>"$REPORT"
     return
   fi
