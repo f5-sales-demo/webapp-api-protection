@@ -66,6 +66,61 @@ resource "xcsh_service_policy" "this" {
             waf_action {
               none {}
             }
+
+            # --- SPol-2 client matcher oneof (omit => server-default any_client, suppressed) ---
+            dynamic "client_selector" {
+              for_each = rules.value.client == "selector" ? [1] : []
+              content {
+                expressions = length(rules.value.client_selector) > 0 ? rules.value.client_selector : null
+              }
+            }
+            client_name = rules.value.client == "name" ? rules.value.client_name : null
+            dynamic "client_name_matcher" {
+              for_each = rules.value.client == "name_matcher" ? [1] : []
+              content {
+                exact_values = length(rules.value.client_name_exact) > 0 ? rules.value.client_name_exact : null
+                regex_values = length(rules.value.client_name_regex) > 0 ? rules.value.client_name_regex : null
+              }
+            }
+            dynamic "ip_threat_category_list" {
+              for_each = rules.value.client == "ip_threat" ? [1] : []
+              content {
+                ip_threat_categories = rules.value.ip_threat_categories
+              }
+            }
+
+            # --- SPol-2 ASN matcher oneof (omit => server-default any_asn, suppressed) ---
+            dynamic "asn_list" {
+              for_each = rules.value.asn == "list" ? [1] : []
+              content {
+                as_numbers = rules.value.asn_numbers
+              }
+            }
+
+            # --- SPol-2 IP matcher oneof (omit => server-default any_ip, suppressed) ---
+            dynamic "ip_prefix_list" {
+              for_each = rules.value.ip == "prefix_list" ? [1] : []
+              content {
+                ip_prefixes  = rules.value.ip_prefixes
+                invert_match = rules.value.ip_invert
+              }
+            }
+
+            # --- SPol-2 TLS-fingerprint matcher oneof (omit => no match constraint) ---
+            dynamic "tls_fingerprint_matcher" {
+              for_each = rules.value.tls == "matcher" ? [1] : []
+              content {
+                classes         = length(rules.value.tls_classes) > 0 ? rules.value.tls_classes : null
+                exact_values    = length(rules.value.tls_exact) > 0 ? rules.value.tls_exact : null
+                excluded_values = length(rules.value.tls_excluded) > 0 ? rules.value.tls_excluded : null
+              }
+            }
+            dynamic "ja4_tls_fingerprint" {
+              for_each = rules.value.tls == "ja4" ? [1] : []
+              content {
+                exact_values = rules.value.ja4_exact
+              }
+            }
           }
         }
       }
