@@ -61,9 +61,23 @@ module "http_lb" {
   origin_ip         = module.origin_server.public_ip
   origin_port       = var.origin_port
   health_check_path = var.health_check_path
-  labels            = var.labels
-  waf_mode          = var.waf_mode
-  csd_enabled       = var.csd_enabled
+
+  # LPC-5a healthcheck parameterization passthrough (defaults reproduce the http /health check).
+  health_check_type            = var.health_check_type
+  hc_healthy_threshold         = var.hc_healthy_threshold
+  hc_unhealthy_threshold       = var.hc_unhealthy_threshold
+  hc_timeout                   = var.hc_timeout
+  hc_interval                  = var.hc_interval
+  hc_jitter_percent            = var.hc_jitter_percent
+  hc_http_host_header          = var.hc_http_host_header
+  hc_expected_status_codes     = var.hc_expected_status_codes
+  hc_expected_response         = var.hc_expected_response
+  hc_request_headers_to_remove = var.hc_request_headers_to_remove
+  hc_tcp_send_payload          = var.hc_tcp_send_payload
+  hc_tcp_expected_response     = var.hc_tcp_expected_response
+  labels                       = var.labels
+  waf_mode                     = var.waf_mode
+  csd_enabled                  = var.csd_enabled
 
   # WAF (app_firewall) exhaustive-coverage passthrough.
   waf_allowed_response_codes_mode = var.waf_allowed_response_codes_mode
