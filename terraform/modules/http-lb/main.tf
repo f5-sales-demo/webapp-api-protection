@@ -1608,6 +1608,84 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # WAF exclusion (LPC-4a) — inline rules that match domain+path+methods and then either skip
+  # WAF (waf_skip_processing) or exclude specific signatures/violations/attack-types/bot-names
+  # (app_firewall_detection_control). Omitted when no rule. Omit a matcher's concrete arm for
+  # "match any" (any_domain / any_path base members are import-suppressed by the provider).
+  dynamic "waf_exclusion" {
+    for_each = length(var.waf_exclusion_rules) > 0 ? [1] : []
+    content {
+      waf_exclusion_inline_rules {
+        dynamic "rules" {
+          for_each = var.waf_exclusion_rules
+          content {
+            metadata {
+              name             = rules.value.name
+              description_spec = rules.value.description
+            }
+            dynamic "any_domain" {
+              for_each = rules.value.domain == "any" ? [1] : []
+              content {}
+            }
+            exact_value  = rules.value.domain == "exact" ? rules.value.domain_value : null
+            suffix_value = rules.value.domain == "suffix" ? rules.value.domain_value : null
+            dynamic "any_path" {
+              for_each = rules.value.path == "any" ? [1] : []
+              content {}
+            }
+            path_prefix          = rules.value.path == "prefix" ? rules.value.path_value : null
+            path_regex           = rules.value.path == "regex" ? rules.value.path_value : null
+            methods              = length(rules.value.methods) > 0 ? rules.value.methods : null
+            expiration_timestamp = rules.value.expiration_timestamp
+            dynamic "waf_skip_processing" {
+              for_each = rules.value.action == "skip" ? [1] : []
+              content {}
+            }
+            dynamic "app_firewall_detection_control" {
+              for_each = rules.value.action == "detection_control" ? [1] : []
+              content {
+                dynamic "exclude_signature_contexts" {
+                  for_each = rules.value.exclude_signatures
+                  iterator = s
+                  content {
+                    signature_id = s.value.signature_id
+                    context      = s.value.context
+                    context_name = s.value.context_name
+                  }
+                }
+                dynamic "exclude_violation_contexts" {
+                  for_each = rules.value.exclude_violations
+                  iterator = v
+                  content {
+                    exclude_violation = v.value.violation
+                    context           = v.value.context
+                    context_name      = v.value.context_name
+                  }
+                }
+                dynamic "exclude_attack_type_contexts" {
+                  for_each = rules.value.exclude_attack_types
+                  iterator = a
+                  content {
+                    exclude_attack_type = a.value.attack_type
+                    context             = a.value.context
+                    context_name        = a.value.context_name
+                  }
+                }
+                dynamic "exclude_bot_name_contexts" {
+                  for_each = rules.value.exclude_bot_names
+                  iterator = b
+                  content {
+                    bot_name = b.value
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   # API protection rules (Coverage Batch D) — allow/deny access to API endpoints
   # (api_endpoint_rules) or API groups / base paths (api_groups_rules), each scoped by
   # a PER-RULE client_matcher (full oneof) + request_matcher. Omitted when both lists
