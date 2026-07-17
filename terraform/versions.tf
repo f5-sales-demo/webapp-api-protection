@@ -46,7 +46,10 @@ terraform {
       # request_constraints bases) on import. Live GET proved only any_server/any_client/
       # any_asn/any_ip are echoed-on-omit; v3.72.5 suppresses just those, so a rule_list
       # rule (which must declare waf_action { none {} }) round-trip-imports clean.
-      version = ">= 3.72.5"
+      # >= 3.72.6: LPC-2 more_option import suppressions (provider #1125) — custom_errors /
+      # no_request_limit_per_connection empty markers, so a more_option header config
+      # round-trip-imports clean.
+      version = ">= 3.72.6"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which

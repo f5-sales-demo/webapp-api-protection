@@ -59,3 +59,13 @@ run "more_option_omitted_by_default" {
     error_message = "more_option must be omitted (null) by default"
   }
 }
+
+run "disable_default_error_pages_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { disable_default_error_pages = true }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.more_option.disable_default_error_pages == true
+    error_message = "disable_default_error_pages must render inside more_option"
+  }
+}

@@ -31,3 +31,9 @@ variable "response_cookies_to_remove" {
   type        = list(string)
   default     = []
 }
+
+variable "disable_default_error_pages" {
+  description = "Disable the LB's default error pages (more_option)."
+  type        = bool
+  default     = false
+}

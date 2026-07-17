@@ -1463,7 +1463,7 @@ resource "xcsh_http_loadbalancer" "this" {
   # Header/cookie manipulation (LPC-2) via more_option. Emitted only when a header/cookie
   # list is set (0-change otherwise); *_to_remove lists null-when-empty.
   dynamic "more_option" {
-    for_each = (length(var.request_headers_to_add) + length(var.request_headers_to_remove) + length(var.response_headers_to_add) + length(var.response_headers_to_remove) + length(var.request_cookies_to_remove) + length(var.response_cookies_to_remove)) > 0 ? [1] : []
+    for_each = (length(var.request_headers_to_add) + length(var.request_headers_to_remove) + length(var.response_headers_to_add) + length(var.response_headers_to_remove) + length(var.request_cookies_to_remove) + length(var.response_cookies_to_remove)) > 0 || var.disable_default_error_pages ? [1] : []
     content {
       dynamic "request_headers_to_add" {
         for_each = var.request_headers_to_add
@@ -1482,9 +1482,10 @@ resource "xcsh_http_loadbalancer" "this" {
           append = response_headers_to_add.value.append
         }
       }
-      response_headers_to_remove = length(var.response_headers_to_remove) > 0 ? var.response_headers_to_remove : null
-      request_cookies_to_remove  = length(var.request_cookies_to_remove) > 0 ? var.request_cookies_to_remove : null
-      response_cookies_to_remove = length(var.response_cookies_to_remove) > 0 ? var.response_cookies_to_remove : null
+      response_headers_to_remove  = length(var.response_headers_to_remove) > 0 ? var.response_headers_to_remove : null
+      request_cookies_to_remove   = length(var.request_cookies_to_remove) > 0 ? var.request_cookies_to_remove : null
+      response_cookies_to_remove  = length(var.response_cookies_to_remove) > 0 ? var.response_cookies_to_remove : null
+      disable_default_error_pages = var.disable_default_error_pages
     }
   }
 
