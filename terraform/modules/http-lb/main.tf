@@ -471,6 +471,28 @@ resource "xcsh_http_loadbalancer" "this" {
     # computed tenant re-planning on the pool/WAF refs).
   }
 
+  # Custom routes (CR-1) — evaluated before default_route_pools. CR-1: a simple_route that
+  # matches a path prefix and routes to the module's own origin pool. Additive; the default
+  # route keeps serving. Later slices add full match / advanced_options / redirect / direct /
+  # custom arms.
+  dynamic "routes" {
+    for_each = var.custom_routes
+    content {
+      simple_route {
+        http_method = routes.value.http_method
+        path {
+          prefix = routes.value.path_prefix
+        }
+        origin_pools {
+          pool {
+            name      = xcsh_origin_pool.origin.name
+            namespace = var.namespace
+          }
+        }
+      }
+    }
+  }
+
   advertise_on_public_default_vip {}
 
   # Attach the WAF (oneof: app_firewall vs disable_waf; server default disable_waf).
