@@ -187,6 +187,10 @@ module "http_lb" {
   response_cookies_to_remove  = var.response_cookies_to_remove
   disable_default_error_pages = var.disable_default_error_pages
 
+  # GraphQL inspection (LPC-3) passthrough.
+  graphql_rules  = var.graphql_rules
+  jwt_validation = var.jwt_validation
+
   # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing
   # suppressed => 0-change) and create no standalone resource.
   api_testing_choice              = var.api_testing_choice

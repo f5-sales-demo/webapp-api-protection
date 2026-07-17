@@ -1489,6 +1489,125 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # JWT validation (LPC-3) — inline JWKS (jwks_config.cleartext); action block/report;
+  # target all_endpoint|api_groups|base_paths; reserved/mandatory claims. Omitted when null.
+  dynamic "jwt_validation" {
+    for_each = var.jwt_validation != null ? [1] : []
+    content {
+      jwks_config {
+        # F5 XC quirk: the API field is named "cleartext" but the server validates it as
+        # base64-decoded JWKS ("failed to decode base64 cleartext JWKS" 500 otherwise). The
+        # variable takes a readable JWKS JSON document; encode it here for the API.
+        cleartext = base64encode(var.jwt_validation.jwks_cleartext)
+      }
+      action {
+        dynamic "block" {
+          for_each = var.jwt_validation.action == "block" ? [1] : []
+          content {}
+        }
+        dynamic "report" {
+          for_each = var.jwt_validation.action == "report" ? [1] : []
+          content {}
+        }
+      }
+      token_location {
+        bearer_token {}
+      }
+      target {
+        dynamic "all_endpoint" {
+          for_each = var.jwt_validation.target == "all_endpoint" ? [1] : []
+          content {}
+        }
+        dynamic "api_groups" {
+          for_each = var.jwt_validation.target == "api_groups" ? [1] : []
+          content {
+            api_groups = var.jwt_validation.api_groups
+          }
+        }
+        dynamic "base_paths" {
+          for_each = var.jwt_validation.target == "base_paths" ? [1] : []
+          content {
+            base_paths = var.jwt_validation.base_paths
+          }
+        }
+      }
+      dynamic "mandatory_claims" {
+        for_each = length(var.jwt_validation.mandatory_claims) > 0 ? [1] : []
+        content {
+          claim_names = var.jwt_validation.mandatory_claims
+        }
+      }
+      reserved_claims {
+        # Each oneof is required: derive the disable arm from value presence so no choice is
+        # ever left nil (the API rejects a nil oneof with required_oneof).
+        issuer = (var.jwt_validation.issuer != null && var.jwt_validation.issuer != "") ? var.jwt_validation.issuer : null
+        dynamic "issuer_disable" {
+          for_each = (var.jwt_validation.issuer == null || var.jwt_validation.issuer == "") ? [1] : []
+          content {}
+        }
+        dynamic "audience" {
+          for_each = length(var.jwt_validation.audiences) > 0 ? [1] : []
+          content {
+            audiences = var.jwt_validation.audiences
+          }
+        }
+        dynamic "audience_disable" {
+          for_each = length(var.jwt_validation.audiences) == 0 ? [1] : []
+          content {}
+        }
+        dynamic "validate_period_enable" {
+          for_each = var.jwt_validation.validate_period ? [1] : []
+          content {}
+        }
+        dynamic "validate_period_disable" {
+          for_each = var.jwt_validation.validate_period ? [] : [1]
+          content {}
+        }
+      }
+    }
+  }
+
+  # GraphQL inspection (LPC-3) — per-rule path/domain/method + query limits + introspection.
+  # Omitted when no rule; graphql_settings emitted per rule (int limits null-when-unset).
+  dynamic "graphql_rules" {
+    for_each = var.graphql_rules
+    content {
+      metadata {
+        name = graphql_rules.value.name
+      }
+      exact_path = graphql_rules.value.exact_path
+      dynamic "any_domain" {
+        for_each = graphql_rules.value.domain == "any" ? [1] : []
+        content {}
+      }
+      exact_value  = graphql_rules.value.domain == "exact" ? graphql_rules.value.domain_value : null
+      suffix_value = graphql_rules.value.domain == "suffix" ? graphql_rules.value.domain_value : null
+      dynamic "method_get" {
+        for_each = graphql_rules.value.method == "get" ? [1] : []
+        content {}
+      }
+      dynamic "method_post" {
+        for_each = graphql_rules.value.method == "post" ? [1] : []
+        content {}
+      }
+      graphql_settings {
+        max_batched_queries = graphql_rules.value.max_batched_queries
+        max_depth           = graphql_rules.value.max_depth
+        max_total_length    = graphql_rules.value.max_total_length
+        max_value_length    = graphql_rules.value.max_value_length
+        policy_name         = graphql_rules.value.policy_name
+        dynamic "enable_introspection" {
+          for_each = graphql_rules.value.introspection == "enable" ? [1] : []
+          content {}
+        }
+        dynamic "disable_introspection" {
+          for_each = graphql_rules.value.introspection == "disable" ? [1] : []
+          content {}
+        }
+      }
+    }
+  }
+
   # API protection rules (Coverage Batch D) — allow/deny access to API endpoints
   # (api_endpoint_rules) or API groups / base paths (api_groups_rules), each scoped by
   # a PER-RULE client_matcher (full oneof) + request_matcher. Omitted when both lists
