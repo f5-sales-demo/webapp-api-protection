@@ -1372,6 +1372,94 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # App-layer response/cookie protection (LPC-1). cors_policy: access-control-* headers.
+  # csrf_policy: oneof all_load_balancer_domains | custom_domain_list | disabled.
+  # protected_cookies[]: per-cookie httponly/secure/samesite/tampering handling. Each omitted
+  # when unset (0-change). Empty lists emitted null-when-empty.
+  dynamic "cors_policy" {
+    for_each = var.cors_policy != null ? [1] : []
+    content {
+      allow_origin       = length(var.cors_policy.allow_origin) > 0 ? var.cors_policy.allow_origin : null
+      allow_origin_regex = length(var.cors_policy.allow_origin_regex) > 0 ? var.cors_policy.allow_origin_regex : null
+      allow_methods      = var.cors_policy.allow_methods
+      allow_headers      = var.cors_policy.allow_headers
+      expose_headers     = var.cors_policy.expose_headers
+      maximum_age        = var.cors_policy.maximum_age
+      allow_credentials  = var.cors_policy.allow_credentials
+      disabled           = var.cors_policy.disabled
+    }
+  }
+  dynamic "csrf_policy" {
+    for_each = var.csrf_policy_mode != "omit" ? [1] : []
+    content {
+      dynamic "all_load_balancer_domains" {
+        for_each = var.csrf_policy_mode == "all_domains" ? [1] : []
+        content {}
+      }
+      dynamic "custom_domain_list" {
+        for_each = var.csrf_policy_mode == "custom" ? [1] : []
+        content {
+          domains = length(var.csrf_custom_domains) > 0 ? var.csrf_custom_domains : null
+        }
+      }
+      dynamic "disabled" {
+        for_each = var.csrf_policy_mode == "disabled" ? [1] : []
+        content {}
+      }
+    }
+  }
+  dynamic "protected_cookies" {
+    for_each = var.protected_cookies
+    content {
+      name          = protected_cookies.value.name
+      max_age_value = protected_cookies.value.max_age_value
+      dynamic "add_httponly" {
+        for_each = protected_cookies.value.httponly == "add" ? [1] : []
+        content {}
+      }
+      dynamic "ignore_httponly" {
+        for_each = protected_cookies.value.httponly == "ignore" ? [1] : []
+        content {}
+      }
+      dynamic "add_secure" {
+        for_each = protected_cookies.value.secure == "add" ? [1] : []
+        content {}
+      }
+      dynamic "ignore_secure" {
+        for_each = protected_cookies.value.secure == "ignore" ? [1] : []
+        content {}
+      }
+      dynamic "samesite_lax" {
+        for_each = protected_cookies.value.samesite == "lax" ? [1] : []
+        content {}
+      }
+      dynamic "samesite_none" {
+        for_each = protected_cookies.value.samesite == "none" ? [1] : []
+        content {}
+      }
+      dynamic "samesite_strict" {
+        for_each = protected_cookies.value.samesite == "strict" ? [1] : []
+        content {}
+      }
+      dynamic "ignore_samesite" {
+        for_each = protected_cookies.value.samesite == "ignore" ? [1] : []
+        content {}
+      }
+      dynamic "enable_tampering_protection" {
+        for_each = protected_cookies.value.tampering == "enable" ? [1] : []
+        content {}
+      }
+      dynamic "disable_tampering_protection" {
+        for_each = protected_cookies.value.tampering == "disable" ? [1] : []
+        content {}
+      }
+      dynamic "ignore_max_age" {
+        for_each = protected_cookies.value.ignore_max_age ? [1] : []
+        content {}
+      }
+    }
+  }
+
   # API protection rules (Coverage Batch D) — allow/deny access to API endpoints
   # (api_endpoint_rules) or API groups / base paths (api_groups_rules), each scoped by
   # a PER-RULE client_matcher (full oneof) + request_matcher. Omitted when both lists
