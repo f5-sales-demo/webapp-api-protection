@@ -426,12 +426,11 @@ resource "xcsh_http_loadbalancer" "this" {
     }
     weight   = 1
     priority = 1
-    # F5 XC always normalizes an empty endpoint_subsets object into the API
-    # response for each default_route_pools entry (verified via live API), so we
-    # declare it to keep apply/plan/import consistent. This is correct config,
-    # not a workaround. (Provider-side handling of server-default empty oneof
-    # members on import is tracked in terraform-provider-xcsh#1003.)
-    endpoint_subsets {}
+    # endpoint_subsets is a server-default empty marker the API always echoes; the
+    # provider suppresses it on import (#1103) and only preserves it on read when it
+    # was in prior state, so the module OMITS it — declaring it {} instead forces a
+    # spurious "+ endpoint_subsets {}" on every import round-trip (and cascades into
+    # computed tenant re-planning on the pool/WAF refs).
   }
 
   advertise_on_public_default_vip {}
