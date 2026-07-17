@@ -178,6 +178,15 @@ module "http_lb" {
   csrf_custom_domains = var.csrf_custom_domains
   protected_cookies   = var.protected_cookies
 
+  # Header/cookie manipulation (LPC-2) passthrough.
+  request_headers_to_add      = var.request_headers_to_add
+  request_headers_to_remove   = var.request_headers_to_remove
+  response_headers_to_add     = var.response_headers_to_add
+  response_headers_to_remove  = var.response_headers_to_remove
+  request_cookies_to_remove   = var.request_cookies_to_remove
+  response_cookies_to_remove  = var.response_cookies_to_remove
+  disable_default_error_pages = var.disable_default_error_pages
+
   # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing
   # suppressed => 0-change) and create no standalone resource.
   api_testing_choice              = var.api_testing_choice
