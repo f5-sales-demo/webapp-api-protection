@@ -63,8 +63,15 @@ resource "xcsh_origin_pool" "origin" {
 
   port = var.origin_port
 
+  # LPC-5b: load-balancing algorithm + endpoint selection. Defaults (ROUND_ROBIN / DISTRIBUTED)
+  # match the server defaults, so a plain apply is 0-change.
+  loadbalancer_algorithm = var.origin_lb_algorithm
+  endpoint_selection     = var.origin_endpoint_selection
+
   origin_servers {
-    labels {}
+    # origin_servers[].labels {} is a server-default empty marker the provider import-suppresses
+    # (OriginPool "labels"); emitting it drifts the direct origin_pool import (+ labels {}), same
+    # class as the endpoint_subsets fix (#94). Omit it — the server materializes the default.
     public_ip {
       ip = var.origin_ip
     }
@@ -73,6 +80,16 @@ resource "xcsh_origin_pool" "origin" {
   healthcheck {
     name      = xcsh_healthcheck.origin.name
     namespace = xcsh_healthcheck.origin.namespace
+  }
+
+  # LPC-5b: advanced_options connection tuning. Emitted only when a timeout is set (else the
+  # block is omitted for 0-change). Both are Computed server-default scalars.
+  dynamic "advanced_options" {
+    for_each = (var.origin_connection_timeout != null || var.origin_http_idle_timeout != null) ? [1] : []
+    content {
+      connection_timeout = var.origin_connection_timeout
+      http_idle_timeout  = var.origin_http_idle_timeout
+    }
   }
 
   no_tls {}
