@@ -32,7 +32,7 @@ CANONICAL = {
 
 def _v(name: str, **overrides: object) -> dict[str, object]:
     """A variant = canonical with the named overrides applied."""
-    vars_ = dict(CANONICAL)
+    vars_: dict[str, object] = dict(CANONICAL)
     vars_.update(overrides)
     return {"name": name, "vars": vars_}
 
