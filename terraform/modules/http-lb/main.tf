@@ -22,16 +22,37 @@ resource "xcsh_healthcheck" "origin" {
   namespace = var.namespace
   labels    = var.labels
 
-  healthy_threshold   = 3
-  unhealthy_threshold = 1
-  timeout             = 3
-  interval            = 15
+  healthy_threshold   = var.hc_healthy_threshold
+  unhealthy_threshold = var.hc_unhealthy_threshold
+  timeout             = var.hc_timeout
+  interval            = var.hc_interval
+  jitter_percent      = var.hc_jitter_percent
 
-  http_health_check {
-    # The origin server's nginx returns 200 on /health for any Host, so no
-    # host_header override is needed (unlike the previous public_name origin).
-    path                  = var.health_check_path
-    expected_status_codes = ["200"]
+  # LPC-5a: http vs tcp health check (oneof). Defaults reproduce the original config (http on
+  # health_check_path expecting 200). The origin nginx returns 200 on /health for any Host, so
+  # host handling defaults to none; a tcp check is a connect-only probe on the pool port.
+  dynamic "http_health_check" {
+    for_each = var.health_check_type == "http" ? [1] : []
+    content {
+      path                  = var.health_check_path
+      expected_status_codes = var.hc_expected_status_codes
+      # http host oneof: explicit host_header, else use_origin_server_name (the server default
+      # when no host_header). Emit exactly one arm to match the server on import.
+      host_header = var.hc_http_host_header
+      dynamic "use_origin_server_name" {
+        for_each = var.hc_http_host_header == null ? [1] : []
+        content {}
+      }
+      expected_response         = var.hc_expected_response
+      request_headers_to_remove = length(var.hc_request_headers_to_remove) > 0 ? var.hc_request_headers_to_remove : null
+    }
+  }
+  dynamic "tcp_health_check" {
+    for_each = var.health_check_type == "tcp" ? [1] : []
+    content {
+      send_payload      = var.hc_tcp_send_payload
+      expected_response = var.hc_tcp_expected_response
+    }
   }
 }
 
