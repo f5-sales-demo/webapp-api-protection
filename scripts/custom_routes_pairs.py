@@ -15,22 +15,75 @@ from pathlib import Path
 
 
 def build() -> list[dict[str, object]]:
-    """Ordered variant manifest: single/multi routes over path+method, then canonical."""
+    """Ordered variant manifest over the route match surface, then canonical."""
     return [
         {
-            "name": "app-any",
-            "vars": {"custom_routes": [{"path_prefix": "/app", "http_method": "ANY"}]},
+            "name": "prefix-any",
+            "vars": {
+                "custom_routes": [
+                    {"path_mode": "prefix", "path_value": "/app", "http_method": "ANY"}
+                ]
+            },
         },
         {
-            "name": "api-get",
-            "vars": {"custom_routes": [{"path_prefix": "/api", "http_method": "GET"}]},
+            "name": "exact-get",
+            "vars": {
+                "custom_routes": [
+                    {
+                        "path_mode": "exact",
+                        "path_value": "/health",
+                        "http_method": "GET",
+                    }
+                ]
+            },
+        },
+        {
+            "name": "regex-post",
+            "vars": {
+                "custom_routes": [
+                    {
+                        "path_mode": "regex",
+                        "path_value": "^/v[0-9]+/.*$",
+                        "http_method": "POST",
+                    }
+                ]
+            },
+        },
+        {
+            "name": "headers-port",
+            "vars": {
+                "custom_routes": [
+                    {
+                        "path_mode": "prefix",
+                        "path_value": "/api",
+                        "incoming_port": 443,
+                        "headers": [
+                            {"name": "x-canary", "mode": "exact", "value": "on"},
+                            {
+                                "name": "x-legacy",
+                                "mode": "presence",
+                                "invert_match": True,
+                            },
+                            {
+                                "name": "x-trace",
+                                "mode": "regex",
+                                "value": "^[0-9a-f]+$",
+                            },
+                        ],
+                    }
+                ]
+            },
         },
         {
             "name": "multi",
             "vars": {
                 "custom_routes": [
-                    {"path_prefix": "/app", "http_method": "ANY"},
-                    {"path_prefix": "/admin", "http_method": "POST"},
+                    {"path_mode": "prefix", "path_value": "/app"},
+                    {
+                        "path_mode": "exact",
+                        "path_value": "/admin",
+                        "http_method": "POST",
+                    },
                 ]
             },
         },
