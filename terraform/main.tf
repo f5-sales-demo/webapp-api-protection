@@ -166,6 +166,12 @@ module "http_lb" {
   service_policy_bgp_asn_sets   = var.service_policy_bgp_asn_sets
   service_policy_ip_prefix_sets = var.service_policy_ip_prefix_sets
 
+  # Client access control (CAC) passthrough.
+  trusted_clients          = var.trusted_clients
+  blocked_clients          = var.blocked_clients
+  ip_reputation_enabled    = var.ip_reputation_enabled
+  ip_reputation_categories = var.ip_reputation_categories
+
   # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing
   # suppressed => 0-change) and create no standalone resource.
   api_testing_choice              = var.api_testing_choice
