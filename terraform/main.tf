@@ -172,6 +172,12 @@ module "http_lb" {
   ip_reputation_enabled    = var.ip_reputation_enabled
   ip_reputation_categories = var.ip_reputation_categories
 
+  # App-layer protection (LPC-1) passthrough.
+  cors_policy         = var.cors_policy
+  csrf_policy_mode    = var.csrf_policy_mode
+  csrf_custom_domains = var.csrf_custom_domains
+  protected_cookies   = var.protected_cookies
+
   # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing
   # suppressed => 0-change) and create no standalone resource.
   api_testing_choice              = var.api_testing_choice
