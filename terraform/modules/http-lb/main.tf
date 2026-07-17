@@ -480,8 +480,30 @@ resource "xcsh_http_loadbalancer" "this" {
     content {
       simple_route {
         http_method = routes.value.http_method
+        # path match oneof: prefix | exact (path) | regex
         path {
-          prefix = routes.value.path_prefix
+          prefix = routes.value.path_mode == "prefix" ? routes.value.path_value : null
+          path   = routes.value.path_mode == "exact" ? routes.value.path_value : null
+          regex  = routes.value.path_mode == "regex" ? routes.value.path_value : null
+        }
+        # header matches: name + presence | exact | regex, optionally inverted
+        dynamic "headers" {
+          for_each = routes.value.headers
+          iterator = h
+          content {
+            name         = h.value.name
+            exact        = h.value.mode == "exact" ? h.value.value : null
+            regex        = h.value.mode == "regex" ? h.value.value : null
+            presence     = h.value.mode == "presence" ? true : null
+            invert_match = h.value.invert_match
+          }
+        }
+        # incoming port match (omitted = match any port)
+        dynamic "incoming_port" {
+          for_each = routes.value.incoming_port != null ? [1] : []
+          content {
+            port = routes.value.incoming_port
+          }
         }
         origin_pools {
           pool {
