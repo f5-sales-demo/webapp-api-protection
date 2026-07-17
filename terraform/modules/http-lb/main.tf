@@ -1460,6 +1460,34 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # Header/cookie manipulation (LPC-2) via more_option. Emitted only when a header/cookie
+  # list is set (0-change otherwise); *_to_remove lists null-when-empty.
+  dynamic "more_option" {
+    for_each = (length(var.request_headers_to_add) + length(var.request_headers_to_remove) + length(var.response_headers_to_add) + length(var.response_headers_to_remove) + length(var.request_cookies_to_remove) + length(var.response_cookies_to_remove)) > 0 ? [1] : []
+    content {
+      dynamic "request_headers_to_add" {
+        for_each = var.request_headers_to_add
+        content {
+          name   = request_headers_to_add.value.name
+          value  = request_headers_to_add.value.value
+          append = request_headers_to_add.value.append
+        }
+      }
+      request_headers_to_remove = length(var.request_headers_to_remove) > 0 ? var.request_headers_to_remove : null
+      dynamic "response_headers_to_add" {
+        for_each = var.response_headers_to_add
+        content {
+          name   = response_headers_to_add.value.name
+          value  = response_headers_to_add.value.value
+          append = response_headers_to_add.value.append
+        }
+      }
+      response_headers_to_remove = length(var.response_headers_to_remove) > 0 ? var.response_headers_to_remove : null
+      request_cookies_to_remove  = length(var.request_cookies_to_remove) > 0 ? var.request_cookies_to_remove : null
+      response_cookies_to_remove = length(var.response_cookies_to_remove) > 0 ? var.response_cookies_to_remove : null
+    }
+  }
+
   # API protection rules (Coverage Batch D) — allow/deny access to API endpoints
   # (api_endpoint_rules) or API groups / base paths (api_groups_rules), each scoped by
   # a PER-RULE client_matcher (full oneof) + request_matcher. Omitted when both lists
