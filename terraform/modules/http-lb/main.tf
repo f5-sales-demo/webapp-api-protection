@@ -1608,74 +1608,86 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
-  # WAF exclusion (LPC-4a) — inline rules that match domain+path+methods and then either skip
-  # WAF (waf_skip_processing) or exclude specific signatures/violations/attack-types/bot-names
-  # (app_firewall_detection_control). Omitted when no rule. Omit a matcher's concrete arm for
-  # "match any" (any_domain / any_path base members are import-suppressed by the provider).
+  # WAF exclusion — a oneof: inline rules (LPC-4a) OR a reference to a standalone
+  # xcsh_waf_exclusion_policy (LPC-4b, waf_exclusion_policy_ref). Inline rules match
+  # domain+path+methods and then either skip WAF (waf_skip_processing) or exclude specific
+  # signatures/violations/attack-types/bot-names (app_firewall_detection_control). Omitted when
+  # neither is set. Mutual exclusion enforced by a lifecycle precondition below. Omit a matcher's
+  # concrete arm for "match any" (any_domain / any_path base members are import-suppressed).
   dynamic "waf_exclusion" {
-    for_each = length(var.waf_exclusion_rules) > 0 ? [1] : []
+    for_each = (length(var.waf_exclusion_rules) > 0 || var.waf_exclusion_policy_ref != null) ? [1] : []
     content {
-      waf_exclusion_inline_rules {
-        dynamic "rules" {
-          for_each = var.waf_exclusion_rules
-          content {
-            metadata {
-              name             = rules.value.name
-              description_spec = rules.value.description
-            }
-            dynamic "any_domain" {
-              for_each = rules.value.domain == "any" ? [1] : []
-              content {}
-            }
-            exact_value  = rules.value.domain == "exact" ? rules.value.domain_value : null
-            suffix_value = rules.value.domain == "suffix" ? rules.value.domain_value : null
-            dynamic "any_path" {
-              for_each = rules.value.path == "any" ? [1] : []
-              content {}
-            }
-            path_prefix          = rules.value.path == "prefix" ? rules.value.path_value : null
-            path_regex           = rules.value.path == "regex" ? rules.value.path_value : null
-            methods              = length(rules.value.methods) > 0 ? rules.value.methods : null
-            expiration_timestamp = rules.value.expiration_timestamp
-            dynamic "waf_skip_processing" {
-              for_each = rules.value.action == "skip" ? [1] : []
-              content {}
-            }
-            dynamic "app_firewall_detection_control" {
-              for_each = rules.value.action == "detection_control" ? [1] : []
-              content {
-                dynamic "exclude_signature_contexts" {
-                  for_each = rules.value.exclude_signatures
-                  iterator = s
-                  content {
-                    signature_id = s.value.signature_id
-                    context      = s.value.context
-                    context_name = s.value.context_name
+      dynamic "waf_exclusion_policy" {
+        for_each = var.waf_exclusion_policy_ref != null ? [1] : []
+        content {
+          name      = xcsh_waf_exclusion_policy.this[var.waf_exclusion_policy_ref].name
+          namespace = var.namespace
+        }
+      }
+      dynamic "waf_exclusion_inline_rules" {
+        for_each = (var.waf_exclusion_policy_ref == null && length(var.waf_exclusion_rules) > 0) ? [1] : []
+        content {
+          dynamic "rules" {
+            for_each = var.waf_exclusion_rules
+            content {
+              metadata {
+                name             = rules.value.name
+                description_spec = rules.value.description
+              }
+              dynamic "any_domain" {
+                for_each = rules.value.domain == "any" ? [1] : []
+                content {}
+              }
+              exact_value  = rules.value.domain == "exact" ? rules.value.domain_value : null
+              suffix_value = rules.value.domain == "suffix" ? rules.value.domain_value : null
+              dynamic "any_path" {
+                for_each = rules.value.path == "any" ? [1] : []
+                content {}
+              }
+              path_prefix          = rules.value.path == "prefix" ? rules.value.path_value : null
+              path_regex           = rules.value.path == "regex" ? rules.value.path_value : null
+              methods              = length(rules.value.methods) > 0 ? rules.value.methods : null
+              expiration_timestamp = rules.value.expiration_timestamp
+              dynamic "waf_skip_processing" {
+                for_each = rules.value.action == "skip" ? [1] : []
+                content {}
+              }
+              dynamic "app_firewall_detection_control" {
+                for_each = rules.value.action == "detection_control" ? [1] : []
+                content {
+                  dynamic "exclude_signature_contexts" {
+                    for_each = rules.value.exclude_signatures
+                    iterator = s
+                    content {
+                      signature_id = s.value.signature_id
+                      context      = s.value.context
+                      context_name = s.value.context_name
+                    }
                   }
-                }
-                dynamic "exclude_violation_contexts" {
-                  for_each = rules.value.exclude_violations
-                  iterator = v
-                  content {
-                    exclude_violation = v.value.violation
-                    context           = v.value.context
-                    context_name      = v.value.context_name
+                  dynamic "exclude_violation_contexts" {
+                    for_each = rules.value.exclude_violations
+                    iterator = v
+                    content {
+                      exclude_violation = v.value.violation
+                      context           = v.value.context
+                      context_name      = v.value.context_name
+                    }
                   }
-                }
-                dynamic "exclude_attack_type_contexts" {
-                  for_each = rules.value.exclude_attack_types
-                  iterator = a
-                  content {
-                    exclude_attack_type = a.value.attack_type
-                    context             = a.value.context
-                    context_name        = a.value.context_name
+                  dynamic "exclude_attack_type_contexts" {
+                    for_each = rules.value.exclude_attack_types
+                    iterator = a
+                    content {
+                      exclude_attack_type = a.value.attack_type
+                      context             = a.value.context
+                      context_name        = a.value.context_name
+                    }
                   }
-                }
-                dynamic "exclude_bot_name_contexts" {
-                  for_each = rules.value.exclude_bot_names
-                  iterator = b
-                  content {
-                    bot_name = b.value
+                  dynamic "exclude_bot_name_contexts" {
+                    for_each = rules.value.exclude_bot_names
+                    iterator = b
+                    content {
+                      bot_name = b.value
+                    }
                   }
                 }
               }
@@ -2216,6 +2228,18 @@ resource "xcsh_http_loadbalancer" "this" {
     precondition {
       condition     = length(var.api_crawler_domains) == 0 || local.api_crawler_password_secret.url != null || local.api_crawler_password_secret.location != null
       error_message = "api_crawler_domains is set but api_crawler_password has no value: set plaintext (clear) or location (blindfold)."
+    }
+
+    # WAF exclusion is a oneof: inline rules (waf_exclusion_rules) XOR a policy reference
+    # (waf_exclusion_policy_ref). Both set at once is invalid — a cross-variable check.
+    precondition {
+      condition     = !(length(var.waf_exclusion_rules) > 0 && var.waf_exclusion_policy_ref != null)
+      error_message = "waf_exclusion_rules and waf_exclusion_policy_ref are mutually exclusive (waf_exclusion is a oneof)."
+    }
+    # A referenced policy must be one of the defined waf_exclusion_policies.
+    precondition {
+      condition     = var.waf_exclusion_policy_ref == null || contains([for p in var.waf_exclusion_policies : p.name], var.waf_exclusion_policy_ref)
+      error_message = "waf_exclusion_policy_ref must name an entry in waf_exclusion_policies."
     }
 
     # Code-scan discovery lives inside enable_api_discovery and references the

@@ -188,9 +188,11 @@ module "http_lb" {
   disable_default_error_pages = var.disable_default_error_pages
 
   # GraphQL inspection (LPC-3) passthrough.
-  graphql_rules       = var.graphql_rules
-  jwt_validation      = var.jwt_validation
-  waf_exclusion_rules = var.waf_exclusion_rules
+  graphql_rules            = var.graphql_rules
+  jwt_validation           = var.jwt_validation
+  waf_exclusion_rules      = var.waf_exclusion_rules
+  waf_exclusion_policies   = var.waf_exclusion_policies
+  waf_exclusion_policy_ref = var.waf_exclusion_policy_ref
 
   # API Testing (SP4) passthrough. Defaults keep it off (disable_api_testing
   # suppressed => 0-change) and create no standalone resource.
