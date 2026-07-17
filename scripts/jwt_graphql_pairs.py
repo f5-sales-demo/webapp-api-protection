@@ -190,14 +190,21 @@ def emit(directory: str) -> int:
     named = [(f"{i:03d}-{v['name']}.tfvars.json", v) for i, v in enumerate(variants)]
     for fname, v in named:
         (out_dir / fname).write_text(json.dumps(v["vars"], indent=2) + "\n")
+
     # jwt-bearing variants carry a write-only secret (jwks_config.cleartext) the API masks as
     # "Redacted"; their whole-LB import re-applies it (expected). Flag SECRET so the runner
     # classifies the round-trip via lpc3_import_check.py instead of demanding a 0-change plan.
     def flag(variant: dict[str, object]) -> str:
         vars_ = variant["vars"]
-        return "SECRET" if isinstance(vars_, dict) and vars_.get("jwt_validation") else "LIVE"
+        return (
+            "SECRET"
+            if isinstance(vars_, dict) and vars_.get("jwt_validation")
+            else "LIVE"
+        )
 
-    lines = [f"{i:03d} {v['name']} {fname} {flag(v)}" for i, (fname, v) in enumerate(named)]
+    lines = [
+        f"{i:03d} {v['name']} {fname} {flag(v)}" for i, (fname, v) in enumerate(named)
+    ]
     (out_dir / "manifest.txt").write_text("\n".join(lines) + "\n")
     return len(variants)
 
