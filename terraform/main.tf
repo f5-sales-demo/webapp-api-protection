@@ -75,6 +75,10 @@ module "http_lb" {
   hc_request_headers_to_remove = var.hc_request_headers_to_remove
   hc_tcp_send_payload          = var.hc_tcp_send_payload
   hc_tcp_expected_response     = var.hc_tcp_expected_response
+  origin_lb_algorithm          = var.origin_lb_algorithm
+  origin_endpoint_selection    = var.origin_endpoint_selection
+  origin_connection_timeout    = var.origin_connection_timeout
+  origin_http_idle_timeout     = var.origin_http_idle_timeout
   labels                       = var.labels
   waf_mode                     = var.waf_mode
   csd_enabled                  = var.csd_enabled
