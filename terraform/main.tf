@@ -79,6 +79,7 @@ module "http_lb" {
   origin_endpoint_selection    = var.origin_endpoint_selection
   origin_connection_timeout    = var.origin_connection_timeout
   origin_http_idle_timeout     = var.origin_http_idle_timeout
+  custom_routes                = var.custom_routes
   labels                       = var.labels
   waf_mode                     = var.waf_mode
   csd_enabled                  = var.csd_enabled
