@@ -1331,6 +1331,47 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # Client access control (CAC) — trusted_clients bypass the SKIP_PROCESSING_* security named
+  # in actions; blocked_clients are blocked (or have those actions applied). Each rule matches
+  # by exactly one of ip_prefix / ipv6_prefix / as_number / user_identifier. Omitted when the
+  # list is empty (0-change). actions null-when-empty (server default SKIP_PROCESSING_WAF).
+  dynamic "trusted_clients" {
+    for_each = var.trusted_clients
+    content {
+      metadata {
+        name = coalesce(trusted_clients.value.name, "cac-trusted-${trusted_clients.key}")
+      }
+      ip_prefix            = trusted_clients.value.ip_prefix
+      ipv6_prefix          = trusted_clients.value.ipv6_prefix
+      as_number            = trusted_clients.value.as_number
+      user_identifier      = trusted_clients.value.user_identifier
+      expiration_timestamp = trusted_clients.value.expiration_timestamp
+      actions              = length(trusted_clients.value.actions) > 0 ? trusted_clients.value.actions : null
+    }
+  }
+  dynamic "blocked_clients" {
+    for_each = var.blocked_clients
+    content {
+      metadata {
+        name = coalesce(blocked_clients.value.name, "cac-blocked-${blocked_clients.key}")
+      }
+      ip_prefix            = blocked_clients.value.ip_prefix
+      ipv6_prefix          = blocked_clients.value.ipv6_prefix
+      as_number            = blocked_clients.value.as_number
+      user_identifier      = blocked_clients.value.user_identifier
+      expiration_timestamp = blocked_clients.value.expiration_timestamp
+      actions              = length(blocked_clients.value.actions) > 0 ? blocked_clients.value.actions : null
+    }
+  }
+  # IP reputation — block clients whose source IP matches the given IpThreatCategory list
+  # (empty list = the server default set). Omitted entirely when disabled (0-change).
+  dynamic "enable_ip_reputation" {
+    for_each = var.ip_reputation_enabled ? [1] : []
+    content {
+      ip_threat_categories = length(var.ip_reputation_categories) > 0 ? var.ip_reputation_categories : null
+    }
+  }
+
   # API protection rules (Coverage Batch D) — allow/deny access to API endpoints
   # (api_endpoint_rules) or API groups / base paths (api_groups_rules), each scoped by
   # a PER-RULE client_matcher (full oneof) + request_matcher. Omitted when both lists
