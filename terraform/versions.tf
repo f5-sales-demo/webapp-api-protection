@@ -49,13 +49,15 @@ terraform {
       # >= 3.72.6: LPC-2 more_option import suppressions (provider #1125) — custom_errors /
       # no_request_limit_per_connection empty markers, so a more_option header config
       # round-trip-imports clean.
-      # >= 3.72.8: LPC-5b origin_pool advanced_options import suppressions (provider #1130) —
+      # >= 3.72.9: LPC-5b origin_pool advanced_options import suppressions (provider #1130) —
       # auto_http_config / default_circuit_breaker / disable_outlier_detection / disable_subsets
       # / no_panic_threshold / no_request_limit_per_connection, so an advanced_options config
       # round-trip-imports clean.
       # >= 3.72.8: CR-1 custom routes[] import suppressions (provider #1134) — route_state_enabled
       # + auto_host_rewrite, so a simple_route config round-trip-imports clean.
-      version = ">= 3.72.8"
+      # >= 3.72.9: CR-3 route advanced_options import suppressions (provider #1138) — 8 oneof-base
+      # markers (buffer/hash/retry/mirror/prefix-rewrite/spdy/websocket/cluster defaults).
+      version = ">= 3.72.9"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which

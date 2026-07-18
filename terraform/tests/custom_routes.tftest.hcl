@@ -75,6 +75,56 @@ run "header_and_port_match" {
   }
 }
 
+run "advanced_options_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    custom_routes = [{
+      path_mode           = "prefix"
+      path_value          = "/app"
+      prefix_rewrite      = "/"
+      priority            = "HIGH"
+      timeout_ms          = 5000
+      req_headers_add     = [{ name = "x-route", value = "app" }]
+      resp_headers_remove = ["server"]
+      waf_mode            = "app_firewall"
+    }]
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].simple_route.advanced_options.prefix_rewrite == "/"
+    error_message = "advanced_options.prefix_rewrite must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].simple_route.advanced_options.priority == "HIGH"
+    error_message = "advanced_options.priority must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].simple_route.advanced_options.request_headers_to_add[0].name == "x-route"
+    error_message = "advanced_options request_headers_to_add must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].simple_route.advanced_options.app_firewall.name == "webapp-api-protection-waf"
+    error_message = "advanced_options per-route app_firewall ref must render"
+  }
+}
+
+run "advanced_options_omitted_when_no_tuning" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { custom_routes = [{ path_mode = "prefix", path_value = "/app" }] }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].simple_route.advanced_options == null
+    error_message = "advanced_options must be omitted when no tuning field is set"
+  }
+}
+
+run "bad_waf_mode_rejected" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { custom_routes = [{ path_mode = "prefix", path_value = "/x", waf_mode = "block" }] }
+  expect_failures = [var.custom_routes]
+}
+
 run "routes_omitted_by_default" {
   command = plan
   module { source = "./modules/http-lb" }

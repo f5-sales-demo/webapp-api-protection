@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Generate the custom routes (CR-1 foundation) coverage matrix.
+"""Generate the custom routes coverage matrix (CR-1 foundation + CR-2 match + CR-3 advanced).
 
-CR-1 covers a simple_route that matches a path prefix (+ http_method) and routes to the module
-origin pool. Small explicit variant set (path prefix x method, single + multi route), plus
-canonical-restore (no routes). Custom routes are additive to default_route_pools, so the LB
-keeps serving www/api throughout.
+Explicit variant set over the simple_route surface: path oneof (prefix/exact/regex) x method,
+header + incoming-port matches, multi-route, and advanced_options (rewrite/priority/timeout,
+header+cookie transforms, per-route WAF app_firewall/disable), plus canonical-restore (no
+routes). Custom routes are additive to default_route_pools, so the LB keeps serving www/api
+throughout. Whole-LB import is the round-trip target.
 
 Deterministic (no RNG). Output: JSON to stdout, or files via --emit.
 """
@@ -84,6 +85,60 @@ def build() -> list[dict[str, object]]:
                         "path_value": "/admin",
                         "http_method": "POST",
                     },
+                ]
+            },
+        },
+        {
+            "name": "adv-rewrite-waf",
+            "vars": {
+                "custom_routes": [
+                    {
+                        "path_mode": "prefix",
+                        "path_value": "/app",
+                        "prefix_rewrite": "/",
+                        "priority": "HIGH",
+                        "timeout_ms": 5000,
+                        "disable_location_add": True,
+                        "waf_mode": "app_firewall",
+                    }
+                ]
+            },
+        },
+        {
+            "name": "adv-headers-cookies",
+            "vars": {
+                "custom_routes": [
+                    {
+                        "path_mode": "prefix",
+                        "path_value": "/api",
+                        "req_headers_add": [
+                            {"name": "x-route", "value": "api", "append": False}
+                        ],
+                        "req_headers_remove": ["x-internal"],
+                        "resp_headers_add": [
+                            {
+                                "name": "x-frame-options",
+                                "value": "DENY",
+                                "append": False,
+                            }
+                        ],
+                        "resp_headers_remove": ["server"],
+                        "req_cookies_remove": ["tracking"],
+                        "resp_cookies_remove": ["debug"],
+                    }
+                ]
+            },
+        },
+        {
+            "name": "adv-waf-inherited",
+            "vars": {
+                "custom_routes": [
+                    {
+                        "path_mode": "prefix",
+                        "path_value": "/public",
+                        "timeout_ms": 2000,
+                        "waf_mode": "inherited",
+                    }
                 ]
             },
         },
