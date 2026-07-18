@@ -511,6 +511,58 @@ resource "xcsh_http_loadbalancer" "this" {
             namespace = var.namespace
           }
         }
+        # advanced_options (CR-3): per-route rewrites, header/cookie transforms, timeout, and a
+        # WAF selector. Emitted only when a field is set (else omitted for 0-change). The WAF
+        # oneof default (inherited_waf) and other oneof bases are server-materialized + provider
+        # import-suppressed. Heavy sub-blocks (cors/csrf/retry/mirror/hash/buffer/websocket) are
+        # deferred to a later slice.
+        dynamic "advanced_options" {
+          for_each = anytrue([
+            routes.value.prefix_rewrite != null, routes.value.disable_location_add,
+            routes.value.timeout_ms != null, length(routes.value.req_headers_add) > 0,
+            length(routes.value.req_headers_remove) > 0, length(routes.value.resp_headers_add) > 0,
+            length(routes.value.resp_headers_remove) > 0, length(routes.value.req_cookies_remove) > 0,
+            length(routes.value.resp_cookies_remove) > 0, routes.value.waf_mode != "inherited",
+          ]) ? [1] : []
+          content {
+            prefix_rewrite             = routes.value.prefix_rewrite
+            priority                   = routes.value.priority
+            disable_location_add       = routes.value.disable_location_add
+            timeout                    = routes.value.timeout_ms
+            request_headers_to_remove  = length(routes.value.req_headers_remove) > 0 ? routes.value.req_headers_remove : null
+            response_headers_to_remove = length(routes.value.resp_headers_remove) > 0 ? routes.value.resp_headers_remove : null
+            request_cookies_to_remove  = length(routes.value.req_cookies_remove) > 0 ? routes.value.req_cookies_remove : null
+            response_cookies_to_remove = length(routes.value.resp_cookies_remove) > 0 ? routes.value.resp_cookies_remove : null
+            dynamic "request_headers_to_add" {
+              for_each = routes.value.req_headers_add
+              iterator = h
+              content {
+                name   = h.value.name
+                value  = h.value.value
+                append = h.value.append
+              }
+            }
+            dynamic "response_headers_to_add" {
+              for_each = routes.value.resp_headers_add
+              iterator = h
+              content {
+                name   = h.value.name
+                value  = h.value.value
+                append = h.value.append
+              }
+            }
+            # WAF oneof: app_firewall ref (per-route override) | inherited (default -> omit).
+            # "disable" is not offered: route-level disable_waf {} collides with the LB-level
+            # disable_waf import-suppression (leaf-name match at any depth) and can't round-trip.
+            dynamic "app_firewall" {
+              for_each = routes.value.waf_mode == "app_firewall" ? [1] : []
+              content {
+                name      = xcsh_app_firewall.this.name
+                namespace = var.namespace
+              }
+            }
+          }
+        }
       }
     }
   }
