@@ -478,89 +478,176 @@ resource "xcsh_http_loadbalancer" "this" {
   dynamic "routes" {
     for_each = var.custom_routes
     content {
-      simple_route {
-        http_method = routes.value.http_method
-        # path match oneof: prefix | exact (path) | regex
-        path {
-          prefix = routes.value.path_mode == "prefix" ? routes.value.path_value : null
-          path   = routes.value.path_mode == "exact" ? routes.value.path_value : null
-          regex  = routes.value.path_mode == "regex" ? routes.value.path_value : null
-        }
-        # header matches: name + presence | exact | regex, optionally inverted
-        dynamic "headers" {
-          for_each = routes.value.headers
-          iterator = h
-          content {
-            name         = h.value.name
-            exact        = h.value.mode == "exact" ? h.value.value : null
-            regex        = h.value.mode == "regex" ? h.value.value : null
-            presence     = h.value.mode == "presence" ? true : null
-            invert_match = h.value.invert_match
+      # simple_route (type=simple): match -> origin pool + advanced_options.
+      dynamic "simple_route" {
+        for_each = routes.value.type == "simple" ? [1] : []
+        content {
+          http_method = routes.value.http_method
+          # path match oneof: prefix | exact (path) | regex
+          path {
+            prefix = routes.value.path_mode == "prefix" ? routes.value.path_value : null
+            path   = routes.value.path_mode == "exact" ? routes.value.path_value : null
+            regex  = routes.value.path_mode == "regex" ? routes.value.path_value : null
           }
-        }
-        # incoming port match (omitted = match any port)
-        dynamic "incoming_port" {
-          for_each = routes.value.incoming_port != null ? [1] : []
-          content {
-            port = routes.value.incoming_port
+          # header matches: name + presence | exact | regex, optionally inverted
+          dynamic "headers" {
+            for_each = routes.value.headers
+            iterator = h
+            content {
+              name         = h.value.name
+              exact        = h.value.mode == "exact" ? h.value.value : null
+              regex        = h.value.mode == "regex" ? h.value.value : null
+              presence     = h.value.mode == "presence" ? true : null
+              invert_match = h.value.invert_match
+            }
           }
-        }
-        origin_pools {
-          pool {
-            name      = xcsh_origin_pool.origin.name
-            namespace = var.namespace
+          # incoming port match (omitted = match any port)
+          dynamic "incoming_port" {
+            for_each = routes.value.incoming_port != null ? [1] : []
+            content {
+              port = routes.value.incoming_port
+            }
           }
-        }
-        # advanced_options (CR-3): per-route rewrites, header/cookie transforms, timeout, and a
-        # WAF selector. Emitted only when a field is set (else omitted for 0-change). The WAF
-        # oneof default (inherited_waf) and other oneof bases are server-materialized + provider
-        # import-suppressed. Heavy sub-blocks (cors/csrf/retry/mirror/hash/buffer/websocket) are
-        # deferred to a later slice.
-        dynamic "advanced_options" {
-          for_each = anytrue([
-            routes.value.prefix_rewrite != null, routes.value.disable_location_add,
-            routes.value.timeout_ms != null, length(routes.value.req_headers_add) > 0,
-            length(routes.value.req_headers_remove) > 0, length(routes.value.resp_headers_add) > 0,
-            length(routes.value.resp_headers_remove) > 0, length(routes.value.req_cookies_remove) > 0,
-            length(routes.value.resp_cookies_remove) > 0, routes.value.waf_mode != "inherited",
-          ]) ? [1] : []
-          content {
-            prefix_rewrite             = routes.value.prefix_rewrite
-            priority                   = routes.value.priority
-            disable_location_add       = routes.value.disable_location_add
-            timeout                    = routes.value.timeout_ms
-            request_headers_to_remove  = length(routes.value.req_headers_remove) > 0 ? routes.value.req_headers_remove : null
-            response_headers_to_remove = length(routes.value.resp_headers_remove) > 0 ? routes.value.resp_headers_remove : null
-            request_cookies_to_remove  = length(routes.value.req_cookies_remove) > 0 ? routes.value.req_cookies_remove : null
-            response_cookies_to_remove = length(routes.value.resp_cookies_remove) > 0 ? routes.value.resp_cookies_remove : null
-            dynamic "request_headers_to_add" {
-              for_each = routes.value.req_headers_add
-              iterator = h
-              content {
-                name   = h.value.name
-                value  = h.value.value
-                append = h.value.append
+          origin_pools {
+            pool {
+              name      = xcsh_origin_pool.origin.name
+              namespace = var.namespace
+            }
+          }
+          # advanced_options (CR-3): per-route rewrites, header/cookie transforms, timeout, and a
+          # WAF selector. Emitted only when a field is set (else omitted for 0-change). The WAF
+          # oneof default (inherited_waf) and other oneof bases are server-materialized + provider
+          # import-suppressed. Heavy sub-blocks (cors/csrf/retry/mirror/hash/buffer/websocket) are
+          # deferred to a later slice.
+          dynamic "advanced_options" {
+            for_each = anytrue([
+              routes.value.prefix_rewrite != null, routes.value.disable_location_add,
+              routes.value.timeout_ms != null, length(routes.value.req_headers_add) > 0,
+              length(routes.value.req_headers_remove) > 0, length(routes.value.resp_headers_add) > 0,
+              length(routes.value.resp_headers_remove) > 0, length(routes.value.req_cookies_remove) > 0,
+              length(routes.value.resp_cookies_remove) > 0, routes.value.waf_mode != "inherited",
+            ]) ? [1] : []
+            content {
+              prefix_rewrite             = routes.value.prefix_rewrite
+              priority                   = routes.value.priority
+              disable_location_add       = routes.value.disable_location_add
+              timeout                    = routes.value.timeout_ms
+              request_headers_to_remove  = length(routes.value.req_headers_remove) > 0 ? routes.value.req_headers_remove : null
+              response_headers_to_remove = length(routes.value.resp_headers_remove) > 0 ? routes.value.resp_headers_remove : null
+              request_cookies_to_remove  = length(routes.value.req_cookies_remove) > 0 ? routes.value.req_cookies_remove : null
+              response_cookies_to_remove = length(routes.value.resp_cookies_remove) > 0 ? routes.value.resp_cookies_remove : null
+              dynamic "request_headers_to_add" {
+                for_each = routes.value.req_headers_add
+                iterator = h
+                content {
+                  name   = h.value.name
+                  value  = h.value.value
+                  append = h.value.append
+                }
+              }
+              dynamic "response_headers_to_add" {
+                for_each = routes.value.resp_headers_add
+                iterator = h
+                content {
+                  name   = h.value.name
+                  value  = h.value.value
+                  append = h.value.append
+                }
+              }
+              # WAF oneof: app_firewall ref (per-route override) | inherited (default -> omit).
+              # "disable" is not offered: route-level disable_waf {} collides with the LB-level
+              # disable_waf import-suppression (leaf-name match at any depth) and can't round-trip.
+              dynamic "app_firewall" {
+                for_each = routes.value.waf_mode == "app_firewall" ? [1] : []
+                content {
+                  name      = xcsh_app_firewall.this.name
+                  namespace = var.namespace
+                }
               }
             }
-            dynamic "response_headers_to_add" {
-              for_each = routes.value.resp_headers_add
-              iterator = h
-              content {
-                name   = h.value.name
-                value  = h.value.value
-                append = h.value.append
-              }
+          }
+        }
+
+      }
+
+      # redirect_route (type=redirect): match -> 3xx redirect (host/path/prefix/proto + query).
+      dynamic "redirect_route" {
+        for_each = routes.value.type == "redirect" ? [1] : []
+        content {
+          http_method = routes.value.http_method
+          path {
+            prefix = routes.value.path_mode == "prefix" ? routes.value.path_value : null
+            path   = routes.value.path_mode == "exact" ? routes.value.path_value : null
+            regex  = routes.value.path_mode == "regex" ? routes.value.path_value : null
+          }
+          dynamic "headers" {
+            for_each = routes.value.headers
+            iterator = h
+            content {
+              name         = h.value.name
+              exact        = h.value.mode == "exact" ? h.value.value : null
+              regex        = h.value.mode == "regex" ? h.value.value : null
+              presence     = h.value.mode == "presence" ? true : null
+              invert_match = h.value.invert_match
             }
-            # WAF oneof: app_firewall ref (per-route override) | inherited (default -> omit).
-            # "disable" is not offered: route-level disable_waf {} collides with the LB-level
-            # disable_waf import-suppression (leaf-name match at any depth) and can't round-trip.
-            dynamic "app_firewall" {
-              for_each = routes.value.waf_mode == "app_firewall" ? [1] : []
-              content {
-                name      = xcsh_app_firewall.this.name
-                namespace = var.namespace
-              }
+          }
+          dynamic "incoming_port" {
+            for_each = routes.value.incoming_port != null ? [1] : []
+            content {
+              port = routes.value.incoming_port
             }
+          }
+          route_redirect {
+            host_redirect  = routes.value.redirect_host
+            path_redirect  = routes.value.redirect_path
+            prefix_rewrite = routes.value.redirect_prefix_rewrite
+            proto_redirect = routes.value.redirect_proto
+            response_code  = routes.value.redirect_response_code
+            # query-param handling oneof: retain_all_params | remove_all_params
+            dynamic "retain_all_params" {
+              for_each = routes.value.redirect_query == "retain" ? [1] : []
+              content {}
+            }
+            dynamic "remove_all_params" {
+              for_each = routes.value.redirect_query == "remove" ? [1] : []
+              content {}
+            }
+          }
+        }
+      }
+
+      # direct_response_route (type=direct_response): match -> inline response (code + body).
+      dynamic "direct_response_route" {
+        for_each = routes.value.type == "direct_response" ? [1] : []
+        content {
+          http_method = routes.value.http_method
+          path {
+            prefix = routes.value.path_mode == "prefix" ? routes.value.path_value : null
+            path   = routes.value.path_mode == "exact" ? routes.value.path_value : null
+            regex  = routes.value.path_mode == "regex" ? routes.value.path_value : null
+          }
+          dynamic "headers" {
+            for_each = routes.value.headers
+            iterator = h
+            content {
+              name         = h.value.name
+              exact        = h.value.mode == "exact" ? h.value.value : null
+              regex        = h.value.mode == "regex" ? h.value.value : null
+              presence     = h.value.mode == "presence" ? true : null
+              invert_match = h.value.invert_match
+            }
+          }
+          dynamic "incoming_port" {
+            for_each = routes.value.incoming_port != null ? [1] : []
+            content {
+              port = routes.value.incoming_port
+            }
+          }
+          route_direct_response {
+            response_code = routes.value.direct_response_code
+            # response_body_encoded must be a URI ref: the string:/// scheme with the message
+            # base64-encoded. The module takes plaintext/HTML and builds that form.
+            response_body_encoded = routes.value.direct_response_body != null ? "string:///${base64encode(routes.value.direct_response_body)}" : null
           }
         }
       }

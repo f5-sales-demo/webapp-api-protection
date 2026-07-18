@@ -125,6 +125,84 @@ run "bad_waf_mode_rejected" {
   expect_failures = [var.custom_routes]
 }
 
+run "redirect_route_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    custom_routes = [{
+      type                    = "redirect"
+      path_mode               = "prefix"
+      path_value              = "/old"
+      redirect_host           = "www.f5-sales-demo.com"
+      redirect_prefix_rewrite = "/new"
+      redirect_proto          = "https"
+      redirect_response_code  = 301
+      redirect_query          = "remove"
+    }]
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].redirect_route.route_redirect.response_code == 301
+    error_message = "redirect response_code must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].redirect_route.route_redirect.prefix_rewrite == "/new"
+    error_message = "redirect prefix_rewrite must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].redirect_route.route_redirect.remove_all_params != null
+    error_message = "redirect remove_all_params arm must render for query=remove"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].simple_route == null
+    error_message = "simple_route must be null for type=redirect"
+  }
+}
+
+run "direct_response_route_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    custom_routes = [{
+      type                 = "direct_response"
+      path_mode            = "exact"
+      path_value           = "/teapot"
+      direct_response_code = 418
+      direct_response_body = "I am a teapot"
+    }]
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].direct_response_route.route_direct_response.response_code == 418
+    error_message = "direct response_code must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].direct_response_route.route_direct_response.response_body_encoded == "string:///${base64encode("I am a teapot")}"
+    error_message = "direct response body must be the string:/// base64 URI ref"
+  }
+}
+
+run "redirect_requires_response_code" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { custom_routes = [{ type = "redirect", path_mode = "prefix", path_value = "/x" }] }
+  expect_failures = [var.custom_routes]
+}
+
+run "direct_response_requires_code_and_body" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { custom_routes = [{ type = "direct_response", path_mode = "prefix", path_value = "/x", direct_response_code = 200 }] }
+  expect_failures = [var.custom_routes]
+}
+
+run "redirect_path_and_prefix_mutually_exclusive" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    custom_routes = [{ type = "redirect", path_mode = "prefix", path_value = "/x", redirect_response_code = 302, redirect_path = "/a", redirect_prefix_rewrite = "/b" }]
+  }
+  expect_failures = [var.custom_routes]
+}
+
 run "routes_omitted_by_default" {
   command = plan
   module { source = "./modules/http-lb" }

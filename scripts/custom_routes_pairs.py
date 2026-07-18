@@ -142,6 +142,59 @@ def build() -> list[dict[str, object]]:
                 ]
             },
         },
+        {
+            "name": "redirect",
+            "vars": {
+                "custom_routes": [
+                    {
+                        "type": "redirect",
+                        "path_mode": "prefix",
+                        "path_value": "/old",
+                        "redirect_host": "www.f5-sales-demo.com",
+                        "redirect_prefix_rewrite": "/new",
+                        "redirect_proto": "https",
+                        "redirect_response_code": 301,
+                        "redirect_query": "remove",
+                    }
+                ]
+            },
+        },
+        {
+            "name": "direct-response",
+            "vars": {
+                "custom_routes": [
+                    {
+                        "type": "direct_response",
+                        "path_mode": "exact",
+                        "path_value": "/teapot",
+                        "direct_response_code": 418,
+                        "direct_response_body": "I am a teapot",
+                    }
+                ]
+            },
+        },
+        {
+            "name": "mixed-types",
+            "vars": {
+                "custom_routes": [
+                    {"type": "simple", "path_mode": "prefix", "path_value": "/app"},
+                    {
+                        "type": "redirect",
+                        "path_mode": "prefix",
+                        "path_value": "/legacy",
+                        "redirect_path": "/",
+                        "redirect_response_code": 302,
+                    },
+                    {
+                        "type": "direct_response",
+                        "path_mode": "exact",
+                        "path_value": "/health-direct",
+                        "direct_response_code": 200,
+                        "direct_response_body": "ok",
+                    },
+                ]
+            },
+        },
         {"name": "canonical-restore", "vars": {"custom_routes": []}},
     ]
 

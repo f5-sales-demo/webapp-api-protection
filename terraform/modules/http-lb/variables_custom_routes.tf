@@ -8,6 +8,10 @@
 variable "custom_routes" {
   description = "Custom LB routes (simple_route match -> origin pool). Empty omits routes[]."
   type = list(object({
+    # route type (CR-4): simple (match -> origin pool + advanced_options) | redirect (match ->
+    # 3xx redirect) | direct_response (match -> inline response). The match block below is shared
+    # by all three; simple-only fields (origin pool + advanced_options) apply when type=simple.
+    type = optional(string, "simple") # simple | redirect | direct_response
     # match: path oneof (prefix|exact|regex)
     path_mode  = optional(string, "prefix") # prefix|exact|regex
     path_value = string
@@ -41,6 +45,16 @@ variable "custom_routes" {
     # collides with the LB-level disable_waf import-suppression (matched by leaf name at any
     # depth), so it cannot round-trip cleanly until the provider suppression is path-aware.
     waf_mode = optional(string, "inherited") # inherited | app_firewall
+    # --- redirect_route (type=redirect): route_redirect ---
+    redirect_host           = optional(string)                   # host_redirect
+    redirect_path           = optional(string)                   # path_redirect (exact new path; excl. w/ prefix rewrite)
+    redirect_prefix_rewrite = optional(string)                   # prefix_rewrite (excl. w/ redirect_path)
+    redirect_proto          = optional(string, "incoming-proto") # incoming-proto (keep) | http | https
+    redirect_response_code  = optional(number)                   # e.g. 301 / 302
+    redirect_query          = optional(string, "retain")         # retain | remove (retain_all_params | remove_all_params)
+    # --- direct_response_route (type=direct_response): route_direct_response ---
+    direct_response_code = optional(number) # e.g. 200 / 404
+    direct_response_body = optional(string) # plaintext/HTML; module base64-encodes for the API
   }))
   default = []
 
@@ -73,6 +87,30 @@ variable "custom_routes" {
   validation {
     condition     = alltrue([for r in var.custom_routes : contains(["inherited", "app_firewall"], r.waf_mode)])
     error_message = "custom_routes[].waf_mode must be inherited or app_firewall."
+  }
+  validation {
+    condition     = alltrue([for r in var.custom_routes : contains(["simple", "redirect", "direct_response"], r.type)])
+    error_message = "custom_routes[].type must be simple, redirect, or direct_response."
+  }
+  validation {
+    condition     = alltrue([for r in var.custom_routes : contains(["incoming-proto", "http", "https"], r.redirect_proto)])
+    error_message = "custom_routes[].redirect_proto must be incoming-proto, http, or https."
+  }
+  validation {
+    condition     = alltrue([for r in var.custom_routes : contains(["retain", "remove"], r.redirect_query)])
+    error_message = "custom_routes[].redirect_query must be retain or remove."
+  }
+  validation {
+    condition     = alltrue([for r in var.custom_routes : r.redirect_path == null || r.redirect_prefix_rewrite == null])
+    error_message = "custom_routes[] cannot set both redirect_path and redirect_prefix_rewrite (mutually exclusive)."
+  }
+  validation {
+    condition     = alltrue([for r in var.custom_routes : r.type != "redirect" || r.redirect_response_code != null])
+    error_message = "custom_routes[] with type=redirect requires redirect_response_code."
+  }
+  validation {
+    condition     = alltrue([for r in var.custom_routes : r.type != "direct_response" || (r.direct_response_code != null && r.direct_response_body != null)])
+    error_message = "custom_routes[] with type=direct_response requires direct_response_code and direct_response_body."
   }
   validation {
     condition     = alltrue([for r in var.custom_routes : contains(["DEFAULT", "HIGH"], r.priority)])
