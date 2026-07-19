@@ -80,6 +80,8 @@ module "http_lb" {
   origin_connection_timeout    = var.origin_connection_timeout
   origin_http_idle_timeout     = var.origin_http_idle_timeout
   custom_routes                = var.custom_routes
+  route_objects                = var.route_objects
+  custom_route_ref             = var.custom_route_ref
   labels                       = var.labels
   waf_mode                     = var.waf_mode
   csd_enabled                  = var.csd_enabled

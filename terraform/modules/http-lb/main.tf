@@ -654,6 +654,20 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # custom_route (CR-5): a routes[] entry that references a standalone xcsh_route object. A second
+  # dynamic "routes" block — Terraform concatenates same-named dynamic blocks into the one list.
+  dynamic "routes" {
+    for_each = var.custom_route_ref != null ? [1] : []
+    content {
+      custom_route_object {
+        route_ref {
+          name      = xcsh_route.this[var.custom_route_ref].name
+          namespace = var.namespace
+        }
+      }
+    }
+  }
+
   advertise_on_public_default_vip {}
 
   # Attach the WAF (oneof: app_firewall vs disable_waf; server default disable_waf).
@@ -2449,6 +2463,12 @@ resource "xcsh_http_loadbalancer" "this" {
     precondition {
       condition     = length(var.api_crawler_domains) == 0 || local.api_crawler_password_secret.url != null || local.api_crawler_password_secret.location != null
       error_message = "api_crawler_domains is set but api_crawler_password has no value: set plaintext (clear) or location (blindfold)."
+    }
+
+    # CR-5: a custom_route_ref must name a defined route_objects entry.
+    precondition {
+      condition     = var.custom_route_ref == null || contains([for r in var.route_objects : r.name], var.custom_route_ref)
+      error_message = "custom_route_ref must name an entry in route_objects."
     }
 
     # WAF exclusion is a oneof: inline rules (waf_exclusion_rules) XOR a policy reference
