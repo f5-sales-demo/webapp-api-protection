@@ -53,9 +53,9 @@ output "mud_mitigation" {
   value       = var.mud_mitigation
 }
 
-output "mud_challenge_mode" {
-  description = "Effective MUD challenge mode (none/enable_challenge/policy_based_challenge)."
-  value       = var.mud_challenge_mode
+output "challenge_mode" {
+  description = "Effective LB challenge_type arm (none/enable/js/captcha/policy_based)."
+  value       = local.challenge_mode
 }
 
 output "waf_allowed_response_codes_mode" {

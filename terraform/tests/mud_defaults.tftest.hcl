@@ -25,8 +25,8 @@ run "mud_defaults_render" {
   }
 
   assert {
-    condition     = output.mud_challenge_mode == "enable_challenge"
-    error_message = "default MUD challenge mode must be enable_challenge"
+    condition     = output.challenge_mode == "enable"
+    error_message = "default MUD challenge mode must derive to enable"
   }
 
   assert {
