@@ -41,10 +41,10 @@ variable "custom_routes" {
     req_cookies_remove   = optional(list(string), [])
     resp_cookies_remove  = optional(list(string), [])
     # inherited (route uses the LB WAF, default) | app_firewall (per-route WAF override to the
-    # module's app_firewall). "disable" is intentionally omitted: the route-level disable_waf {}
-    # collides with the LB-level disable_waf import-suppression (matched by leaf name at any
-    # depth), so it cannot round-trip cleanly until the provider suppression is path-aware.
-    waf_mode = optional(string, "inherited") # inherited | app_firewall
+    # module's app_firewall) | disable (turn WAF off for this route -> route disable_waf {}).
+    # disable round-trips since provider v3.72.11 (#1145): the LB-level disable_waf import-
+    # suppression is now root-only scoped, so the nested route-level disable_waf reads back.
+    waf_mode = optional(string, "inherited") # inherited | app_firewall | disable
     # --- redirect_route (type=redirect): route_redirect ---
     redirect_host           = optional(string)                   # host_redirect
     redirect_path           = optional(string)                   # path_redirect (exact new path; excl. w/ prefix rewrite)
@@ -85,8 +85,8 @@ variable "custom_routes" {
     error_message = "custom_routes[].headers[].value is required for exact/regex mode."
   }
   validation {
-    condition     = alltrue([for r in var.custom_routes : contains(["inherited", "app_firewall"], r.waf_mode)])
-    error_message = "custom_routes[].waf_mode must be inherited or app_firewall."
+    condition     = alltrue([for r in var.custom_routes : contains(["inherited", "app_firewall", "disable"], r.waf_mode)])
+    error_message = "custom_routes[].waf_mode must be inherited, app_firewall, or disable."
   }
   validation {
     condition     = alltrue([for r in var.custom_routes : contains(["simple", "redirect", "direct_response"], r.type)])

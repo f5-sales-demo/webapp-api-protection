@@ -554,15 +554,20 @@ resource "xcsh_http_loadbalancer" "this" {
                   append = h.value.append
                 }
               }
-              # WAF oneof: app_firewall ref (per-route override) | inherited (default -> omit).
-              # "disable" is not offered: route-level disable_waf {} collides with the LB-level
-              # disable_waf import-suppression (leaf-name match at any depth) and can't round-trip.
+              # WAF oneof: app_firewall ref (per-route override) | disable (route disable_waf {}) |
+              # inherited (default -> omit). disable round-trips since provider v3.72.11 (#1145):
+              # the LB-level disable_waf import-suppression is now root-only, so the nested
+              # route-level disable_waf is read back instead of stripped on import.
               dynamic "app_firewall" {
                 for_each = routes.value.waf_mode == "app_firewall" ? [1] : []
                 content {
                   name      = xcsh_app_firewall.this.name
                   namespace = var.namespace
                 }
+              }
+              dynamic "disable_waf" {
+                for_each = routes.value.waf_mode == "disable" ? [1] : []
+                content {}
               }
             }
           }
