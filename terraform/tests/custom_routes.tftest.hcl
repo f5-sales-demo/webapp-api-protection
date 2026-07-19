@@ -108,6 +108,28 @@ run "advanced_options_render" {
   }
 }
 
+run "waf_mode_disable_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    custom_routes = [{
+      path_mode  = "prefix"
+      path_value = "/no-waf"
+      waf_mode   = "disable"
+    }]
+  }
+  # waf_mode=disable -> route advanced_options.disable_waf {} (round-trips since provider
+  # v3.72.11 / #1145 root-only import suppression). app_firewall arm must be absent.
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].simple_route.advanced_options.disable_waf != null
+    error_message = "waf_mode=disable must render advanced_options.disable_waf"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].simple_route.advanced_options.app_firewall == null
+    error_message = "waf_mode=disable must not render the app_firewall arm"
+  }
+}
+
 run "advanced_options_omitted_when_no_tuning" {
   command = plan
   module { source = "./modules/http-lb" }

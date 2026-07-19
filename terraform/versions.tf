@@ -59,7 +59,10 @@ terraform {
       # markers (buffer/hash/retry/mirror/prefix-rewrite/spdy/websocket/cluster defaults).
       # >= 3.72.10: meaningful-zero int64 read (provider #1129) — signature_id=0 ("all signatures")
       # round-trips faithfully, re-enabling that waf_exclusion case.
-      version = ">= 3.72.10"
+      # >= 3.72.11: root-only import suppression (provider #1145) — disable_waf is suppressed only
+      # at the LB root, so a route-level advanced_options.disable_waf {} (waf_mode=disable) reads
+      # back and round-trips instead of being stripped on import. Re-enables CR-3's dropped arm.
+      version = ">= 3.72.11"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which

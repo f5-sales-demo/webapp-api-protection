@@ -143,6 +143,20 @@ def build() -> list[dict[str, object]]:
             },
         },
         {
+            # waf_mode=disable -> route advanced_options.disable_waf {}. Round-trips since
+            # provider v3.72.11 (#1145 root-only import suppression); previously dropped (CR-3).
+            "name": "adv-waf-disable",
+            "vars": {
+                "custom_routes": [
+                    {
+                        "path_mode": "prefix",
+                        "path_value": "/no-waf",
+                        "waf_mode": "disable",
+                    }
+                ]
+            },
+        },
+        {
             "name": "redirect",
             "vars": {
                 "custom_routes": [
