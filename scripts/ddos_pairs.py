@@ -60,7 +60,11 @@ def build() -> list[dict[str, object]]:
                             "ip_prefixes": ["198.51.100.0/24"],
                             "ip_invert": False,
                         },
-                        {"name": "block-tls", "source": "tls", "tls_classes": ["TRICKBOT"]},
+                        {
+                            "name": "block-tls",
+                            "source": "tls",
+                            "tls_classes": ["TRICKBOT"],
+                        },
                     ]
                 }
             },
