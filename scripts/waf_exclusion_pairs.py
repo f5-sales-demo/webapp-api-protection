@@ -78,12 +78,15 @@ def _excl_fields(excl: str) -> dict[str, object]:
         return {"action": "skip"}
     base: dict[str, object] = {"action": "detection_control"}
     if excl == "signature":
+        # signature_id 0 = "exclude ALL signatures for the context"; round-trips faithfully since
+        # provider v3.72.10 (#1129, meaningful-zero int64 read). A real ID is the 200000001+ range.
         base["exclude_signatures"] = [
+            {"signature_id": 0, "context": "CONTEXT_ANY"},
             {
                 "signature_id": 200002147,
                 "context": "CONTEXT_HEADER",
                 "context_name": "x-api",
-            }
+            },
         ]
     elif excl == "violation":
         base["exclude_violations"] = [{"violation": "VIOL_JSON_MALFORMED"}]
