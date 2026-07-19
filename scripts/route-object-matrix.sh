@@ -41,7 +41,10 @@ echo "generated $count variants into $VARDIR (running [$START..$END])"
 
 reimport_clean() {
   local label="$1" vf="$2" addr="$3" id="$4"
-  terraform state rm "$addr" >/dev/null 2>&1 || { echo "FAIL $label state-rm ($addr)" >>"$REPORT"; return 1; }
+  terraform state rm "$addr" >/dev/null 2>&1 || {
+    echo "FAIL $label state-rm ($addr)" >>"$REPORT"
+    return 1
+  }
   terraform import "${COMMON[@]}" -var-file="$vf" "$addr" "$id" >/tmp/cr5-import.log 2>&1 || {
     echo "FAIL $label import ($(grep -iE 'error' /tmp/cr5-import.log | head -1 | cut -c1-60))" >>"$REPORT"
     return 1
