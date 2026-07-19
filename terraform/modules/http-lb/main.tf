@@ -2592,6 +2592,33 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # DDoS-1: L7 DDoS protection. Emitted only when ddos.l7_enabled; the module emits ONLY the
+  # non-default arms — the server materializes the default markers (default_rps_threshold,
+  # clientside_action_none, mitigation_block, ddos_policy_none), all import-suppressed (provider
+  # #1155). rps_threshold null omits the attribute (server default). clientside_action none omits
+  # all arms (server clientside_action_none).
+  dynamic "l7_ddos_protection" {
+    for_each = var.ddos.l7_enabled ? [1] : []
+    content {
+      rps_threshold = var.ddos.rps_threshold
+      dynamic "clientside_action_js_challenge" {
+        for_each = var.ddos.clientside_action == "js" ? [1] : []
+        content {
+          cookie_expiry   = var.ddos.cs_cookie_expiry
+          custom_page     = var.ddos.cs_custom_page
+          js_script_delay = var.ddos.cs_js_script_delay
+        }
+      }
+      dynamic "clientside_action_captcha_challenge" {
+        for_each = var.ddos.clientside_action == "captcha" ? [1] : []
+        content {
+          cookie_expiry = var.ddos.cs_cookie_expiry
+          custom_page   = var.ddos.cs_custom_page
+        }
+      }
+    }
+  }
+
   # Fail fast at plan if a crawler domain is configured without a usable password
   # value — a cross-variable check the api_crawler_password variable validation cannot
   # express (clear needs plaintext; blindfold needs location).

@@ -62,7 +62,11 @@ terraform {
       # >= 3.72.11: root-only import suppression (provider #1145) — disable_waf is suppressed only
       # at the LB root, so a route-level advanced_options.disable_waf {} (waf_mode=disable) reads
       # back and round-trips instead of being stripped on import. Re-enables CR-3's dropped arm.
-      version = ">= 3.72.11"
+      # >= 3.72.15: l7_ddos_protection nested server-default markers (provider #1155) — the server
+      # materializes mitigation_block / default_rps_threshold / clientside_action_none /
+      # ddos_policy_none for any l7_ddos_protection config, so a DDoS-1 config that omits them
+      # round-trips 0-change on import.
+      version = ">= 3.72.15"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which
