@@ -2410,7 +2410,47 @@ resource "xcsh_http_loadbalancer" "this" {
     for_each = var.csd_enabled ? [1] : []
     content {
       policy {
-        js_insert_all_pages {}
+        # JS-insertion oneof: all_pages (default) | disabled | all_except (+ exclude_list).
+        dynamic "js_insert_all_pages" {
+          for_each = var.csd.js_insert == "all_pages" ? [1] : []
+          content {}
+        }
+        dynamic "disable_js_insert" {
+          for_each = var.csd.js_insert == "disabled" ? [1] : []
+          content {}
+        }
+        dynamic "js_insert_all_pages_except" {
+          for_each = var.csd.js_insert == "all_except" ? [1] : []
+          content {
+            dynamic "exclude_list" {
+              for_each = var.csd.exclude_list
+              content {
+                metadata {
+                  name = exclude_list.value.name
+                }
+                # domain matcher oneof.
+                dynamic "any_domain" {
+                  for_each = exclude_list.value.domain_mode == "any" ? [1] : []
+                  content {}
+                }
+                dynamic "domain" {
+                  for_each = exclude_list.value.domain_mode != "any" ? [1] : []
+                  content {
+                    exact_value  = exclude_list.value.domain_mode == "exact" ? exclude_list.value.domain_value : null
+                    regex_value  = exclude_list.value.domain_mode == "regex" ? exclude_list.value.domain_value : null
+                    suffix_value = exclude_list.value.domain_mode == "suffix" ? exclude_list.value.domain_value : null
+                  }
+                }
+                # path matcher oneof (required by the API).
+                path {
+                  path   = exclude_list.value.path_mode == "exact" ? exclude_list.value.path_value : null
+                  prefix = exclude_list.value.path_mode == "prefix" ? exclude_list.value.path_value : null
+                  regex  = exclude_list.value.path_mode == "regex" ? exclude_list.value.path_value : null
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
