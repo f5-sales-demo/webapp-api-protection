@@ -21,6 +21,16 @@ variable "challenge" {
     custom_page                      = optional(string)
     js_script_delay                  = optional(number)
     attach_malicious_user_mitigation = optional(bool, false)
+    # CH-2: policy_based_challenge body. Each of js_params/captcha_params/temporary_blocking is a
+    # default-vs-custom oneof — null selects the default_* arm, an object the custom arm. activation
+    # is the oneof {default(omit) | no_challenge | always_js | always_captcha}. Mitigation choice
+    # reuses attach_malicious_user_mitigation (ref arm) vs default_mitigation_settings. rule_list=CH-3.
+    policy_based = optional(object({
+      activation         = optional(string, "default")
+      js_params          = optional(object({ cookie_expiry = optional(number), custom_page = optional(string), js_script_delay = optional(number) }))
+      captcha_params     = optional(object({ cookie_expiry = optional(number), custom_page = optional(string) }))
+      temporary_blocking = optional(object({ custom_page = optional(string) }))
+    }))
   })
   default = {}
 
@@ -31,5 +41,17 @@ variable "challenge" {
   validation {
     condition     = !var.challenge.attach_malicious_user_mitigation || contains(["enable", "policy_based"], coalesce(var.challenge.mode, "none"))
     error_message = "challenge.attach_malicious_user_mitigation is valid only for mode enable or policy_based."
+  }
+  validation {
+    condition     = var.challenge.policy_based == null || var.challenge.mode == "policy_based"
+    error_message = "challenge.policy_based params require challenge.mode = policy_based."
+  }
+  validation {
+    condition     = try(var.challenge.policy_based.activation, "default") == null ? true : contains(["default", "no_challenge", "always_js", "always_captcha"], try(var.challenge.policy_based.activation, "default"))
+    error_message = "challenge.policy_based.activation must be default, no_challenge, always_js, or always_captcha."
+  }
+  validation {
+    condition     = try(var.challenge.policy_based.js_params.js_script_delay, null) == null || try(var.challenge.policy_based.js_params.js_script_delay, 0) >= 1000
+    error_message = "challenge.policy_based.js_params.js_script_delay must be >= 1000 (F5 XC uint32 gte constraint)."
   }
 }
