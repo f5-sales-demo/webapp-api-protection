@@ -30,6 +30,26 @@ variable "challenge" {
       js_params          = optional(object({ cookie_expiry = optional(number), custom_page = optional(string), js_script_delay = optional(number) }))
       captcha_params     = optional(object({ cookie_expiry = optional(number), custom_page = optional(string) }))
       temporary_blocking = optional(object({ custom_page = optional(string) }))
+      # CH-3: rule_list.rules[] — per-request challenge rules. action = the 3-arm oneof
+      # (js->enable_javascript_challenge, captcha->enable_captcha_challenge, disable->disable_challenge).
+      # Matchers are a representative subset (path exact/regex, http_method, headers, client_selector);
+      # the full matcher set is exhaustively covered by the SPol service_policy effort (same F5 XC
+      # types) and not re-exhausted here (DRY).
+      rules = optional(list(object({
+        name              = string
+        action            = optional(string, "js") # js | captcha | disable
+        path_mode         = optional(string)       # exact | regex (null = no path matcher)
+        path_values       = optional(list(string), [])
+        http_methods      = optional(list(string), [])
+        client_expression = optional(string) # single label expression -> client_selector
+        headers = optional(list(object({
+          name   = string
+          mode   = optional(string, "presence") # presence | exact | regex
+          values = optional(list(string), [])
+          invert = optional(bool, false)
+        })), [])
+        expiration_timestamp = optional(string)
+      })), [])
     }))
   })
   default = {}
@@ -53,5 +73,17 @@ variable "challenge" {
   validation {
     condition     = try(var.challenge.policy_based.js_params.js_script_delay, null) == null || try(var.challenge.policy_based.js_params.js_script_delay, 0) >= 1000
     error_message = "challenge.policy_based.js_params.js_script_delay must be >= 1000 (F5 XC uint32 gte constraint)."
+  }
+  validation {
+    condition     = alltrue([for r in try(var.challenge.policy_based.rules, []) : contains(["js", "captcha", "disable"], r.action)])
+    error_message = "challenge.policy_based.rules[].action must be js, captcha, or disable."
+  }
+  validation {
+    condition     = alltrue([for r in try(var.challenge.policy_based.rules, []) : r.path_mode == null || contains(["exact", "regex"], r.path_mode)])
+    error_message = "challenge.policy_based.rules[].path_mode must be exact or regex (the challenge rule path matcher has no prefix arm)."
+  }
+  validation {
+    condition     = alltrue([for r in try(var.challenge.policy_based.rules, []) : alltrue([for h in r.headers : contains(["presence", "exact", "regex"], h.mode)])])
+    error_message = "challenge.policy_based.rules[].headers[].mode must be presence, exact, or regex."
   }
 }

@@ -164,6 +164,88 @@ run "bad_activation_rejected" {
   expect_failures = [var.challenge]
 }
 
+run "rule_list_actions_and_matchers_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    challenge = {
+      mode = "policy_based"
+      policy_based = {
+        rules = [
+          {
+            name         = "js-login"
+            action       = "js"
+            path_mode    = "exact"
+            path_values  = ["/login"]
+            http_methods = ["GET", "POST"]
+            headers      = [{ name = "x-probe", mode = "exact", values = ["on"] }]
+          },
+          {
+            name              = "captcha-admin"
+            action            = "captcha"
+            path_mode         = "regex"
+            path_values       = ["^/admin/.*$"]
+            client_expression = "tier in (gold)"
+          },
+          { name = "disable-health", action = "disable", path_mode = "exact", path_values = ["/health"] },
+        ]
+      }
+    }
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.rule_list.rules[0].spec.enable_javascript_challenge != null
+    error_message = "rule 0 action=js must render enable_javascript_challenge"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.rule_list.rules[0].spec.path.exact_values[0] == "/login"
+    error_message = "rule 0 path exact matcher must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.rule_list.rules[0].spec.http_method.methods[1] == "POST"
+    error_message = "rule 0 http_method matcher must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.rule_list.rules[1].spec.enable_captcha_challenge != null
+    error_message = "rule 1 action=captcha must render enable_captcha_challenge"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.rule_list.rules[1].spec.client_selector.expressions[0] == "tier in (gold)"
+    error_message = "rule 1 client_selector expression must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.rule_list.rules[2].spec.disable_challenge != null
+    error_message = "rule 2 action=disable must render disable_challenge"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.rule_list.rules[0].metadata.name == "js-login"
+    error_message = "rule metadata.name must render"
+  }
+}
+
+run "rule_list_omitted_without_rules" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { challenge = { mode = "policy_based", policy_based = { activation = "always_js" } } }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.rule_list == null
+    error_message = "rule_list must be omitted when no rules are defined"
+  }
+}
+
+run "bad_rule_action_rejected" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { challenge = { mode = "policy_based", policy_based = { rules = [{ name = "r", action = "block" }] } } }
+  expect_failures = [var.challenge]
+}
+
+run "bad_rule_path_mode_rejected" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { challenge = { mode = "policy_based", policy_based = { rules = [{ name = "r", path_mode = "prefix" }] } } }
+  expect_failures = [var.challenge]
+}
+
 run "bad_mode_rejected" {
   command = plan
   module { source = "./modules/http-lb" }
