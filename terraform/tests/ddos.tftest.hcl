@@ -84,6 +84,62 @@ run "enabled_minimal_renders_block" {
   }
 }
 
+run "mitigation_rules_source_arms_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    ddos = {
+      mitigation_rules = [
+        { name = "block-cn", source = "country", countries = ["COUNTRY_CN", "COUNTRY_RU"] },
+        { name = "block-asn", source = "asn", as_numbers = [64512, 64513] },
+        { name = "block-ip", source = "ip", ip_prefixes = ["203.0.113.0/24"], ip_invert = true },
+        { name = "block-tls", source = "tls", tls_classes = ["TRICKBOT"] },
+      ]
+    }
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.ddos_mitigation_rules[0].ddos_client_source.country_list[0] == "COUNTRY_CN"
+    error_message = "country source arm must render country_list"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.ddos_mitigation_rules[0].metadata.name == "block-cn"
+    error_message = "rule metadata.name must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.ddos_mitigation_rules[0].block != null
+    error_message = "block action must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.ddos_mitigation_rules[1].ddos_client_source.asn_list.as_numbers[0] == 64512
+    error_message = "asn source arm must render asn_list.as_numbers"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.ddos_mitigation_rules[2].ip_prefix_list.invert_match == true
+    error_message = "ip source arm must render rule-level ip_prefix_list.invert_match"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.ddos_mitigation_rules[3].ddos_client_source.tls_fingerprint_matcher.classes[0] == "TRICKBOT"
+    error_message = "tls source arm must render tls_fingerprint_matcher.classes"
+  }
+}
+
+run "mitigation_rules_omitted_by_default" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { ddos = {} }
+  assert {
+    condition     = length(xcsh_http_loadbalancer.this.ddos_mitigation_rules) == 0
+    error_message = "ddos_mitigation_rules must be empty by default"
+  }
+}
+
+run "bad_mitigation_source_rejected" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { ddos = { mitigation_rules = [{ name = "r", source = "user_agent" }] } }
+  expect_failures = [var.ddos]
+}
+
 run "bad_clientside_action_rejected" {
   command = plan
   module { source = "./modules/http-lb" }
