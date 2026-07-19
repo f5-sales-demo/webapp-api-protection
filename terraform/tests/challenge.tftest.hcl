@@ -1,5 +1,6 @@
-# Plan-level tests for CH-1: the unified `challenge` variable owning the LB challenge_type
-# oneof (no_challenge/enable/js/captcha/policy_based). command = plan, targets ./modules/http-lb.
+# Plan-level tests for the unified `challenge` variable owning the LB challenge_type oneof
+# (no_challenge/enable/js/captcha/policy_based). CH-1: mode selection + js/captcha arms + MUD
+# derivation. CH-2: policy_based_challenge parameter + activation oneofs. command = plan.
 variables {
   namespace         = "webapp-api-protection"
   lb_domains        = ["www.f5-sales-demo.com"]
@@ -93,6 +94,74 @@ run "explicit_enable_with_mud_attaches_ref" {
     condition     = xcsh_http_loadbalancer.this.enable_challenge.malicious_user_mitigation.name == "webapp-api-protection-mud"
     error_message = "explicit enable + attach must reference the mitigation policy"
   }
+}
+
+run "policy_based_custom_params_render" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    challenge = {
+      mode = "policy_based"
+      policy_based = {
+        activation         = "always_js"
+        js_params          = { cookie_expiry = 1800, js_script_delay = 2000 }
+        captcha_params     = { cookie_expiry = 1800 }
+        temporary_blocking = { custom_page = "string:///QmxvY2tlZC4=" }
+      }
+    }
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.js_challenge_parameters.js_script_delay == 2000
+    error_message = "custom js_challenge_parameters must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.captcha_challenge_parameters.cookie_expiry == 1800
+    error_message = "custom captcha_challenge_parameters must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.temporary_user_blocking != null
+    error_message = "custom temporary_user_blocking must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.always_enable_js_challenge != null
+    error_message = "activation always_js must render always_enable_js_challenge"
+  }
+}
+
+run "policy_based_defaults_omit_custom_arms" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  # mode=policy_based with no params -> empty policy_based_challenge (server applies default_* arms)
+  variables { challenge = { mode = "policy_based" } }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge != null
+    error_message = "policy_based_challenge block must render for mode=policy_based"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.js_challenge_parameters == null && xcsh_http_loadbalancer.this.policy_based_challenge.captcha_challenge_parameters == null && xcsh_http_loadbalancer.this.policy_based_challenge.always_enable_js_challenge == null
+    error_message = "no custom arm may render when policy_based params are unset"
+  }
+}
+
+run "js_script_delay_min_rejected" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { challenge = { mode = "policy_based", policy_based = { js_params = { js_script_delay = 500 } } } }
+  expect_failures = [var.challenge]
+}
+
+run "policy_based_requires_policy_based_mode" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { challenge = { mode = "js", policy_based = { activation = "always_js" } } }
+  expect_failures = [var.challenge]
+}
+
+run "bad_activation_rejected" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables { challenge = { mode = "policy_based", policy_based = { activation = "always_everything" } } }
+  expect_failures = [var.challenge]
 }
 
 run "bad_mode_rejected" {

@@ -2475,12 +2475,50 @@ resource "xcsh_http_loadbalancer" "this" {
   dynamic "policy_based_challenge" {
     for_each = local.challenge_mode == "policy_based" ? [1] : []
     content {
+      # mitigation choice: ref arm (attach) vs the server default (default_mitigation_settings,
+      # emitted by the server when omitted; import-suppressed).
       dynamic "malicious_user_mitigation" {
         for_each = local.challenge_attach_mud ? [1] : []
         content {
           name      = xcsh_malicious_user_mitigation.mud[0].name
           namespace = xcsh_malicious_user_mitigation.mud[0].namespace
         }
+      }
+      # js/captcha/temp-blocking parameter choices — emit the custom arm only; omission -> server
+      # default_* arm (CH-2 probe: js_script_delay must be >= 1000).
+      dynamic "js_challenge_parameters" {
+        for_each = try(local.challenge_pbc.js_params, null) != null ? [1] : []
+        content {
+          cookie_expiry   = try(local.challenge_pbc.js_params.cookie_expiry, null)
+          custom_page     = try(local.challenge_pbc.js_params.custom_page, null)
+          js_script_delay = try(local.challenge_pbc.js_params.js_script_delay, null)
+        }
+      }
+      dynamic "captcha_challenge_parameters" {
+        for_each = try(local.challenge_pbc.captcha_params, null) != null ? [1] : []
+        content {
+          cookie_expiry = try(local.challenge_pbc.captcha_params.cookie_expiry, null)
+          custom_page   = try(local.challenge_pbc.captcha_params.custom_page, null)
+        }
+      }
+      dynamic "temporary_user_blocking" {
+        for_each = try(local.challenge_pbc.temporary_blocking, null) != null ? [1] : []
+        content {
+          custom_page = try(local.challenge_pbc.temporary_blocking.custom_page, null)
+        }
+      }
+      # activation choice (oneof): omit for the server default; rule_list is CH-3.
+      dynamic "no_challenge" {
+        for_each = local.challenge_pbc_activation == "no_challenge" ? [1] : []
+        content {}
+      }
+      dynamic "always_enable_js_challenge" {
+        for_each = local.challenge_pbc_activation == "always_js" ? [1] : []
+        content {}
+      }
+      dynamic "always_enable_captcha_challenge" {
+        for_each = local.challenge_pbc_activation == "always_captcha" ? [1] : []
+        content {}
       }
     }
   }

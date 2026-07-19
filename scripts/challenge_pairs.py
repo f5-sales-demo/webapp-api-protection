@@ -59,6 +59,40 @@ def build() -> list[dict[str, object]]:
             },
         },
         {
+            # policy_based custom js params + always_js activation (standalone, MUD off).
+            "name": "pbc-custom-js",
+            "vars": {
+                "mud_enabled": False,
+                "challenge": {
+                    "mode": "policy_based",
+                    "policy_based": {
+                        "activation": "always_js",
+                        "js_params": {"cookie_expiry": 1800, "js_script_delay": 2000},
+                    },
+                },
+            },
+        },
+        {
+            # policy_based custom captcha params + temporary_user_blocking + always_captcha.
+            "name": "pbc-custom-captcha-temp",
+            "vars": {
+                "mud_enabled": False,
+                "challenge": {
+                    "mode": "policy_based",
+                    "policy_based": {
+                        "activation": "always_captcha",
+                        "captcha_params": {"cookie_expiry": 1800},
+                        "temporary_blocking": {"custom_page": "string:///QmxvY2tlZC4="},
+                    },
+                },
+            },
+        },
+        {
+            # policy_based all-default (empty body -> server default_* arms).
+            "name": "pbc-all-default",
+            "vars": {"mud_enabled": False, "challenge": {"mode": "policy_based"}},
+        },
+        {
             "name": "none",
             "vars": {"mud_enabled": False, "challenge": {"mode": "none"}},
         },
