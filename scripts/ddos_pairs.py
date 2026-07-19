@@ -43,6 +43,33 @@ def build() -> list[dict[str, object]]:
             "vars": {"ddos": {"l7_enabled": True}},
         },
         {
+            # DDoS-3: manual block rules, one per ddos_client_source arm (country/asn/ip/tls).
+            "name": "mitigation-rules",
+            "vars": {
+                "ddos": {
+                    "mitigation_rules": [
+                        {
+                            "name": "block-cn",
+                            "source": "country",
+                            "countries": ["COUNTRY_CN", "COUNTRY_RU"],
+                        },
+                        {"name": "block-asn", "source": "asn", "as_numbers": [64512]},
+                        {
+                            "name": "block-ip",
+                            "source": "ip",
+                            "ip_prefixes": ["198.51.100.0/24"],
+                            "ip_invert": False,
+                        },
+                        {
+                            "name": "block-tls",
+                            "source": "tls",
+                            "tls_classes": ["TRICKBOT"],
+                        },
+                    ]
+                }
+            },
+        },
+        {
             "name": "canonical-restore",
             "vars": {"ddos": {"l7_enabled": False}},
         },

@@ -18,6 +18,20 @@ variable "ddos" {
     cs_cookie_expiry   = optional(number)
     cs_custom_page     = optional(string)
     cs_js_script_delay = optional(number)
+    # DDoS-3: manual L7 DDoS block rules. Each rule blocks a client source (the ddos_client_source
+    # oneof selected by `source`): country | asn | ip | tls | ja4.
+    mitigation_rules = optional(list(object({
+      name                 = string
+      source               = optional(string, "country") # country | asn | ip | tls | ja4
+      countries            = optional(list(string), [])
+      as_numbers           = optional(list(number), [])
+      ip_prefixes          = optional(list(string), [])
+      ip_invert            = optional(bool, false)
+      tls_classes          = optional(list(string), [])
+      tls_exact            = optional(list(string), [])
+      ja4_exact            = optional(list(string), [])
+      expiration_timestamp = optional(string)
+    })), [])
   })
   default = {}
 
@@ -28,5 +42,9 @@ variable "ddos" {
   validation {
     condition     = var.ddos.rps_threshold == null || var.ddos.rps_threshold >= 1
     error_message = "ddos.rps_threshold must be >= 1 when set."
+  }
+  validation {
+    condition     = alltrue([for r in var.ddos.mitigation_rules : contains(["country", "asn", "ip", "tls", "ja4"], r.source)])
+    error_message = "ddos.mitigation_rules[].source must be country, asn, ip, tls, or ja4."
   }
 }
