@@ -112,7 +112,7 @@ module "http_lb" {
   mud_user_id                     = var.mud_user_id
   mud_user_id_rule                = var.mud_user_id_rule
   mud_mitigation                  = var.mud_mitigation
-  mud_challenge_mode              = var.mud_challenge_mode
+  challenge                       = var.challenge
 
   # API Discovery & Crawler (SP1) passthrough. Defaults keep enable_api_discovery {}
   # bare (0-change). The api-discovery matrix cycles the non-default arms.

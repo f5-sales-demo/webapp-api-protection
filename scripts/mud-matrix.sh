@@ -82,9 +82,13 @@ check() {
   round_trip "$label"
 }
 
-# --- challenge modes ---
-for mode in enable_challenge policy_based_challenge none; do
-  check "challenge-$mode" -var "mud_challenge_mode=$mode"
+# --- challenge modes (unified `challenge` var; MUD carriers attach the mitigation ref) ---
+for mode in enable policy_based none; do
+  if [ "$mode" = none ]; then
+    check "challenge-$mode" -var "challenge={mode=\"none\"}"
+  else
+    check "challenge-$mode" -var "challenge={mode=\"$mode\",attach_malicious_user_mitigation=true}"
+  fi
 done
 
 # --- mitigation action at every level (all-same-action covers 9 pairings) ---
@@ -101,7 +105,7 @@ for rule in cookie_name http_header_name ip_and_http_header_name jwt_claim_name 
 done
 
 # --- canonical end-state (leave the live LB healthy) ---
-check "canonical" -var mud_user_id=client_ip -var mud_challenge_mode=enable_challenge \
+check "canonical" -var mud_user_id=client_ip -var 'challenge={mode="enable",attach_malicious_user_mitigation=true}' \
   -var 'mud_mitigation={low="javascript_challenge",medium="captcha_challenge",high="block_temporarily"}'
 
 echo "===== MUD MATRIX RESULTS ====="

@@ -53,9 +53,9 @@ output "mud_mitigation" {
   value       = module.http_lb.mud_mitigation
 }
 
-output "mud_challenge_mode" {
-  description = "Effective MUD challenge mode."
-  value       = module.http_lb.mud_challenge_mode
+output "challenge_mode" {
+  description = "Effective LB challenge_type arm (none/enable/js/captcha/policy_based)."
+  value       = module.http_lb.challenge_mode
 }
 
 

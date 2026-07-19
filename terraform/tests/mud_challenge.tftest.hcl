@@ -1,6 +1,6 @@
-# Plan-level test: the LB challenge integration is selected by mud_challenge_mode —
-# enable_challenge, policy_based_challenge, or none (neither block). Each mode must
-# produce a valid plan. Targets ./modules/http-lb with a dummy origin — no tenant.
+# Plan-level test: MUD auto-mitigation drives the LB challenge_type oneof through the unified
+# `challenge` variable (CH-1) — enable / policy_based with the mitigation ref attached, or none.
+# Targets ./modules/http-lb with a dummy origin — no tenant.
 variables {
   namespace         = "webapp-api-protection"
   lb_domains        = ["www.f5-sales-demo.com"]
@@ -16,29 +16,37 @@ variables {
 run "challenge_enable_renders" {
   command = plan
   module { source = "./modules/http-lb" }
-  variables { mud_challenge_mode = "enable_challenge" }
+  variables { challenge = { mode = "enable", attach_malicious_user_mitigation = true } }
   assert {
-    condition     = output.mud_challenge_mode == "enable_challenge"
-    error_message = "challenge mode must be enable_challenge"
+    condition     = output.challenge_mode == "enable"
+    error_message = "challenge mode must be enable"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.enable_challenge.malicious_user_mitigation.name == "webapp-api-protection-mud"
+    error_message = "enable arm must carry the mitigation ref"
   }
 }
 
 run "challenge_policy_based_renders" {
   command = plan
   module { source = "./modules/http-lb" }
-  variables { mud_challenge_mode = "policy_based_challenge" }
+  variables { challenge = { mode = "policy_based", attach_malicious_user_mitigation = true } }
   assert {
-    condition     = output.mud_challenge_mode == "policy_based_challenge"
-    error_message = "challenge mode must be policy_based_challenge"
+    condition     = output.challenge_mode == "policy_based"
+    error_message = "challenge mode must be policy_based"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.policy_based_challenge.malicious_user_mitigation.name == "webapp-api-protection-mud"
+    error_message = "policy_based arm must carry the mitigation ref"
   }
 }
 
 run "challenge_none_renders" {
   command = plan
   module { source = "./modules/http-lb" }
-  variables { mud_challenge_mode = "none" }
+  variables { challenge = { mode = "none" } }
   assert {
-    condition     = output.mud_challenge_mode == "none"
-    error_message = "challenge mode none must render (neither challenge block emitted)"
+    condition     = output.challenge_mode == "none"
+    error_message = "challenge mode none must render (no challenge arm emitted)"
   }
 }
