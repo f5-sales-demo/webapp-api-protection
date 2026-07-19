@@ -2667,6 +2667,34 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # LBA: load-balancing algorithm oneof. round_robin (default) is omitted (server materializes it,
+  # import-suppressed); the chosen non-default arm is emitted. cookie_stickiness excluded (500).
+  dynamic "least_active" {
+    for_each = var.lb_algorithm.mode == "least_active" ? [1] : []
+    content {}
+  }
+  dynamic "random" {
+    for_each = var.lb_algorithm.mode == "random" ? [1] : []
+    content {}
+  }
+  dynamic "source_ip_stickiness" {
+    for_each = var.lb_algorithm.mode == "source_ip_stickiness" ? [1] : []
+    content {}
+  }
+  dynamic "ring_hash" {
+    for_each = var.lb_algorithm.mode == "ring_hash" ? [1] : []
+    content {
+      dynamic "hash_policy" {
+        for_each = var.lb_algorithm.ring_hash_policies
+        content {
+          header_name = hash_policy.value.header_name
+          source_ip   = hash_policy.value.source_ip
+          terminal    = hash_policy.value.terminal
+        }
+      }
+    }
+  }
+
   # Fail fast at plan if a crawler domain is configured without a usable password
   # value — a cross-variable check the api_crawler_password variable validation cannot
   # express (clear needs plaintext; blindfold needs location).
