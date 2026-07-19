@@ -114,6 +114,19 @@ variable "challenge" {
   default = {}
 }
 
+variable "ddos" {
+  description = "L7 DDoS protection config (l7_ddos_protection). See module ./modules/http-lb variables_ddos.tf."
+  type = object({
+    l7_enabled         = optional(bool, false)
+    rps_threshold      = optional(number)
+    clientside_action  = optional(string, "none")
+    cs_cookie_expiry   = optional(number)
+    cs_custom_page     = optional(string)
+    cs_js_script_delay = optional(number)
+  })
+  default = {}
+}
+
 variable "mud_bad_traffic" {
   description = "Have the traffic generator emit identifiable malicious-user traffic (WAF-triggering payloads, forbidden-path scanning, failed logins) so MUD flags a user and applies mitigation. Only takes effect when mud_enabled. Off by default to keep the baseline demo benign."
   type        = bool
