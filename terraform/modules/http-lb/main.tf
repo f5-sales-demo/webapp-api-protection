@@ -2437,26 +2437,50 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
-  # Auto-mitigation for detected malicious users, via the challenge oneof. mud_challenge_mode
-  # selects enable_challenge (risk-based) or policy_based_challenge (policy-rule-based); both
-  # carry the malicious_user_mitigation reference. "none" emits neither → server default
-  # no_challenge (import-suppressed). Both arms are gated on mud_enabled.
+  # Challenge_type oneof (unified — see variables_challenge.tf / locals_challenge.tf). The
+  # effective local.challenge_mode selects one arm; "none" emits none → server default
+  # no_challenge (import-suppressed). enable/policy_based optionally carry the MUD
+  # malicious_user_mitigation ref (local.challenge_attach_mud). js/captcha challenge ALL
+  # traffic. The rich policy_based_challenge body (rules/params/temp-blocking) is CH-2/CH-3.
   dynamic "enable_challenge" {
-    for_each = var.mud_enabled && var.mud_challenge_mode == "enable_challenge" ? [1] : []
+    for_each = local.challenge_mode == "enable" ? [1] : []
     content {
-      malicious_user_mitigation {
-        name      = xcsh_malicious_user_mitigation.mud[0].name
-        namespace = xcsh_malicious_user_mitigation.mud[0].namespace
+      dynamic "malicious_user_mitigation" {
+        for_each = local.challenge_attach_mud ? [1] : []
+        content {
+          name      = xcsh_malicious_user_mitigation.mud[0].name
+          namespace = xcsh_malicious_user_mitigation.mud[0].namespace
+        }
       }
     }
   }
 
-  dynamic "policy_based_challenge" {
-    for_each = var.mud_enabled && var.mud_challenge_mode == "policy_based_challenge" ? [1] : []
+  dynamic "js_challenge" {
+    for_each = local.challenge_mode == "js" ? [1] : []
     content {
-      malicious_user_mitigation {
-        name      = xcsh_malicious_user_mitigation.mud[0].name
-        namespace = xcsh_malicious_user_mitigation.mud[0].namespace
+      cookie_expiry   = var.challenge.cookie_expiry
+      custom_page     = var.challenge.custom_page
+      js_script_delay = var.challenge.js_script_delay
+    }
+  }
+
+  dynamic "captcha_challenge" {
+    for_each = local.challenge_mode == "captcha" ? [1] : []
+    content {
+      cookie_expiry = var.challenge.cookie_expiry
+      custom_page   = var.challenge.custom_page
+    }
+  }
+
+  dynamic "policy_based_challenge" {
+    for_each = local.challenge_mode == "policy_based" ? [1] : []
+    content {
+      dynamic "malicious_user_mitigation" {
+        for_each = local.challenge_attach_mud ? [1] : []
+        content {
+          name      = xcsh_malicious_user_mitigation.mud[0].name
+          namespace = xcsh_malicious_user_mitigation.mud[0].namespace
+        }
       }
     }
   }
@@ -2474,6 +2498,13 @@ resource "xcsh_http_loadbalancer" "this" {
     precondition {
       condition     = var.custom_route_ref == null || contains([for r in var.route_objects : r.name], var.custom_route_ref)
       error_message = "custom_route_ref must name an entry in route_objects."
+    }
+
+    # CH-1: attaching the malicious_user_mitigation ref to the challenge arm needs MUD
+    # enabled (the mitigation resource only exists when mud_enabled) — a cross-variable check.
+    precondition {
+      condition     = !local.challenge_attach_mud || var.mud_enabled
+      error_message = "challenge.attach_malicious_user_mitigation requires mud_enabled (the mitigation policy must exist)."
     }
 
     # WAF exclusion is a oneof: inline rules (waf_exclusion_rules) XOR a policy reference

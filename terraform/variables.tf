@@ -102,15 +102,16 @@ variable "mud_mitigation" {
   }
 }
 
-variable "mud_challenge_mode" {
-  description = "MUD challenge integration: none, enable_challenge, or policy_based_challenge."
-  type        = string
-  default     = "enable_challenge"
-
-  validation {
-    condition     = contains(["none", "enable_challenge", "policy_based_challenge"], var.mud_challenge_mode)
-    error_message = "mud_challenge_mode must be none, enable_challenge, or policy_based_challenge."
-  }
+variable "challenge" {
+  description = "LB challenge configuration (owns the challenge_type oneof). See module ./modules/http-lb variables_challenge.tf. MUD uses mode enable/policy_based with attach_malicious_user_mitigation."
+  type = object({
+    mode                             = optional(string)
+    cookie_expiry                    = optional(number)
+    custom_page                      = optional(string)
+    js_script_delay                  = optional(number)
+    attach_malicious_user_mitigation = optional(bool, false)
+  })
+  default = {}
 }
 
 variable "mud_bad_traffic" {

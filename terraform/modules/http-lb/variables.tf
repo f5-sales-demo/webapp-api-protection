@@ -103,16 +103,9 @@ variable "mud_mitigation" {
   }
 }
 
-variable "mud_challenge_mode" {
-  description = "LB challenge integration for MUD auto-mitigation: none, enable_challenge, or policy_based_challenge."
-  type        = string
-  default     = "enable_challenge"
-
-  validation {
-    condition     = contains(["none", "enable_challenge", "policy_based_challenge"], var.mud_challenge_mode)
-    error_message = "mud_challenge_mode must be none, enable_challenge, or policy_based_challenge."
-  }
-}
+# The LB challenge integration (formerly mud_challenge_mode) is now the unified `challenge`
+# variable — see variables_challenge.tf. MUD's use is challenge.mode = enable/policy_based
+# with attach_malicious_user_mitigation = true (derived by default when mud_enabled).
 
 # ---------------------------------------------------------------------------
 # Web Application Firewall (xcsh_app_firewall) — exhaustive option coverage.
