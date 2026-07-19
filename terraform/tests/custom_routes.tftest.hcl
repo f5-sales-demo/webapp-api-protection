@@ -203,6 +203,54 @@ run "redirect_path_and_prefix_mutually_exclusive" {
   expect_failures = [var.custom_routes]
 }
 
+run "standalone_route_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    route_objects = [{ name = "ro-a", path_prefix = "/ro", response_code = 200, response_body = "hi from route obj" }]
+  }
+  assert {
+    condition     = xcsh_route.this["ro-a"].routes[0].match[0].path.prefix == "/ro"
+    error_message = "standalone route match prefix must render"
+  }
+  assert {
+    condition     = xcsh_route.this["ro-a"].routes[0].route_direct_response.response_body_encoded == "string:///${base64encode("hi from route obj")}"
+    error_message = "standalone route direct-response body must be the string:/// URI ref"
+  }
+}
+
+run "lb_custom_route_ref_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    route_objects    = [{ name = "ro-a", path_prefix = "/ro" }]
+    custom_route_ref = "ro-a"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].custom_route_object.route_ref.name == "ro-a"
+    error_message = "LB custom_route_object route_ref must render the referenced route object"
+  }
+}
+
+run "custom_route_ref_must_exist" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    route_objects    = [{ name = "ro-a", path_prefix = "/ro" }]
+    custom_route_ref = "missing"
+  }
+  expect_failures = [xcsh_http_loadbalancer.this]
+}
+
+run "no_route_objects_by_default" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  assert {
+    condition     = length(xcsh_route.this) == 0
+    error_message = "no standalone route objects by default"
+  }
+}
+
 run "routes_omitted_by_default" {
   command = plan
   module { source = "./modules/http-lb" }
