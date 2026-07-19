@@ -15,4 +15,10 @@ locals {
   challenge_attach_mud = (
     local.challenge_explicit ? var.challenge.attach_malicious_user_mitigation : var.mud_enabled
   )
+
+  # CH-2: policy_based_challenge body. Emit only the CUSTOM arm of each default-vs-custom oneof
+  # (js/captcha/temp-blocking params, mitigation ref) and the chosen activation member; omitting a
+  # choice lets the server apply its default_* arm (import-suppressed). Null when not configured.
+  challenge_pbc            = try(var.challenge.policy_based, null)
+  challenge_pbc_activation = try(var.challenge.policy_based.activation, "default")
 }
