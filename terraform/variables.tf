@@ -139,6 +139,19 @@ variable "ddos" {
   default = {}
 }
 
+variable "lb_algorithm" {
+  description = "LB load-balancing algorithm (loadbalancer_algorithm oneof). See module ./modules/http-lb variables_lb_algorithm.tf."
+  type = object({
+    mode = optional(string, "round_robin")
+    ring_hash_policies = optional(list(object({
+      header_name = optional(string)
+      source_ip   = optional(bool, false)
+      terminal    = optional(bool, false)
+    })), [])
+  })
+  default = {}
+}
+
 variable "mud_bad_traffic" {
   description = "Have the traffic generator emit identifiable malicious-user traffic (WAF-triggering payloads, forbidden-path scanning, failed logins) so MUD flags a user and applies mitigation. Only takes effect when mud_enabled. Off by default to keep the baseline demo benign."
   type        = bool
