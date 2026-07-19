@@ -2619,6 +2619,54 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
+  # DDoS-3: manual L7 DDoS block rules. Each rule = metadata{name} + block{} + a source matcher
+  # selected by rule.source: country/asn/tls/ja4 use the ddos_client_source block; ip uses the
+  # rule-level ip_prefix_list block (a sibling of ddos_client_source, not nested in it).
+  dynamic "ddos_mitigation_rules" {
+    for_each = var.ddos.mitigation_rules
+    content {
+      expiration_timestamp = ddos_mitigation_rules.value.expiration_timestamp
+      metadata {
+        name = ddos_mitigation_rules.value.name
+      }
+      block {}
+      dynamic "ddos_client_source" {
+        for_each = ddos_mitigation_rules.value.source != "ip" ? [1] : []
+        content {
+          # null-when-empty on every list: the API returns unset list matchers as absent, so an
+          # emitted empty list ([]) drifts on import (+ exact_values = []).
+          country_list = ddos_mitigation_rules.value.source == "country" && length(ddos_mitigation_rules.value.countries) > 0 ? ddos_mitigation_rules.value.countries : null
+          dynamic "asn_list" {
+            for_each = ddos_mitigation_rules.value.source == "asn" ? [1] : []
+            content {
+              as_numbers = length(ddos_mitigation_rules.value.as_numbers) > 0 ? ddos_mitigation_rules.value.as_numbers : null
+            }
+          }
+          dynamic "tls_fingerprint_matcher" {
+            for_each = ddos_mitigation_rules.value.source == "tls" ? [1] : []
+            content {
+              classes      = length(ddos_mitigation_rules.value.tls_classes) > 0 ? ddos_mitigation_rules.value.tls_classes : null
+              exact_values = length(ddos_mitigation_rules.value.tls_exact) > 0 ? ddos_mitigation_rules.value.tls_exact : null
+            }
+          }
+          dynamic "ja4_tls_fingerprint_matcher" {
+            for_each = ddos_mitigation_rules.value.source == "ja4" ? [1] : []
+            content {
+              exact_values = length(ddos_mitigation_rules.value.ja4_exact) > 0 ? ddos_mitigation_rules.value.ja4_exact : null
+            }
+          }
+        }
+      }
+      dynamic "ip_prefix_list" {
+        for_each = ddos_mitigation_rules.value.source == "ip" ? [1] : []
+        content {
+          ip_prefixes  = length(ddos_mitigation_rules.value.ip_prefixes) > 0 ? ddos_mitigation_rules.value.ip_prefixes : null
+          invert_match = ddos_mitigation_rules.value.ip_invert
+        }
+      }
+    }
+  }
+
   # Fail fast at plan if a crawler domain is configured without a usable password
   # value — a cross-variable check the api_crawler_password variable validation cannot
   # express (clear needs plaintext; blindfold needs location).

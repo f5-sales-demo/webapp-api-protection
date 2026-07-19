@@ -123,6 +123,18 @@ variable "ddos" {
     cs_cookie_expiry   = optional(number)
     cs_custom_page     = optional(string)
     cs_js_script_delay = optional(number)
+    mitigation_rules = optional(list(object({
+      name                 = string
+      source               = optional(string, "country")
+      countries            = optional(list(string), [])
+      as_numbers           = optional(list(number), [])
+      ip_prefixes          = optional(list(string), [])
+      ip_invert            = optional(bool, false)
+      tls_classes          = optional(list(string), [])
+      tls_exact            = optional(list(string), [])
+      ja4_exact            = optional(list(string), [])
+      expiration_timestamp = optional(string)
+    })), [])
   })
   default = {}
 }
