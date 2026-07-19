@@ -19,20 +19,20 @@ SKIP_RULE = {
     "path_value": "/waf-excl-probe",
     "action": "skip",
 }
-# Use a real signature ID (200000001-299999999). signature_id=0 ("all signatures") hits a
-# distinct provider zero-value-omission bug (marshal drops the 0 -> read-back null -> apply
-# "inconsistent result"); tracked separately, not exercised here.
+# signature_id 0 = "exclude ALL signatures for the context"; round-trips faithfully since
+# provider v3.72.10 (#1129, meaningful-zero int64 read). A real ID is the 200000001+ range.
 DC_RULE = {
     "name": "excl-sig",
     "domain": "exact",
     "domain_value": "api.f5-sales-demo.com",
     "action": "detection_control",
     "exclude_signatures": [
+        {"signature_id": 0, "context": "CONTEXT_ANY"},
         {
             "signature_id": 200002147,
             "context": "CONTEXT_HEADER",
             "context_name": "x-api",
-        }
+        },
     ],
     "exclude_violations": [{"violation": "VIOL_JSON_MALFORMED"}],
 }

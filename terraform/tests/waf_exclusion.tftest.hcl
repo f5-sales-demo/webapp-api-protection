@@ -42,11 +42,14 @@ run "detection_control_rule_renders" {
   module { source = "./modules/http-lb" }
   variables {
     waf_exclusion_rules = [{
-      name               = "excl-sig"
-      domain             = "exact"
-      domain_value       = "api.f5-sales-demo.com"
-      action             = "detection_control"
-      exclude_signatures = [{ signature_id = 200002147, context = "CONTEXT_HEADER", context_name = "x-api" }]
+      name         = "excl-sig"
+      domain       = "exact"
+      domain_value = "api.f5-sales-demo.com"
+      action       = "detection_control"
+      exclude_signatures = [
+        { signature_id = 0, context = "CONTEXT_ANY" },
+        { signature_id = 200002147, context = "CONTEXT_HEADER", context_name = "x-api" },
+      ]
       exclude_violations = [{ violation = "VIOL_JSON_MALFORMED" }]
     }]
   }
@@ -54,8 +57,13 @@ run "detection_control_rule_renders" {
     condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].exact_value == "api.f5-sales-demo.com"
     error_message = "exact_value must render for domain=exact"
   }
+  # signature_id 0 = "all signatures"; round-trips since provider v3.72.10 (#1129).
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].app_firewall_detection_control.exclude_signature_contexts[0].signature_id == 200002147
+    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].app_firewall_detection_control.exclude_signature_contexts[0].signature_id == 0
+    error_message = "signature_id=0 (all signatures) must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].app_firewall_detection_control.exclude_signature_contexts[1].signature_id == 200002147
     error_message = "exclude_signature_contexts signature_id must render"
   }
   assert {
