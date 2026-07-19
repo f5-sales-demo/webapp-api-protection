@@ -139,6 +139,21 @@ variable "ddos" {
   default = {}
 }
 
+variable "csd" {
+  description = "Client-Side Defense policy (client_side_defense.policy, gated by csd_enabled). See module ./modules/http-lb variables_csd.tf."
+  type = object({
+    js_insert = optional(string, "all_pages")
+    exclude_list = optional(list(object({
+      name         = string
+      domain_mode  = optional(string, "any")
+      domain_value = optional(string)
+      path_mode    = optional(string, "prefix")
+      path_value   = string
+    })), [])
+  })
+  default = {}
+}
+
 variable "lb_algorithm" {
   description = "LB load-balancing algorithm (loadbalancer_algorithm oneof). See module ./modules/http-lb variables_lb_algorithm.tf."
   type = object({
