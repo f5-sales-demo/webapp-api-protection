@@ -253,6 +253,14 @@ run "bad_mode_rejected" {
   expect_failures = [var.challenge]
 }
 
+run "js_requires_cookie_expiry" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  # CH-4: mode=js without cookie_expiry is rejected by the API (uint32 gte 1) — caught at plan.
+  variables { challenge = { mode = "js", js_script_delay = 2000 } }
+  expect_failures = [var.challenge]
+}
+
 run "attach_requires_carrier_arm" {
   command = plan
   module { source = "./modules/http-lb" }
