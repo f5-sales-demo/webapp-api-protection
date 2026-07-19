@@ -2520,6 +2520,75 @@ resource "xcsh_http_loadbalancer" "this" {
         for_each = local.challenge_pbc_activation == "always_captcha" ? [1] : []
         content {}
       }
+      # CH-3: per-request challenge rules. Each rule = metadata{name} + spec{matchers + action
+      # oneof} + optional expiration. Coexists with the activation choice (live-probe confirmed).
+      dynamic "rule_list" {
+        for_each = length(try(local.challenge_pbc.rules, [])) > 0 ? [1] : []
+        content {
+          dynamic "rules" {
+            for_each = local.challenge_pbc.rules
+            content {
+              metadata {
+                name = rules.value.name
+              }
+              spec {
+                expiration_timestamp = rules.value.expiration_timestamp
+                # action oneof (js/captcha/disable)
+                dynamic "enable_javascript_challenge" {
+                  for_each = rules.value.action == "js" ? [1] : []
+                  content {}
+                }
+                dynamic "enable_captcha_challenge" {
+                  for_each = rules.value.action == "captcha" ? [1] : []
+                  content {}
+                }
+                dynamic "disable_challenge" {
+                  for_each = rules.value.action == "disable" ? [1] : []
+                  content {}
+                }
+                # representative matchers (additive AND); full set covered by SPol.
+                dynamic "path" {
+                  for_each = rules.value.path_mode != null ? [1] : []
+                  content {
+                    exact_values = rules.value.path_mode == "exact" ? rules.value.path_values : null
+                    regex_values = rules.value.path_mode == "regex" ? rules.value.path_values : null
+                  }
+                }
+                dynamic "http_method" {
+                  for_each = length(rules.value.http_methods) > 0 ? [1] : []
+                  content {
+                    methods = rules.value.http_methods
+                  }
+                }
+                dynamic "client_selector" {
+                  for_each = rules.value.client_expression != null ? [1] : []
+                  content {
+                    expressions = [rules.value.client_expression]
+                  }
+                }
+                dynamic "headers" {
+                  for_each = rules.value.headers
+                  content {
+                    name           = headers.value.name
+                    invert_matcher = headers.value.invert
+                    dynamic "check_present" {
+                      for_each = headers.value.mode == "presence" ? [1] : []
+                      content {}
+                    }
+                    dynamic "item" {
+                      for_each = contains(["exact", "regex"], headers.value.mode) ? [1] : []
+                      content {
+                        exact_values = headers.value.mode == "exact" ? headers.value.values : null
+                        regex_values = headers.value.mode == "regex" ? headers.value.values : null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 

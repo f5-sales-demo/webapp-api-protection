@@ -93,6 +93,47 @@ def build() -> list[dict[str, object]]:
             "vars": {"mud_enabled": False, "challenge": {"mode": "policy_based"}},
         },
         {
+            # CH-3: rule_list with all 3 action arms across representative matchers.
+            "name": "pbc-rule-list",
+            "vars": {
+                "mud_enabled": False,
+                "challenge": {
+                    "mode": "policy_based",
+                    "policy_based": {
+                        "rules": [
+                            {
+                                "name": "js-login",
+                                "action": "js",
+                                "path_mode": "exact",
+                                "path_values": ["/login"],
+                                "http_methods": ["GET", "POST"],
+                                "headers": [
+                                    {
+                                        "name": "x-probe",
+                                        "mode": "exact",
+                                        "values": ["on"],
+                                    }
+                                ],
+                            },
+                            {
+                                "name": "captcha-admin",
+                                "action": "captcha",
+                                "path_mode": "regex",
+                                "path_values": ["^/admin/.*$"],
+                                "client_expression": "tier in (gold)",
+                            },
+                            {
+                                "name": "disable-health",
+                                "action": "disable",
+                                "path_mode": "exact",
+                                "path_values": ["/health"],
+                            },
+                        ]
+                    },
+                },
+            },
+        },
+        {
             "name": "none",
             "vars": {"mud_enabled": False, "challenge": {"mode": "none"}},
         },
