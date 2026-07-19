@@ -66,6 +66,12 @@ variable "challenge" {
     condition     = var.challenge.policy_based == null || var.challenge.mode == "policy_based"
     error_message = "challenge.policy_based params require challenge.mode = policy_based."
   }
+  # CH-4 (live-discovered): the top-level js/captcha arms require cookie_expiry >= 1 (F5 XC
+  # uint32 gte) — a bare mode=js/captcha without it is rejected 400 by the API at apply.
+  validation {
+    condition     = !contains(["js", "captcha"], coalesce(var.challenge.mode, "none")) || (var.challenge.cookie_expiry != null && var.challenge.cookie_expiry >= 1)
+    error_message = "challenge.cookie_expiry (>= 1) is required for mode js or captcha."
+  }
   validation {
     condition     = try(var.challenge.policy_based.activation, "default") == null ? true : contains(["default", "no_challenge", "always_js", "always_captcha"], try(var.challenge.policy_based.activation, "default"))
     error_message = "challenge.policy_based.activation must be default, no_challenge, always_js, or always_captcha."
