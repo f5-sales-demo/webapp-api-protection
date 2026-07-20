@@ -54,24 +54,27 @@ csd="${base}/api/shape/csd/namespaces/${NS}"
 auth=(-H "Authorization: APIToken ${XCSH_API_TOKEN}")
 
 echo "== 1) CSD enabled on ${NS}/${LB} + protected_domain present? =="
+# Gate on two RELIABLE signals: client_side_defense on the LB (injects the sensor) and CSD
+# /status (isConfigured && isEnabled). The protected_domains list/GET-by-name API is unreliable
+# for verifying enrollment — the list renders a blank placeholder item and GET-by-name 404s even
+# when the domain is enrolled (create returns 409 "domains already exist"); domains are also
+# tenant-globally unique. So the protected_domain is reported for context but NOT used to gate.
 cfg=$(curl -s "${auth[@]}" "${base}/api/config/namespaces/${NS}/http_loadbalancers/${LB}?response_format=GET_RSP_FORMAT_DEFAULT")
 csd_on=$(printf '%s' "$cfg" | python3 -c '
 import sys, json
 s = (json.load(sys.stdin) or {}).get("spec", {})
 print("yes" if s.get("client_side_defense") is not None else "no")
 ' 2>/dev/null || echo "no")
-prot=$(curl -s "${auth[@]}" "${csd}/protected_domains" | python3 -c '
+status_ok=$(curl -s "${auth[@]}" "${csd}/status" | python3 -c '
 import sys, json
-root = sys.argv[1]
 d = json.load(sys.stdin) or {}
-items = d.get("items") or d.get("domains_list") or []
-names = [ (i.get("name") or i.get("domain") or "") for i in items ]
-print("yes" if any(root in n for n in names) else "no")
-' "${PROTECTED_ROOT}" 2>/dev/null || echo "no")
+print("yes" if d.get("isConfigured") and d.get("isEnabled") else "no")
+' 2>/dev/null || echo "no")
 echo "  client_side_defense configured: ${csd_on}"
-echo "  protected_domain ~ ${PROTECTED_ROOT}: ${prot}"
-if [ "${csd_on}" != "yes" ] || [ "${prot}" != "yes" ]; then
-  echo "  => CSD not fully enabled (need client_side_defense on the LB + a protected_domain). "
+echo "  CSD status isConfigured+isEnabled: ${status_ok}"
+echo "  protected_domain ~ ${PROTECTED_ROOT}: (info only; domain-list API is unreliable — see comment)"
+if [ "${csd_on}" != "yes" ] || [ "${status_ok}" != "yes" ]; then
+  echo "  => CSD not fully enabled (need client_side_defense on the LB + CSD status enabled)."
   exit 2
 fi
 echo "  => CSD ENABLED"
