@@ -2410,7 +2410,9 @@ resource "xcsh_http_loadbalancer" "this" {
     for_each = var.csd_enabled ? [1] : []
     content {
       policy {
-        # JS-insertion oneof: all_pages (default) | disabled | all_except (+ exclude_list).
+        # JS-insertion oneof (4 mutually-exclusive arms, API-enforced): all_pages (default) |
+        # disabled | all_except (+ exclude_list) | insertion_rules (+ rules[>=1] + optional
+        # exclude_list). Matcher entries come pre-normalized from local.csd_* (see locals_csd.tf).
         dynamic "js_insert_all_pages" {
           for_each = var.csd.js_insert == "all_pages" ? [1] : []
           content {}
@@ -2423,29 +2425,85 @@ resource "xcsh_http_loadbalancer" "this" {
           for_each = var.csd.js_insert == "all_except" ? [1] : []
           content {
             dynamic "exclude_list" {
-              for_each = var.csd.exclude_list
+              for_each = local.csd_exclude_list
               content {
                 metadata {
-                  name = exclude_list.value.name
+                  name             = exclude_list.value.name
+                  description_spec = exclude_list.value.description
                 }
-                # domain matcher oneof.
                 dynamic "any_domain" {
-                  for_each = exclude_list.value.domain_mode == "any" ? [1] : []
+                  for_each = exclude_list.value.any_domain ? [1] : []
                   content {}
                 }
                 dynamic "domain" {
-                  for_each = exclude_list.value.domain_mode != "any" ? [1] : []
+                  for_each = exclude_list.value.any_domain ? [] : [1]
                   content {
-                    exact_value  = exclude_list.value.domain_mode == "exact" ? exclude_list.value.domain_value : null
-                    regex_value  = exclude_list.value.domain_mode == "regex" ? exclude_list.value.domain_value : null
-                    suffix_value = exclude_list.value.domain_mode == "suffix" ? exclude_list.value.domain_value : null
+                    exact_value  = exclude_list.value.domain_exact
+                    regex_value  = exclude_list.value.domain_regex
+                    suffix_value = exclude_list.value.domain_suffix
                   }
                 }
-                # path matcher oneof (required by the API).
                 path {
-                  path   = exclude_list.value.path_mode == "exact" ? exclude_list.value.path_value : null
-                  prefix = exclude_list.value.path_mode == "prefix" ? exclude_list.value.path_value : null
-                  regex  = exclude_list.value.path_mode == "regex" ? exclude_list.value.path_value : null
+                  path   = exclude_list.value.path_exact
+                  prefix = exclude_list.value.path_prefix
+                  regex  = exclude_list.value.path_regex
+                }
+              }
+            }
+          }
+        }
+        dynamic "js_insertion_rules" {
+          for_each = var.csd.js_insert == "insertion_rules" ? [1] : []
+          content {
+            dynamic "rules" {
+              for_each = local.csd_insertion_rules
+              content {
+                metadata {
+                  name             = rules.value.name
+                  description_spec = rules.value.description
+                }
+                dynamic "any_domain" {
+                  for_each = rules.value.any_domain ? [1] : []
+                  content {}
+                }
+                dynamic "domain" {
+                  for_each = rules.value.any_domain ? [] : [1]
+                  content {
+                    exact_value  = rules.value.domain_exact
+                    regex_value  = rules.value.domain_regex
+                    suffix_value = rules.value.domain_suffix
+                  }
+                }
+                path {
+                  path   = rules.value.path_exact
+                  prefix = rules.value.path_prefix
+                  regex  = rules.value.path_regex
+                }
+              }
+            }
+            dynamic "exclude_list" {
+              for_each = local.csd_insertion_exclude_list
+              content {
+                metadata {
+                  name             = exclude_list.value.name
+                  description_spec = exclude_list.value.description
+                }
+                dynamic "any_domain" {
+                  for_each = exclude_list.value.any_domain ? [1] : []
+                  content {}
+                }
+                dynamic "domain" {
+                  for_each = exclude_list.value.any_domain ? [] : [1]
+                  content {
+                    exact_value  = exclude_list.value.domain_exact
+                    regex_value  = exclude_list.value.domain_regex
+                    suffix_value = exclude_list.value.domain_suffix
+                  }
+                }
+                path {
+                  path   = exclude_list.value.path_exact
+                  prefix = exclude_list.value.path_prefix
+                  regex  = exclude_list.value.path_regex
                 }
               }
             }

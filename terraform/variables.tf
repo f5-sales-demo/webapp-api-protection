@@ -145,11 +145,30 @@ variable "csd" {
     js_insert = optional(string, "all_pages")
     exclude_list = optional(list(object({
       name         = string
+      description  = optional(string)
       domain_mode  = optional(string, "any")
       domain_value = optional(string)
       path_mode    = optional(string, "prefix")
       path_value   = string
     })), [])
+    insertion_rules = optional(object({
+      rules = optional(list(object({
+        name         = string
+        description  = optional(string)
+        domain_mode  = optional(string, "any")
+        domain_value = optional(string)
+        path_mode    = optional(string, "prefix")
+        path_value   = string
+      })), [])
+      exclude_list = optional(list(object({
+        name         = string
+        description  = optional(string)
+        domain_mode  = optional(string, "any")
+        domain_value = optional(string)
+        path_mode    = optional(string, "prefix")
+        path_value   = string
+      })), [])
+    }))
   })
   default = {}
 }
