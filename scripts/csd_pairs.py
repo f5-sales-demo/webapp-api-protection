@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Generate the Client-Side Defense (CSD) policy coverage matrix.
 
-Cycles the LIVE LB through the client_side_defense.policy js_insert oneof — disabled
-(disable_js_insert) and all_except (js_insert_all_pages_except + exclude_list) — and ends on
-canonical-restore (all_pages, the default the merged baseline uses). csd_enabled stays true.
+Cycles the LIVE LB through the client_side_defense.policy js_insert oneof arms: disabled
+(disable_js_insert), all_except (js_insert_all_pages_except + exclude_list), all_except with regex
+domain/path matchers, and insertion_rules (js_insertion_rules + rules + nested exclude_list). Ends
+on canonical-restore (all_pages, the default the merged baseline uses). csd_enabled stays true.
 Deterministic. Output: JSON to stdout, or files via --emit.
 """
 
@@ -34,6 +35,57 @@ def build() -> list[dict[str, object]]:
                             "domain_mode": "any",
                             "path_mode": "exact",
                             "path_value": "/health",
+                        },
+                    ],
+                }
+            },
+        },
+        {
+            "name": "insertion-rules",
+            "vars": {
+                "csd": {
+                    "js_insert": "insertion_rules",
+                    "insertion_rules": {
+                        "rules": [
+                            {
+                                "name": "ins-home",
+                                "domain_mode": "any",
+                                "path_mode": "prefix",
+                                "path_value": "/",
+                            },
+                            {
+                                "name": "ins-checkout",
+                                "description": "checkout pages",
+                                "domain_mode": "suffix",
+                                "domain_value": "f5-sales-demo.com",
+                                "path_mode": "exact",
+                                "path_value": "/csd-demo/",
+                            },
+                        ],
+                        "exclude_list": [
+                            {
+                                "name": "skip-health",
+                                "domain_mode": "any",
+                                "path_mode": "exact",
+                                "path_value": "/health",
+                            },
+                        ],
+                    },
+                }
+            },
+        },
+        {
+            "name": "all-except-regex",
+            "vars": {
+                "csd": {
+                    "js_insert": "all_except",
+                    "exclude_list": [
+                        {
+                            "name": "skip-regex",
+                            "domain_mode": "regex",
+                            "domain_value": "cdn[.].*",
+                            "path_mode": "regex",
+                            "path_value": "^/static/.*$",
                         },
                     ],
                 }
