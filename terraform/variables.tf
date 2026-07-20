@@ -173,6 +173,32 @@ variable "csd" {
   default = {}
 }
 
+variable "csd_mitigated_domains" {
+  description = "CSD mitigated (blocked) domains (xcsh_mitigated_domain). See module ./modules/http-lb variables_csd_domains.tf."
+  type = list(object({
+    name        = string
+    domain      = string
+    description = optional(string)
+    disable     = optional(bool, false)
+    labels      = optional(map(string), {})
+    annotations = optional(map(string), {})
+  }))
+  default = []
+}
+
+variable "csd_allowed_domains" {
+  description = "CSD allowed (allowlisted) domains (xcsh_allowed_domain). See module ./modules/http-lb variables_csd_domains.tf."
+  type = list(object({
+    name        = string
+    domain      = string
+    description = optional(string)
+    disable     = optional(bool, false)
+    labels      = optional(map(string), {})
+    annotations = optional(map(string), {})
+  }))
+  default = []
+}
+
 variable "lb_algorithm" {
   description = "LB load-balancing algorithm (loadbalancer_algorithm oneof). See module ./modules/http-lb variables_lb_algorithm.tf."
   type = object({

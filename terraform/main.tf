@@ -116,6 +116,8 @@ module "http_lb" {
   ddos                            = var.ddos
   lb_algorithm                    = var.lb_algorithm
   csd                             = var.csd
+  csd_mitigated_domains           = var.csd_mitigated_domains
+  csd_allowed_domains             = var.csd_allowed_domains
 
   # API Discovery & Crawler (SP1) passthrough. Defaults keep enable_api_discovery {}
   # bare (0-change). The api-discovery matrix cycles the non-default arms.
