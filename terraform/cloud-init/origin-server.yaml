@@ -1500,10 +1500,13 @@ write_files:
       <script src="https://unpkg.com/underscore@1.13.7/underscore-min.js"></script>
       <script src="https://esm.sh/moment@2.30.1"></script>
       <script src="https://ga.jspm.io/npm:dayjs@1.11.13/dayjs.min.js"></script>
-      <!-- First-party checkout logic served as an EXTERNAL script (app.py /checkout.js) so CSD
-           inventories it at load; it reads payment fields (Magecart skimmer) and is flagged High
-           Risk. CSD does NOT inventory inline scripts, which is why this logic must be external. -->
-      <script src="checkout.js"></script>
+      <!-- Magecart skimmer served as a THIRD-PARTY external script via the cdn-simulator edge
+           (${cdn_simulator_host}), which origin-pulls this origin and serves /csd-demo/checkout.js
+           under its own host. Loaded from that third-party host (not same-origin) so CSD inventories
+           it as a distinct third-party domain, flags it High Risk (it reads payment-field values),
+           and mitigating that host blocks it — the detect -> mitigate -> block cycle. CSD does NOT
+           inventory inline scripts, which is why this logic must be external. -->
+      <script src="http://${cdn_simulator_host}/csd-demo/checkout.js"></script>
       </body>
       </html>
 

@@ -1,45 +1,40 @@
 # CSD demo — Phase 3 (Mitigate) reproduced in Terraform.
 #
-# The CSD docs demo (csd/docs/en/demo/phase-3-mitigate.mdx) applies mitigations by POSTing the
-# attack's third-party domains to the CSD mitigated_domains API. This reproduces that step
-# declaratively: when csd_demo_mitigation_enabled = true, the six domains the /csd-demo/ page
-# loads/exfils to (4 CDN supply-chain domains + 2 external exfil endpoints) are registered as
-# xcsh_mitigated_domain resources (via the http-lb module's csd_mitigated_domains input).
+# The CSD docs demo (csd/docs/en/demo/phase-3-mitigate.mdx) applies mitigations by registering the
+# attacking third-party script's host as a CSD mitigated_domain. This reproduces that step
+# declaratively: when csd_demo_mitigation_enabled = true, the cdn-simulator edge host — which serves
+# the behaving skimmer (/csd-demo/checkout.js, a genuine third-party <script src>) — is registered as
+# an xcsh_mitigated_domain (via the http-lb module's csd_mitigated_domains input).
 #
-# This is the mitigate/teardown toggle: set true to apply the mitigations (Phase 3 Step 3), leave
-# false (default) to remove them (Phase 4 teardown of mitigations). CSD mitigation blocks SCRIPT
-# LOADING from mitigated domains (clears the <script> src) — so it meaningfully blocks the 4 CDN
-# supply-chain scripts. The 2 exfil domains are included for demo fidelity (they appear in the
-# mitigated list) though CSD does not intercept fetch() (per the docs).
+# The mitigated host is DERIVED from var.csd_cdn_simulator_host, the same single source of truth that
+# the origin's checkout page loads the skimmer from. There is exactly one behaving third-party script
+# in the demo (checkout.js reads payment fields), so exactly one host to detect and mitigate; the
+# other libraries the page loads are benign (never read fields) and CSD does not flag them.
 #
-# csd_demo_mitigated_domains uses the SAME type as csd_mitigated_domains so the selection in
-# main.tf (enabled ? demo : user) unifies cleanly. httpbin.org note: the CSD API rejects a bare
-# eTLD+1 as mitigated_domain ("cannot derive eTLD+1"), so the identifier is httpbin.org while the
-# mitigated_domain value is www.httpbin.org — matching the docs' Phase 3 Step 3 exception.
+# This is the mitigate/teardown toggle: set true to apply the mitigation (Phase 3 Step 3), leave
+# false (default) to remove it (Phase 4 teardown, and the "before" detection baseline). CSD
+# mitigation blocks SCRIPT LOADING from the mitigated host (clears the <script> src), so it blocks
+# the third-party skimmer — the detect -> mitigate -> block cycle.
 
 variable "csd_demo_mitigation_enabled" {
-  description = "Apply the CSD demo Phase 3 mitigations (register the /csd-demo/ third-party domains as CSD mitigated_domains). false = teardown/no mitigations."
+  description = "Apply the CSD demo Phase 3 mitigation (register the cdn-simulator skimmer host as a CSD mitigated_domain). false = teardown/no mitigation (also the 'before' detection baseline)."
   type        = bool
   default     = false
 }
 
-variable "csd_demo_mitigated_domains" {
-  description = "The /csd-demo/ third-party domains registered when csd_demo_mitigation_enabled = true (4 CDN supply-chain + 2 external exfil). Same shape as csd_mitigated_domains."
-  type = list(object({
-    name        = string
-    domain      = string
-    description = optional(string)
-    disable     = optional(bool, false)
-    labels      = optional(map(string), {})
-    annotations = optional(map(string), {})
-  }))
-  # Names are DNS-1123 labels (no dots — provider requirement); domain carries the real host.
-  default = [
-    { name = "block-jsdelivr", domain = "cdn.jsdelivr.net", description = "CSD demo: CDN supply-chain script domain" },
-    { name = "block-esm-sh", domain = "esm.sh", description = "CSD demo: CDN supply-chain script domain" },
-    { name = "block-unpkg", domain = "unpkg.com", description = "CSD demo: CDN supply-chain script domain" },
-    { name = "block-jspm", domain = "ga.jspm.io", description = "CSD demo: CDN supply-chain script domain" },
-    { name = "block-httpbin", domain = "www.httpbin.org", description = "CSD demo: external exfil endpoint (eTLD+1 -> www host)" },
-    { name = "block-jsonplaceholder", domain = "jsonplaceholder.typicode.com", description = "CSD demo: external exfil endpoint" },
+locals {
+  # Single source of truth: the host we load the behaving skimmer from (var.csd_cdn_simulator_host)
+  # is exactly the host CSD detects and we mitigate. name is a stable DNS-1123 label (no dots);
+  # domain carries the real FQDN (validated as an FQDN on the variable). Built to the same object
+  # shape as var.csd_mitigated_domains so main.tf's enabled ? demo : user selection type-checks.
+  csd_demo_mitigated_domains = [
+    {
+      name        = "block-cdn-simulator"
+      domain      = var.csd_cdn_simulator_host
+      description = "CSD demo: third-party CDN host serving the behaving skimmer (checkout.js from cdn-simulator)"
+      disable     = false
+      labels      = tomap({})
+      annotations = tomap({})
+    }
   ]
 }
