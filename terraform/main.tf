@@ -42,7 +42,12 @@ module "origin_server" {
     { name = "AllowCrAPI", priority = 130, port = "8888" },
   ]
 
-  custom_data = base64encode(templatefile("${path.module}/cloud-init/origin-server.yaml", {}))
+  # gzip + base64: the rendered cloud-init exceeds Azure's 65535-byte custom_data
+  # limit uncompressed. cloud-init detects the gzip magic bytes and decompresses
+  # user-data automatically, so the VM receives the same YAML.
+  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {
+    cdn_simulator_host = var.csd_cdn_simulator_host
+  }))
 }
 
 # --- F5 XC namespace + HTTP load balancer -------------------------------------
@@ -116,7 +121,7 @@ module "http_lb" {
   ddos                            = var.ddos
   lb_algorithm                    = var.lb_algorithm
   csd                             = var.csd
-  csd_mitigated_domains           = var.csd_demo_mitigation_enabled ? var.csd_demo_mitigated_domains : var.csd_mitigated_domains
+  csd_mitigated_domains           = var.csd_demo_mitigation_enabled ? local.csd_demo_mitigated_domains : var.csd_mitigated_domains
   csd_allowed_domains             = var.csd_allowed_domains
 
   # API Discovery & Crawler (SP1) passthrough. Defaults keep enable_api_discovery {}
