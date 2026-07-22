@@ -42,7 +42,9 @@ module "origin_server" {
     { name = "AllowCrAPI", priority = 130, port = "8888" },
   ]
 
-  custom_data = base64encode(templatefile("${path.module}/cloud-init/origin-server.yaml", {}))
+  custom_data = base64encode(templatefile("${path.module}/cloud-init/origin-server.yaml", {
+    cdn_simulator_host = var.csd_cdn_simulator_host
+  }))
 }
 
 # --- F5 XC namespace + HTTP load balancer -------------------------------------

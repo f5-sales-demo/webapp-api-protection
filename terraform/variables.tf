@@ -47,6 +47,23 @@ variable "csd_enabled" {
   default     = true
 }
 
+variable "csd_cdn_simulator_host" {
+  description = "FQDN of the cdn-simulator edge that serves the CSD demo's behaving skimmer (/csd-demo/checkout.js) as a THIRD-PARTY script. The cdn-simulator origin-pulls this webapp's origin, so it serves the origin's checkout.js under its own host — making it a distinct domain that CSD detects (and mitigation blocks). Must be an FQDN (not a raw IP) so it matches the F5 XC mitigated-domain exactly; use the cdn-simulator's edge_fqdn output. See docs: deploy the cdn-simulator component pointing origin_host at this origin."
+  type        = string
+  default     = "cdn-simulator-rmordasiewicz.eastus2.cloudapp.azure.com"
+
+  validation {
+    # Must be an FQDN, never a raw IP: F5 XC CSD registers the mitigated domain by
+    # host, and the origin's <script src> host must match it exactly for the
+    # detect -> mitigate -> block cycle. A raw IPv4 cannot be registered reliably.
+    condition = (
+      !can(regex("^(\\d{1,3}\\.){3}\\d{1,3}$", var.csd_cdn_simulator_host))
+      && can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", var.csd_cdn_simulator_host))
+    )
+    error_message = "csd_cdn_simulator_host must be an FQDN (e.g. the cdn-simulator edge_fqdn), not a raw IP, so it matches the F5 XC CSD mitigated-domain exactly."
+  }
+}
+
 variable "mud_enabled" {
   description = "Enable Malicious User Detection: score per-user behavior into threat levels and auto-mitigate (JS challenge / CAPTCHA / temporary block) via a malicious_user_mitigation policy. Requires the tenant MUD addon (verified via a data-source guard, not managed here)."
   type        = bool
