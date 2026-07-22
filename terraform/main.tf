@@ -42,7 +42,10 @@ module "origin_server" {
     { name = "AllowCrAPI", priority = 130, port = "8888" },
   ]
 
-  custom_data = base64encode(templatefile("${path.module}/cloud-init/origin-server.yaml", {
+  # gzip + base64: the rendered cloud-init exceeds Azure's 65535-byte custom_data
+  # limit uncompressed. cloud-init detects the gzip magic bytes and decompresses
+  # user-data automatically, so the VM receives the same YAML.
+  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {
     cdn_simulator_host = var.csd_cdn_simulator_host
   }))
 }
