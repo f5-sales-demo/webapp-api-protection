@@ -20,7 +20,6 @@
 
 F5 XC web application and API protection
 
-
 ## Documentation
 
 Full documentation is available at **[https://f5-sales-demo.github.io/webapp-api-protection/](https://f5-sales-demo.github.io/webapp-api-protection/)**.
