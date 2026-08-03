@@ -277,6 +277,11 @@ variable "waf_staging_period" {
   description = "Staging period (days) when waf_staging_mode is new or new_and_updated."
   type        = number
   default     = 7
+
+  validation {
+    condition     = var.waf_staging_period >= 1 && var.waf_staging_period <= 20
+    error_message = "waf_staging_period must be between 1 and 20 days."
+  }
 }
 
 variable "waf_suppression" {
