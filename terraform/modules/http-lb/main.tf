@@ -1834,8 +1834,6 @@ resource "xcsh_http_loadbalancer" "this" {
         max_batched_queries = graphql_rules.value.max_batched_queries
         max_depth           = graphql_rules.value.max_depth
         max_total_length    = graphql_rules.value.max_total_length
-        max_value_length    = graphql_rules.value.max_value_length
-        policy_name         = graphql_rules.value.policy_name
         dynamic "enable_introspection" {
           for_each = graphql_rules.value.introspection == "enable" ? [1] : []
           content {}
