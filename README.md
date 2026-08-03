@@ -1,3 +1,5 @@
+# Web App & API Protection
+
 🌐 English |
 [日本語](https://f5-sales-demo.github.io/webapp-api-protection/ja/) |
 [한국어](https://f5-sales-demo.github.io/webapp-api-protection/ko/) |
@@ -11,8 +13,6 @@
 [العربية](https://f5-sales-demo.github.io/webapp-api-protection/ar/) |
 [हिन्दी](https://f5-sales-demo.github.io/webapp-api-protection/hi/) |
 [ไทย](https://f5-sales-demo.github.io/webapp-api-protection/th/)
-
-# Web App & API Protection
 
 [![GitHub Pages Deploy](https://github.com/f5-sales-demo/webapp-api-protection/actions/workflows/github-pages-deploy.yml/badge.svg)](https://github.com/f5-sales-demo/webapp-api-protection/actions/workflows/github-pages-deploy.yml)
 [![Repository Settings](https://github.com/f5-sales-demo/webapp-api-protection/actions/workflows/enforce-repo-settings.yml/badge.svg)](https://github.com/f5-sales-demo/webapp-api-protection/actions/workflows/enforce-repo-settings.yml)
