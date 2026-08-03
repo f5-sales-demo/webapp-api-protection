@@ -13,8 +13,6 @@ variable "graphql_rules" {
     max_batched_queries = optional(number)
     max_depth           = optional(number)
     max_total_length    = optional(number)
-    max_value_length    = optional(number)
-    policy_name         = optional(string)
     introspection       = optional(string, "omit") # omit|enable|disable
   }))
   default = []
