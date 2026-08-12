@@ -122,7 +122,7 @@ run "staging_new_and_updated" {
   module { source = "./modules/http-lb" }
   variables {
     waf_staging_mode   = "new_and_updated"
-    waf_staging_period = 30
+    waf_staging_period = 20
   }
   assert {
     condition     = output.waf_detection_mode == "custom"
