@@ -41,7 +41,7 @@ env:
 jobs:
   validate:
     name: validate
-    runs-on: [self-hosted, Linux, X64, webapp-api-protection]
+    runs-on: [self-hosted, Linux, X64, webapp-api-protection, ubuntu-24.04]
     defaults:
       run:
         working-directory: terraform
