@@ -74,7 +74,7 @@ terraform {
     # example plans the modules were incorporated from.
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"
+      version = "~> 5.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
