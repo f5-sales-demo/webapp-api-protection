@@ -128,6 +128,9 @@ def _counter(payload: Any, name: str) -> int:
     return 0
 
 
+# This is an ordered evidence decision table; each return preserves the exact
+# pending reason that operators need while polling aggregation.
+# pylint: disable-next=too-many-return-statements
 def evaluate(
     snapshot: dict[str, Any], expected_domain: str, phase: str, since_epoch: int
 ) -> Evaluation:
