@@ -22,6 +22,12 @@ CONFIG_FAILURE = 2
 PENDING = 3
 
 
+def http_error_context(error: urllib.error.HTTPError) -> str:
+    """Return useful API failure context without tenant, query, or credential data."""
+    path = urllib.parse.urlsplit(error.url).path
+    return f"HTTP {error.code} at {path}"
+
+
 @dataclass(frozen=True)
 class Evaluation:
     exit_code: int
@@ -289,6 +295,12 @@ def main() -> int:
                 args.phase,
                 args.since_epoch,
             )
+        except urllib.error.HTTPError as error:
+            print(
+                f"CSD verification failed: API/authentication/dataplane error ({http_error_context(error)})",
+                file=sys.stderr,
+            )
+            return CONFIG_FAILURE
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
             print(
                 f"CSD verification failed: API/authentication/dataplane error ({type(error).__name__})",
