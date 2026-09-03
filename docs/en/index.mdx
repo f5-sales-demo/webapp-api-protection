@@ -1,9 +1,50 @@
 ---
-title: Web App & API Protection
-description: HTTP load balancing, WAF, and API protection for F5 Distributed Cloud, driven by Terraform.
-hero:
-  tagline: HTTP load balancing, WAF, and API protection, driven by Terraform.
-sidebar:
-  hidden: true
-  order: 0
+title: Web Application & API Protection (WAAP)
+description: Declarative end-to-end multi-threat protection demo with HTTP Load Balancer, WAF, Bot Defense, and Client-Side Defense.
 ---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+The **Web Application & API Protection (WAAP)** demonstration illustrates how to secure modern web applications and APIs against multi-vector threats using F5 Distributed Cloud and Terraform automation.
+
+## Architecture
+
+```text
++-------------------------------------------------------------------------+
+|                   F5 Distributed Cloud WAAP Architecture                |
+|                                                                         |
+|  Client Traffic                                                         |
+|        |                                                                |
+|        v                                                                |
+|  +-------------------------------------------------------------------+  |
+|  | F5 Distributed Cloud HTTP Load Balancer (Public VIP)              |  |
+|  +---------------------------------+---------------------------------+  |
+|                                    |                                    |
+|         +--------------------------+--------------------------+         |
+|         | Layer 7 Inspection Pipeline                         |         |
+|         v                                                     v         |
+|  +-----------------------------+               +---------------------+  |
+|  | Web Application Firewall    |               | Bot Defense & CSD   |  |
+|  | (Signatures, Staging Staged)|               | (Client Telemetry)  |  |
+|  +-----------------------------+               +---------------------+  |
+|                                    |                                    |
+|                                    v                                    |
+|  +-------------------------------------------------------------------+  |
+|  | Origin Pool: Backend Microservices & API Endpoints                |  |
+|  +-------------------------------------------------------------------+  |
++-------------------------------------------------------------------------+
+```
+
+## Key Capabilities
+
+<CardGrid>
+  <Card title="Declarative HTTP LB" icon="star">
+    Full Terraform provisioning of HTTP load balancer VIPs and origin pool routing.
+  </Card>
+  <Card title="WAF Staging Enforcement" icon="seti:shield">
+    Safe policy iteration with validated WAF staging periods prior to active blocking.
+  </Card>
+  <Card title="Client-Side Defense" icon="puzzle">
+    Telemetry beacon injection for real-time detection of unauthorized JavaScript exfiltration.
+  </Card>
+</CardGrid>
