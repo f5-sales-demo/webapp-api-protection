@@ -1,0 +1,18 @@
+{
+  "config": {"spec": {"client_side_defense": {}}},
+  "status": {"isConfigured": true, "isEnabled": true},
+  "detected_domains": {
+    "domains_list": [{"domain": "cdn-simulator-rmordasiewicz.eastus2.cloudapp.azure.com", "lastUpdated": 1788451800}]
+  },
+  "scripts": {
+    "scripts": [{
+      "id": "script-1",
+      "url": "http://cdn-simulator-rmordasiewicz.eastus2.cloudapp.azure.com/csd-demo/checkout.js",
+      "risk": "High Risk",
+      "lastSeen": 1788451800,
+      "affected_users_count": 8
+    }]
+  },
+  "summary": {"suspicious_scripts": 1, "blocked_scripts": 0},
+  "mitigated_domains": {"items": []}
+}
