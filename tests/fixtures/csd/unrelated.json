@@ -1,0 +1,19 @@
+{
+  "config": { "spec": { "client_side_defense": {} } },
+  "status": { "isConfigured": true, "isEnabled": true },
+  "detected_domains": {
+    "domains_list": [{ "domain": "unrelated.example", "lastUpdated": 1788451800 }]
+  },
+  "scripts": {
+    "scripts": [
+      {
+        "url": "https://unrelated.example/a.js",
+        "risk": "High Risk",
+        "lastSeen": 1788451800,
+        "affected_users_count": 99
+      }
+    ]
+  },
+  "summary": { "suspicious_scripts": 99, "blocked_scripts": 99 },
+  "mitigated_domains": { "items": [{ "name": "unrelated.example" }] }
+}

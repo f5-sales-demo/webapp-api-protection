@@ -1,0 +1,54 @@
+---
+name: Verify CSD telemetry
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_domain:
+        description: Exact third-party FQDN expected in CSD telemetry
+        required: true
+        default: cdn-simulator-rmordasiewicz.eastus2.cloudapp.azure.com
+        type: string
+      verify_phase:
+        description: Lifecycle phase to verify
+        required: true
+        default: detection
+        type: choice
+        options: [detection, mitigation]
+      since_epoch:
+        description: Earliest acceptable detection timestamp (Unix epoch seconds)
+        required: true
+        type: string
+      poll_min:
+        description: Maximum aggregation polling time in minutes
+        required: true
+        default: '15'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: csd-verify
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Read-only exact-domain verification
+    runs-on: managed-socketless
+    environment: csd-verification
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify exact-domain CSD telemetry
+        env:
+          EXPECTED_DOMAIN: ${{ inputs.expected_domain }}
+          VERIFY_PHASE: ${{ inputs.verify_phase }}
+          SINCE_EPOCH: ${{ inputs.since_epoch }}
+          POLL_MIN: ${{ inputs.poll_min }}
+          XCSH_API_URL: ${{ secrets.XCSH_API_URL }}
+          XCSH_API_TOKEN: ${{ secrets.XCSH_API_TOKEN }}
+        run: scripts/csd-verify.sh
