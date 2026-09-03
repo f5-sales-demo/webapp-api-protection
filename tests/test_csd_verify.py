@@ -1,9 +1,19 @@
 # ruff: noqa: PT009,PT027
 import json
 import unittest
+import urllib.error
+from email.message import Message
 from pathlib import Path
+from unittest.mock import patch
 
-from scripts.csd_verify import CONFIG_FAILURE, PENDING, VERIFIED, evaluate
+from scripts.csd_verify import (
+    CONFIG_FAILURE,
+    PENDING,
+    VERIFIED,
+    ApiClient,
+    evaluate,
+    http_error_context,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures" / "csd"
 DOMAIN = "cdn-simulator-rmordasiewicz.eastus2.cloudapp.azure.com"
@@ -15,6 +25,32 @@ def fixture(name: str) -> dict:
 
 
 class CsdVerifierTests(unittest.TestCase):
+    def test_http_error_context_omits_host_query_and_credentials(self) -> None:
+        error = urllib.error.HTTPError(
+            "https://tenant.example/api/shape/csd/scripts?token=secret",
+            400,
+            "bad request",
+            Message(),
+            None,
+        )
+        self.assertEqual(
+            http_error_context(error), "HTTP 400 at /api/shape/csd/scripts"
+        )
+
+    def test_scripts_query_uses_an_api_supported_exact_one_day_window(self) -> None:
+        client = ApiClient("https://example.invalid", "token", "namespace", "lb")
+        now = 1_788_452_345
+        with (
+            patch("scripts.csd_verify.time.time", return_value=now),
+            patch.object(client, "request", return_value={}) as request,
+        ):
+            client.snapshot()
+        scripts_call = request.call_args_list[3]
+        self.assertEqual(
+            scripts_call.kwargs["body"],
+            {"startTime": str(now - 86_400), "endTime": str(now)},
+        )
+
     def test_exact_fresh_high_risk_detection_with_affected_users_verifies(self) -> None:
         result = evaluate(fixture("detection.json"), DOMAIN, "detection", SINCE)
         self.assertEqual(result.exit_code, VERIFIED)

@@ -22,6 +22,12 @@ CONFIG_FAILURE = 2
 PENDING = 3
 
 
+def http_error_context(error: urllib.error.HTTPError) -> str:
+    """Return useful API failure context without tenant, query, or credential data."""
+    path = urllib.parse.urlsplit(error.url).path
+    return f"HTTP {error.code} at {path}"
+
+
 @dataclass(frozen=True)
 class Evaluation:
     exit_code: int
@@ -231,7 +237,7 @@ class ApiClient:
         with urllib.request.urlopen(request, timeout=30) as response:
             return json.load(response)
 
-    def snapshot(self, since_epoch: int) -> dict[str, Any]:
+    def snapshot(self) -> dict[str, Any]:
         now = int(time.time())
         ns = urllib.parse.quote(self.namespace)
         lb = urllib.parse.quote(self.load_balancer)
@@ -244,7 +250,7 @@ class ApiClient:
             "scripts": self.request(
                 f"{self.csd}/scripts",
                 method="POST",
-                body={"startTime": str(since_epoch), "endTime": str(now)},
+                body={"startTime": str(now - 86_400), "endTime": str(now)},
             ),
             "summary": self.request(f"{self.csd}/summary"),
             "mitigated_domains": self.request(f"{self.csd}/mitigated_domains"),
@@ -284,11 +290,17 @@ def main() -> int:
     while True:
         try:
             result = evaluate(
-                client.snapshot(args.since_epoch),
+                client.snapshot(),
                 args.expected_domain,
                 args.phase,
                 args.since_epoch,
             )
+        except urllib.error.HTTPError as error:
+            print(
+                f"CSD verification failed: API/authentication/dataplane error ({http_error_context(error)})",
+                file=sys.stderr,
+            )
+            return CONFIG_FAILURE
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
             print(
                 f"CSD verification failed: API/authentication/dataplane error ({type(error).__name__})",
