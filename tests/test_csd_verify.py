@@ -7,10 +7,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts.csd_verify import (
-    ApiClient,
     CONFIG_FAILURE,
     PENDING,
     VERIFIED,
+    ApiClient,
     evaluate,
     http_error_context,
 )
@@ -33,7 +33,9 @@ class CsdVerifierTests(unittest.TestCase):
             Message(),
             None,
         )
-        self.assertEqual(http_error_context(error), "HTTP 400 at /api/shape/csd/scripts")
+        self.assertEqual(
+            http_error_context(error), "HTTP 400 at /api/shape/csd/scripts"
+        )
 
     def test_scripts_query_uses_an_api_supported_exact_one_day_window(self) -> None:
         client = ApiClient("https://example.invalid", "token", "namespace", "lb")
