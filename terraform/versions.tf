@@ -66,7 +66,10 @@ terraform {
       # materializes mitigation_block / default_rps_threshold / clientside_action_none /
       # ddos_policy_none for any l7_ddos_protection config, so a DDoS-1 config that omits them
       # round-trips 0-change on import.
-      version = ">= 3.72.15"
+      # The v4+ schema is not compatible with this v3 configuration. Keep the
+      # minimum read-back fixes above while preventing a fresh init from
+      # silently selecting a breaking major release.
+      version = ">= 3.72.15, < 4.0.0"
     }
     # Azure providers: this plan also deploys its OWN Azure origin server and
     # traffic generator (modules/origin-server, modules/traffic-generator), which
