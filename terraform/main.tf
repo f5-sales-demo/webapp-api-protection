@@ -314,7 +314,9 @@ module "traffic_generator" {
 
   # Target both LB domains, not the origin directly.
   # target_origin_ip is the optional direct-origin baseline / bypass-testing target.
-  custom_data = base64encode(templatefile("${path.module}/cloud-init/traffic-generator.yaml", {
+  # Azure limits decoded custom-data to 65535 bytes. As for the origin, cloud-init
+  # detects gzip automatically and restores the exact YAML without extra tooling.
+  custom_data = base64gzip(templatefile("${path.module}/cloud-init/traffic-generator.yaml", {
     traffic_script   = indent(6, file("${path.module}/../scripts/demo_traffic.py"))
     target_domains   = jsonencode(var.lb_domains)
     target_origin_ip = module.origin_server.public_ip
