@@ -1,5 +1,5 @@
 variable "namespace" {
-  description = "F5 XC namespace this plan creates and deploys the load balancer / origin pool into. HTTP load balancer and origin pool objects live in a user namespace (unlike DNS objects, which are system-scoped)."
+  description = "F5 XC namespace owned by the separate persistent terraform/namespace root; this application root never owns or destroys it."
   type        = string
   default     = "webapp-api-protection"
 }
@@ -44,7 +44,7 @@ variable "waf_mode" {
 variable "csd_enabled" {
   description = "Enable Client-Side Defense: inject the F5 XC telemetry JavaScript on all pages and register the served domain with the CSD reporting engine. Requires the tenant CSD addon (verified via a data-source guard, not managed here)."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "csd_cdn_simulator_host" {

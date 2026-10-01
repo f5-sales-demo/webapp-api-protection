@@ -74,14 +74,8 @@ resource "xcsh_api_testing" "this" {
   }
 
   # Schedule oneof (every_week = suppressed default => emit neither marker).
-  dynamic "every_day" {
-    for_each = local.api_testing_use_every_day ? [1] : []
-    content {}
-  }
-  dynamic "every_month" {
-    for_each = local.api_testing_use_every_month ? [1] : []
-    content {}
-  }
+  every_day   = local.api_testing_use_every_day ? {} : null
+  every_month = local.api_testing_use_every_month ? {} : null
 
   lifecycle {
     precondition {

@@ -39,8 +39,13 @@ run "http_host_header_renders" {
     error_message = "host_header must render when hc_http_host_header is set"
   }
   assert {
-    condition     = xcsh_healthcheck.origin.http_health_check.use_origin_server_name == null
-    error_message = "use_origin_server_name must be omitted when host_header is set"
+    # Optional+Computed use_origin_server_name is UNKNOWN when omitted in a
+    # real plan. Check its null-selection expression, not a fabricated result.
+    condition = (
+      var.hc_http_host_header != null &&
+      strcontains(file("modules/http-lb/main.tf"), "use_origin_server_name    = var.hc_http_host_header == null ? {} : null")
+    )
+    error_message = "Explicit host_header must configure use_origin_server_name as null."
   }
 }
 

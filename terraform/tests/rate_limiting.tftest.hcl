@@ -313,8 +313,17 @@ run "rate_limit_inline_ip_allowed_list" {
     rate_limit_ip_allowed_prefixes = ["192.0.2.0/24", "198.51.100.0/24"]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.rate_limit.ip_allowed_list != null && toset(xcsh_http_loadbalancer.this.rate_limit.ip_allowed_list.prefixes) == toset(["192.0.2.0/24", "198.51.100.0/24"]) && xcsh_http_loadbalancer.this.rate_limit.no_ip_allowed_list == null
-    error_message = "inline prefixes must render ip_allowed_list, not no_ip_allowed_list"
+    condition     = xcsh_http_loadbalancer.this.rate_limit.ip_allowed_list != null && toset(xcsh_http_loadbalancer.this.rate_limit.ip_allowed_list.prefixes) == toset(["192.0.2.0/24", "198.51.100.0/24"])
+    error_message = "inline prefixes must render the actual planned ip_allowed_list"
+  }
+  # Optional+Computed no_ip_allowed_list is UNKNOWN when omitted. Verify the
+  # inactive-arm selection in configuration; retain the planned prefixes above.
+  assert {
+    condition = (
+      length(var.rate_limit_ip_allowed_prefixes) > 0 &&
+      strcontains(file("modules/http-lb/main.tf"), "no_ip_allowed_list = (length(var.rate_limit_ip_allowed_prefixes) == 0 && length(var.rate_limit_custom_ip_prefix_sets) == 0) ? {} : null")
+    )
+    error_message = "An explicit IP allow-list must configure no_ip_allowed_list as null."
   }
 }
 
@@ -340,8 +349,17 @@ run "rate_limit_with_policies" {
     rate_limiter_policies  = [{ name = "rlp-a", rules = [{ name = "r", action = "apply" }] }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.rate_limit.policies != null && xcsh_http_loadbalancer.this.rate_limit.policies.policies[0].name == "rlp-a" && xcsh_http_loadbalancer.this.rate_limit.no_policies == null
-    error_message = "policy refs must render policies.policies, not no_policies"
+    condition     = xcsh_http_loadbalancer.this.rate_limit.policies != null && xcsh_http_loadbalancer.this.rate_limit.policies.policies[0].name == "rlp-a"
+    error_message = "policy refs must render the actual planned policies.policies"
+  }
+  # no_policies is also Optional+Computed: omission is a configuration choice,
+  # not a known-null provider plan value.
+  assert {
+    condition = (
+      length(var.rate_limit_policy_refs) > 0 &&
+      strcontains(file("modules/http-lb/main.tf"), "no_policies = length(var.rate_limit_policy_refs) == 0 ? {} : null")
+    )
+    error_message = "Explicit policy refs must configure no_policies as null."
   }
 }
 
@@ -648,4 +666,35 @@ run "server_url_client_matcher_renders" {
     condition     = xcsh_http_loadbalancer.this.api_rate_limit.server_url_rules[0].client_matcher.ip_prefix_list != null
     error_message = "server_url client_matcher must render (positive coverage for the bypass/server_url matcher path)"
   }
+}
+
+
+run "server_url_api_group_with_explicit_base_path_renders" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    rate_limit_choice = "api_rate_limit"
+    api_rate_limit_server_url_rules = [{
+      api_group        = "orders"
+      base_path        = "/api/orders"
+      inline_threshold = 5
+    }]
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.api_rate_limit.server_url_rules[0].api_group == "orders" && xcsh_http_loadbalancer.this.api_rate_limit.server_url_rules[0].base_path == "/api/orders"
+    error_message = "server_url api_group selection must preserve its explicitly configured base_path"
+  }
+}
+
+run "server_url_api_group_requires_explicit_base_path" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    rate_limit_choice = "api_rate_limit"
+    api_rate_limit_server_url_rules = [{
+      api_group        = "orders"
+      inline_threshold = 5
+    }]
+  }
+  expect_failures = [xcsh_http_loadbalancer.this]
 }

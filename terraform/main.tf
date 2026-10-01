@@ -1,12 +1,11 @@
 # webapp-api-protection reference plan (multi-provider: F5 XC + Azure).
 #
-# Full automation, one plan, one state. This plan stands up its OWN backend and
-# load balancer end to end — no dependency object is created out-of-band:
+# Application and namespace state are separate local files outside the checkout.
+# terraform/namespace owns the persistent namespace, independent of application teardown.
 #
 #   modules/origin-server      Azure Linux VM (nginx + Docker: httpbin, juice-shop,
 #                              dvwa, vampi, whoami, dvga, restaurant, crAPI) on :80,
 #                              health endpoint /health. This is the real origin.
-#   xcsh_namespace             The F5 XC namespace this plan owns.
 #   modules/http-lb            F5 XC HTTP load balancer + origin pool, advertised on
 #                              the public VIP, serving www/api.f5-sales-demo.com. The
 #                              pool points at the origin server's Azure public IP.
@@ -17,7 +16,9 @@
 # DNS records for the LB domains are auto-managed by F5 XC (the f5-sales-demo.com
 # zone has allow_http_lb_managed_records enabled — see the dns repo).
 #
-# Later iterations attach WAF (app_firewall) and API protection (api_definition).
+locals {
+  azure_admin_username = "azureuser"
+}
 
 # --- Azure origin server (the real backend the LB forwards to) -----------------
 module "origin_server" {
@@ -31,6 +32,7 @@ module "origin_server" {
   vm_size             = var.origin_vm_size
   disk_size_gb        = 60
   ssh_public_key_path = var.ssh_public_key_path
+  admin_username      = local.azure_admin_username
   environment         = var.environment
   deployer            = var.deployer
   tags                = var.azure_tags
@@ -45,21 +47,15 @@ module "origin_server" {
   # gzip + base64: the rendered cloud-init exceeds Azure's 65535-byte custom_data
   # limit uncompressed. cloud-init detects the gzip magic bytes and decompresses
   # user-data automatically, so the VM receives the same YAML.
-  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {
-    cdn_simulator_host = var.csd_cdn_simulator_host
-  }))
+  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {}))
 }
 
-# --- F5 XC namespace + HTTP load balancer -------------------------------------
-resource "xcsh_namespace" "this" {
-  name   = var.namespace
-  labels = var.labels
-}
+# --- F5 XC HTTP load balancer in the persistent namespace-only root's namespace --
 
 module "http_lb" {
   source = "./modules/http-lb"
 
-  namespace  = xcsh_namespace.this.name
+  namespace  = var.namespace
   lb_domains = var.lb_domains
   # Point the origin pool at the Azure origin server's public IP (created above).
   # Terraform orders VM creation before the pool that references its IP.
@@ -269,7 +265,7 @@ data "xcsh_addon_service_activation_status" "csd" {
 resource "xcsh_protected_domain" "csd" {
   count            = var.csd_enabled ? 1 : 0
   name             = "webapp-api-protection-root"
-  namespace        = xcsh_namespace.this.name
+  namespace        = var.namespace
   protected_domain = "f5-sales-demo.com"
 
   depends_on = [data.xcsh_addon_service_activation_status.csd]
@@ -307,6 +303,7 @@ module "traffic_generator" {
   vm_size             = var.traffic_gen_vm_size
   disk_size_gb        = 64
   ssh_public_key_path = var.ssh_public_key_path
+  admin_username      = local.azure_admin_username
   environment         = var.environment
   deployer            = var.deployer
   tags                = var.azure_tags
@@ -315,17 +312,15 @@ module "traffic_generator" {
     { name = "AllowSSH", priority = 100, port = "22" },
   ]
 
-  # Target the LB FQDN (lb_domains[0] = www.f5-sales-demo.com), not the origin directly;
+  # Target both LB domains, not the origin directly.
   # target_origin_ip is the optional direct-origin baseline / bypass-testing target.
   custom_data = base64encode(templatefile("${path.module}/cloud-init/traffic-generator.yaml", {
-    target_fqdn      = var.lb_domains[0]
+    traffic_script   = indent(6, file("${path.module}/../scripts/demo_traffic.py"))
+    target_domains   = jsonencode(var.lb_domains)
     target_origin_ip = module.origin_server.public_ip
     tool_tier        = var.traffic_gen_tool_tier
     # Emit identifiable malicious-user traffic each burst so MUD scores a user and
     # applies the configured mitigation (only meaningful when mud_enabled).
     mud_bad_traffic = var.mud_enabled && var.mud_bad_traffic
   }))
-
-  # The generator is only useful once the LB exists to receive its traffic.
-  depends_on = [module.http_lb]
 }

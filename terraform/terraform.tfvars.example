@@ -1,11 +1,12 @@
-# Copy to terraform.tfvars and adjust. terraform.tfvars is gitignored.
+# Reference inputs; the showcase lifecycle generates deployment variables.
+# For manual use, copy to terraform.tfvars and adjust (terraform.tfvars is gitignored).
 # Credentials are NOT set here:
 #   F5 XC — export XCSH_API_URL + XCSH_API_TOKEN (see terraform/README.md).
-#   Azure — `az login` locally (or ARM_* / a service principal in CI).
+#   Azure — authenticate with `az login` before running Terraform locally.
 
 # --- F5 XC ---------------------------------------------------------------------
 
-# F5 XC namespace this plan creates and deploys into (default: webapp-api-protection).
+# Existing externally managed F5 XC namespace, not owned by the application root.
 namespace = "webapp-api-protection"
 
 # Domains the load balancer serves. On production, F5 XC auto-manages their DNS
@@ -25,13 +26,13 @@ labels = {
 # App firewall (WAF) enforcement mode: "blocking" (actively block) or "monitoring".
 waf_mode = "blocking"
 
-# Client-Side Defense: inject the CSD telemetry JS on all pages + register the
-# domain with the CSD reporting engine. Requires the tenant CSD addon.
-csd_enabled = true
+# Client-Side Defense remains opt-in and requires the tenant CSD addon.
+# The unattended showcase does not enable CSD enforcement.
+csd_enabled = false
 
 # --- Azure (origin server + traffic generator this plan deploys) ---------------
 
-# Subscription the Azure VMs go into. Find it with: az account show --query id -o tsv
+# Synthetic example only; supply the approved subscription privately for deployment.
 subscription_id = "00000000-0000-0000-0000-000000000000"
 
 # Azure region and the SSH public key installed on both VMs.

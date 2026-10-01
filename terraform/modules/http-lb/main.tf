@@ -38,11 +38,8 @@ resource "xcsh_healthcheck" "origin" {
       expected_status_codes = var.hc_expected_status_codes
       # http host oneof: explicit host_header, else use_origin_server_name (the server default
       # when no host_header). Emit exactly one arm to match the server on import.
-      host_header = var.hc_http_host_header
-      dynamic "use_origin_server_name" {
-        for_each = var.hc_http_host_header == null ? [1] : []
-        content {}
-      }
+      host_header               = var.hc_http_host_header
+      use_origin_server_name    = var.hc_http_host_header == null ? {} : null
       expected_response         = var.hc_expected_response
       request_headers_to_remove = length(var.hc_request_headers_to_remove) > 0 ? var.hc_request_headers_to_remove : null
     }
@@ -92,8 +89,8 @@ resource "xcsh_origin_pool" "origin" {
     }
   }
 
-  no_tls {}
-  same_as_endpoint_port {}
+  no_tls                = {}
+  same_as_endpoint_port = {}
 }
 
 # Web application firewall attached to the load balancer below.
@@ -115,14 +112,8 @@ resource "xcsh_app_firewall" "this" {
   labels    = var.labels
 
   # enforcement_mode_choice
-  dynamic "blocking" {
-    for_each = var.waf_mode == "blocking" ? [1] : []
-    content {}
-  }
-  dynamic "monitoring" {
-    for_each = var.waf_mode == "monitoring" ? [1] : []
-    content {}
-  }
+  blocking   = var.waf_mode == "blocking" ? {} : null
+  monitoring = var.waf_mode == "monitoring" ? {} : null
 
   # allowed_response_codes_choice (omit => server default allow_all, suppressed)
   dynamic "allowed_response_codes" {
@@ -152,10 +143,7 @@ resource "xcsh_app_firewall" "this" {
   }
 
   # anonymization_setting (omit => server default default_anonymization, suppressed)
-  dynamic "disable_anonymization" {
-    for_each = var.waf_anonymization_mode == "disable" ? [1] : []
-    content {}
-  }
+  disable_anonymization = var.waf_anonymization_mode == "disable" ? {} : null
   # NOTE: custom_anonymization is intentionally NOT rendered. The generated provider
   # cannot build a value for its anonymization_config list-nested-block (Value
   # Conversion Error: model []AppFirewall...AnonymizationConfigModel vs expected
@@ -169,30 +157,18 @@ resource "xcsh_app_firewall" "this" {
   dynamic "enable_ai_enhancements" {
     for_each = var.waf_ai_mode == "enable" ? [1] : []
     content {
-      dynamic "mitigate_high_risk_action" {
-        for_each = var.waf_ai_risk_action == "high" ? [1] : []
-        content {}
-      }
-      dynamic "mitigate_high_medium_risk_action" {
-        for_each = var.waf_ai_risk_action == "high_medium" ? [1] : []
-        content {}
-      }
+      mitigate_high_risk_action        = var.waf_ai_risk_action == "high" ? {} : null
+      mitigate_high_medium_risk_action = var.waf_ai_risk_action == "high_medium" ? {} : null
     }
   }
 
   # detection_setting_choice
-  dynamic "default_detection_settings" {
-    for_each = var.waf_detection_mode == "default" ? [1] : []
-    content {}
-  }
+  default_detection_settings = var.waf_detection_mode == "default" ? {} : null
   dynamic "detection_settings" {
     for_each = var.waf_detection_mode == "custom" ? [1] : []
     content {
       # violation_detection_setting
-      dynamic "default_violation_settings" {
-        for_each = var.waf_violation_mode == "default" ? [1] : []
-        content {}
-      }
+      default_violation_settings = var.waf_violation_mode == "default" ? {} : null
       dynamic "violation_settings" {
         for_each = var.waf_violation_mode == "custom" ? [1] : []
         content {
@@ -215,24 +191,12 @@ resource "xcsh_app_firewall" "this" {
       }
 
       # false_positive_suppression
-      dynamic "enable_suppression" {
-        for_each = var.waf_suppression == "enable" ? [1] : []
-        content {}
-      }
-      dynamic "disable_suppression" {
-        for_each = var.waf_suppression == "disable" ? [1] : []
-        content {}
-      }
+      enable_suppression  = var.waf_suppression == "enable" ? {} : null
+      disable_suppression = var.waf_suppression == "disable" ? {} : null
 
       # threat_campaign_choice
-      dynamic "enable_threat_campaigns" {
-        for_each = var.waf_threat_campaigns == "enable" ? [1] : []
-        content {}
-      }
-      dynamic "disable_threat_campaigns" {
-        for_each = var.waf_threat_campaigns == "disable" ? [1] : []
-        content {}
-      }
+      enable_threat_campaigns  = var.waf_threat_campaigns == "enable" ? {} : null
+      disable_threat_campaigns = var.waf_threat_campaigns == "disable" ? {} : null
 
       # bot_protection_choice, nested. "default" omits the block: nested
       # default_bot_setting is import-suppressed (materialized by the server), so
@@ -251,24 +215,12 @@ resource "xcsh_app_firewall" "this" {
 
       signature_selection_setting {
         # signature_selection_by_accuracy
-        dynamic "only_high_accuracy_signatures" {
-          for_each = var.waf_signature_accuracy == "only_high" ? [1] : []
-          content {}
-        }
-        dynamic "high_medium_accuracy_signatures" {
-          for_each = var.waf_signature_accuracy == "high_medium" ? [1] : []
-          content {}
-        }
-        dynamic "high_medium_low_accuracy_signatures" {
-          for_each = var.waf_signature_accuracy == "high_medium_low" ? [1] : []
-          content {}
-        }
+        only_high_accuracy_signatures       = var.waf_signature_accuracy == "only_high" ? {} : null
+        high_medium_accuracy_signatures     = var.waf_signature_accuracy == "high_medium" ? {} : null
+        high_medium_low_accuracy_signatures = var.waf_signature_accuracy == "high_medium_low" ? {} : null
 
         # attack_type_setting
-        dynamic "default_attack_type_settings" {
-          for_each = var.waf_attack_type_mode == "default" ? [1] : []
-          content {}
-        }
+        default_attack_type_settings = var.waf_attack_type_mode == "default" ? {} : null
         dynamic "attack_type_settings" {
           for_each = var.waf_attack_type_mode == "custom" ? [1] : []
           content {
@@ -296,63 +248,36 @@ resource "xcsh_malicious_user_mitigation" "mud" {
   # by var.mud_mitigation. The rules list is kept static (3 entries) because a dynamic
   # rules list produces an unknown-typed value the generated provider model cannot handle
   # (mitigation_type.rules → []RulesModel, not a ListValue). Action is a oneof; emit the
-  # selected member as an empty marker.
+  # selected member as an empty object attribute; null leaves unselected arms omitted.
   mitigation_type {
     rules {
       threat_level {
-        low {}
+        low = {}
       }
       mitigation_action {
-        dynamic "block_temporarily" {
-          for_each = var.mud_mitigation.low == "block_temporarily" ? [1] : []
-          content {}
-        }
-        dynamic "captcha_challenge" {
-          for_each = var.mud_mitigation.low == "captcha_challenge" ? [1] : []
-          content {}
-        }
-        dynamic "javascript_challenge" {
-          for_each = var.mud_mitigation.low == "javascript_challenge" ? [1] : []
-          content {}
-        }
+        block_temporarily    = var.mud_mitigation.low == "block_temporarily" ? {} : null
+        captcha_challenge    = var.mud_mitigation.low == "captcha_challenge" ? {} : null
+        javascript_challenge = var.mud_mitigation.low == "javascript_challenge" ? {} : null
       }
     }
     rules {
       threat_level {
-        medium {}
+        medium = {}
       }
       mitigation_action {
-        dynamic "block_temporarily" {
-          for_each = var.mud_mitigation.medium == "block_temporarily" ? [1] : []
-          content {}
-        }
-        dynamic "captcha_challenge" {
-          for_each = var.mud_mitigation.medium == "captcha_challenge" ? [1] : []
-          content {}
-        }
-        dynamic "javascript_challenge" {
-          for_each = var.mud_mitigation.medium == "javascript_challenge" ? [1] : []
-          content {}
-        }
+        block_temporarily    = var.mud_mitigation.medium == "block_temporarily" ? {} : null
+        captcha_challenge    = var.mud_mitigation.medium == "captcha_challenge" ? {} : null
+        javascript_challenge = var.mud_mitigation.medium == "javascript_challenge" ? {} : null
       }
     }
     rules {
       threat_level {
-        high {}
+        high = {}
       }
       mitigation_action {
-        dynamic "block_temporarily" {
-          for_each = var.mud_mitigation.high == "block_temporarily" ? [1] : []
-          content {}
-        }
-        dynamic "captcha_challenge" {
-          for_each = var.mud_mitigation.high == "captcha_challenge" ? [1] : []
-          content {}
-        }
-        dynamic "javascript_challenge" {
-          for_each = var.mud_mitigation.high == "javascript_challenge" ? [1] : []
-          content {}
-        }
+        block_temporarily    = var.mud_mitigation.high == "block_temporarily" ? {} : null
+        captcha_challenge    = var.mud_mitigation.high == "captcha_challenge" ? {} : null
+        javascript_challenge = var.mud_mitigation.high == "javascript_challenge" ? {} : null
       }
     }
   }
@@ -360,7 +285,7 @@ resource "xcsh_malicious_user_mitigation" "mud" {
 
 # User-identification policy — only when mud_user_id = user_identification. Exactly one
 # rule of the selected type: keyed rule-types set the matching string attribute; marker
-# rule-types are emitted as an empty block. Referenced by the LB's user_identification
+# rule-types are emitted as empty object attributes. Referenced by the LB's user_identification
 # block below. When mud_user_id = client_ip we create nothing and the LB uses the
 # server-default user_id_client_ip (import-suppressed).
 resource "xcsh_user_identification" "mud" {
@@ -376,46 +301,16 @@ resource "xcsh_user_identification" "mud" {
     jwt_claim_name          = var.mud_user_id_rule == "jwt_claim_name" ? "sub" : null
     query_param_key         = var.mud_user_id_rule == "query_param_key" ? "mud_user" : null
 
-    dynamic "client_asn" {
-      for_each = var.mud_user_id_rule == "client_asn" ? [1] : []
-      content {}
-    }
-    dynamic "client_city" {
-      for_each = var.mud_user_id_rule == "client_city" ? [1] : []
-      content {}
-    }
-    dynamic "client_country" {
-      for_each = var.mud_user_id_rule == "client_country" ? [1] : []
-      content {}
-    }
-    dynamic "client_ip" {
-      for_each = var.mud_user_id_rule == "client_ip" ? [1] : []
-      content {}
-    }
-    dynamic "client_region" {
-      for_each = var.mud_user_id_rule == "client_region" ? [1] : []
-      content {}
-    }
-    dynamic "tls_fingerprint" {
-      for_each = var.mud_user_id_rule == "tls_fingerprint" ? [1] : []
-      content {}
-    }
-    dynamic "ip_and_tls_fingerprint" {
-      for_each = var.mud_user_id_rule == "ip_and_tls_fingerprint" ? [1] : []
-      content {}
-    }
-    dynamic "ja4_tls_fingerprint" {
-      for_each = var.mud_user_id_rule == "ja4_tls_fingerprint" ? [1] : []
-      content {}
-    }
-    dynamic "ip_and_ja4_tls_fingerprint" {
-      for_each = var.mud_user_id_rule == "ip_and_ja4_tls_fingerprint" ? [1] : []
-      content {}
-    }
-    dynamic "none" {
-      for_each = var.mud_user_id_rule == "none" ? [1] : []
-      content {}
-    }
+    client_asn                 = var.mud_user_id_rule == "client_asn" ? {} : null
+    client_city                = var.mud_user_id_rule == "client_city" ? {} : null
+    client_country             = var.mud_user_id_rule == "client_country" ? {} : null
+    client_ip                  = var.mud_user_id_rule == "client_ip" ? {} : null
+    client_region              = var.mud_user_id_rule == "client_region" ? {} : null
+    tls_fingerprint            = var.mud_user_id_rule == "tls_fingerprint" ? {} : null
+    ip_and_tls_fingerprint     = var.mud_user_id_rule == "ip_and_tls_fingerprint" ? {} : null
+    ja4_tls_fingerprint        = var.mud_user_id_rule == "ja4_tls_fingerprint" ? {} : null
+    ip_and_ja4_tls_fingerprint = var.mud_user_id_rule == "ip_and_ja4_tls_fingerprint" ? {} : null
+    none                       = var.mud_user_id_rule == "none" ? {} : null
   }
 }
 
@@ -565,10 +460,7 @@ resource "xcsh_http_loadbalancer" "this" {
                   namespace = var.namespace
                 }
               }
-              dynamic "disable_waf" {
-                for_each = routes.value.waf_mode == "disable" ? [1] : []
-                content {}
-              }
+              disable_waf = routes.value.waf_mode == "disable" ? {} : null
             }
           }
         }
@@ -609,14 +501,8 @@ resource "xcsh_http_loadbalancer" "this" {
             proto_redirect = routes.value.redirect_proto
             response_code  = routes.value.redirect_response_code
             # query-param handling oneof: retain_all_params | remove_all_params
-            dynamic "retain_all_params" {
-              for_each = routes.value.redirect_query == "retain" ? [1] : []
-              content {}
-            }
-            dynamic "remove_all_params" {
-              for_each = routes.value.redirect_query == "remove" ? [1] : []
-              content {}
-            }
+            retain_all_params = routes.value.redirect_query == "retain" ? {} : null
+            remove_all_params = routes.value.redirect_query == "remove" ? {} : null
           }
         }
       }
@@ -673,7 +559,7 @@ resource "xcsh_http_loadbalancer" "this" {
     }
   }
 
-  advertise_on_public_default_vip {}
+  advertise_on_public_default_vip = {}
 
   # Attach the WAF (oneof: app_firewall vs disable_waf; server default disable_waf).
   app_firewall {
@@ -687,10 +573,7 @@ resource "xcsh_http_loadbalancer" "this" {
   #   none   => no_service_policies {} (also import-suppressed on the empty arm).
   #   active => active_service_policies referencing var.service_policy_active in order
   #             (evaluation is top-to-bottom). tenant is Computed — omit it.
-  dynamic "no_service_policies" {
-    for_each = var.service_policies_choice == "none" ? [1] : []
-    content {}
-  }
+  no_service_policies = var.service_policies_choice == "none" ? {} : null
   dynamic "active_service_policies" {
     for_each = var.service_policies_choice == "active" ? [1] : []
     content {
@@ -764,10 +647,7 @@ resource "xcsh_http_loadbalancer" "this" {
 
       # learn_from_redirect_traffic oneof. omit => emit NEITHER arm (server default
       # disable_learn_from_redirect_traffic is import-suppressed). enable => emit enable arm.
-      dynamic "enable_learn_from_redirect_traffic" {
-        for_each = var.api_discovery_learn_from_redirect == "enable" ? [1] : []
-        content {}
-      }
+      enable_learn_from_redirect_traffic = var.api_discovery_learn_from_redirect == "enable" ? {} : null
 
       # discovered_api_settings — omitted entirely unless a purge duration is set.
       dynamic "discovered_api_settings" {
@@ -803,10 +683,7 @@ resource "xcsh_http_loadbalancer" "this" {
             }
 
             # repo-selection oneof: all_repos vs selected_repos.
-            dynamic "all_repos" {
-              for_each = var.api_discovery_code_scan == "all" ? [1] : []
-              content {}
-            }
+            all_repos = var.api_discovery_code_scan == "all" ? {} : null
             dynamic "selected_repos" {
               for_each = var.api_discovery_code_scan == "selected" ? [1] : []
               content {
@@ -820,10 +697,7 @@ resource "xcsh_http_loadbalancer" "this" {
   }
 
   # disable_api_discovery — the other arm of api_discovery_choice.
-  dynamic "disable_api_discovery" {
-    for_each = var.api_discovery_choice == "disable" ? [1] : []
-    content {}
-  }
+  disable_api_discovery = var.api_discovery_choice == "disable" ? {} : null
 
   # API schema enforcement (api_definition_choice oneof: api_specification vs the
   # server default disable_api_definition). Default omits the block entirely, so the
@@ -843,10 +717,7 @@ resource "xcsh_http_loadbalancer" "this" {
         namespace = var.namespace
       }
 
-      dynamic "validation_disabled" {
-        for_each = var.api_specification_validation == "disabled" ? [1] : []
-        content {}
-      }
+      validation_disabled = var.api_specification_validation == "disabled" ? {} : null
 
       dynamic "validation_all_spec_endpoints" {
         for_each = var.api_specification_validation == "all_spec_endpoints" ? [1] : []
@@ -855,49 +726,28 @@ resource "xcsh_http_loadbalancer" "this" {
           # hardcode skip_validation and enforce nothing). Request + response are
           # independent oneofs; response omitted entirely unless response_mode set.
           validation_mode {
-            dynamic "skip_validation" {
-              for_each = local.rendered_api_validation.req_skip ? [1] : []
-              content {}
-            }
+            skip_validation = local.rendered_api_validation.req_skip ? {} : null
             dynamic "validation_mode_active" {
               for_each = local.rendered_api_validation.req_active ? [1] : []
               content {
                 request_validation_properties = local.rendered_api_validation.req_props
-                dynamic "enforcement_block" {
-                  for_each = local.rendered_api_validation.req_block ? [1] : []
-                  content {}
-                }
-                dynamic "enforcement_report" {
-                  for_each = local.rendered_api_validation.req_report ? [1] : []
-                  content {}
-                }
+                enforcement_block             = local.rendered_api_validation.req_block ? {} : null
+                enforcement_report            = local.rendered_api_validation.req_report ? {} : null
               }
             }
-            dynamic "skip_response_validation" {
-              for_each = local.rendered_api_validation.resp_emit && local.rendered_api_validation.resp_skip ? [1] : []
-              content {}
-            }
+            skip_response_validation = local.rendered_api_validation.resp_emit && local.rendered_api_validation.resp_skip ? {} : null
             dynamic "response_validation_mode_active" {
               for_each = local.rendered_api_validation.resp_emit && local.rendered_api_validation.resp_active ? [1] : []
               content {
                 response_validation_properties = local.rendered_api_validation.resp_props
-                dynamic "enforcement_block" {
-                  for_each = local.rendered_api_validation.resp_block ? [1] : []
-                  content {}
-                }
-                dynamic "enforcement_report" {
-                  for_each = local.rendered_api_validation.resp_report ? [1] : []
-                  content {}
-                }
+                enforcement_block              = local.rendered_api_validation.resp_block ? {} : null
+                enforcement_report             = local.rendered_api_validation.resp_report ? {} : null
               }
             }
           }
 
           fall_through_mode {
-            dynamic "fall_through_mode_allow" {
-              for_each = local.rendered_api_validation.ft_custom ? [] : [1]
-              content {}
-            }
+            fall_through_mode_allow = local.rendered_api_validation.ft_custom ? null : {}
             # fall_through_mode_custom rules use action_block/report/skip (NOT the
             # per-rule validation_mode used by validation_custom_list). Reuse the
             # shared validation_custom_rules, mapping action -> action_*.
@@ -914,18 +764,9 @@ resource "xcsh_http_loadbalancer" "this" {
                       methods = open_api_validation_rules.value.methods
                       path    = open_api_validation_rules.value.path
                     }
-                    dynamic "action_block" {
-                      for_each = open_api_validation_rules.value.action == "block" ? [1] : []
-                      content {}
-                    }
-                    dynamic "action_report" {
-                      for_each = open_api_validation_rules.value.action == "report" ? [1] : []
-                      content {}
-                    }
-                    dynamic "action_skip" {
-                      for_each = open_api_validation_rules.value.action == "skip" ? [1] : []
-                      content {}
-                    }
+                    action_block  = open_api_validation_rules.value.action == "block" ? {} : null
+                    action_report = open_api_validation_rules.value.action == "report" ? {} : null
+                    action_skip   = open_api_validation_rules.value.action == "skip" ? {} : null
                   }
                 }
               }
@@ -937,26 +778,14 @@ resource "xcsh_http_loadbalancer" "this" {
           dynamic "settings" {
             for_each = local.rendered_api_validation.settings_emit ? [1] : []
             content {
-              dynamic "oversized_body_fail_validation" {
-                for_each = local.rendered_api_validation.oversized_fail ? [1] : []
-                content {}
-              }
-              dynamic "oversized_body_skip_validation" {
-                for_each = local.rendered_api_validation.oversized_skip ? [1] : []
-                content {}
-              }
+              oversized_body_fail_validation = local.rendered_api_validation.oversized_fail ? {} : null
+              oversized_body_skip_validation = local.rendered_api_validation.oversized_skip ? {} : null
               dynamic "property_validation_settings_custom" {
                 for_each = local.rendered_api_validation.params_custom ? [1] : []
                 content {
                   query_parameters {
-                    dynamic "allow_additional_parameters" {
-                      for_each = local.rendered_api_validation.params_allow ? [1] : []
-                      content {}
-                    }
-                    dynamic "disallow_additional_parameters" {
-                      for_each = local.rendered_api_validation.params_disallow ? [1] : []
-                      content {}
-                    }
+                    allow_additional_parameters    = local.rendered_api_validation.params_allow ? {} : null
+                    disallow_additional_parameters = local.rendered_api_validation.params_disallow ? {} : null
                   }
                 }
               }
@@ -972,7 +801,7 @@ resource "xcsh_http_loadbalancer" "this" {
         for_each = var.api_specification_validation == "custom_list" ? [1] : []
         content {
           fall_through_mode {
-            fall_through_mode_allow {}
+            fall_through_mode_allow = {}
           }
           dynamic "open_api_validation_rules" {
             for_each = var.validation_custom_rules
@@ -980,7 +809,7 @@ resource "xcsh_http_loadbalancer" "this" {
               metadata {
                 name = "validation-rule-${open_api_validation_rules.key}"
               }
-              any_domain {}
+              any_domain = {}
               api_endpoint {
                 methods = open_api_validation_rules.value.methods
                 path    = open_api_validation_rules.value.path
@@ -988,10 +817,7 @@ resource "xcsh_http_loadbalancer" "this" {
               # action via validation_mode: skip = skip_validation; block/report =
               # validation_mode_active with enforcement_block / enforcement_report.
               validation_mode {
-                dynamic "skip_validation" {
-                  for_each = open_api_validation_rules.value.action == "skip" ? [1] : []
-                  content {}
-                }
+                skip_validation = open_api_validation_rules.value.action == "skip" ? {} : null
                 dynamic "validation_mode_active" {
                   for_each = contains(["block", "report"], open_api_validation_rules.value.action) ? [1] : []
                   content {
@@ -999,14 +825,8 @@ resource "xcsh_http_loadbalancer" "this" {
                     # all_spec_endpoints via var.api_validation_request_properties
                     # (Batch A: was hardcoded).
                     request_validation_properties = var.api_validation_request_properties
-                    dynamic "enforcement_block" {
-                      for_each = open_api_validation_rules.value.action == "block" ? [1] : []
-                      content {}
-                    }
-                    dynamic "enforcement_report" {
-                      for_each = open_api_validation_rules.value.action == "report" ? [1] : []
-                      content {}
-                    }
+                    enforcement_block             = open_api_validation_rules.value.action == "block" ? {} : null
+                    enforcement_report            = open_api_validation_rules.value.action == "report" ? {} : null
                   }
                 }
               }
@@ -1029,10 +849,7 @@ resource "xcsh_http_loadbalancer" "this" {
     content {
       # IP-allow-list oneof: no_ip_allowed_list (default) | ip_allowed_list (inline
       # prefixes) | custom_ip_allowed_list (refs to ip_prefix_set objects).
-      dynamic "no_ip_allowed_list" {
-        for_each = (length(var.rate_limit_ip_allowed_prefixes) == 0 && length(var.rate_limit_custom_ip_prefix_sets) == 0) ? [1] : []
-        content {}
-      }
+      no_ip_allowed_list = (length(var.rate_limit_ip_allowed_prefixes) == 0 && length(var.rate_limit_custom_ip_prefix_sets) == 0) ? {} : null
       dynamic "ip_allowed_list" {
         for_each = length(var.rate_limit_ip_allowed_prefixes) > 0 ? [1] : []
         content {
@@ -1053,10 +870,7 @@ resource "xcsh_http_loadbalancer" "this" {
       }
 
       # policies oneof: no_policies (default) | policies (refs to xcsh_rate_limiter_policy).
-      dynamic "no_policies" {
-        for_each = length(var.rate_limit_policy_refs) == 0 ? [1] : []
-        content {}
-      }
+      no_policies = length(var.rate_limit_policy_refs) == 0 ? {} : null
       dynamic "policies" {
         for_each = length(var.rate_limit_policy_refs) > 0 ? [1] : []
         content {
@@ -1093,10 +907,7 @@ resource "xcsh_http_loadbalancer" "this" {
         content {
           api_endpoint_path = ep.value.api_endpoint_path
           specific_domain   = ep.value.specific_domain
-          dynamic "any_domain" {
-            for_each = ep.value.specific_domain == null ? [1] : []
-            content {}
-          }
+          any_domain        = ep.value.specific_domain == null ? {} : null
           dynamic "api_endpoint_method" {
             for_each = length(ep.value.methods) > 0 ? [1] : []
             content {
@@ -1114,12 +925,9 @@ resource "xcsh_http_loadbalancer" "this" {
           dynamic "inline_rate_limiter" {
             for_each = ep.value.inline_threshold != null ? [1] : []
             content {
-              threshold = ep.value.inline_threshold
-              unit      = ep.value.inline_unit
-              dynamic "use_http_lb_user_id" {
-                for_each = ep.value.inline_user_id == "http_lb" ? [1] : []
-                content {}
-              }
+              threshold           = ep.value.inline_threshold
+              unit                = ep.value.inline_unit
+              use_http_lb_user_id = ep.value.inline_user_id == "http_lb" ? {} : null
               dynamic "ref_user_id" {
                 for_each = ep.value.inline_user_id == "ref" ? [1] : []
                 content {
@@ -1133,10 +941,7 @@ resource "xcsh_http_loadbalancer" "this" {
             for_each = ep.value.client_matcher != null && ep.value.client_matcher.mode != null ? [ep.value.client_matcher] : []
             iterator = cm
             content {
-              dynamic "any_ip" {
-                for_each = cm.value.mode == "any_ip" ? [1] : []
-                content {}
-              }
+              any_ip = cm.value.mode == "any_ip" ? {} : null
               dynamic "asn_list" {
                 for_each = cm.value.mode == "asn_list" ? [1] : []
                 content { as_numbers = cm.value.as_numbers }
@@ -1199,16 +1004,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.cookies
                 iterator = m
                 content {
-                  name           = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  name              = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -1222,16 +1021,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.headers
                 iterator = m
                 content {
-                  name           = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  name              = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -1245,16 +1038,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.jwt_claims
                 iterator = m
                 content {
-                  name           = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  name              = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -1268,16 +1055,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.query_params
                 iterator = m
                 content {
-                  key            = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  key               = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -1301,14 +1082,8 @@ resource "xcsh_http_loadbalancer" "this" {
             content {
               base_path       = bp.value.target == "base_path" ? bp.value.base_path : null
               specific_domain = bp.value.specific_domain
-              dynamic "any_domain" {
-                for_each = bp.value.specific_domain == null ? [1] : []
-                content {}
-              }
-              dynamic "any_url" {
-                for_each = bp.value.target == "any_url" ? [1] : []
-                content {}
-              }
+              any_domain      = bp.value.specific_domain == null ? {} : null
+              any_url         = bp.value.target == "any_url" ? {} : null
               dynamic "api_endpoint" {
                 for_each = bp.value.target == "api_endpoint" ? [1] : []
                 content {
@@ -1324,10 +1099,7 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = bp.value.client_matcher != null && bp.value.client_matcher.mode != null ? [bp.value.client_matcher] : []
                 iterator = cm
                 content {
-                  dynamic "any_ip" {
-                    for_each = cm.value.mode == "any_ip" ? [1] : []
-                    content {}
-                  }
+                  any_ip = cm.value.mode == "any_ip" ? {} : null
                   dynamic "asn_list" {
                     for_each = cm.value.mode == "asn_list" ? [1] : []
                     content { as_numbers = cm.value.as_numbers }
@@ -1394,10 +1166,7 @@ resource "xcsh_http_loadbalancer" "this" {
           api_group       = su.value.api_group
           base_path       = su.value.base_path
           specific_domain = su.value.specific_domain
-          dynamic "any_domain" {
-            for_each = su.value.specific_domain == null ? [1] : []
-            content {}
-          }
+          any_domain      = su.value.specific_domain == null ? {} : null
           dynamic "ref_rate_limiter" {
             for_each = su.value.ref_rate_limiter != null ? [1] : []
             content {
@@ -1408,12 +1177,9 @@ resource "xcsh_http_loadbalancer" "this" {
           dynamic "inline_rate_limiter" {
             for_each = su.value.inline_threshold != null ? [1] : []
             content {
-              threshold = su.value.inline_threshold
-              unit      = su.value.inline_unit
-              dynamic "use_http_lb_user_id" {
-                for_each = su.value.inline_user_id == "http_lb" ? [1] : []
-                content {}
-              }
+              threshold           = su.value.inline_threshold
+              unit                = su.value.inline_unit
+              use_http_lb_user_id = su.value.inline_user_id == "http_lb" ? {} : null
               dynamic "ref_user_id" {
                 for_each = su.value.inline_user_id == "ref" ? [1] : []
                 content {
@@ -1427,10 +1193,7 @@ resource "xcsh_http_loadbalancer" "this" {
             for_each = su.value.client_matcher != null && su.value.client_matcher.mode != null ? [su.value.client_matcher] : []
             iterator = cm
             content {
-              dynamic "any_ip" {
-                for_each = cm.value.mode == "any_ip" ? [1] : []
-                content {}
-              }
+              any_ip = cm.value.mode == "any_ip" ? {} : null
               dynamic "asn_list" {
                 for_each = cm.value.mode == "asn_list" ? [1] : []
                 content { as_numbers = cm.value.as_numbers }
@@ -1527,14 +1290,8 @@ resource "xcsh_http_loadbalancer" "this" {
               fields = d.value.fields
             }
           }
-          dynamic "mask" {
-            for_each = d.value.action == "mask" ? [1] : []
-            content {}
-          }
-          dynamic "report" {
-            for_each = d.value.action == "report" ? [1] : []
-            content {}
-          }
+          mask   = d.value.action == "mask" ? {} : null
+          report = d.value.action == "report" ? {} : null
         }
       }
     }
@@ -1551,30 +1308,21 @@ resource "xcsh_http_loadbalancer" "this" {
       metadata {
         name = "data-guard-${data_guard_rules.key}"
       }
-      dynamic "any_domain" {
-        for_each = data_guard_rules.value.domain_mode == "any" ? [1] : []
-        content {}
-      }
+      any_domain   = data_guard_rules.value.domain_mode == "any" ? {} : null
       exact_value  = data_guard_rules.value.domain_mode == "exact" ? data_guard_rules.value.domain : null
       suffix_value = data_guard_rules.value.domain_mode == "suffix" ? data_guard_rules.value.domain : null
       path {
         path = data_guard_rules.value.path
       }
-      dynamic "apply_data_guard" {
-        for_each = data_guard_rules.value.apply ? [1] : []
-        content {}
-      }
-      dynamic "skip_data_guard" {
-        for_each = data_guard_rules.value.apply ? [] : [1]
-        content {}
-      }
+      apply_data_guard = data_guard_rules.value.apply ? {} : null
+      skip_data_guard  = data_guard_rules.value.apply ? null : {}
     }
   }
 
   # Client access control (CAC) — trusted_clients bypass the SKIP_PROCESSING_* security named
   # in actions; blocked_clients are blocked (or have those actions applied). Each rule matches
   # by exactly one of ip_prefix / ipv6_prefix / as_number / user_identifier. Omitted when the
-  # list is empty (0-change). actions null-when-empty (server default SKIP_PROCESSING_WAF).
+  # list is empty (0-change). Provider 12 requires actions on configured rules; use its documented WAF default.
   dynamic "trusted_clients" {
     for_each = var.trusted_clients
     content {
@@ -1586,7 +1334,7 @@ resource "xcsh_http_loadbalancer" "this" {
       as_number            = trusted_clients.value.as_number
       user_identifier      = trusted_clients.value.user_identifier
       expiration_timestamp = trusted_clients.value.expiration_timestamp
-      actions              = length(trusted_clients.value.actions) > 0 ? trusted_clients.value.actions : null
+      actions              = length(trusted_clients.value.actions) > 0 ? trusted_clients.value.actions : ["SKIP_PROCESSING_WAF"]
     }
   }
   dynamic "blocked_clients" {
@@ -1600,7 +1348,7 @@ resource "xcsh_http_loadbalancer" "this" {
       as_number            = blocked_clients.value.as_number
       user_identifier      = blocked_clients.value.user_identifier
       expiration_timestamp = blocked_clients.value.expiration_timestamp
-      actions              = length(blocked_clients.value.actions) > 0 ? blocked_clients.value.actions : null
+      actions              = length(blocked_clients.value.actions) > 0 ? blocked_clients.value.actions : ["SKIP_PROCESSING_WAF"]
     }
   }
   # IP reputation — block clients whose source IP matches the given IpThreatCategory list
@@ -1632,71 +1380,32 @@ resource "xcsh_http_loadbalancer" "this" {
   dynamic "csrf_policy" {
     for_each = var.csrf_policy_mode != "omit" ? [1] : []
     content {
-      dynamic "all_load_balancer_domains" {
-        for_each = var.csrf_policy_mode == "all_domains" ? [1] : []
-        content {}
-      }
+      all_load_balancer_domains = var.csrf_policy_mode == "all_domains" ? {} : null
       dynamic "custom_domain_list" {
         for_each = var.csrf_policy_mode == "custom" ? [1] : []
         content {
           domains = length(var.csrf_custom_domains) > 0 ? var.csrf_custom_domains : null
         }
       }
-      dynamic "disabled" {
-        for_each = var.csrf_policy_mode == "disabled" ? [1] : []
-        content {}
-      }
+      disabled = var.csrf_policy_mode == "disabled" ? {} : null
     }
   }
   dynamic "protected_cookies" {
     for_each = var.protected_cookies
     content {
-      name          = protected_cookies.value.name
-      max_age_value = protected_cookies.value.max_age_value
-      dynamic "add_httponly" {
-        for_each = protected_cookies.value.httponly == "add" ? [1] : []
-        content {}
-      }
-      dynamic "ignore_httponly" {
-        for_each = protected_cookies.value.httponly == "ignore" ? [1] : []
-        content {}
-      }
-      dynamic "add_secure" {
-        for_each = protected_cookies.value.secure == "add" ? [1] : []
-        content {}
-      }
-      dynamic "ignore_secure" {
-        for_each = protected_cookies.value.secure == "ignore" ? [1] : []
-        content {}
-      }
-      dynamic "samesite_lax" {
-        for_each = protected_cookies.value.samesite == "lax" ? [1] : []
-        content {}
-      }
-      dynamic "samesite_none" {
-        for_each = protected_cookies.value.samesite == "none" ? [1] : []
-        content {}
-      }
-      dynamic "samesite_strict" {
-        for_each = protected_cookies.value.samesite == "strict" ? [1] : []
-        content {}
-      }
-      dynamic "ignore_samesite" {
-        for_each = protected_cookies.value.samesite == "ignore" ? [1] : []
-        content {}
-      }
-      dynamic "enable_tampering_protection" {
-        for_each = protected_cookies.value.tampering == "enable" ? [1] : []
-        content {}
-      }
-      dynamic "disable_tampering_protection" {
-        for_each = protected_cookies.value.tampering == "disable" ? [1] : []
-        content {}
-      }
-      dynamic "ignore_max_age" {
-        for_each = protected_cookies.value.ignore_max_age ? [1] : []
-        content {}
-      }
+      name                         = protected_cookies.value.name
+      max_age_value                = protected_cookies.value.max_age_value
+      add_httponly                 = protected_cookies.value.httponly == "add" ? {} : null
+      ignore_httponly              = protected_cookies.value.httponly == "ignore" ? {} : null
+      add_secure                   = protected_cookies.value.secure == "add" ? {} : null
+      ignore_secure                = protected_cookies.value.secure == "ignore" ? {} : null
+      samesite_lax                 = protected_cookies.value.samesite == "lax" ? {} : null
+      samesite_none                = protected_cookies.value.samesite == "none" ? {} : null
+      samesite_strict              = protected_cookies.value.samesite == "strict" ? {} : null
+      ignore_samesite              = protected_cookies.value.samesite == "ignore" ? {} : null
+      enable_tampering_protection  = protected_cookies.value.tampering == "enable" ? {} : null
+      disable_tampering_protection = protected_cookies.value.tampering == "disable" ? {} : null
+      ignore_max_age               = protected_cookies.value.ignore_max_age ? {} : null
     }
   }
 
@@ -1741,23 +1450,14 @@ resource "xcsh_http_loadbalancer" "this" {
         cleartext = base64encode(var.jwt_validation.jwks_cleartext)
       }
       action {
-        dynamic "block" {
-          for_each = var.jwt_validation.action == "block" ? [1] : []
-          content {}
-        }
-        dynamic "report" {
-          for_each = var.jwt_validation.action == "report" ? [1] : []
-          content {}
-        }
+        block  = var.jwt_validation.action == "block" ? {} : null
+        report = var.jwt_validation.action == "report" ? {} : null
       }
       token_location {
         bearer_token {}
       }
       target {
-        dynamic "all_endpoint" {
-          for_each = var.jwt_validation.target == "all_endpoint" ? [1] : []
-          content {}
-        }
+        all_endpoint = var.jwt_validation.target == "all_endpoint" ? {} : null
         dynamic "api_groups" {
           for_each = var.jwt_validation.target == "api_groups" ? [1] : []
           content {
@@ -1780,68 +1480,41 @@ resource "xcsh_http_loadbalancer" "this" {
       reserved_claims {
         # Each oneof is required: derive the disable arm from value presence so no choice is
         # ever left nil (the API rejects a nil oneof with required_oneof).
-        issuer = (var.jwt_validation.issuer != null && var.jwt_validation.issuer != "") ? var.jwt_validation.issuer : null
-        dynamic "issuer_disable" {
-          for_each = (var.jwt_validation.issuer == null || var.jwt_validation.issuer == "") ? [1] : []
-          content {}
-        }
+        issuer         = (var.jwt_validation.issuer != null && var.jwt_validation.issuer != "") ? var.jwt_validation.issuer : null
+        issuer_disable = (var.jwt_validation.issuer == null || var.jwt_validation.issuer == "") ? {} : null
         dynamic "audience" {
           for_each = length(var.jwt_validation.audiences) > 0 ? [1] : []
           content {
             audiences = var.jwt_validation.audiences
           }
         }
-        dynamic "audience_disable" {
-          for_each = length(var.jwt_validation.audiences) == 0 ? [1] : []
-          content {}
-        }
-        dynamic "validate_period_enable" {
-          for_each = var.jwt_validation.validate_period ? [1] : []
-          content {}
-        }
-        dynamic "validate_period_disable" {
-          for_each = var.jwt_validation.validate_period ? [] : [1]
-          content {}
-        }
+        audience_disable        = length(var.jwt_validation.audiences) == 0 ? {} : null
+        validate_period_enable  = var.jwt_validation.validate_period ? {} : null
+        validate_period_disable = var.jwt_validation.validate_period ? null : {}
       }
     }
   }
 
   # GraphQL inspection (LPC-3) — per-rule path/domain/method + query limits + introspection.
-  # Omitted when no rule; graphql_settings emitted per rule (int limits null-when-unset).
+  # Omitted when no rule; provider 12 requires explicit batch and total-length limits.
   dynamic "graphql_rules" {
     for_each = var.graphql_rules
     content {
       metadata {
         name = graphql_rules.value.name
       }
-      exact_path = graphql_rules.value.exact_path
-      dynamic "any_domain" {
-        for_each = graphql_rules.value.domain == "any" ? [1] : []
-        content {}
-      }
+      exact_path   = graphql_rules.value.exact_path
+      any_domain   = graphql_rules.value.domain == "any" ? {} : null
       exact_value  = graphql_rules.value.domain == "exact" ? graphql_rules.value.domain_value : null
       suffix_value = graphql_rules.value.domain == "suffix" ? graphql_rules.value.domain_value : null
-      dynamic "method_get" {
-        for_each = graphql_rules.value.method == "get" ? [1] : []
-        content {}
-      }
-      dynamic "method_post" {
-        for_each = graphql_rules.value.method == "post" ? [1] : []
-        content {}
-      }
+      method_get   = graphql_rules.value.method == "get" ? {} : null
+      method_post  = graphql_rules.value.method == "post" ? {} : null
       graphql_settings {
-        max_batched_queries = graphql_rules.value.max_batched_queries
-        max_depth           = graphql_rules.value.max_depth
-        max_total_length    = graphql_rules.value.max_total_length
-        dynamic "enable_introspection" {
-          for_each = graphql_rules.value.introspection == "enable" ? [1] : []
-          content {}
-        }
-        dynamic "disable_introspection" {
-          for_each = graphql_rules.value.introspection == "disable" ? [1] : []
-          content {}
-        }
+        max_batched_queries   = graphql_rules.value.max_batched_queries
+        max_depth             = graphql_rules.value.max_depth
+        max_total_length      = graphql_rules.value.max_total_length
+        enable_introspection  = graphql_rules.value.introspection == "enable" ? {} : null
+        disable_introspection = graphql_rules.value.introspection == "disable" ? {} : null
       }
     }
   }
@@ -1872,24 +1545,15 @@ resource "xcsh_http_loadbalancer" "this" {
                 name             = rules.value.name
                 description_spec = rules.value.description
               }
-              dynamic "any_domain" {
-                for_each = rules.value.domain == "any" ? [1] : []
-                content {}
-              }
-              exact_value  = rules.value.domain == "exact" ? rules.value.domain_value : null
-              suffix_value = rules.value.domain == "suffix" ? rules.value.domain_value : null
-              dynamic "any_path" {
-                for_each = rules.value.path == "any" ? [1] : []
-                content {}
-              }
+              any_domain           = rules.value.domain == "any" ? {} : null
+              exact_value          = rules.value.domain == "exact" ? rules.value.domain_value : null
+              suffix_value         = rules.value.domain == "suffix" ? rules.value.domain_value : null
+              any_path             = rules.value.path == "any" ? {} : null
               path_prefix          = rules.value.path == "prefix" ? rules.value.path_value : null
               path_regex           = rules.value.path == "regex" ? rules.value.path_value : null
               methods              = length(rules.value.methods) > 0 ? rules.value.methods : null
               expiration_timestamp = rules.value.expiration_timestamp
-              dynamic "waf_skip_processing" {
-                for_each = rules.value.action == "skip" ? [1] : []
-                content {}
-              }
+              waf_skip_processing  = rules.value.action == "skip" ? {} : null
               dynamic "app_firewall_detection_control" {
                 for_each = rules.value.action == "detection_control" ? [1] : []
                 content {
@@ -1952,33 +1616,21 @@ resource "xcsh_http_loadbalancer" "this" {
             name = "api-protection-${ep.key}"
           }
           api_endpoint_path = ep.value.path
-          dynamic "any_domain" {
-            for_each = ep.value.domain_mode == "any" ? [1] : []
-            content {}
-          }
-          specific_domain = ep.value.domain_mode == "specific" ? ep.value.domain : null
+          any_domain        = ep.value.domain_mode == "any" ? {} : null
+          specific_domain   = ep.value.domain_mode == "specific" ? ep.value.domain : null
           api_endpoint_method {
             invert_matcher = ep.value.methods_invert
             methods        = ep.value.methods
           }
           action {
-            dynamic "allow" {
-              for_each = ep.value.action == "allow" ? [1] : []
-              content {}
-            }
-            dynamic "deny" {
-              for_each = ep.value.action == "deny" ? [1] : []
-              content {}
-            }
+            allow = ep.value.action == "allow" ? {} : null
+            deny  = ep.value.action == "deny" ? {} : null
           }
           dynamic "client_matcher" {
             for_each = ep.value.client_matcher != null && ep.value.client_matcher.mode != null ? [ep.value.client_matcher] : []
             iterator = cm
             content {
-              dynamic "any_ip" {
-                for_each = cm.value.mode == "any_ip" ? [1] : []
-                content {}
-              }
+              any_ip = cm.value.mode == "any_ip" ? {} : null
               dynamic "asn_list" {
                 for_each = cm.value.mode == "asn_list" ? [1] : []
                 content { as_numbers = cm.value.as_numbers }
@@ -2041,16 +1693,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.cookies
                 iterator = m
                 content {
-                  name           = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  name              = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -2064,16 +1710,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.headers
                 iterator = m
                 content {
-                  name           = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  name              = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -2087,16 +1727,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.jwt_claims
                 iterator = m
                 content {
-                  name           = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  name              = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -2110,16 +1744,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.query_params
                 iterator = m
                 content {
-                  key            = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  key               = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -2141,31 +1769,19 @@ resource "xcsh_http_loadbalancer" "this" {
           metadata {
             name = "api-protection-group-${gp.key}"
           }
-          api_group = gp.value.api_group
-          base_path = gp.value.base_path
-          dynamic "any_domain" {
-            for_each = gp.value.domain_mode == "any" ? [1] : []
-            content {}
-          }
+          api_group       = gp.value.api_group
+          base_path       = gp.value.base_path
+          any_domain      = gp.value.domain_mode == "any" ? {} : null
           specific_domain = gp.value.domain_mode == "specific" ? gp.value.domain : null
           action {
-            dynamic "allow" {
-              for_each = gp.value.action == "allow" ? [1] : []
-              content {}
-            }
-            dynamic "deny" {
-              for_each = gp.value.action == "deny" ? [1] : []
-              content {}
-            }
+            allow = gp.value.action == "allow" ? {} : null
+            deny  = gp.value.action == "deny" ? {} : null
           }
           dynamic "client_matcher" {
             for_each = gp.value.client_matcher != null && gp.value.client_matcher.mode != null ? [gp.value.client_matcher] : []
             iterator = cm
             content {
-              dynamic "any_ip" {
-                for_each = cm.value.mode == "any_ip" ? [1] : []
-                content {}
-              }
+              any_ip = cm.value.mode == "any_ip" ? {} : null
               dynamic "asn_list" {
                 for_each = cm.value.mode == "asn_list" ? [1] : []
                 content { as_numbers = cm.value.as_numbers }
@@ -2228,16 +1844,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.headers
                 iterator = m
                 content {
-                  name           = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  name              = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -2251,16 +1861,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.cookies
                 iterator = m
                 content {
-                  name           = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  name              = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -2274,16 +1878,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.jwt_claims
                 iterator = m
                 content {
-                  name           = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  name              = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -2297,16 +1895,10 @@ resource "xcsh_http_loadbalancer" "this" {
                 for_each = rm.value.query_params
                 iterator = m
                 content {
-                  key            = m.value.name
-                  invert_matcher = m.value.invert
-                  dynamic "check_present" {
-                    for_each = m.value.presence == "present" ? [1] : []
-                    content {}
-                  }
-                  dynamic "check_not_present" {
-                    for_each = m.value.presence == "absent" ? [1] : []
-                    content {}
-                  }
+                  key               = m.value.name
+                  invert_matcher    = m.value.invert
+                  check_present     = m.value.presence == "present" ? {} : null
+                  check_not_present = m.value.presence == "absent" ? {} : null
                   dynamic "item" {
                     for_each = m.value.presence == "match" ? [1] : []
                     content {
@@ -2411,14 +2003,8 @@ resource "xcsh_http_loadbalancer" "this" {
         # JS-insertion oneof (4 mutually-exclusive arms, API-enforced): all_pages (default) |
         # disabled | all_except (+ exclude_list) | insertion_rules (+ rules[>=1] + optional
         # exclude_list). Matcher entries come pre-normalized from local.csd_* (see locals_csd.tf).
-        dynamic "js_insert_all_pages" {
-          for_each = var.csd.js_insert == "all_pages" ? [1] : []
-          content {}
-        }
-        dynamic "disable_js_insert" {
-          for_each = var.csd.js_insert == "disabled" ? [1] : []
-          content {}
-        }
+        js_insert_all_pages = var.csd.js_insert == "all_pages" ? {} : null
+        disable_js_insert   = var.csd.js_insert == "disabled" ? {} : null
         dynamic "js_insert_all_pages_except" {
           for_each = var.csd.js_insert == "all_except" ? [1] : []
           content {
@@ -2429,10 +2015,7 @@ resource "xcsh_http_loadbalancer" "this" {
                   name             = exclude_list.value.name
                   description_spec = exclude_list.value.description
                 }
-                dynamic "any_domain" {
-                  for_each = exclude_list.value.any_domain ? [1] : []
-                  content {}
-                }
+                any_domain = exclude_list.value.any_domain ? {} : null
                 dynamic "domain" {
                   for_each = exclude_list.value.any_domain ? [] : [1]
                   content {
@@ -2460,10 +2043,7 @@ resource "xcsh_http_loadbalancer" "this" {
                   name             = rules.value.name
                   description_spec = rules.value.description
                 }
-                dynamic "any_domain" {
-                  for_each = rules.value.any_domain ? [1] : []
-                  content {}
-                }
+                any_domain = rules.value.any_domain ? {} : null
                 dynamic "domain" {
                   for_each = rules.value.any_domain ? [] : [1]
                   content {
@@ -2486,10 +2066,7 @@ resource "xcsh_http_loadbalancer" "this" {
                   name             = exclude_list.value.name
                   description_spec = exclude_list.value.description
                 }
-                dynamic "any_domain" {
-                  for_each = exclude_list.value.any_domain ? [1] : []
-                  content {}
-                }
+                any_domain = exclude_list.value.any_domain ? {} : null
                 dynamic "domain" {
                   for_each = exclude_list.value.any_domain ? [] : [1]
                   content {
@@ -2516,10 +2093,7 @@ resource "xcsh_http_loadbalancer" "this" {
   # (malicious_user_detection oneof vs the server default disable_malicious_user_detection).
   # When mud_enabled is false we emit NO block — the server applies the disable marker,
   # which the provider suppresses on import (no drift; do not declare it).
-  dynamic "enable_malicious_user_detection" {
-    for_each = var.mud_enabled ? [1] : []
-    content {}
-  }
+  enable_malicious_user_detection = var.mud_enabled ? {} : null
 
   # User identification: reference a user_identification policy when mud_user_id is
   # user_identification; otherwise emit nothing and the server applies the default
@@ -2604,18 +2178,9 @@ resource "xcsh_http_loadbalancer" "this" {
         }
       }
       # activation choice (oneof): omit for the server default; rule_list is CH-3.
-      dynamic "no_challenge" {
-        for_each = local.challenge_pbc_activation == "no_challenge" ? [1] : []
-        content {}
-      }
-      dynamic "always_enable_js_challenge" {
-        for_each = local.challenge_pbc_activation == "always_js" ? [1] : []
-        content {}
-      }
-      dynamic "always_enable_captcha_challenge" {
-        for_each = local.challenge_pbc_activation == "always_captcha" ? [1] : []
-        content {}
-      }
+      no_challenge                    = local.challenge_pbc_activation == "no_challenge" ? {} : null
+      always_enable_js_challenge      = local.challenge_pbc_activation == "always_js" ? {} : null
+      always_enable_captcha_challenge = local.challenge_pbc_activation == "always_captcha" ? {} : null
       # CH-3: per-request challenge rules. Each rule = metadata{name} + spec{matchers + action
       # oneof} + optional expiration. Coexists with the activation choice (live-probe confirmed).
       dynamic "rule_list" {
@@ -2630,18 +2195,9 @@ resource "xcsh_http_loadbalancer" "this" {
               spec {
                 expiration_timestamp = rules.value.expiration_timestamp
                 # action oneof (js/captcha/disable)
-                dynamic "enable_javascript_challenge" {
-                  for_each = rules.value.action == "js" ? [1] : []
-                  content {}
-                }
-                dynamic "enable_captcha_challenge" {
-                  for_each = rules.value.action == "captcha" ? [1] : []
-                  content {}
-                }
-                dynamic "disable_challenge" {
-                  for_each = rules.value.action == "disable" ? [1] : []
-                  content {}
-                }
+                enable_javascript_challenge = rules.value.action == "js" ? {} : null
+                enable_captcha_challenge    = rules.value.action == "captcha" ? {} : null
+                disable_challenge           = rules.value.action == "disable" ? {} : null
                 # representative matchers (additive AND); full set covered by SPol.
                 dynamic "path" {
                   for_each = rules.value.path_mode != null ? [1] : []
@@ -2667,10 +2223,7 @@ resource "xcsh_http_loadbalancer" "this" {
                   content {
                     name           = headers.value.name
                     invert_matcher = headers.value.invert
-                    dynamic "check_present" {
-                      for_each = headers.value.mode == "presence" ? [1] : []
-                      content {}
-                    }
+                    check_present  = headers.value.mode == "presence" ? {} : null
                     dynamic "item" {
                       for_each = contains(["exact", "regex"], headers.value.mode) ? [1] : []
                       content {
@@ -2765,18 +2318,9 @@ resource "xcsh_http_loadbalancer" "this" {
 
   # LBA: load-balancing algorithm oneof. round_robin (default) is omitted (server materializes it,
   # import-suppressed); the chosen non-default arm is emitted. cookie_stickiness excluded (500).
-  dynamic "least_active" {
-    for_each = var.lb_algorithm.mode == "least_active" ? [1] : []
-    content {}
-  }
-  dynamic "random" {
-    for_each = var.lb_algorithm.mode == "random" ? [1] : []
-    content {}
-  }
-  dynamic "source_ip_stickiness" {
-    for_each = var.lb_algorithm.mode == "source_ip_stickiness" ? [1] : []
-    content {}
-  }
+  least_active         = var.lb_algorithm.mode == "least_active" ? {} : null
+  random               = var.lb_algorithm.mode == "random" ? {} : null
+  source_ip_stickiness = var.lb_algorithm.mode == "source_ip_stickiness" ? {} : null
   dynamic "ring_hash" {
     for_each = var.lb_algorithm.mode == "ring_hash" ? [1] : []
     content {
@@ -2784,7 +2328,7 @@ resource "xcsh_http_loadbalancer" "this" {
         for_each = var.lb_algorithm.ring_hash_policies
         content {
           header_name = hash_policy.value.header_name
-          source_ip   = hash_policy.value.source_ip
+          source_ip   = hash_policy.value.source_ip ? true : null
           terminal    = hash_policy.value.terminal
         }
       }
@@ -2795,6 +2339,14 @@ resource "xcsh_http_loadbalancer" "this" {
   # value — a cross-variable check the api_crawler_password variable validation cannot
   # express (clear needs plaintext; blindfold needs location).
   lifecycle {
+    precondition {
+      condition     = alltrue([for r in var.api_protection_group_rules : r.base_path != null])
+      error_message = "api_protection_group_rules require explicit base_path with provider 12, including rules selecting api_group; no safe prefix can be inferred."
+    }
+    precondition {
+      condition     = alltrue([for r in var.api_rate_limit_server_url_rules : r.base_path != null])
+      error_message = "api_rate_limit_server_url_rules require explicit base_path with provider 12, including rules selecting api_group; no safe prefix can be inferred."
+    }
     precondition {
       condition     = length(var.api_crawler_domains) == 0 || local.api_crawler_password_secret.url != null || local.api_crawler_password_secret.location != null
       error_message = "api_crawler_domains is set but api_crawler_password has no value: set plaintext (clear) or location (blindfold)."

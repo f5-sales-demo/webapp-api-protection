@@ -15,24 +15,15 @@ resource "xcsh_waf_exclusion_policy" "this" {
         name             = rule.value.name
         description_spec = rule.value.description
       }
-      dynamic "any_domain" {
-        for_each = rule.value.domain == "any" ? [1] : []
-        content {}
-      }
-      exact_value  = rule.value.domain == "exact" ? rule.value.domain_value : null
-      suffix_value = rule.value.domain == "suffix" ? rule.value.domain_value : null
-      dynamic "any_path" {
-        for_each = rule.value.path == "any" ? [1] : []
-        content {}
-      }
+      any_domain           = rule.value.domain == "any" ? {} : null
+      exact_value          = rule.value.domain == "exact" ? rule.value.domain_value : null
+      suffix_value         = rule.value.domain == "suffix" ? rule.value.domain_value : null
+      any_path             = rule.value.path == "any" ? {} : null
       path_prefix          = rule.value.path == "prefix" ? rule.value.path_value : null
       path_regex           = rule.value.path == "regex" ? rule.value.path_value : null
       methods              = length(rule.value.methods) > 0 ? rule.value.methods : null
       expiration_timestamp = rule.value.expiration_timestamp
-      dynamic "waf_skip_processing" {
-        for_each = rule.value.action == "skip" ? [1] : []
-        content {}
-      }
+      waf_skip_processing  = rule.value.action == "skip" ? {} : null
       dynamic "app_firewall_detection_control" {
         for_each = rule.value.action == "detection_control" ? [1] : []
         content {

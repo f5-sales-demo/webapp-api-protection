@@ -18,6 +18,10 @@ variable "graphql_rules" {
   default = []
 
   validation {
+    condition     = alltrue([for r in var.graphql_rules : r.max_batched_queries != null && r.max_total_length != null])
+    error_message = "graphql_rules require explicit max_batched_queries and max_total_length limits with provider 12; no server default is documented."
+  }
+  validation {
     condition     = alltrue([for r in var.graphql_rules : contains(["any", "exact", "suffix"], r.domain)])
     error_message = "each graphql_rules[].domain must be any, exact, or suffix."
   }

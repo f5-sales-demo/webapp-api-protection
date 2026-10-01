@@ -12,10 +12,7 @@ resource "xcsh_rate_limiter_policy" "this" {
   namespace = var.namespace
 
   # server scope oneof
-  dynamic "any_server" {
-    for_each = each.value.server_scope == "any_server" ? [1] : []
-    content {}
-  }
+  any_server = each.value.server_scope == "any_server" ? {} : null
   dynamic "server_name_matcher" {
     for_each = each.value.server_scope == "name_matcher" ? [1] : []
     content {
@@ -38,14 +35,8 @@ resource "xcsh_rate_limiter_policy" "this" {
       }
       spec {
         # --- action oneof ---
-        dynamic "apply_rate_limiter" {
-          for_each = rules.value.action == "apply" ? [1] : []
-          content {}
-        }
-        dynamic "bypass_rate_limiter" {
-          for_each = rules.value.action == "bypass" ? [1] : []
-          content {}
-        }
+        apply_rate_limiter  = rules.value.action == "apply" ? {} : null
+        bypass_rate_limiter = rules.value.action == "bypass" ? {} : null
         dynamic "custom_rate_limiter" {
           for_each = rules.value.action == "custom" ? [1] : []
           content {
@@ -133,16 +124,10 @@ resource "xcsh_rate_limiter_policy" "this" {
         dynamic "headers" {
           for_each = rules.value.headers
           content {
-            name           = headers.value.name
-            invert_matcher = headers.value.invert
-            dynamic "check_present" {
-              for_each = headers.value.presence == "present" ? [1] : []
-              content {}
-            }
-            dynamic "check_not_present" {
-              for_each = headers.value.presence == "absent" ? [1] : []
-              content {}
-            }
+            name              = headers.value.name
+            invert_matcher    = headers.value.invert
+            check_present     = headers.value.presence == "present" ? {} : null
+            check_not_present = headers.value.presence == "absent" ? {} : null
             dynamic "item" {
               for_each = headers.value.presence == "match" ? [1] : []
               content {

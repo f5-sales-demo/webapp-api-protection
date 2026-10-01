@@ -25,7 +25,7 @@ resource "xcsh_route" "this" {
     # waf_type is a required oneof the server materializes on apply (was-absent-now-present);
     # emit the inherit arm so the route uses the LB WAF and the apply is consistent.
     waf_type {
-      inherit_waf {}
+      inherit_waf = {}
     }
   }
 }
