@@ -28,13 +28,16 @@ class FixtureExportTests(unittest.TestCase):
         assert result["fixture_type"] == "seeded-synthetic-origin-accounts"
 
     def test_missing_fixture_cannot_be_exported_as_ready(self):
-        with patch.object(
-            fixtures,
-            "seeded_ids",
-            return_value={
-                "crapi_vehicle_uuid": None,
-                "crapi_video_id": 3,
-                "crapi_order_id": 7,
-            },
-        ), expect_error(ValueError, "missing"):
+        with (
+            patch.object(
+                fixtures,
+                "seeded_ids",
+                return_value={
+                    "crapi_vehicle_uuid": None,
+                    "crapi_video_id": 3,
+                    "crapi_order_id": 7,
+                },
+            ),
+            expect_error(ValueError, "missing"),
+        ):
             fixtures.collect()
