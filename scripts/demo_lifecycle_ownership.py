@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from demo_lifecycle_terraform import Terraform
 
 _ACCESS_BUDGET_SECONDS = 20
+_REQUIRED_CATALOG_PASSES = 2
 _MAX_IP_OCTET = 255
 _GROUP_ID_PARTS = 5
 _MIN_PROVIDER_PARTS = 3
@@ -527,12 +528,52 @@ class Ownership:
             self.context.state.deadline = original
         self.runtime.phase("traffic-" + action)
 
+    def await_catalog(self) -> None:
+        """Wait for two successful current-source full passes before launching fresh controls."""
+        outputs = self.context.state.outputs
+        if not outputs:
+            message = "catalog acceptance output unavailable"
+            raise Blocked(message)
+        guest = self.owned_guest(
+            _resources(self.context), "generator", outputs["generator"]
+        )
+        while True:
+            self.runtime.remaining()
+            status = json.loads(
+                self.runtime.run(
+                    [
+                        *self.ssh_argv(guest, "yes"),
+                        "sudo",
+                        "-n",
+                        "/usr/local/bin/tgen-control",
+                        "status",
+                    ]
+                )[0]
+            )
+            passes = status.get("catalog_passes", [])
+            if (
+                status.get("service_active") is not True
+                or status.get("service_enabled") is not True
+                or status.get("failures")
+            ):
+                message = "continuous catalog inactive or failed; private receipts require repair"
+                raise Blocked(message)
+            if len(passes) >= _REQUIRED_CATALOG_PASSES and all(
+                p.get("passed") and p.get("catalog_complete")
+                for p in passes[-_REQUIRED_CATALOG_PASSES:]
+            ):
+                self.runtime.phase("two-complete-catalog-passes")
+                return
+            time.sleep(min(30, self.runtime.remaining()))
+
     def verify_phase(
         self, phase: Literal["readiness", "acceptance", "absence"]
     ) -> None:
         """Run the original verifier against the shared private evidence artifacts."""
         if phase != "absence":
             self.enroll_guests()
+        if phase == "acceptance":
+            self.await_catalog()
         paths = self.context.paths
         self.runtime.run(
             [
@@ -543,7 +584,7 @@ class Ownership:
                 "--phase",
                 phase,
                 "--timeout-seconds",
-                str(max(1, int(self.runtime.remaining()))),
+                str(max(1, min(3600, int(self.runtime.remaining())))),
                 "--report",
                 paths.state / (phase + "-report.json"),
                 "--run-manifest",

@@ -448,6 +448,7 @@ class RuntimeContract(unittest.TestCase):
         (scripts / "demo-verify.sh").write_text("exit 2\n")
         stub(self, fixture.lifecycle, "preflight")
         stub(self, fixture.ownership, "enroll_guests")
+        stub(self, fixture.ownership, "await_catalog")
         stub(
             self,
             fixture.lifecycle,
