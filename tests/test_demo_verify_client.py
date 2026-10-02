@@ -104,6 +104,32 @@ class ScopedTransportTests(unittest.TestCase):
             with expect_error(contracts.EvidenceError):
                 client.pages("demo", "demo-lb", 100, 110)
 
+    def test_stable_scroll_token_with_distinct_batches_proves_progress(self):
+        client = fixtures.client()
+        first = fixtures.event()
+        second = dict(first, request_id="other-synthetic-request")
+        client.api = Mock(
+            side_effect=[
+                (
+                    200,
+                    {
+                        "events": [json.dumps(first)],
+                        "total_hits": "2",
+                        "scroll_id": "same",
+                    },
+                ),
+                (
+                    200,
+                    {
+                        "events": [json.dumps(second)],
+                        "total_hits": "2",
+                        "scroll_id": "same",
+                    },
+                ),
+            ]
+        )
+        ensure_equal(len(client.pages("demo", "demo-lb", 100, 110)), 2)
+
     def test_commands_fail_closed(self):
         client = fixtures.client()
         with (

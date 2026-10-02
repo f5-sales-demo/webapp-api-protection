@@ -324,7 +324,7 @@ class Client:
         }
         code, page = self.api(path, payload)
         records: list[Any] = []
-        tokens: set[str] = set()
+        seen_batches: set[str] = set()
         total = None
         for _ in range(MAX_PAGES):
             batch, page_total, token = _page_batch(code, page, key)
@@ -345,10 +345,11 @@ class Client:
             if not token:
                 msg = "truncated telemetry coverage"
                 raise _fail(msg)
-            if token in tokens or not batch:
+            fingerprint = json.dumps(batch, sort_keys=True)
+            if fingerprint in seen_batches or not batch:
                 msg = "invalid pagination progress"
                 raise _fail(msg)
-            tokens.add(token)
+            seen_batches.add(fingerprint)
             code, page = self.api(path + "/scroll", {"scroll_id": token})
         msg = "telemetry pagination exceeded bound"
         raise _fail(msg)
