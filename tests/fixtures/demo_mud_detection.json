@@ -1,0 +1,30 @@
+{
+  "source": "Observed synthetic zerochange-deploy-live-proof-20261001 run, re-read 2026-10-01; names, domains, identity and epochs replaced. No live acceptance claim.",
+  "logs": [
+    "{\"namespace\":\"demo\",\"vh_name\":\"ves-io-http-loadbalancer-demo-lb\",\"user\":\"Header-X-Mud-User-showcase-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-d0-mud\",\"threat_level\":\"High\",\"suspicion_log_type\":\"detection\",\"suspicion_score\":1.0,\"waf_suspicion_score\":1.0,\"start_time\":100,\"end_time\":101,\"mitigation_activity_info\":\"{\\\"mum_captcha_challenge\\\":0,\\\"mum_js_challenge\\\":0,\\\"mum_temporarily_blocking\\\":0}\",\"incremental_activity_info\":\"{\\\"bot_defense_sec_event_count\\\":0,\\\"err_count\\\":27,\\\"failed_login_count\\\":0,\\\"forbidden_access_count\\\":0,\\\"page_not_found_count\\\":0,\\\"rate_limiting_count\\\":0,\\\"req_count\\\":28,\\\"waf_sec_event_count\\\":27}\"}"
+  ],
+  "mitigation_event": {
+    "namespace": "demo",
+    "vh_name": "ves-io-http-loadbalancer-demo-lb",
+    "domain": "www.example.test",
+    "req_path": "/httpbin/get",
+    "method": "GET",
+    "user": "Header-X-Mud-User-showcase-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-d0-mud",
+    "time": "1970-01-01T00:01:45Z",
+    "sec_event_type": "svc_policy_sec_event",
+    "sec_event_name": "Malicious User Mitigation",
+    "action": "block",
+    "policy_hits": {
+      "policy_hits": [
+        {
+          "malicious_user_mitigate_action": "MUM_BLOCK_TEMPORARILY",
+          "policy": "ves-io-http-loadbalancer-oas-validation-demo-lb",
+          "policy_namespace": "demo",
+          "policy_set": "ves-io-http-loadbalancer-waf-exclusion-demo-lb",
+          "rate_limiter_action": "pass",
+          "result": "allow"
+        }
+      ]
+    }
+  }
+}

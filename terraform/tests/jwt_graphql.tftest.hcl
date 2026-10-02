@@ -17,12 +17,14 @@ run "graphql_rule_renders" {
   module { source = "./modules/http-lb" }
   variables {
     graphql_rules = [{
-      name          = "gql"
-      exact_path    = "/graphql"
-      domain        = "any"
-      method        = "post"
-      max_depth     = 10
-      introspection = "disable"
+      name                = "gql"
+      exact_path          = "/graphql"
+      domain              = "any"
+      method              = "post"
+      max_depth           = 10
+      max_batched_queries = 3
+      max_total_length    = 4096
+      introspection       = "disable"
     }]
   }
   assert {
@@ -33,13 +35,17 @@ run "graphql_rule_renders" {
     condition     = xcsh_http_loadbalancer.this.graphql_rules[0].exact_path == "/graphql"
     error_message = "graphql_rules exact_path must render"
   }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.graphql_rules[0].graphql_settings.max_batched_queries == 3 && xcsh_http_loadbalancer.this.graphql_rules[0].graphql_settings.max_total_length == 4096
+    error_message = "GraphQL batch and total-length limits must render their explicit test values"
+  }
 }
 
 run "graphql_exact_domain_requires_value" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
-    graphql_rules = [{ name = "g", domain = "exact", method = "post" }]
+    graphql_rules = [{ name = "g", domain = "exact", method = "post", max_batched_queries = 3, max_total_length = 4096 }]
   }
   expect_failures = [var.graphql_rules]
 }
@@ -48,7 +54,7 @@ run "graphql_bad_method_rejected" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
-    graphql_rules = [{ name = "g", method = "delete" }]
+    graphql_rules = [{ name = "g", method = "delete", max_batched_queries = 3, max_total_length = 4096 }]
   }
   expect_failures = [var.graphql_rules]
 }
@@ -57,7 +63,7 @@ run "graphql_bad_introspection_rejected" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
-    graphql_rules = [{ name = "g", introspection = "maybe" }]
+    graphql_rules = [{ name = "g", introspection = "maybe", max_batched_queries = 3, max_total_length = 4096 }]
   }
   expect_failures = [var.graphql_rules]
 }
@@ -163,4 +169,23 @@ run "jwt_omitted_by_default" {
     condition     = xcsh_http_loadbalancer.this.jwt_validation == null
     error_message = "jwt_validation must be omitted (null) by default"
   }
+}
+
+
+run "graphql_requires_explicit_max_batched_queries" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    graphql_rules = [{ name = "g", max_total_length = 4096 }]
+  }
+  expect_failures = [var.graphql_rules]
+}
+
+run "graphql_requires_explicit_max_total_length" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    graphql_rules = [{ name = "g", max_batched_queries = 3 }]
+  }
+  expect_failures = [var.graphql_rules]
 }

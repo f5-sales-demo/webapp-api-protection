@@ -40,11 +40,8 @@ resource "xcsh_api_definition" "this" {
     }
   }
 
-  # schema-origin oneof. mixed => emit the block; strict => omit (server default,
+  # schema-origin oneof. mixed => emit the object; strict => omit (server default,
   # suppressed on import — see terraform-provider-xcsh
   # tools/import-default-suppressions.json APIDefinition).
-  dynamic "mixed_schema_origin" {
-    for_each = var.api_definition_schema_origin == "mixed" ? [1] : []
-    content {}
-  }
+  mixed_schema_origin = var.api_definition_schema_origin == "mixed" ? {} : null
 }

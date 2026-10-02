@@ -33,14 +33,8 @@ resource "xcsh_service_policy" "this" {
   }
 
   # --- rule-handling oneof (exactly one arm) ---
-  dynamic "allow_all_requests" {
-    for_each = each.value.rule_handling == "allow_all" ? [1] : []
-    content {}
-  }
-  dynamic "deny_all_requests" {
-    for_each = each.value.rule_handling == "deny_all" ? [1] : []
-    content {}
-  }
+  allow_all_requests = each.value.rule_handling == "allow_all" ? {} : null
+  deny_all_requests  = each.value.rule_handling == "deny_all" ? {} : null
   dynamic "allow_list" {
     for_each = each.value.rule_handling == "allow_list" ? [1] : []
     content {}
@@ -67,14 +61,8 @@ resource "xcsh_service_policy" "this" {
             # default CONTEXT_ANY); context_name is emitted null-when-empty because the provider
             # reads the server's empty string back as null (an explicit "" would drift on import).
             waf_action {
-              dynamic "none" {
-                for_each = rules.value.waf_action_mode == "none" ? [1] : []
-                content {}
-              }
-              dynamic "waf_skip_processing" {
-                for_each = rules.value.waf_action_mode == "skip" ? [1] : []
-                content {}
-              }
+              none                = rules.value.waf_action_mode == "none" ? {} : null
+              waf_skip_processing = rules.value.waf_action_mode == "skip" ? {} : null
               dynamic "app_firewall_detection_control" {
                 for_each = rules.value.waf_action_mode == "detection_control" ? [1] : []
                 content {
@@ -116,13 +104,13 @@ resource "xcsh_service_policy" "this" {
             dynamic "bot_action" {
               for_each = rules.value.bot_action_mode == "skip" ? [1] : []
               content {
-                bot_skip_processing {}
+                bot_skip_processing = {}
               }
             }
             dynamic "mum_action" {
               for_each = rules.value.mum_action_mode == "skip" ? [1] : []
               content {
-                skip_processing {}
+                skip_processing = {}
               }
             }
 
@@ -239,16 +227,10 @@ resource "xcsh_service_policy" "this" {
             dynamic "headers" {
               for_each = rules.value.headers
               content {
-                name           = headers.value.name
-                invert_matcher = headers.value.invert
-                dynamic "check_present" {
-                  for_each = headers.value.presence == "present" ? [1] : []
-                  content {}
-                }
-                dynamic "check_not_present" {
-                  for_each = headers.value.presence == "absent" ? [1] : []
-                  content {}
-                }
+                name              = headers.value.name
+                invert_matcher    = headers.value.invert
+                check_present     = headers.value.presence == "present" ? {} : null
+                check_not_present = headers.value.presence == "absent" ? {} : null
                 dynamic "item" {
                   for_each = headers.value.presence == "match" ? [1] : []
                   content {
@@ -261,16 +243,10 @@ resource "xcsh_service_policy" "this" {
             dynamic "query_params" {
               for_each = rules.value.query_params
               content {
-                key            = query_params.value.key
-                invert_matcher = query_params.value.invert
-                dynamic "check_present" {
-                  for_each = query_params.value.presence == "present" ? [1] : []
-                  content {}
-                }
-                dynamic "check_not_present" {
-                  for_each = query_params.value.presence == "absent" ? [1] : []
-                  content {}
-                }
+                key               = query_params.value.key
+                invert_matcher    = query_params.value.invert
+                check_present     = query_params.value.presence == "present" ? {} : null
+                check_not_present = query_params.value.presence == "absent" ? {} : null
                 dynamic "item" {
                   for_each = query_params.value.presence == "match" ? [1] : []
                   content {
@@ -287,16 +263,10 @@ resource "xcsh_service_policy" "this" {
             dynamic "arg_matchers" {
               for_each = rules.value.arg_matchers
               content {
-                name           = arg_matchers.value.name
-                invert_matcher = arg_matchers.value.invert
-                dynamic "check_present" {
-                  for_each = arg_matchers.value.presence == "present" ? [1] : []
-                  content {}
-                }
-                dynamic "check_not_present" {
-                  for_each = arg_matchers.value.presence == "absent" ? [1] : []
-                  content {}
-                }
+                name              = arg_matchers.value.name
+                invert_matcher    = arg_matchers.value.invert
+                check_present     = arg_matchers.value.presence == "present" ? {} : null
+                check_not_present = arg_matchers.value.presence == "absent" ? {} : null
                 dynamic "item" {
                   for_each = arg_matchers.value.presence == "match" ? [1] : []
                   content {
@@ -310,16 +280,10 @@ resource "xcsh_service_policy" "this" {
             dynamic "cookie_matchers" {
               for_each = rules.value.cookie_matchers
               content {
-                name           = cookie_matchers.value.name
-                invert_matcher = cookie_matchers.value.invert
-                dynamic "check_present" {
-                  for_each = cookie_matchers.value.presence == "present" ? [1] : []
-                  content {}
-                }
-                dynamic "check_not_present" {
-                  for_each = cookie_matchers.value.presence == "absent" ? [1] : []
-                  content {}
-                }
+                name              = cookie_matchers.value.name
+                invert_matcher    = cookie_matchers.value.invert
+                check_present     = cookie_matchers.value.presence == "present" ? {} : null
+                check_not_present = cookie_matchers.value.presence == "absent" ? {} : null
                 dynamic "item" {
                   for_each = cookie_matchers.value.presence == "match" ? [1] : []
                   content {
@@ -333,16 +297,10 @@ resource "xcsh_service_policy" "this" {
             dynamic "jwt_claims" {
               for_each = rules.value.jwt_claims
               content {
-                name           = jwt_claims.value.name
-                invert_matcher = jwt_claims.value.invert
-                dynamic "check_present" {
-                  for_each = jwt_claims.value.presence == "present" ? [1] : []
-                  content {}
-                }
-                dynamic "check_not_present" {
-                  for_each = jwt_claims.value.presence == "absent" ? [1] : []
-                  content {}
-                }
+                name              = jwt_claims.value.name
+                invert_matcher    = jwt_claims.value.invert
+                check_present     = jwt_claims.value.presence == "present" ? {} : null
+                check_not_present = jwt_claims.value.presence == "absent" ? {} : null
                 dynamic "item" {
                   for_each = jwt_claims.value.presence == "match" ? [1] : []
                   content {
@@ -396,18 +354,9 @@ resource "xcsh_service_policy" "this" {
             dynamic "segment_policy" {
               for_each = (rules.value.segment_src != "omit" || rules.value.segment_dst != "omit" || rules.value.segment_intra) ? [1] : []
               content {
-                dynamic "src_any" {
-                  for_each = rules.value.segment_src == "any" ? [1] : []
-                  content {}
-                }
-                dynamic "dst_any" {
-                  for_each = rules.value.segment_dst == "any" ? [1] : []
-                  content {}
-                }
-                dynamic "intra_segment" {
-                  for_each = rules.value.segment_intra ? [1] : []
-                  content {}
-                }
+                src_any       = rules.value.segment_src == "any" ? {} : null
+                dst_any       = rules.value.segment_dst == "any" ? {} : null
+                intra_segment = rules.value.segment_intra ? {} : null
               }
             }
 
@@ -418,71 +367,32 @@ resource "xcsh_service_policy" "this" {
             dynamic "request_constraints" {
               for_each = rules.value.request_constraints_enabled ? [1] : []
               content {
-                max_cookie_count_exceeds = rules.value.max_cookie_count
-                dynamic "max_cookie_count_none" {
-                  for_each = rules.value.max_cookie_count == null ? [1] : []
-                  content {}
-                }
-                max_cookie_key_size_exceeds = rules.value.max_cookie_key_size
-                dynamic "max_cookie_key_size_none" {
-                  for_each = rules.value.max_cookie_key_size == null ? [1] : []
-                  content {}
-                }
-                max_cookie_value_size_exceeds = rules.value.max_cookie_value_size
-                dynamic "max_cookie_value_size_none" {
-                  for_each = rules.value.max_cookie_value_size == null ? [1] : []
-                  content {}
-                }
-                max_header_count_exceeds = rules.value.max_header_count
-                dynamic "max_header_count_none" {
-                  for_each = rules.value.max_header_count == null ? [1] : []
-                  content {}
-                }
-                max_header_key_size_exceeds = rules.value.max_header_key_size
-                dynamic "max_header_key_size_none" {
-                  for_each = rules.value.max_header_key_size == null ? [1] : []
-                  content {}
-                }
-                max_header_value_size_exceeds = rules.value.max_header_value_size
-                dynamic "max_header_value_size_none" {
-                  for_each = rules.value.max_header_value_size == null ? [1] : []
-                  content {}
-                }
-                max_parameter_count_exceeds = rules.value.max_parameter_count
-                dynamic "max_parameter_count_none" {
-                  for_each = rules.value.max_parameter_count == null ? [1] : []
-                  content {}
-                }
-                max_parameter_name_size_exceeds = rules.value.max_parameter_name_size
-                dynamic "max_parameter_name_size_none" {
-                  for_each = rules.value.max_parameter_name_size == null ? [1] : []
-                  content {}
-                }
+                max_cookie_count_exceeds         = rules.value.max_cookie_count
+                max_cookie_count_none            = rules.value.max_cookie_count == null ? {} : null
+                max_cookie_key_size_exceeds      = rules.value.max_cookie_key_size
+                max_cookie_key_size_none         = rules.value.max_cookie_key_size == null ? {} : null
+                max_cookie_value_size_exceeds    = rules.value.max_cookie_value_size
+                max_cookie_value_size_none       = rules.value.max_cookie_value_size == null ? {} : null
+                max_header_count_exceeds         = rules.value.max_header_count
+                max_header_count_none            = rules.value.max_header_count == null ? {} : null
+                max_header_key_size_exceeds      = rules.value.max_header_key_size
+                max_header_key_size_none         = rules.value.max_header_key_size == null ? {} : null
+                max_header_value_size_exceeds    = rules.value.max_header_value_size
+                max_header_value_size_none       = rules.value.max_header_value_size == null ? {} : null
+                max_parameter_count_exceeds      = rules.value.max_parameter_count
+                max_parameter_count_none         = rules.value.max_parameter_count == null ? {} : null
+                max_parameter_name_size_exceeds  = rules.value.max_parameter_name_size
+                max_parameter_name_size_none     = rules.value.max_parameter_name_size == null ? {} : null
                 max_parameter_value_size_exceeds = rules.value.max_parameter_value_size
-                dynamic "max_parameter_value_size_none" {
-                  for_each = rules.value.max_parameter_value_size == null ? [1] : []
-                  content {}
-                }
-                max_query_size_exceeds = rules.value.max_query_size
-                dynamic "max_query_size_none" {
-                  for_each = rules.value.max_query_size == null ? [1] : []
-                  content {}
-                }
-                max_request_line_size_exceeds = rules.value.max_request_line_size
-                dynamic "max_request_line_size_none" {
-                  for_each = rules.value.max_request_line_size == null ? [1] : []
-                  content {}
-                }
-                max_request_size_exceeds = rules.value.max_request_size
-                dynamic "max_request_size_none" {
-                  for_each = rules.value.max_request_size == null ? [1] : []
-                  content {}
-                }
-                max_url_size_exceeds = rules.value.max_url_size
-                dynamic "max_url_size_none" {
-                  for_each = rules.value.max_url_size == null ? [1] : []
-                  content {}
-                }
+                max_parameter_value_size_none    = rules.value.max_parameter_value_size == null ? {} : null
+                max_query_size_exceeds           = rules.value.max_query_size
+                max_query_size_none              = rules.value.max_query_size == null ? {} : null
+                max_request_line_size_exceeds    = rules.value.max_request_line_size
+                max_request_line_size_none       = rules.value.max_request_line_size == null ? {} : null
+                max_request_size_exceeds         = rules.value.max_request_size
+                max_request_size_none            = rules.value.max_request_size == null ? {} : null
+                max_url_size_exceeds             = rules.value.max_url_size
+                max_url_size_none                = rules.value.max_url_size == null ? {} : null
               }
             }
           }

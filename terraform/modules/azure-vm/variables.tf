@@ -68,6 +68,17 @@ variable "vm_size" {
   default     = "Standard_D16s_v3"
 }
 
+variable "image_version" {
+  description = "Pinned Canonical Ubuntu 24.04 LTS server x64 image version (verified available in eastus2)"
+  type        = string
+  default     = "24.04.202609040"
+
+  validation {
+    condition     = can(regex("^24\\.04\\.[0-9]{9}$", var.image_version))
+    error_message = "Use an exact Ubuntu 24.04 image version such as 24.04.202609040; latest is not permitted."
+  }
+}
+
 variable "admin_username" {
   description = "SSH admin username for the VM"
   type        = string

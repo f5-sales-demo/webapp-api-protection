@@ -39,20 +39,11 @@ resource "xcsh_rate_limiter" "this" {
           }
         }
       }
-      dynamic "disabled" {
-        for_each = limits.value.action == "disabled" ? [1] : []
-        content {}
-      }
+      disabled = limits.value.action == "disabled" ? {} : null
 
       # burst-algorithm oneof: leaky_bucket | token_bucket (omit => server default).
-      dynamic "leaky_bucket" {
-        for_each = limits.value.algorithm == "leaky_bucket" ? [1] : []
-        content {}
-      }
-      dynamic "token_bucket" {
-        for_each = limits.value.algorithm == "token_bucket" ? [1] : []
-        content {}
-      }
+      leaky_bucket = limits.value.algorithm == "leaky_bucket" ? {} : null
+      token_bucket = limits.value.algorithm == "token_bucket" ? {} : null
     }
   }
 

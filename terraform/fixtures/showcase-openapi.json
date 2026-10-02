@@ -1,0 +1,35 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Unattended WAAP synthetic showcase",
+    "version": "1.0.0",
+    "description": "Authorized synthetic demo traffic only. Only POST /httpbin/post is schema-enforced; unrelated endpoints remain outside this specification and fall through to the origin."
+  },
+  "servers": [{ "url": "http://www.f5-sales-demo.com" }, { "url": "http://api.f5-sales-demo.com" }],
+  "paths": {
+    "/httpbin/post": {
+      "post": {
+        "operationId": "syntheticShowcasePost",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["demo_id"],
+                "properties": {
+                  "demo_id": { "type": "string", "example": "synthetic-run-001" }
+                },
+                "additionalProperties": true
+              },
+              "example": { "demo_id": "synthetic-run-001" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Origin echoes the valid synthetic request; response validation is disabled." }
+        }
+      }
+    }
+  }
+}

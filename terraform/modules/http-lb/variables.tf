@@ -349,3 +349,9 @@ variable "waf_disabled_attack_types" {
     error_message = "waf_disabled_attack_types must have at most 22 entries."
   }
 }
+
+variable "lb_https_auto_cert" {
+  description = "Serve HTTPS with an XC automatic certificate while retaining HTTP availability."
+  type        = bool
+  default     = false
+}
