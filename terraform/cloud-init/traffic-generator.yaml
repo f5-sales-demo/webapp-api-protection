@@ -595,6 +595,19 @@ runcmd:
     chmod +x /usr/local/bin/zap
     timeout 60 zap -version
 
+  # ZAP DOM-XSS uses the separately pinned headless Firefox driver.
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    fetch_url 'https://archive.mozilla.org/pub/firefox/releases/157.0/linux-x86_64/en-US/firefox-157.0.tar.xz' /tmp/firefox.tar.xz 'Firefox 157.0'
+    printf '%s  %s\n' 42f2c62a562316982ef5a796738c57602bf84a984f5c616e80bcff4627f78fff /tmp/firefox.tar.xz | sha256sum --check --strict -
+    tar -xJf /tmp/firefox.tar.xz -C /opt
+    ln -sfn /opt/firefox/firefox /usr/local/bin/firefox
+    fetch_url 'https://github.com/mozilla/geckodriver/releases/download/v0.37.1/geckodriver-v0.37.1-linux64.tar.gz' /tmp/geckodriver.tar.gz 'geckodriver 0.37.1'
+    printf '%s  %s\n' e815130ea95983e162ae91843b48d3a3ce991735635fce83a647afde21e09f7e /tmp/geckodriver.tar.gz | sha256sum --check --strict -
+    tar -xzf /tmp/geckodriver.tar.gz -C /usr/local/bin
+    firefox --version
+    geckodriver --version
+
   # Offline scanner templates are catalog prerequisites, pinned independently.
   - |
     . /usr/local/lib/cloud-init-helpers.sh
