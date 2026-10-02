@@ -608,6 +608,11 @@ def _poll_acceptance(
         events = window.ordinary(client, required)
         _rate_attribution(evidence, required, events, window)
         _mud_evidence(client, evidence, required, events, window)
+        status = json.loads(
+            client.ssh(
+                out["generator"], args, "sudo -n /usr/local/bin/tgen-control status"
+            )
+        )
         evidence["scheduled_traffic"] = evaluation.continuous_traffic_ready(
             status, out["domains"], invoked_at
         )

@@ -281,6 +281,8 @@ class AcceptanceReadinessTests(unittest.TestCase):
                 client = Mock(deadline=100, read_retries=[])
                 client.ssh.side_effect = [
                     json.dumps({"history": []}),
+                    json.dumps({"history": []}),
+                    json.dumps(fixtures.continuous_status(status)),
                     json.dumps(fixtures.continuous_status(status)),
                 ]
                 client.pages.side_effect = lambda *args, raw=raw, events=events: (
