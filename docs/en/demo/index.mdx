@@ -9,9 +9,9 @@ sidebar:
 import { Aside } from "@astrojs/starlight/components";
 
 The showcase uses two Azure VMs (origin and traffic generator) and an F5 Distributed
-Cloud HTTP load balancer. The checked-in profile requests blocking WAF, API discovery,
+Cloud HTTP and HTTPS load balancers. The checked-in profile requests blocking WAF, API discovery,
 schema validation, endpoint denial, rate limiting and synthetic-user MUD. Client-Side
-Defense enforcement is excluded. Terraform acceptance does not establish security success.
+Defense enforcement is disabled. Shared CSD browser simulations establish activity only. Terraform acceptance does not establish security success.
 
 <Aside type="caution" title="Live acceptance remains blocked">
 Full showcase acceptance is not verified: authoritative live suspicious-user detection
@@ -127,9 +127,13 @@ also checked read-only; existing Azure storage remains outside the lifecycle.
 
 Readiness requires cloud-init completion on both VMs, native origin service/replica
 checks and expected routed application responses through both domains, not just `/health`.
-Traffic must measure approximately 1500 requests in 30 seconds at 50 requests/second,
-90% benign mix, all attack classes, both domains, at least 99% benign success and zero
-transport errors, with finite ordered latency measurements and manual/scheduled history.
+The perpetual shared catalog offers 200 aggregate HTTP requests/second: 180 benign
+requests/second split equally across both domains and a shared 20 requests/second attack
+budget. Browser/scanner requests share the pacing boundary; TLS/slow-connection probes
+record separate limits. Acceptance requires two complete meaningful catalog passes,
+measured rates within five percent, at least 99% benign success, no baseline transport
+failures and fresh supervised-service health. Focused-suite passes cannot satisfy full
+catalog completion. Detailed private evidence is limited to seven days or 10 GiB.
 Security acceptance requires correlated live policy/mitigation events plus API discovery
 and traffic evidence. Response checks alone are not security proof.
 
