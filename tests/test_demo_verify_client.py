@@ -32,6 +32,21 @@ class ScopedTransportTests(unittest.TestCase):
             '{vh_name="ves-io-http-loadbalancer-demo-lb"}',
         )
 
+    def test_large_event_window_splits_with_complete_child_coverage(self):
+        client = fixtures.client()
+        event = json.dumps(fixtures.event())
+        client.api = Mock(
+            side_effect=[
+                (200, {"events": [event], "total_hits": "2", "scroll_id": "opaque"}),
+                (200, {"events": [event], "total_hits": "2", "scroll_id": "opaque"}),
+                (200, {"events": [event], "total_hits": "1"}),
+                (200, {"events": [event], "total_hits": "1"}),
+            ]
+        )
+        with patch.object(transport, "MAX_PAGES", 1):
+            records = client.pages("demo", "demo-lb", 100, 140)
+        ensure_equal(len(records), 1)
+
     def test_full_count_with_live_scroll_token_is_complete(self):
         client = fixtures.client()
         client.api = Mock(

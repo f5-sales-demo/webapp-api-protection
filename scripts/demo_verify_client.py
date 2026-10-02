@@ -29,6 +29,7 @@ SHORT_TIMEOUT = 20
 BACKOFF = 1
 PAGE_LIMIT = 500
 MAX_PAGES = 20
+MIN_TELEMETRY_WINDOW = 10
 OK = 200
 NOT_FOUND = 404
 TRANSIENT = (429, 503)
@@ -350,8 +351,28 @@ class Client:
                 raise _fail(msg)
             seen_batches.add(json.dumps(batch, sort_keys=True))
             code, page = self.api(path + "/scroll", {"scroll_id": token})
-        msg = "telemetry pagination exceeded bound"
-        raise _fail(msg)
+        return self._split_pages(namespace, lb, since, end, suspicious, user)
+
+    def _split_pages(
+        self,
+        namespace: str,
+        lb: str,
+        since: float,
+        end: float,
+        suspicious: bool,
+        user: str | None,
+    ) -> list[Any]:
+        """Split oversized windows while retaining complete child page coverage."""
+        if end - since <= MIN_TELEMETRY_WINDOW:
+            msg = "telemetry pagination exceeded bound within ten-second window"
+            raise _fail(msg)
+        midpoint = (since + end) / 2
+        records = self.pages(
+            namespace, lb, since, midpoint, suspicious, user
+        ) + self.pages(namespace, lb, midpoint, end, suspicious, user)
+        return list(
+            {json.dumps(record, sort_keys=True): record for record in records}.values()
+        )
 
     def ssh(
         self,
