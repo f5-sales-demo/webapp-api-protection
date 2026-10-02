@@ -131,7 +131,7 @@ class CloudInitTests(unittest.TestCase):
         ensure("/v1.2.3/ffuf_1.2.3_linux_amd64.tar.gz" in result.stdout)
         ensure("/v1.2.3/gobuster_Linux_x86_64.tar.gz" in result.stdout)
 
-    def test_standard_smoke_does_not_require_full_tier_tools(self):
+    def test_every_catalog_requires_zap_and_java(self):
         stubs = 'set -eu\nlog_phase() { :; }; command() { case "$2" in zap|msfconsole|java) return 1 ;; *) return 0 ;; esac; };\n'
         for tier in ("standard", "full"):
             _, data = rendered_cloud_config(tier)
@@ -144,12 +144,12 @@ class CloudInitTests(unittest.TestCase):
                     str(Path(directory) / "status.json"),
                 )
                 result = shell(stubs + smoke)
-                ensure_equal(result.returncode, 0 if tier == "standard" else 1)
+                ensure_equal(result.returncode, 1)
                 ensure_equal(
                     json.loads((Path(directory) / "status.json").read_text())[
                         "tools_fail"
                     ],
-                    0 if tier == "standard" else 3,
+                    2,
                 )
 
 
@@ -244,10 +244,10 @@ class ArchiveInstallerTests(unittest.TestCase):
             ensure(unsupported.returncode != 0 and "fetch:" not in unsupported.stdout)
 
     def test_zap_is_full_tier_pinned_and_checksum_failure_is_fatal(self):
-        stubs = 'log_phase() { :; }; install_packages() { :; }; fetch_url() { echo "fetch:$1"; }; tar() { echo extracted; }; mv() { :; }; chmod() { :; }; timeout() { echo "timeout:$*"; };\n'
+        stubs = 'log_phase() { :; }; install_packages() { :; }; fetch_url() { echo "fetch:$1"; }; tar() { echo extracted; }; mv() { :; }; ln() { :; }; chmod() { :; }; timeout() { echo "timeout:$*"; };\n'
         for tier in ("standard", "full"):
             _, data = rendered_cloud_config(tier)
-            source = phase(data, "installing configured full-tier tools").replace(
+            source = phase(data, "installing required full-catalog tools").replace(
                 ". /usr/local/lib/cloud-init-helpers.sh", ""
             )
             for checksum_status in (0, 19):
@@ -262,26 +262,21 @@ class ArchiveInstallerTests(unittest.TestCase):
                         "sha256sum() { cat; return " + str(checksum_status) + "; };\n"
                     )
                     result = shell(data["runcmd"][0] + stubs + checker + installer)
-                    ensure_equal(
-                        result.returncode, checksum_status if tier == "full" else 0
+                    ensure_equal(result.returncode, checksum_status)
+                    ensure("/v2.17.0/ZAP_2.17.0_Linux.tar.gz" in result.stdout)
+                    ensure(
+                        "efe799aaa3627db683b43f00c9c210aea0b75c00cc8f0a0f0434d12bb3ddde5a"
+                        in result.stdout
                     )
-                    if tier == "standard":
-                        ensure("fetch:" not in result.stdout)
-                    else:
-                        ensure("/v2.17.0/ZAP_2.17.0_Linux.tar.gz" in result.stdout)
-                        ensure(
-                            "efe799aaa3627db683b43f00c9c210aea0b75c00cc8f0a0f0434d12bb3ddde5a"
-                            in result.stdout
-                        )
-                        ensure_equal("extracted" in result.stdout, checksum_status == 0)
-                        ensure_equal(
-                            "timeout:60 zap -version" in result.stdout,
-                            checksum_status == 0,
-                        )
+                    ensure_equal("extracted" in result.stdout, checksum_status == 0)
+                    ensure_equal(
+                        "timeout:60 zap -version" in result.stdout,
+                        checksum_status == 0,
+                    )
 
     def test_real_checksum_rejects_corrupted_zap_before_extracting(self):
         _, data = rendered_cloud_config("full")
-        source = phase(data, "installing configured full-tier tools").replace(
+        source = phase(data, "installing required full-catalog tools").replace(
             ". /usr/local/lib/cloud-init-helpers.sh", ""
         )
         stubs = 'log_phase() { :; }; install_packages() { :; }; fetch_url() { printf corrupted > "$2"; }; tar() { echo MUST_NOT_EXTRACT; return 90; };\n'

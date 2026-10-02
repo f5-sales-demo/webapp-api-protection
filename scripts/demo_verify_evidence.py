@@ -227,7 +227,10 @@ def continuous_traffic_ready(status: Any, domains: list[str], since: float) -> b
         not isinstance(passes, list)
         or len(passes) < PAIR_LENGTH
         or any(
-            not p.get("complete") or not p.get("passed") or p.get("started", 0) < since
+            not p.get("complete")
+            or not p.get("catalog_complete")
+            or not p.get("passed")
+            or p.get("started", 0) < since
             for p in passes[-2:]
         )
     ):

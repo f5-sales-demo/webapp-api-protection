@@ -15,8 +15,18 @@ class ContinuousTests(unittest.TestCase):
             "service_enabled": True,
             "heartbeat": now,
             "catalog_passes": [
-                {"complete": True, "passed": True, "started": now - 20},
-                {"complete": True, "passed": True, "started": now - 10},
+                {
+                    "complete": True,
+                    "catalog_complete": True,
+                    "passed": True,
+                    "started": now - 20,
+                },
+                {
+                    "complete": True,
+                    "catalog_complete": True,
+                    "passed": True,
+                    "started": now - 10,
+                },
             ],
             "rates": {
                 "elapsed": 30,
@@ -32,6 +42,13 @@ class ContinuousTests(unittest.TestCase):
             },
             "failures": [],
         }
+
+    def test_focused_suite_passes_cannot_establish_catalog_acceptance(self):
+        status = self.status()
+        status["catalog_passes"][0]["catalog_complete"] = False
+        assert not continuous_traffic_ready(
+            status, ["www.example.test", "api.example.test"], time.time() - 60
+        )
 
     def test_two_passes_and_measured_budget_required(self):
         status = self.status()

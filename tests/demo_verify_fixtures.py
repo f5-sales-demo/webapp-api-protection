@@ -149,12 +149,14 @@ def continuous_status(status):
             {
                 "id": "pass-fixture-a",
                 "complete": True,
+                "catalog_complete": True,
                 "passed": True,
                 "started": start,
             },
             {
                 "id": "pass-fixture-b",
                 "complete": True,
+                "catalog_complete": True,
                 "passed": True,
                 "started": now - 1,
             },

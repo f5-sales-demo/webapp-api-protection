@@ -566,29 +566,19 @@ runcmd:
     clone_repo "https://github.com/nemesida-waf/waf-bypass.git" /opt/waf-bypass
     clone_repo "https://github.com/swisskyrepo/PayloadsAllTheThings.git" /opt/PayloadsAllTheThings
 
-  # --- Phase 7: ZAP and Metasploit are required only when full tier is configured ---
+  # --- Phase 7: Every catalog requires the full ZAP/browser runtime ---
   - |
     . /usr/local/lib/cloud-init-helpers.sh
-    log_phase "phase7" "installing configured full-tier tools"
-    export PATH=/usr/local/bin:$PATH
-    if [ "${tool_tier}" = "full" ]; then
-      install_packages default-jre-headless
-      ZAP_VER=2.17.0
-      fetch_url "https://github.com/zaproxy/zaproxy/releases/download/v$${ZAP_VER}/ZAP_$${ZAP_VER}_Linux.tar.gz" /tmp/zap.tar.gz 'ZAP 2.17.0'
-      # GitHub v2.17.0 Linux release asset 328902565 digest, verified 2026-09-30.
-      printf '%s  %s\n' efe799aaa3627db683b43f00c9c210aea0b75c00cc8f0a0f0434d12bb3ddde5a /tmp/zap.tar.gz | sha256sum --check --strict -
-      tar -xzf /tmp/zap.tar.gz -C /opt
-      mv /opt/ZAP_$${ZAP_VER} /opt/zaproxy
-      printf '#!/bin/sh\nexec /opt/zaproxy/zap.sh "$@"\n' > /usr/local/bin/zap
-      chmod +x /usr/local/bin/zap
-      timeout 60 zap -version
-      echo "Installing Metasploit (full tier)..."
-      fetch_url 'https://raw.githubusercontent.com/rapid7/metasploit-omnibus/25a202b4e6226631cb0f24716b2fff0136312805/config/templates/metasploit-framework-wrappers/msfupdate.erb' /tmp/msfinstall 'Metasploit installer'
-      # SHA-256 of the immutable upstream installer response, verified 2026-09-30.
-      printf '%s  %s\n' d12fea4d1339ebecb09d8cc36920d9f5e5e7e9fffbe092b1e1cd09255cc16825 /tmp/msfinstall | sha256sum --check --strict -
-      chmod +x /tmp/msfinstall
-      timeout 600 /tmp/msfinstall
-    fi
+    log_phase "phase7" "installing required full-catalog tools"
+    install_packages default-jre-headless
+    ZAP_VER=2.17.0
+    fetch_url "https://github.com/zaproxy/zaproxy/releases/download/v$${ZAP_VER}/ZAP_$${ZAP_VER}_Linux.tar.gz" /tmp/zap.tar.gz 'ZAP 2.17.0'
+    printf '%s  %s\n' efe799aaa3627db683b43f00c9c210aea0b75c00cc8f0a0f0434d12bb3ddde5a /tmp/zap.tar.gz | sha256sum --check --strict -
+    tar -xzf /tmp/zap.tar.gz -C /opt
+    ln -sfn /opt/ZAP_$${ZAP_VER} /opt/zaproxy
+    printf '#!/bin/sh\nexec /opt/zaproxy/zap.sh "$@"\n' > /usr/local/bin/zap
+    chmod +x /usr/local/bin/zap
+    timeout 60 zap -version
 
   # --- Phase 8: verified shared generator installation ---
   - |
@@ -628,7 +618,7 @@ runcmd:
     export PATH=/opt/traffic-generator/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     PASS=0; FAIL=0
     TOOLS='nmap nikto sqlmap nuclei dalfox ffuf gobuster feroxbuster subfinder httpx sslscan hydra john hashcat masscan hping3 tshark wrk hey vegeta ab testssl arjun gotestwaf node npx playwright scapy hashid pwn mitmproxy mitmdump mitmweb sslyze smbclient.py'
-    if [ "${tool_tier}" = "full" ]; then TOOLS="$TOOLS zap msfconsole java"; fi
+    TOOLS="$TOOLS zap java"
     for tool in $TOOLS; do
       if command -v "$tool" >/dev/null 2>&1; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "MISSING: $tool"; fi
     done
