@@ -622,13 +622,11 @@ runcmd:
     log_phase "phase8" "installing immutable shared traffic catalog"
     fetch_url "https://raw.githubusercontent.com/f5-sales-demo/traffic-generator/${generator_commit}/scripts/install_catalog.py" /tmp/install-catalog.py 'immutable catalog installer'
     printf '%s  %s\n' '${installer_sha256}' /tmp/install-catalog.py | sha256sum --check --strict -
-    python3 /tmp/install-catalog.py --commit '${generator_commit}' --sha256 '${generator_sha256}'
+    python3 /tmp/install-catalog.py --commit '${generator_commit}' --sha256 '${generator_sha256}' --install-service
     ln -sfn /opt/SecLists /opt/seclists
     if [ ! -f /opt/seclists/Passwords/Common-Credentials/best15.txt ]; then
       printf '%s\n' password 123456 admin admin123 letmein welcome changeme password1 qwerty abc123 12345678 test secret demo synthetic > /opt/seclists/Passwords/Common-Credentials/best15.txt
     fi
-    install -m 0755 /opt/traffic-generator/current/scripts/tgen-control /usr/local/bin/tgen-control
-    install -m 0644 /opt/traffic-generator/current/scripts/tgen-continuous.service /etc/systemd/system/tgen-continuous.service
     python3 - <<'PYCONFIG'
     import json, os
     config = {
