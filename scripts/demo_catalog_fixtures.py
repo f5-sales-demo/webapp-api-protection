@@ -4,8 +4,10 @@
 import json
 import os
 import subprocess
+from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+RESTAURANT_SYNTHETIC_PASSWORD = "password"  # noqa: S105 - published synthetic lab account
 ACCOUNTS = (
     ("adam007@example.com", "adam007!123"),
     ("pogba006@example.com", "pogba006!123"),
@@ -71,7 +73,7 @@ def login(email: str, password: str) -> str:
 
 def restaurant_fixtures() -> dict:
     """Seed bounded customer/Chef accounts through the demo application's own model."""
-    code = "from db.session import SessionLocal; from db.models import UserRole; from apis.auth.utils import create_user_if_not_exists; db=SessionLocal(); create_user_if_not_exists(db,'tgen_customer','TGenSynthetic123','Synthetic','Customer','5550100001',UserRole.CUSTOMER); create_user_if_not_exists(db,'tgen_chef','TGenSynthetic123','Synthetic','Chef','5550100002',UserRole.CHEF); db.close()"
+    code = "from db.session import SessionLocal; from db.models import UserRole; from apis.auth.utils import create_user_if_not_exists, update_user_password; db=SessionLocal(); create_user_if_not_exists(db,'tgen_customer','password','Synthetic','Customer','5550100001',UserRole.CUSTOMER); create_user_if_not_exists(db,'tgen_chef','password','Synthetic','Chef','5550100002',UserRole.CHEF); update_user_password(db,'tgen_customer','password'); update_user_password(db,'tgen_chef','password'); db.close()"
     subprocess.run(  # noqa: S603 - fixed owned container and synthetic seed code
         ["/usr/bin/docker", "exec", "restaurant-1", "python", "-c", code],
         check=True,
@@ -82,7 +84,9 @@ def restaurant_fixtures() -> dict:
     for role in ("customer", "chef"):
         request = Request(
             "http://127.0.0.1:8301/token",
-            data=("username=tgen_" + role + "&password=TGenSynthetic123").encode(),
+            data=urlencode(
+                {"username": "tgen_" + role, "password": RESTAURANT_SYNTHETIC_PASSWORD}
+            ).encode(),
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         with urlopen(request, timeout=10) as response:  # noqa: S310 - fixed loopback HTTP origin
