@@ -94,6 +94,13 @@ class FixtureResponse(addinfourl):
 class OriginTests(unittest.TestCase):
     """Verify origin guest contracts without reaching deployed applications."""
 
+    def test_juice_directory_listings_use_final_body_framing(self) -> None:
+        files = embedded_files()
+        source = files["/opt/origin-server/juice-shop-framing/preload.cjs"]
+        ensure("serve-index" in source)
+        ensure("removeHeader('Content-Length')" in source)
+        ensure_equal(TEMPLATE.read_text().count("NODE_OPTIONS=--require=/juice-shop/waap-framing.cjs"), 4)
+
     def test_dvga_recovery_is_bounded_to_owned_replica_names(self) -> None:
         files = embedded_files()
         source = files["/usr/local/bin/demo-dvga-recovery"]

@@ -185,6 +185,21 @@ write_files:
       SystemMaxUse=200M
       RuntimeMaxUse=50M
 
+  - path: /opt/origin-server/juice-shop-framing/preload.cjs
+    permissions: '0644'
+    content: |
+      // Generated directory listings may be changed after their original length is set.
+      // Let Node frame the final body rather than transmitting a stale Content-Length.
+      const http = require('node:http');
+      const original = http.ServerResponse.prototype.setHeader;
+      http.ServerResponse.prototype.setHeader = function(name, value) {
+        if (name.toLowerCase() === 'content-length' && new Error().stack.includes('serve-index')) {
+          this.removeHeader('Content-Length');
+          return this;
+        }
+        return original.call(this, name, value);
+      };
+
   - path: /opt/origin-server/docker-compose.yml
     content: |
       services:
@@ -192,11 +207,14 @@ write_files:
           # Registry manifest receipts resolved 2026-09-30 via registry-1.docker.io/v2/<repo>/manifests/<tag>.
           image: bkimminich/juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e
           container_name: juice-shop-1
+          volumes:
+            - ./juice-shop-framing/preload.cjs:/juice-shop/waap-framing.cjs:ro
           restart: unless-stopped
           ports:
             - "127.0.0.1:3001:3000"
           environment:
             - NODE_ENV=ctf
+            - NODE_OPTIONS=--require=/juice-shop/waap-framing.cjs
           deploy:
             resources:
               limits:
@@ -206,11 +224,14 @@ write_files:
         juice-shop-2:
           image: bkimminich/juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e
           container_name: juice-shop-2
+          volumes:
+            - ./juice-shop-framing/preload.cjs:/juice-shop/waap-framing.cjs:ro
           restart: unless-stopped
           ports:
             - "127.0.0.1:3002:3000"
           environment:
             - NODE_ENV=ctf
+            - NODE_OPTIONS=--require=/juice-shop/waap-framing.cjs
           deploy:
             resources:
               limits:
@@ -220,11 +241,14 @@ write_files:
         juice-shop-3:
           image: bkimminich/juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e
           container_name: juice-shop-3
+          volumes:
+            - ./juice-shop-framing/preload.cjs:/juice-shop/waap-framing.cjs:ro
           restart: unless-stopped
           ports:
             - "127.0.0.1:3003:3000"
           environment:
             - NODE_ENV=ctf
+            - NODE_OPTIONS=--require=/juice-shop/waap-framing.cjs
           deploy:
             resources:
               limits:
@@ -234,11 +258,14 @@ write_files:
         juice-shop-4:
           image: bkimminich/juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e
           container_name: juice-shop-4
+          volumes:
+            - ./juice-shop-framing/preload.cjs:/juice-shop/waap-framing.cjs:ro
           restart: unless-stopped
           ports:
             - "127.0.0.1:3004:3000"
           environment:
             - NODE_ENV=ctf
+            - NODE_OPTIONS=--require=/juice-shop/waap-framing.cjs
           deploy:
             resources:
               limits:
