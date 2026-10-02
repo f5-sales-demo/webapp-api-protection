@@ -14,6 +14,7 @@ class ContinuousTests(unittest.TestCase):
             "service_active": True,
             "service_enabled": True,
             "heartbeat": now,
+            "run_started": now - 30,
             "catalog_passes": [
                 {
                     "complete": True,
@@ -71,3 +72,16 @@ class ContinuousTests(unittest.TestCase):
             broken = copy.deepcopy(status)
             broken["rates"][field] = value
             assert not continuous_traffic_ready(broken, domains, time.time() - 60)
+
+    def test_current_run_passes_can_precede_acceptance_invocation(self):
+        status = self.status()
+        assert continuous_traffic_ready(
+            status, ["www.example.test", "api.example.test"], time.time() - 1
+        )
+
+    def test_old_run_passes_cannot_establish_current_run_acceptance(self):
+        status = self.status()
+        status["run_started"] = time.time() - 5
+        assert not continuous_traffic_ready(
+            status, ["www.example.test", "api.example.test"], time.time() - 1
+        )

@@ -223,6 +223,7 @@ def continuous_traffic_ready(status: Any, domains: list[str], since: float) -> b
         or now - heartbeat > CONTINUOUS_HEARTBEAT_MAX_AGE
     ):
         return False
+    run_started = status.get("run_started", now)
     if (
         not isinstance(passes, list)
         or len(passes) < PAIR_LENGTH
@@ -230,7 +231,7 @@ def continuous_traffic_ready(status: Any, domains: list[str], since: float) -> b
             not p.get("complete")
             or not p.get("catalog_complete")
             or not p.get("passed")
-            or p.get("started", 0) < since
+            or p.get("started", 0) < run_started
             for p in passes[-2:]
         )
     ):
@@ -244,8 +245,10 @@ def continuous_traffic_ready(status: Any, domains: list[str], since: float) -> b
         or not CONTINUOUS_RATE_MIN <= (count + attacks) / elapsed <= CONTINUOUS_RATE_MAX
     ):
         return False
+    completed = rates.get("benign_completed", count)
     if (
-        rates.get("benign_success", 0) / count < CONTINUOUS_BENIGN_SUCCESS
+        completed <= 0
+        or rates.get("benign_success", 0) / completed < CONTINUOUS_BENIGN_SUCCESS
         or rates.get("benign_transport_failures", 1) != 0
         or rates.get("attack_transport_failures", 1) != 0
     ):

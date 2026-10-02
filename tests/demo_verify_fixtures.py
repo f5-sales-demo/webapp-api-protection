@@ -145,6 +145,7 @@ def continuous_status(status):
         "service_active": True,
         "service_enabled": True,
         "heartbeat": now,
+        "run_started": start - 1,
         "catalog_passes": [
             {
                 "id": "pass-fixture-a",

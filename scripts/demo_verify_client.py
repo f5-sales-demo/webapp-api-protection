@@ -403,9 +403,14 @@ class Client:
     ) -> tuple[int, Any]:
         """Issue a synthetic HTTP probe without accepting redirects as evidence."""
         identified_user(user)
-        url = "https://" + host + path
+        try:
+            ipaddress.ip_address(host)
+            protocol = "http"
+        except ValueError:
+            protocol = "https"
+        url = protocol + "://" + host + path
         parsed = urllib.parse.urlsplit(url)
-        if parsed.scheme != "https" or parsed.netloc != host or parsed.username:
+        if parsed.scheme != protocol or parsed.netloc != host or parsed.username:
             msg = "valid application HTTPS host required"
             raise _fail(msg)
         data = json.dumps(body).encode() if body is not None else None
