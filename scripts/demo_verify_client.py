@@ -29,8 +29,8 @@ SHORT_TIMEOUT = 20
 BACKOFF = 1
 PAGE_LIMIT = 500
 MAX_PAGES = 20
-MIN_TELEMETRY_WINDOW = 1
-INITIAL_TELEMETRY_WINDOW = 2
+MIN_TELEMETRY_WINDOW = 10
+INITIAL_TELEMETRY_WINDOW = 30
 OK = 200
 NOT_FOUND = 404
 TRANSIENT = (429, 503)
@@ -320,7 +320,7 @@ class Client:
         path = f"/api/data/namespaces/{namespace}/app_security/{resource}"
         payload = {
             "query": _query(lb, suspicious, user),
-            "start_time": str(int(since)),
+            "start_time": str(min(int(since), int(end) - MIN_TELEMETRY_WINDOW)),
             "end_time": str(int(end) + 1),
             "limit": PAGE_LIMIT,
             "scroll": True,
@@ -366,7 +366,7 @@ class Client:
     ) -> list[Any]:
         """Split oversized windows while retaining complete child page coverage."""
         if end - since <= MIN_TELEMETRY_WINDOW:
-            msg = "telemetry pagination exceeded bound within one-second window"
+            msg = "telemetry pagination exceeded bound within ten-second window"
             raise _fail(msg)
         midpoint = (since + end) / 2
         records = self.pages(
