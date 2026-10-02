@@ -345,11 +345,10 @@ class Client:
             if not token:
                 msg = "truncated telemetry coverage"
                 raise _fail(msg)
-            fingerprint = json.dumps(batch, sort_keys=True)
-            if fingerprint in seen_batches or not batch:
+            if json.dumps(batch, sort_keys=True) in seen_batches or not batch:
                 msg = "invalid pagination progress"
                 raise _fail(msg)
-            seen_batches.add(fingerprint)
+            seen_batches.add(json.dumps(batch, sort_keys=True))
             code, page = self.api(path + "/scroll", {"scroll_id": token})
         msg = "telemetry pagination exceeded bound"
         raise _fail(msg)
