@@ -580,6 +580,14 @@ runcmd:
     chmod +x /usr/local/bin/zap
     timeout 60 zap -version
 
+  # Offline scanner templates are catalog prerequisites, pinned independently.
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    fetch_url 'https://codeload.github.com/projectdiscovery/nuclei-templates/tar.gz/fb76120d9969f53d00524d15a0cd16edb4986072' /tmp/nuclei-templates.tar.gz 'pinned Nuclei templates'
+    printf '%s  %s\n' d28d3d6e0b4401eac04f7ad5ccb2295e2df8194d179c13f2ee47d06f91b39edb /tmp/nuclei-templates.tar.gz | sha256sum --check --strict -
+    mkdir -p /opt/nuclei-templates
+    tar -xzf /tmp/nuclei-templates.tar.gz --strip-components=1 -C /opt/nuclei-templates
+
   # --- Phase 8: verified shared generator installation ---
   - |
     . /usr/local/lib/cloud-init-helpers.sh
