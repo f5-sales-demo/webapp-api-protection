@@ -4,7 +4,7 @@ Run the showcase locally from the repository root. Terraform acceptance is not
 security acceptance: only the private live reports establish what passed.
 MUD configuration, HTTP denials, or static tests must not be presented as verified
 MUD detection. Fresh joined detection and mitigation evidence is required; a
-previous control proof does not certify new scheduled measurements.
+previous control proof does not certify new complete catalog passes.
 Client-Side Defense (CSD) enforcement is excluded from this showcase.
 
 ## Scope and prerequisites
@@ -201,28 +201,36 @@ WAF, API discovery, exact schema validation, endpoint denial, rate limiting and
 MUD with synthetic header identity; CSD is disabled. Readback must match this
 profile before response and log evidence can count.
 
-The generator's measured contract is 1500 requests over 30 seconds at 50 requests
-per second (accepted ranges: 1485–1515, 29.5–30.5 seconds, 49–51 requests/second),
-90% benign traffic (89–91%), all five attack classes and both domains, at least
-99% benign success and zero transport errors. Latencies must be finite, ordered,
-positive in mean, and bounded to a five-second maximum. Guest history must show
-manual and scheduled runs; response checks are not attributed security proof.
+The shared generator continuously offers **200 aggregate HTTP requests/second**:
+180 benign requests/second, divided equally across both authorized domains, and
+20 requests/second for rotating catalog attacks. Scanners, subprocesses, browsers
+and nested workers share one enforced pacing boundary. TLS/connection probes have
+a separate recorded 20-attempt/second limit; slow headers have at most 20 connections.
 
-Each scheduled burst is **measurement only; fresh control attribution required**.
-Its first 50 requests retain the shared fresh rate identity, alternating domains,
-within the unchanged 1500-request budget. Rate-class responses must be either
-HTTP 429 or HTTP 200 with an actual decoded httpbin echo matching the identity,
-host, stripped upstream path, method and request query. Missing/malformed bodies,
-HTTP 403 (including WAF/MUD denials), unexpected statuses and transport failures
-cannot masquerade as successful rate-class origin responses.
+The explicit catalog covers shell and JavaScript entrypoints plus all eleven CSD
+browser simulations. Suites execute in catalog order, with bounded scenario-specific
+parallel workers. Each scenario has a fifteen-minute deadline and descendant cleanup.
+Missing dependencies, missing fixtures, skips and zero meaningful launches fail
+coverage. Browser simulation receipts establish activity only; CSD stays disabled.
 
-The report records per-domain `rate_outcomes`: status counts, `429_count` and
-`rate_denial_observed`. Zero observed rate denials may pass **traffic measurement**,
-not protection acceptance. Full acceptance still requires independent fresh
-HTTP 429 plus matching API Rate Limiting policy events on **both** domains,
-independent-user and unrelated-endpoint allow controls, and all other fresh
-attributed controls including MUD detection and delayed service-policy mitigation.
-Scheduled MUD-class HTTP 403 alone does not attribute MUD protection.
+Continuous acceptance requires two complete meaningful catalog passes, a fresh
+heartbeat and active enabled service, achieved aggregate rate within five percent,
+at least 99% benign success and zero baseline transport failures. Private receipts
+report the source commit/archive digest, current scenario, outcomes and failures.
+Detailed evidence is capped at seven days or 10 GiB. Successful focused-suite passes
+do not establish full catalog coverage.
+
+`/usr/local/bin/tgen-control start|stop|status|run-once` controls the supervised service.
+Start validates certificates, dependencies and every required application route;
+stop terminates workers. An explicitly enabled service resumes after reboot. The
+same immutable checksum-verifying installer is used by cloud-init and live updates.
+Protections remain enabled, HTTP is retained alongside auto-certificate HTTPS, and
+`/WAF/SQL` and `/WAF/XSS` identify synthetic DemoApp-compatible fixtures.
+
+Traffic receipts are measurement evidence. Separate attributed probes must prove
+WAF, schema enforcement, endpoint denial, per-user rate limiting, API discovery,
+MUD detection and mitigation with unaffected benign controls. Missing attribution
+remains incomplete acceptance.
 
 The configured endpoint policy is nominally **20/MINUTE per identified user**.
 It is not evidence of a strict global fixed-window cap or a guarantee that the
@@ -231,7 +239,7 @@ HTTP 429 under sequential and concurrent pressure, but a strict global capacity
 of 20 per minute remains unverified. Performance cadence and independent control
 proof are separate gates; neither substitutes for the other. Existing failed
 history is retained and never relabeled as verified. Helper changes require a
-source-generated VM rebuild and new scheduled measurements before live acceptance.
+source-generated VM rebuild and new complete catalog passes before live acceptance.
 
 Acceptance requires attributable security events correlated to run/user,
 endpoint, method, time, policy and mitigation plus discovery/traffic evidence.
