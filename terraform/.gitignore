@@ -1,6 +1,6 @@
 # Terraform working files
 .terraform/
-.terraform.lock.hcl
+!.terraform.lock.hcl
 
 # State (local backend during prototyping — never commit)
 *.tfstate

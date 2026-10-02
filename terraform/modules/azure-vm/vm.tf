@@ -26,7 +26,7 @@ resource "azurerm_linux_virtual_machine" "main" {
     publisher = "Canonical"
     offer     = "ubuntu-24_04-lts"
     sku       = "server"
-    version   = "latest"
+    version   = var.image_version
   }
 
   custom_data = var.custom_data

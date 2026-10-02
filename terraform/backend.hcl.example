@@ -1,7 +1,4 @@
-# Local backend config for the azurerm remote state (partial backend).
-# Copy to backend.hcl (gitignored) and init:  terraform init -backend-config=backend.hcl
-# Reuses the shared state account from the DNS use case; only the key differs.
-resource_group_name  = "f5-sales-demo-tfstate"
-storage_account_name = "f5salesdemotfstate"
-container_name       = "tfstate"
-key                  = "webapp-api-protection.tfstate"
+# Secret-free local backend configuration; replace /home/OPERATOR with your home.
+# Terraform does not expand ~ or environment variables in this HCL path.
+# Keep the state and its backups outside the checkout with owner-only permissions.
+path = "/path/to/private/waap-showcase/terraform.tfstate"

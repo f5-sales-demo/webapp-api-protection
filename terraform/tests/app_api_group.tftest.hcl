@@ -45,11 +45,15 @@ run "api_groups_rule_references_created_group" {
   module { source = "./modules/http-lb" }
   variables {
     app_api_groups             = [{ name = "orders-api", elements = [{ path_regex = "/api/orders.*" }] }]
-    api_protection_group_rules = [{ api_group = "orders-api", action = "deny" }]
+    api_protection_group_rules = [{ api_group = "orders-api", base_path = "/api/orders", action = "deny" }]
   }
   assert {
     condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].api_group == "orders-api" && xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].action.deny != null
     error_message = "api_groups_rules must reference the created group by name with the deny action"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].base_path == "/api/orders"
+    error_message = "group rule must render the explicit synthetic orders endpoint prefix"
   }
 }
 

@@ -1,5 +1,5 @@
 variable "namespace" {
-  description = "F5 XC namespace this plan creates and deploys the load balancer / origin pool into. HTTP load balancer and origin pool objects live in a user namespace (unlike DNS objects, which are system-scoped)."
+  description = "F5 XC namespace owned by the separate persistent terraform/namespace root; this application root never owns or destroys it."
   type        = string
   default     = "webapp-api-protection"
 }
@@ -44,7 +44,7 @@ variable "waf_mode" {
 variable "csd_enabled" {
   description = "Enable Client-Side Defense: inject the F5 XC telemetry JavaScript on all pages and register the served domain with the CSD reporting engine. Requires the tenant CSD addon (verified via a data-source guard, not managed here)."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "csd_cdn_simulator_host" {
@@ -401,4 +401,28 @@ variable "waf_disabled_attack_types" {
   description = "Disabled attack types when waf_attack_type_mode=custom (<=22)."
   type        = list(string)
   default     = []
+}
+
+variable "lb_https_auto_cert" {
+  description = "Serve HTTPS with an XC automatic certificate while retaining HTTP availability."
+  type        = bool
+  default     = false
+}
+
+variable "traffic_generator_commit" {
+  description = "Immutable shared traffic-generator source commit; runtime installer validates it."
+  type        = string
+  default     = "8c15b436981e82d9030791878d5da2df5f249c75"
+}
+
+variable "traffic_generator_sha256" {
+  description = "Verified SHA-256 of the immutable shared generator archive."
+  type        = string
+  default     = "a899c8bf399cf7ee172796f2968197ee955b5f3113c96c46f090649d39c3e08b"
+}
+
+variable "traffic_generator_installer_sha256" {
+  description = "Verified SHA-256 of the exact shared catalog installer."
+  type        = string
+  default     = "1249491840045f4f619c86a0c5ff95daf2d0f7675b3c9dccfa9d8ae6d911092e"
 }

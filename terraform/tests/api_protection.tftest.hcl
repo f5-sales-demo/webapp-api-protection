@@ -206,13 +206,17 @@ run "api_protection_group_rules_render" {
   module { source = "./modules/http-lb" }
   variables {
     api_protection_group_rules = [
-      { api_group = "sensitive", action = "deny", client_matcher = { mode = "ip_prefix_list", ip_prefixes = ["10.0.0.0/8"] } },
+      { api_group = "sensitive", base_path = "/api/sensitive", action = "deny", client_matcher = { mode = "ip_prefix_list", ip_prefixes = ["10.0.0.0/8"] } },
       { base_path = "/api/internal", action = "allow" },
     ]
   }
   assert {
     condition     = output.api_protection_group_rule_count == 2 && xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].client_matcher.ip_prefix_list != null
     error_message = "api_groups_rules (allow/deny + client_matcher) must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].api_group == "sensitive" && xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].base_path == "/api/sensitive"
+    error_message = "api_group selection must preserve its explicitly configured base_path"
   }
 }
 
@@ -324,4 +328,14 @@ run "validation_custom_rules_reject_bad_action" {
     validation_custom_rules      = [{ path = "/x", action = "quarantine" }]
   }
   expect_failures = [var.validation_custom_rules]
+}
+
+
+run "api_protection_group_requires_explicit_base_path" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    api_protection_group_rules = [{ api_group = "sensitive", action = "deny" }]
+  }
+  expect_failures = [xcsh_http_loadbalancer.this]
 }

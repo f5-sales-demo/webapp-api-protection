@@ -67,6 +67,21 @@ packages:
   - libasound2-dev
 
 write_files:
+  - path: /usr/local/bin/demo-install-catalog-fixtures
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env python3
+      """Atomically install an ownership-routed private synthetic fixture export."""
+      import json, os, pathlib, sys, tempfile
+      os.umask(0o077)
+      data=json.load(sys.stdin)
+      if data.get("fixture_type") != "seeded-synthetic-origin-accounts" or len(data.get("crapi_tokens", [])) != 2:
+          raise ValueError("invalid synthetic fixture export")
+      root=pathlib.Path("/opt/traffic-generator")
+      fd,name=tempfile.mkstemp(prefix="fixtures-", dir=root)
+      with os.fdopen(fd, "w") as stream: json.dump(data,stream)
+      os.replace(name,root/"fixtures.json")
+
   - path: /usr/local/bin/ghlatest
     permissions: '0755'
     content: |
@@ -120,11 +135,18 @@ write_files:
       *    soft    nproc     65535
       *    hard    nproc     65535
 
+  # PAM supplies this PATH to non-login SSH probes as well as interactive sessions.
+  - path: /etc/environment
+    permissions: '0644'
+    content: |
+      PATH="/opt/traffic-generator/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      NODE_PATH="/usr/lib/node_modules"
+
   - path: /etc/profile.d/traffic-generator.sh
     permissions: '0644'
     content: |
       export NODE_PATH=/usr/lib/node_modules
-      export PATH=$PATH:/usr/local/bin
+      export PATH=/opt/traffic-generator/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
   - path: /usr/local/bin/tgen-profile
     permissions: '0755'
@@ -180,34 +202,106 @@ write_files:
         report
       fi
 
-  - path: /opt/traffic-generator/config.env
+  # Resolved on Ubuntu Python 3.12.3, 2026-10-01; wheel/sdist hashes from PyPI.
+  # Exact x86_64 Linux dependency graph; resolved without system-site packages.
+  - path: /opt/traffic-generator/python-tools.lock
+    permissions: '0644'
     content: |
-      TARGET_FQDN=${target_fqdn}
-      TARGET_ORIGIN_IP=${target_origin_ip}
-      TARGET_PROTOCOL=http
-      CRAPI_PORT=8888
-      NODE_PATH=/usr/lib/node_modules
-      # --- Continuous load (systemd tgen-continuous.timer) ---
-      # A bounded, rate-limited burst runs on a timer so the F5 XC WAF / API
-      # protection always has live traffic. Rate-based (req/s) keeps egress cost
-      # predictable: ~RATE*DURATION requests per burst. The wrapper reads these on
-      # every run (no redeploy needed). Cadence is set in tgen-continuous.timer
-      # (OnUnitActiveSec, default 5min); set CONTINUOUS_ENABLED=false to pause.
-      CONTINUOUS_ENABLED=true
-      CONTINUOUS_RATE=50
-      CONTINUOUS_DURATION=30s
-      # --- Malicious-user profile (drives Malicious User Detection scoring) ---
-      # When true, each burst also emits identifiable bad-user traffic (WAF-triggering
-      # payloads, forbidden-path scanning, failed logins) carrying a stable identity via
-      # header/cookie/query so MUD attributes it to one user regardless of which
-      # user-identification rule is active. Read every run by tgen-continuous.
-      MUD_BAD_TRAFFIC=${mud_bad_traffic}
-      MUD_BAD_USER_ID=mud-attacker-01
-      MUD_BAD_ITERATIONS=40
+      aioquic==1.2.0 --hash=sha256:43ae3b11d43400a620ca0b4b4885d12b76a599c2cbddba755f74bebfa65fe587
+      annotated-types==0.8.0 --hash=sha256:f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0
+      argon2-cffi==25.1.0 --hash=sha256:fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741
+      argon2-cffi-bindings==26.1.0 --hash=sha256:27f1821903e2ceadcb88ec2b45ef190897b7682449c772f4d9b53e42c520cf29
+      arjun==2.2.7 --hash=sha256:b193cdaf97bf7b0e8cd91a41da778639e01fd9738d5f666a8161377f475ce72e
+      asgiref==3.11.1 --hash=sha256:e8667a091e69529631969fd45dc268fa79b99c92c5fcdda727757e52146ec133
+      attrs==26.1.0 --hash=sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309
+      bcrypt==5.0.0 --hash=sha256:611f0a17aa4a25a69362dcc299fda5c8a3d4f160e2abb3831041feb77393a14a
+      blinker==1.9.0 --hash=sha256:ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc
+      brotli==1.2.0 --hash=sha256:072e7624b1fc4d601036ab3f4f27942ef772887e876beff0301d261210bca97f
+      capstone==6.0.0a11 --hash=sha256:603e446a838271abd5d86c70d40609d7a1280890e04323b3c1d5e2b2fd5fcd88
+      certifi==2026.7.22 --hash=sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775
+      cffi==2.1.1 --hash=sha256:c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf
+      charset-normalizer==3.5.2 --hash=sha256:3d31298449090ab8d47b7b1b2a555ff73cac7ed438a08b7ac160980c7ebed649
+      click==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360
+      colored-traceback==0.4.2 --hash=sha256:8ad752a5b3c4e50bccd99d4a2d01e16d80926b519e07a85437ecbf8b4f8ce884
+      cryptography==46.0.7 --hash=sha256:42a1e5f98abb6391717978baf9f90dc28a743b7d9be7f0751a6f56a75d14065b
+      dicttoxml==1.7.16 --hash=sha256:8677671496d0d38e66c7179f82a7e9059f94887777955dc71b0ac602ee637c26
+      dnspython==2.8.0 --hash=sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af
+      Flask==3.1.3 --hash=sha256:f4bcbefc124291925f1a26446da31a5178f9483862233b23c0c96a20701f670c
+      h11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
+      h2==4.3.0 --hash=sha256:c438f029a25f7945c69e0ccf0fb951dc3f73a5f6412981daee861431b70e2bdd
+      hashID==3.1.4 --hash=sha256:56c52041c7599d2469276da7041340526bd0f02eb1502e60b021cee37f04da6a
+      hpack==4.2.0 --hash=sha256:858ac0b02280fa582b5080d68db0899c62a80375e0e5413a74970c5e518b6986
+      hyperframe==6.1.0 --hash=sha256:b03380493a519fce58ea5af42e4a42317bf9bd425596f7a0835ffce80f1a42e5
+      idna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c
+      impacket==0.13.1 --hash=sha256:3e5349c1209cdd3b90bff6f8b61c0d89aea0f3dbba6ad02ad254b9d3ef2301d0
+      intervaltree==3.2.1 --hash=sha256:a8a8381bbd35d48ceebee932c77ffc988492d22fb1d27d0ba1d74a7694eb8f0b
+      invoke==3.0.3 --hash=sha256:f11327165e5cbb89b2ad1d88d3292b5113332c43b8553b494da435d6ec6f5053
+      itsdangerous==2.2.0 --hash=sha256:c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef
+      Jinja2==3.1.6 --hash=sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67
+      kaitaistruct==0.11 --hash=sha256:5c6ce79177b4e193a577ecd359e26516d1d6d000a0bffd6e1010f2a46a62a561
+      ldap3==2.9.1 --hash=sha256:5869596fc4948797020d3f03b7939da938778a0f9e2009f7a072ccf92b8e8d70
+      ldapdomaindump==0.10.0 --hash=sha256:3797259596df7a5e1fda98388c96b1d94196f5da5551f1af1aaeedda0c9f5a11
+      Mako==1.4.3 --hash=sha256:723296007c870bfd6b3f0c3230dba7198096e5269297ebf5e4eff9e7ffa39d4f
+      MarkupSafe==3.0.3 --hash=sha256:d6dd0be5b5b189d31db7cda48b91d7e0a9795f31430b7f271219ab30f1d3ac9d
+      mitmproxy==12.2.3 --hash=sha256:df75ccd15ccb39ab55ce9dd4130312270e8ba208eb927a7cbe50cb52678ec722
+      mitmproxy_linux==0.12.11 --hash=sha256:0e5670a6b82546ebc0f947d79adfcb3c001ba3136a10ce848a2f4e2f336611c4
+      mitmproxy_rs==0.12.11 --hash=sha256:c5d00a02414de0a81c088e1b3b8bcb6af4c55332fa106dd8c454512b671477ba
+      msgpack==1.1.2 --hash=sha256:372839311ccf6bdaf39b00b61288e0557916c3729529b301c52c2d88842add42
+      nassl==5.4.0 --hash=sha256:8c4a1ac2bcef693573f100013113b0a5041c0a4bac2687efce166eef2526affb
+      packaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+      paramiko==5.0.0 --hash=sha256:b7044611c30140d9a75261653210e2002977b71a0497ff3ba0d98d7edbf62f7c
+      pip==26.2.1 --hash=sha256:71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e
+      plumbum==2.0.2 --hash=sha256:a865771826c1d2cce0ca8b2a2c48aa0447ed7a518859e389a95f158e9c369547
+      psutil==7.2.2 --hash=sha256:076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9
+      publicsuffix2==2.20191221 --hash=sha256:786b5e36205b88758bd3518725ec8cfe7a8173f5269354641f581c6b80a99893
+      pwntools==4.15.0 --hash=sha256:f5508729b310ef1e959ad324306a0964cb6f2b04a34247484e446f0343eefc5c
+      pyasn1==0.6.4 --hash=sha256:deda9277cfd454080ec40b207fb6df82206a3a2688735233cdcd8d3d565f088b
+      pyasn1_modules==0.4.2 --hash=sha256:29253a9207ce32b64c3ac6600edc75368f98473906e8fd1043bd6b5b1de2c14a
+      pycparser==3.0 --hash=sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992
+      pycryptodomex==3.23.0 --hash=sha256:f489c4765093fb60e2edafdf223397bc716491b2b69fe74367b70d6999257a5c
+      pydantic==2.11.10 --hash=sha256:802a655709d49bd004c31e865ef37da30b540786a46bfce02333e0e24b5fe29a
+      pydantic_core==2.33.2 --hash=sha256:8f57a69461af2a5fa6e6bbd7a5f60d3b7e6cebb687f55106933188e79ad155c1
+      pyelftools==0.33 --hash=sha256:f215ad5f47d3f1373a21496a6c9e0707c622840d0622f23ff7ce08678b020036
+      Pygments==2.21.0 --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+      pylsqpack==0.3.24 --hash=sha256:6024854eb16d32803d4890fb90a73b9348c74b61c0770680aefaaa75f8456e8c
+      PyNaCl==1.6.2 --hash=sha256:c8a231e36ec2cab018c4ad4358c386e36eede0319a0c41fed24f840b1dac59f6
+      pyOpenSSL==26.2.0 --hash=sha256:4f9d971bc5298b8bc1fab282803da04bf000c755d4ad9d99b52de2569ca19a70
+      pyparsing==3.3.2 --hash=sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d
+      pyperclip==1.11.0 --hash=sha256:299403e9ff44581cb9ba2ffeed69c7aa96a008622ad0c46cb575ca75b5b84273
+      pyserial==3.5 --hash=sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0
+      PySocks==1.7.1 --hash=sha256:2725bd0a9925919b9b51739eea5f9e2bae91e83288108a9ad338b2e3a4435ee5
+      python-dateutil==2.9.0.post0 --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
+      ratelimit==2.2.1 --hash=sha256:af8a9b64b821529aca09ebaf6d8d279100d766f19e90b5059ac6a718ca6dee42
+      requests==2.34.2 --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0
+      ROPGadget==7.7 --hash=sha256:f54c3d5d0be20a1c2b70fc1e9455304a2f8d9c8e63b9f37a1bac13ab03e254a7
+      rpyc==6.0.2 --hash=sha256:8072308ad30725bc281c42c011fc8c922be15f3eeda6eafb2917cafe1b6f00ec
+      ruamel.yaml==0.19.1 --hash=sha256:27592957fedf6e0b62f281e96effd28043345e0e66001f97683aa9a40c667c93
+      scapy==2.7.0 --hash=sha256:eb22786da92be6fd8e5c694ae5595e4f5b9ac1f4364c9c45986844f3e3063561
+      service-identity==24.2.0 --hash=sha256:6b047fbd8a84fd0bb0d55ebce4031e400562b9196e1e0d3e0fe2b8a59f6d4a85
+      six==1.17.0 --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274
+      sortedcontainers==2.4.0 --hash=sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0
+      sslyze==6.3.1 --hash=sha256:2cd4062f82a3fa605dbd34e3b71f99961e4e7cf438879da1c52f619855ffbc1d
+      tls_parser==2.0.2 --hash=sha256:67621c6afa721c7afdb9c50d3c38119f22c9c1b93823af27e05a78e3a6fd0e5e
+      tornado==6.5.5 --hash=sha256:e74c92e8e65086b338fd56333fb9a68b9f6f2fe7ad532645a290a464bcf46be5
+      typing-inspection==0.4.2 --hash=sha256:4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7
+      typing_extensions==4.14.0 --hash=sha256:a1514509136dd0b477638fc68d6a91497af5076466ad0fa6c338e44e359944af
+      unicorn==2.1.2 --hash=sha256:6a3f886db8d977ae4b36810e5fe3dd0d2ba2151d030e64db47ae2c5f1115efa8
+      unix-ar==0.2.1 --hash=sha256:2acb718bc1308bf80e5b9da2614d8242cc2fe3be4cd8b2fd4719bce189aafcf1
+      urllib3==2.8.0 --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3
+      urwid==3.0.5 --hash=sha256:f188144261224fdfc9b56b4222869bd0eac90fd7895cf1e376129cdc7e13bc84
+      wcwidth==0.9.1 --hash=sha256:747fb724223f417a17541a95a17c1dac3a8ef9a0cf41684950f0eab191a35f65
+      Werkzeug==3.1.9 --hash=sha256:6392e50c78460ba618e5b21f08a71f59c99ce99cdc6cf6e3dd7e6ccca8754fab
+      wsproto==1.3.2 --hash=sha256:61eea322cdf56e8cc904bd3ad7573359a242ba65688716b0710a5eb12beab584
+      zstandard==0.25.0 --hash=sha256:5a56ba0db2d244117ed744dfa8f6f5b366e14148e00de44723413b2f3938a902
+
+  - path: /opt/traffic-generator/config.json
+    permissions: '0644'
+    content: |
+      {"target_domains":${target_domains},"target_origin_ip":"${target_origin_ip}","tool_tier":"${tool_tier}","mud_bad_traffic":${mud_bad_traffic}}
 
   - path: /opt/traffic-generator/status.json
     content: |
-      {"status":"provisioning","tool_tier":"${tool_tier}"}
+      {"status":"stopped","history":[],"tool_tier":"${tool_tier}"}
 
   - path: /usr/local/lib/cloud-init-helpers.sh
     permissions: "0644"
@@ -264,101 +358,36 @@ write_files:
         return 1
       }
 
-  # Continuous bounded-load wrapper (invoked by tgen-continuous.timer). Reads
-  # /opt/traffic-generator/config.env each run; self-contained (does not require
-  # the cloned suites). Hits endpoints served by the origin server through the LB.
-  - path: /usr/local/bin/tgen-continuous
-    permissions: "0755"
+  # Canonical Python runtime is embedded, never downloaded at boot.
+  - path: /usr/local/lib/demo_traffic.py
+    permissions: '0755'
+    content: |
+      ${traffic_script}
+
+  - path: /usr/local/bin/tgen-control
+    permissions: '0755'
     content: |
       #!/bin/bash
-      # NOTE: rendered by Terraform templatefile(), which turns the doubled-brace
-      # escape $${NAME} into a literal shell variable reference. So every shell
-      # variable below is written with that doubled-brace escape; command
-      # substitution uses a single-dollar $( ... ) (templatefile leaves $( alone).
-      # Never write an unbraced double-dollar before a name — it survives verbatim.
-      set -u
-      CONFIG=/opt/traffic-generator/config.env
-      [ -r "$${CONFIG}" ] && . "$${CONFIG}"
-      [ "$${CONTINUOUS_ENABLED:-true}" = "true" ] || exit 0
-      : "$${TARGET_FQDN:?TARGET_FQDN required}"
-      PROTO="$${TARGET_PROTOCOL:-http}"
-      BASE="$${PROTO}://$${TARGET_FQDN}"
-      RATE="$${CONTINUOUS_RATE:-50}"
-      DUR="$${CONTINUOUS_DURATION:-30s}"
-      LOG=/opt/traffic-generator/results/continuous.log
-      mkdir -p /opt/traffic-generator/results
-      # Endpoints the origin server's nginx serves (routed through the LB).
-      ENDPOINTS="/ /health /httpbin/get /httpbin/status/200 /juice-shop/ /vampi/users/v1 /dvwa/ /whoami/"
-      echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] burst -> $${BASE} rate=$${RATE} dur=$${DUR}" >> "$${LOG}"
-      if command -v vegeta >/dev/null 2>&1; then
-        targets=$(mktemp)
-        for ep in $${ENDPOINTS}; do echo "GET $${BASE}$${ep}"; done > "$${targets}"
-        vegeta attack -duration="$${DUR}" -rate="$${RATE}" -targets="$${targets}" 2>>"$${LOG}" | vegeta report >> "$${LOG}" 2>&1
-        rm -f "$${targets}"
-      elif command -v hey >/dev/null 2>&1; then
-        for ep in $${ENDPOINTS}; do hey -z "$${DUR}" -q "$${RATE}" "$${BASE}$${ep}" >> "$${LOG}" 2>&1; done
-      elif command -v wrk >/dev/null 2>&1; then
-        for ep in $${ENDPOINTS}; do wrk -t2 -c10 -d"$${DUR}" "$${BASE}$${ep}" >> "$${LOG}" 2>&1; done
-      else
-        end=$(( $(date +%s) + 30 ))
-        while [ "$(date +%s)" -lt "$${end}" ]; do
-          for ep in $${ENDPOINTS}; do curl -s -o /dev/null "$${BASE}$${ep}"; done
-        done
+      set -euo pipefail
+      if [ "$(id -u)" -ne 0 ]; then
+        exec sudo -n /usr/local/bin/tgen-control "$@"
       fi
-      # --- Malicious-user burst: identifiable bad-user traffic to drive MUD scoring. ---
-      # Sends WAF-triggering / forbidden / high-error requests plus failed logins, all
-      # tagged with one identity (X-MUD-User header + x-mud-user cookie + mud_user query)
-      # so F5 XC attributes the abuse to a single user and raises its threat level.
-      if [ "$${MUD_BAD_TRAFFIC:-false}" = "true" ]; then
-        _uid="$${MUD_BAD_USER_ID:-mud-attacker-01}"
-        _hdr="X-MUD-User: $${_uid}"
-        _ck="x-mud-user=$${_uid}"
-        _iter="$${MUD_BAD_ITERATIONS:-40}"
-        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] malicious-user burst -> $${BASE} as $${_uid}" >> "$${LOG}"
-        for _n in $(seq 1 "$${_iter}"); do
-          for _p in "/?q=%27+OR+%271%27%3D%271" "/?x=%3Cscript%3Ealert(1)%3C%2Fscript%3E" "/admin" "/.env" "/wp-login.php" "/phpmyadmin/" "/httpbin/status/401" "/httpbin/status/403"; do
-            curl -s -o /dev/null -m 5 -H "$${_hdr}" -b "$${_ck}" "$${BASE}$${_p}"
-          done
-          # query-param identity variant (covers the query_param_key user-id rule)
-          curl -s -o /dev/null -m 5 -H "$${_hdr}" -b "$${_ck}" "$${BASE}/admin?mud_user=$${_uid}"
-          # failed-login pattern (credential stuffing) against juice-shop
-          curl -s -o /dev/null -m 5 -H "$${_hdr}" -b "$${_ck}" -X POST \
-            -H 'Content-Type: application/json' \
-            -d "{\"email\":\"admin@juice-sh.op\",\"password\":\"wrong$${_n}\"}" \
-            "$${BASE}/juice-shop/rest/user/login"
-        done
-        echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] malicious-user burst complete" >> "$${LOG}"
-      fi
-      tail -n 2000 "$${LOG}" > "$${LOG}.tmp" 2>/dev/null && mv "$${LOG}.tmp" "$${LOG}"
-      echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] burst complete" >> "$${LOG}"
+      export PATH=/opt/traffic-generator/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      exec /usr/bin/python3 /usr/local/lib/demo_traffic.py "$@"
 
-  - path: /etc/systemd/system/tgen-continuous.service
-    content: |
-      [Unit]
-      Description=Continuous bounded HTTP load at the F5 XC load balancer
-      After=network-online.target
-      Wants=network-online.target
-
-      [Service]
-      Type=oneshot
-      User=azureuser
-      ExecStart=/usr/local/bin/tgen-continuous
-
-  - path: /etc/systemd/system/tgen-continuous.timer
-    content: |
-      [Unit]
-      Description=Run tgen-continuous on a fixed cadence
-
-      [Timer]
-      OnBootSec=5min
-      OnUnitActiveSec=5min
-      AccuracySec=30s
-      Unit=tgen-continuous.service
-
-      [Install]
-      WantedBy=timers.target
+  # Installed from the immutable shared catalog; service starts only after readiness.
 
 runcmd:
+  # cloud-init emits all runcmd entries into one /bin/sh script: strictness applies to every phase.
+  - |
+    set -eu
+    trap 'rc=$?; if [ "$rc" -ne 0 ]; then printf "traffic-generator provisioning failed (%s)\n" "$rc" >&2; fi' EXIT
+    case '${tool_tier}' in standard|full) ;; *) echo 'Invalid tool tier' >&2; exit 1 ;; esac
+    # cloud-init is noninteractive and may not supply HOME; child installers inherit these.
+    export HOME=/root XDG_CACHE_HOME=/root/.cache
+    export GOPATH=/opt/go GOCACHE=/root/.cache/go-build GOMODCACHE=/opt/go/pkg/mod
+    export GOTOOLCHAIN=local
+    export PATH=/opt/traffic-generator/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   # --- Phase 0: Kernel tuning, NIC optimization, system limits ---
   - sysctl --system
   - systemctl daemon-reload
@@ -383,7 +412,9 @@ runcmd:
       if command -v ethtool >/dev/null 2>&1; then
         RX_MAX=$(ethtool -g "$NIC" 2>/dev/null | awk '/Pre-set.*:/,/^$/{if(/RX:/){print $2; exit}}')
         TX_MAX=$(ethtool -g "$NIC" 2>/dev/null | awk '/Pre-set.*:/,/^$/{if(/TX:/){print $2; exit}}')
-        [ -n "$RX_MAX" ] && [ -n "$TX_MAX" ] && ethtool -G "$NIC" rx "$RX_MAX" tx "$TX_MAX" 2>/dev/null
+        if [ -n "$RX_MAX" ] && [ -n "$TX_MAX" ]; then
+          ethtool -G "$NIC" rx "$RX_MAX" tx "$TX_MAX" 2>/dev/null || true
+        fi
       fi
       echo "NIC tuning: RPS mask=$RPS_MASK on $NIC"
     fi
@@ -394,16 +425,18 @@ runcmd:
   - |
     . /usr/local/lib/cloud-init-helpers.sh
     log_phase "phase1" "installing Node.js 24"
-    retry_cmd 3 10 sh -c 'curl -fsSL https://deb.nodesource.com/setup_24.x | bash -'
+    fetch_url 'https://deb.nodesource.com/setup_24.x' /tmp/nodesource-setup.sh 'Node.js repository setup'
+    retry_cmd 3 10 bash /tmp/nodesource-setup.sh
     install_packages nodejs
 
   # --- Phase 2: Python toolchain (uv) ---
   - |
     . /usr/local/lib/cloud-init-helpers.sh
     log_phase "phase2" "installing Python uv"
-    retry_cmd 4 5 sh -c 'curl -fsSL https://astral.sh/uv/install.sh | sh'
-    cp /root/.local/bin/uv /usr/local/bin/uv || true
-    cp /root/.local/bin/uvx /usr/local/bin/uvx || true
+    fetch_url 'https://astral.sh/uv/install.sh' /tmp/uv-install.sh 'uv installer'
+    retry_cmd 4 5 sh /tmp/uv-install.sh
+    cp /root/.local/bin/uv /usr/local/bin/uv
+    cp /root/.local/bin/uvx /usr/local/bin/uvx
 
   # --- Phase 3: Security binaries (Go tools via ghlatest) ---
   - |
@@ -415,78 +448,115 @@ runcmd:
     echo "Installing nuclei..."
     NUCLEI_VER=$(ghlatest projectdiscovery/nuclei)
     fetch_url "https://github.com/projectdiscovery/nuclei/releases/download/v$${NUCLEI_VER}/nuclei_$${NUCLEI_VER}_linux_$${DPKG_ARCH}.zip" /tmp/nuclei.zip "nuclei"
-    unzip -oq /tmp/nuclei.zip nuclei -d /usr/local/bin && rm /tmp/nuclei.zip
+    unzip -oq /tmp/nuclei.zip nuclei -d /usr/local/bin
+    rm /tmp/nuclei.zip
 
     echo "Installing subfinder..."
     SUBFINDER_VER=$(ghlatest projectdiscovery/subfinder)
     fetch_url "https://github.com/projectdiscovery/subfinder/releases/download/v$${SUBFINDER_VER}/subfinder_$${SUBFINDER_VER}_linux_$${DPKG_ARCH}.zip" /tmp/subfinder.zip "subfinder"
-    unzip -oq /tmp/subfinder.zip subfinder -d /usr/local/bin && rm /tmp/subfinder.zip
+    unzip -oq /tmp/subfinder.zip subfinder -d /usr/local/bin
+    rm /tmp/subfinder.zip
 
     echo "Installing httpx..."
     HTTPX_VER=$(ghlatest projectdiscovery/httpx)
     fetch_url "https://github.com/projectdiscovery/httpx/releases/download/v$${HTTPX_VER}/httpx_$${HTTPX_VER}_linux_$${DPKG_ARCH}.zip" /tmp/httpx.zip "httpx"
-    unzip -oq /tmp/httpx.zip httpx -d /usr/local/bin && rm /tmp/httpx.zip
+    unzip -oq /tmp/httpx.zip httpx -d /usr/local/bin
+    rm /tmp/httpx.zip
 
     echo "Installing ffuf..."
     FFUF_VER=$(ghlatest ffuf/ffuf)
-    retry_cmd 4 5 sh -c 'curl -fsSL "https://github.com/ffuf/ffuf/releases/download/v$${FFUF_VER}/ffuf_$${FFUF_VER}_linux_$${DPKG_ARCH}.tar.gz" | tar -xz -C /usr/local/bin ffuf'
+    fetch_url "https://github.com/ffuf/ffuf/releases/download/v$${FFUF_VER}/ffuf_$${FFUF_VER}_linux_$${DPKG_ARCH}.tar.gz" /tmp/ffuf.tar.gz 'ffuf'
+    tar -xzf /tmp/ffuf.tar.gz -C /usr/local/bin ffuf
 
     echo "Installing gobuster..."
     GOBUSTER_VER=$(ghlatest OJ/gobuster)
-    retry_cmd 4 5 sh -c 'curl -fsSL "https://github.com/OJ/gobuster/releases/download/v$${GOBUSTER_VER}/gobuster_Linux_$(uname -m).tar.gz" | tar -xz -C /usr/local/bin gobuster'
+    fetch_url "https://github.com/OJ/gobuster/releases/download/v$${GOBUSTER_VER}/gobuster_Linux_$(uname -m).tar.gz" /tmp/gobuster.tar.gz 'gobuster'
+    tar -xzf /tmp/gobuster.tar.gz -C /usr/local/bin gobuster
 
     echo "Installing feroxbuster..."
     FEROX_VER=$(ghlatest epi052/feroxbuster)
     fetch_url "https://github.com/epi052/feroxbuster/releases/download/v$${FEROX_VER}/feroxbuster_$${DPKG_ARCH}.deb.zip" /tmp/ferox.zip "feroxbuster"
-    unzip -oq /tmp/ferox.zip -d /tmp && dpkg -i /tmp/feroxbuster_*.deb && rm -f /tmp/ferox.zip /tmp/feroxbuster_*.deb
+    unzip -oq /tmp/ferox.zip -d /tmp
+    dpkg -i /tmp/feroxbuster_*.deb
+    rm -f /tmp/ferox.zip /tmp/feroxbuster_*.deb
 
     echo "Installing dalfox..."
-    DALFOX_VER=$(ghlatest hahwul/dalfox)
-    fetch_url "https://github.com/hahwul/dalfox/releases/download/v$${DALFOX_VER}/dalfox-linux-$${DPKG_ARCH}.tar.gz" /tmp/dalfox.tar.gz "dalfox"
-    tar -xzf /tmp/dalfox.tar.gz -C /tmp && mv /tmp/dalfox-linux-$${DPKG_ARCH} /usr/local/bin/dalfox && chmod +x /usr/local/bin/dalfox && rm /tmp/dalfox.tar.gz
+    DALFOX_VER=3.2.3
+    [ "$DPKG_ARCH" = "amd64" ] || { echo 'Unsupported Dalfox architecture' >&2; exit 1; }
+    fetch_url "https://github.com/hahwul/dalfox/releases/download/v$${DALFOX_VER}/dalfox-v$${DALFOX_VER}-linux-x86_64.tar.gz" /tmp/dalfox.tar.gz 'dalfox 3.2.3 (glibc)'
+    # Official asset 566035019 and its .sha256 agree; download hash verified 2026-10-01.
+    printf '%s  %s\n' 3b059b6bb55e686b5f240852ea6a6750aa5e35a3b404e4027ffe505e2b60a470 /tmp/dalfox.tar.gz | sha256sum --check --strict -
+    tar -xzf /tmp/dalfox.tar.gz -C /usr/local/bin --strip-components=1 "dalfox-v$${DALFOX_VER}-linux-x86_64/dalfox"
+    chmod +x /usr/local/bin/dalfox
+    rm /tmp/dalfox.tar.gz
 
     echo "Installing amass..."
     AMASS_VER=$(ghlatest owasp-amass/amass)
     fetch_url "https://github.com/owasp-amass/amass/releases/download/v$${AMASS_VER}/amass_linux_$${DPKG_ARCH}.tar.gz" /tmp/amass.tar.gz "amass"
-    mkdir -p /tmp/amass && tar -xzf /tmp/amass.tar.gz -C /tmp/amass && cp /tmp/amass/amass_linux_$${DPKG_ARCH}/amass /usr/local/bin/ && rm -rf /tmp/amass /tmp/amass.tar.gz
+    mkdir -p /tmp/amass
+    tar -xzf /tmp/amass.tar.gz -C /tmp/amass
+    cp /tmp/amass/amass_linux_$${DPKG_ARCH}/amass /usr/local/bin/
+    rm -rf /tmp/amass /tmp/amass.tar.gz
 
     echo "Phase 3 complete"
 
   # --- Phase 3b: High-performance load testing tools ---
   - |
+    set -eu
     . /usr/local/lib/cloud-init-helpers.sh
     log_phase "phase3b" "installing load testing tools"
     export DPKG_ARCH=$(dpkg --print-architecture)
     export PATH=/usr/local/bin:$PATH
 
-    echo "Installing hey (via go install — no prebuilt binaries available)..."
-    install_packages golang-go
-    mkdir -p /opt/go/bin
-    chown -R azureuser:azureuser /opt/go
-    retry_cmd 3 15 sh -c 'GOPATH=/opt/go go install github.com/rakyll/hey@latest'
+    # hey v0.1.5 requires Go 1.24; gotestwaf v0.5.9 requires Go 1.25.
+    # Source: tagged go.mod files; Go archive digest: https://go.dev/dl/?mode=json.
+    echo "Installing checksum-pinned Go 1.26.8..."
+    [ "$DPKG_ARCH" = "amd64" ] || { echo 'Unsupported Go architecture' >&2; exit 1; }
+    install -d -m 0700 "$XDG_CACHE_HOME" "$GOCACHE" "$GOPATH" "$GOMODCACHE" /opt/go/bin
+    install -d -m 0755 /opt/traffic-generator-toolchain
+    fetch_url 'https://go.dev/dl/go1.26.8.linux-amd64.tar.gz' /tmp/go.tar.gz 'Go 1.26.8'
+    printf '%s  %s\n' d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b /tmp/go.tar.gz | sha256sum --check --strict -
+    tar -xzf /tmp/go.tar.gz -C /opt/traffic-generator-toolchain
+    rm /tmp/go.tar.gz
+    export PATH=/opt/traffic-generator-toolchain/go/bin:$PATH
+    [ "$(go version)" = 'go version go1.26.8 linux/amd64' ] || { echo 'Unexpected Go version' >&2; exit 1; }
+    echo "Installing hey v0.1.5..."
+    retry_cmd 3 15 sh -c 'go install github.com/rakyll/hey@v0.1.5'
     cp /opt/go/bin/hey /usr/local/bin/hey
 
-    echo "Installing gotestwaf..."
-    retry_cmd 3 15 sh -c 'GOPATH=/opt/go go install github.com/wallarm/gotestwaf/cmd/gotestwaf@latest'
+    echo "Installing gotestwaf v0.5.9..."
+    retry_cmd 3 15 sh -c 'go install github.com/wallarm/gotestwaf/cmd/gotestwaf@v0.5.9'
     cp /opt/go/bin/gotestwaf /usr/local/bin/gotestwaf
     mkdir -p /opt/gotestwaf
-    cp -r /opt/go/pkg/mod/github.com/wallarm/gotestwaf@*/config.yaml /opt/gotestwaf/ 2>/dev/null || true
-    cp -r /opt/go/pkg/mod/github.com/wallarm/gotestwaf@*/testcases /opt/gotestwaf/ 2>/dev/null || true
+    cp -r /opt/go/pkg/mod/github.com/wallarm/gotestwaf@v0.5.9/config.yaml /opt/gotestwaf/
+    cp -r /opt/go/pkg/mod/github.com/wallarm/gotestwaf@v0.5.9/testcases /opt/gotestwaf/
     chown -R azureuser:azureuser /opt/gotestwaf
 
-    echo "Installing vegeta..."
-    VEGETA_VER=$(ghlatest tsenart/vegeta)
-    retry_cmd 4 5 sh -c 'curl -fsSL "https://github.com/tsenart/vegeta/releases/download/v$${VEGETA_VER}/vegeta_$${VEGETA_VER}_linux_$${DPKG_ARCH}.tar.gz" | tar -xz -C /usr/local/bin vegeta'
+    echo "Installing checksum-pinned Vegeta 12.12.0..."
+    [ "$DPKG_ARCH" = "amd64" ] || { echo 'Unsupported Vegeta architecture' >&2; exit 1; }
+    fetch_url 'https://github.com/tsenart/vegeta/releases/download/v12.12.0/vegeta_12.12.0_linux_amd64.tar.gz' /tmp/vegeta.tar.gz 'vegeta 12.12.0'
+    # Verified against the upstream v12.12.0 checksums release asset.
+    printf '%s  %s\n' e7ce26c8fa4b9e1a3668aa7f82a4d77fca6a6d955f8dd5e843816115cc568450 /tmp/vegeta.tar.gz | sha256sum --check --strict -
+    tar -xzf /tmp/vegeta.tar.gz -C /usr/local/bin vegeta
+    vegeta -version
+    rm /tmp/vegeta.tar.gz
 
     echo "Phase 3b complete"
 
   # --- Phase 4: Python security tools ---
   - |
     . /usr/local/lib/cloud-init-helpers.sh
-    log_phase "phase4" "installing Python security tools"
-    retry_cmd 3 10 pip install --retries 3 --break-system-packages scapy impacket arjun hashid pwntools
-    retry_cmd 3 10 pip install --retries 3 --break-system-packages --ignore-installed typing_extensions mitmproxy sslyze
-    retry_cmd 3 10 pip install --retries 3 --break-system-packages wfuzz
+    log_phase "phase4" "installing isolated Python security tools"
+    /usr/bin/python3 -m venv /opt/traffic-generator/venv
+    /opt/traffic-generator/venv/bin/python -c 'import sys; assert sys.prefix != sys.base_prefix'
+    retry_cmd 3 10 timeout 900 /opt/traffic-generator/venv/bin/python -m pip --isolated install --retries 3 --require-hashes -r /opt/traffic-generator/python-tools.lock
+    /opt/traffic-generator/venv/bin/python -m pip --isolated check
+    for tool in scapy arjun hashid pwn sslyze smbclient.py; do
+      timeout 30 /opt/traffic-generator/venv/bin/"$tool" -h >/dev/null
+    done
+    for tool in mitmproxy mitmdump mitmweb; do
+      timeout 30 /opt/traffic-generator/venv/bin/"$tool" --version
+    done
 
   # --- Phase 5: Browser automation ---
   - |
@@ -497,7 +567,7 @@ runcmd:
     . /usr/local/lib/cloud-init-helpers.sh
     retry_cmd 3 30 npx --yes playwright install chromium
     retry_cmd 3 30 sh -c 'su - azureuser -c "export NODE_PATH=/usr/lib/node_modules && npx --yes playwright install chromium"'
-    npx --yes playwright install-deps chromium 2>/dev/null || true
+    retry_cmd 3 30 npx --yes playwright install-deps chromium
 
   # --- Phase 6: Git-cloned tools ---
   - |
@@ -511,59 +581,94 @@ runcmd:
     clone_repo "https://github.com/nemesida-waf/waf-bypass.git" /opt/waf-bypass
     clone_repo "https://github.com/swisskyrepo/PayloadsAllTheThings.git" /opt/PayloadsAllTheThings
 
-  # --- Phase 7: ZAP (standard tier) + heavy frameworks (full tier) ---
+  # --- Phase 7: Every catalog requires the full ZAP/browser runtime ---
   - |
     . /usr/local/lib/cloud-init-helpers.sh
-    log_phase "phase7" "installing ZAP and optional tools"
-    export PATH=/usr/local/bin:$PATH
-    echo "Installing ZAP..."
-    ZAP_VER=$(ghlatest zaproxy/zaproxy)
-    retry_cmd 4 5 sh -c 'curl -fsSL "https://github.com/zaproxy/zaproxy/releases/download/v$${ZAP_VER}/ZAP_$${ZAP_VER}_Linux.tar.gz" | tar -xz -C /opt'
-    mv /opt/ZAP_$${ZAP_VER} /opt/zaproxy 2>/dev/null || true
-    printf '#!/bin/sh\nexec /opt/zaproxy/zap.sh "$@"\n' > /usr/local/bin/zap && chmod +x /usr/local/bin/zap
+    log_phase "phase7" "installing required full-catalog tools"
+    install_packages default-jre-headless
+    ZAP_VER=2.17.0
+    fetch_url "https://github.com/zaproxy/zaproxy/releases/download/v$${ZAP_VER}/ZAP_$${ZAP_VER}_Linux.tar.gz" /tmp/zap.tar.gz 'ZAP 2.17.0'
+    printf '%s  %s\n' efe799aaa3627db683b43f00c9c210aea0b75c00cc8f0a0f0434d12bb3ddde5a /tmp/zap.tar.gz | sha256sum --check --strict -
+    tar -xzf /tmp/zap.tar.gz -C /opt
+    ln -sfn /opt/ZAP_$${ZAP_VER} /opt/zaproxy
+    printf '#!/bin/sh\nexec /opt/zaproxy/zap.sh "$@"\n' > /usr/local/bin/zap
+    chmod +x /usr/local/bin/zap
+    timeout 60 zap -version
 
-    if [ "${tool_tier}" = "full" ]; then
-      echo "Installing Metasploit (full tier)..."
-      curl -fsSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > /tmp/msfinstall
-      chmod +x /tmp/msfinstall && /tmp/msfinstall
-    fi
-
-  # --- Phase 8: Clone traffic-generator suites ---
-  - mkdir -p /opt/traffic-generator/suites /opt/traffic-generator/results
+  # ZAP DOM-XSS uses the separately pinned headless Firefox driver.
   - |
     . /usr/local/lib/cloud-init-helpers.sh
-    log_phase "phase8" "cloning traffic generator suites"
-    clone_repo "https://github.com/f5-sales-demo/traffic-generator.git" /opt/traffic-generator/repo 1 || log_phase "warning" "traffic-generator repo clone failed — suites will be from cloud-init"
+    fetch_url 'https://archive.mozilla.org/pub/firefox/releases/157.0/linux-x86_64/en-US/firefox-157.0.tar.xz' /tmp/firefox.tar.xz 'Firefox 157.0'
+    printf '%s  %s\n' 42f2c62a562316982ef5a796738c57602bf84a984f5c616e80bcff4627f78fff /tmp/firefox.tar.xz | sha256sum --check --strict -
+    tar -xJf /tmp/firefox.tar.xz -C /opt
+    ln -sfn /opt/firefox/firefox /usr/local/bin/firefox
+    fetch_url 'https://github.com/mozilla/geckodriver/releases/download/v0.37.1/geckodriver-v0.37.1-linux64.tar.gz' /tmp/geckodriver.tar.gz 'geckodriver 0.37.1'
+    printf '%s  %s\n' e815130ea95983e162ae91843b48d3a3ce991735635fce83a647afde21e09f7e /tmp/geckodriver.tar.gz | sha256sum --check --strict -
+    tar -xzf /tmp/geckodriver.tar.gz -C /usr/local/bin
+    firefox --version
+    geckodriver --version
+
+  # Offline scanner templates are catalog prerequisites, pinned independently.
   - |
-    if [ -d /opt/traffic-generator/repo/suites ]; then
-      cp -r /opt/traffic-generator/repo/suites/* /opt/traffic-generator/suites/
-      chmod -R +x /opt/traffic-generator/suites/
+    . /usr/local/lib/cloud-init-helpers.sh
+    fetch_url 'https://codeload.github.com/projectdiscovery/nuclei-templates/tar.gz/fb76120d9969f53d00524d15a0cd16edb4986072' /tmp/nuclei-templates.tar.gz 'pinned Nuclei templates'
+    printf '%s  %s\n' d28d3d6e0b4401eac04f7ad5ccb2295e2df8194d179c13f2ee47d06f91b39edb /tmp/nuclei-templates.tar.gz | sha256sum --check --strict -
+    mkdir -p /opt/nuclei-templates
+    tar -xzf /tmp/nuclei-templates.tar.gz --strip-components=1 -C /opt/nuclei-templates
+
+  # --- Phase 8: verified shared generator installation ---
+  - |
+    . /usr/local/lib/cloud-init-helpers.sh
+    log_phase "phase8" "installing immutable shared traffic catalog"
+    fetch_url "https://raw.githubusercontent.com/f5-sales-demo/traffic-generator/${generator_commit}/scripts/install_catalog.py" /tmp/install-catalog.py 'immutable catalog installer'
+    printf '%s  %s\n' '${installer_sha256}' /tmp/install-catalog.py | sha256sum --check --strict -
+    python3 /tmp/install-catalog.py --commit '${generator_commit}' --sha256 '${generator_sha256}' --install-service
+    ln -sfn /opt/SecLists /opt/seclists
+    if [ ! -f /opt/seclists/Passwords/Common-Credentials/best15.txt ]; then
+      printf '%s\n' password 123456 admin admin123 letmein welcome changeme password1 qwerty abc123 12345678 test secret demo synthetic > /opt/seclists/Passwords/Common-Credentials/best15.txt
     fi
-  - chown -R azureuser:azureuser /opt/traffic-generator
+    python3 - <<'PYCONFIG'
+    import json, os
+    config = {
+        "schema_version": 1, "domains": ${target_domains}, "protocol": "https",
+        "http_rps": 200, "benign_rps": 180, "attack_rps": 20,
+        "connection_rps": 20, "slow_connections": 20,
+        "csd_enabled": False, "protections_enabled": True,
+        "scenario_timeout_seconds": 900, "retention_days": 7,
+        "retention_bytes": 10737418240,
+        "results_dir": "/opt/traffic-generator/runtime",
+        "source_commit": "${generator_commit}", "artifact_sha256": "${generator_sha256}"
+    }
+    path = "/opt/traffic-generator/catalog-config.json"
+    with open(path, "w") as stream: json.dump(config, stream)
+    os.chmod(path, 0o600)
+    PYCONFIG
 
   # --- Phase 9: Smoke test and status update ---
   - |
     . /usr/local/lib/cloud-init-helpers.sh
     log_phase "phase9" "running smoke test"
     export NODE_PATH=/usr/lib/node_modules
-    export PATH=/usr/local/bin:$PATH
+    export PATH=/opt/traffic-generator/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     PASS=0; FAIL=0
-    for tool in nmap nikto sqlmap nuclei dalfox ffuf gobuster feroxbuster subfinder httpx sslscan hydra john hashcat masscan hping3 tshark wrk hey vegeta ab zap testssl arjun wfuzz gotestwaf node npx playwright; do
+    TOOLS='nmap nikto sqlmap nuclei dalfox ffuf gobuster feroxbuster subfinder httpx sslscan hydra john hashcat masscan hping3 tshark wrk hey vegeta ab testssl arjun gotestwaf node npx playwright scapy hashid pwn mitmproxy mitmdump mitmweb sslyze smbclient.py'
+    TOOLS="$TOOLS zap java"
+    for tool in $TOOLS; do
       if command -v "$tool" >/dev/null 2>&1; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "MISSING: $tool"; fi
     done
     if [ "$FAIL" -eq 0 ]; then STATUS="ready"; else STATUS="degraded"; fi
     log_phase "phase9" "smoke test complete: $PASS passed, $FAIL failed"
     printf '{"status":"%s","tool_tier":"${tool_tier}","tools_pass":%d,"tools_fail":%d,"timestamp":"%s"}\n' \
       "$STATUS" "$PASS" "$FAIL" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > /opt/traffic-generator/status.json
+    [ "$FAIL" -eq 0 ] || exit 1
 
-  # --- Phase 10: Enable continuous load timer ---
+  # Provision STOPPED. Lifecycle readiness must succeed before tgen-control start.
   - |
-    . /usr/local/lib/cloud-init-helpers.sh
-    log_phase "phase10" "enabling continuous-load timer"
+    set -eu
     systemctl daemon-reload
-    systemctl enable --now tgen-continuous.timer
-    # Kick off one burst immediately so traffic starts without waiting for OnBootSec.
-    systemctl start tgen-continuous.service || true
+    systemctl disable --now tgen-continuous.service
+    systemctl stop tgen-continuous.service
+    printf '{"status":"stopped","history":[],"tool_tier":"${tool_tier}"}\n' > /opt/traffic-generator/status.json
 
   # --- Completion ---
   - |

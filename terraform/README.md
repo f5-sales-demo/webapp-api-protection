@@ -1,174 +1,277 @@
-# webapp-api-protection Terraform reference plan
+# Web App & API Protection showcase lifecycle
 
-A comprehensive, multi-provider reference plan that stands up a complete demo of
-F5 Distributed Cloud web-app & API protection **end-to-end**, deploying every
-piece itself — no shared/out-of-band dependency objects:
+Run the showcase locally from the repository root. Terraform acceptance is not
+security acceptance: only the private live reports establish what passed.
+MUD configuration, HTTP denials, or static tests must not be presented as verified
+MUD detection. Fresh joined detection and mitigation evidence is required; a
+previous control proof does not certify new complete catalog passes.
+Client-Side Defense (CSD) enforcement is excluded from this showcase.
 
-- **Azure origin server** (`modules/origin-server`) — a Linux VM running nginx +
-  Docker with a suite of demo/vulnerable apps (httpbin, OWASP Juice Shop, DVWA,
-  VAmPI, crAPI, DVGA, RESTaurant, whoami) on port 80, health endpoint `/health`.
-  This is the real backend the load balancer forwards to.
-- **F5 XC namespace + HTTP load balancer** (`modules/http-lb`) — the plan creates
-  its own `xcsh_namespace`, then an HTTP load balancer + origin pool advertised on
-  the F5 XC public VIP, serving `www.f5-sales-demo.com` and `api.f5-sales-demo.com`.
-  The origin pool points at the Azure origin server's **public IP** (port 80,
-  health check `/health`). F5 XC auto-manages the DNS records for those domains
-  (the load balancer sets `http.dns_volterra_managed`, and the `f5-sales-demo.com`
-  zone has `allow_http_lb_managed_records` enabled — see the `dns` repo). The load
-  balancer enforces two app-security controls (see **Security controls** below):
-  a **WAF** (`xcsh_app_firewall`) and **API Discovery** (`enable_api_discovery`).
-- **Azure traffic generator** (`modules/traffic-generator`) — a Linux VM with load
-  and attack tooling (wrk, vegeta, hey, nuclei, sqlmap, ZAP, …) that drives
-  **continuous** HTTP load at the load balancer FQDN via a systemd timer, so the
-  WAF / API-protection controls always have live traffic to analyze.
+## Scope and prerequisites
 
-It targets the **production tenant** (`https://f5-sales-demo.console.ves.volterra.io`,
-internet-reachable), with remote state in Azure Blob Storage.
+The lifecycle rejects checked-in F5 Distributed Cloud scope overrides: tenant
+`f5-sales-demo`, namespace `webapp-api-protection`, `www.f5-sales-demo.com` and
+`api.f5-sales-demo.com`. The approved Azure subscription/Entra tenant are private
+operator inputs, never inferred from login. Azure runs in `eastus2`
+with two 16-vCPU VMs: origin `Standard_D16s_v3` and generator `Standard_F16s_v2`.
+No Customer Edge, AWS, or GCP resources are deployed.
 
-## Security controls
+Before invocation, provide an already-authenticated **Azure CLI user** in the
+supplied subscription/tenant, F5 Distributed Cloud API credentials, and an
+existing SSH key pair (default `~/.ssh/id_ed25519`). The lifecycle does not sign
+in, collect credentials, retrieve storage keys, or create service principals.
+An identity from another cloud is not authorization for this deployment.
 
-The `http-lb` module attaches four F5 XC app-security controls to the load balancer:
+Authorize the operator once, separately from login: create
+`~/.local/state/waap-showcase/operator.json`
+outside the checkout, in a caller-owned directory with mode **0700**. Use a
+caller-owned, non-symlink file with mode **0600** containing:
 
-- **WAF** — `xcsh_app_firewall.this` (`webapp-api-protection-waf`) is referenced by the
-  load balancer's `app_firewall {}` block. Enforcement mode is set by the `waf_mode`
-  variable: `blocking` (default — actively blocks malicious requests with an F5 XC block
-  page) or `monitoring` (detect & log only). The firewall declares the server-default
-  oneof markers (`default_detection_settings {}`, `allow_all_response_codes {}`,
-  `use_default_blocking_page {}`, `default_bot_setting {}`, `default_anonymization {}`)
-  so apply/plan/import stay clean.
-- **API Discovery** — the load balancer's `enable_api_discovery {}` block turns on
-  learn-from-traffic API discovery. It is independent of API-definition *enforcement*
-  (`api_specification` / `xcsh_api_definition`), so no separate resource is required;
-  F5 XC learns the API schema from the live traffic the generator produces. Discovered
-  endpoints appear asynchronously in the F5 XC console (Web App & API Protection → API
-  Discovery).
-- **Client-Side Defense** — the load balancer's `client_side_defense { policy {
-  js_insert_all_pages {} } }` block injects the F5 XC telemetry JavaScript into served
-  pages to detect Magecart/formjacking/skimming (PCI DSS 6.4.3 / 11.6.1). Toggled by the
-  `csd_enabled` variable (default `true`). CSD requires the tenant Client-Side Defense
-  addon: the plan asserts that dependency via a `data xcsh_addon_service_activation_status`
-  guard (state `AS_SUBSCRIBED`) rather than managing the subscription — tenant entitlement
-  is owned by a separate tenant plan. The served root domain is registered with the CSD
-  reporting engine via `xcsh_protected_domain` (system namespace). Telemetry beacons and
-  detected scripts appear in the console (Web App & API Protection → Client-Side Defense).
-- **Malicious User Detection** — the load balancer's `enable_malicious_user_detection {}`
-  block scores per-user behavior into threat levels (users identified by the server-default
-  client IP). Auto-mitigation is wired through the `enable_challenge` block, which references
-  an `xcsh_malicious_user_mitigation` policy (`webapp-api-protection-mud`) that escalates by
-  threat level: low → JavaScript challenge, medium → CAPTCHA, high → temporary block. Toggled
-  by the `mud_enabled` variable (default `true`). MUD is a WAAP capability: the plan asserts
-  the tenant WAAP entitlement via a `data xcsh_addon_service_activation_status` guard
-  (`f5xc-waap-standard`, state `AS_SUBSCRIBED`) rather than managing the subscription. Flagged
-  users and mitigation actions appear in the console (Web App & API Protection → Malicious
-  Users).
-
-## Architecture
-
-```
-                 (continuous load)
- traffic-generator VM ───────────────► www/api.f5-sales-demo.com
-   (Azure, wrk/vegeta/nuclei/…)              │  (F5 XC managed DNS → public VIP)
-                                             ▼
-                                  F5 XC HTTP load balancer  (modules/http-lb)
-                                             │  default_route_pools → origin-pool
-                                             ▼
-                                  origin pool (public_ip :80, health /health)
-                                             │
-                                             ▼
-                              origin-server VM  (Azure, nginx + Docker apps)
-```
-
-## Layout
-
-| Path | Purpose |
-| --- | --- |
-| `versions.tf` | Terraform + provider pins (`xcsh`, `azurerm`, `azuread`) |
-| `providers.tf` | `xcsh` (env auth) + `azurerm`/`azuread` (subscription from var, env auth) |
-| `backend.tf` | Azure Blob Storage remote state (`azurerm`, access-key auth) |
-| `variables.tf` / `terraform.tfvars.example` | Inputs (F5 XC + Azure) |
-| `main.tf` / `outputs.tf` | Module wiring (origin → LB → traffic generator) |
-| `modules/http-lb/` | F5 XC HTTP load balancer + origin pool → Azure origin IP |
-| `modules/origin-server/` | Azure origin server VM (nginx + Docker demo apps) |
-| `modules/traffic-generator/` | Azure traffic generator VM (continuous load) |
-
-The `origin-server` and `traffic-generator` modules were incorporated from the
-standalone example plans of the same name. As child modules they have their own
-`providers.tf` stripped — they inherit the `azurerm`/`azuread` providers from this
-root — and this plan deploys its **own** Azure resources (named
-`*-webapp-api-protection-*`), not any resources deployed by those other plans.
-
-## Prerequisites
-
-- Terraform >= 1.5
-- The `xcsh` provider. Locally via `dev_overrides` (below); CI uses the released
-  version pinned in `versions.tf` from the registry.
-- The `azurerm` (`~> 4.0`) and `azuread` (`~> 3.0`) providers (downloaded on init).
-- Network access to the production tenant (`https://f5-sales-demo.console.ves.volterra.io`).
-- **Azure auth**: `az login` locally (or a service principal via `ARM_*` in CI),
-  with rights to create resource groups / VMs / networking in the subscription.
-- An SSH public key on disk (default `~/.ssh/id_ed25519.pub`) — installed on both VMs.
-- Azure remote-state backend (shared with the DNS use case; already bootstrapped).
-  `ARM_ACCESS_KEY` via `az storage account keys list -g f5-sales-demo-tfstate -n
-  f5salesdemotfstate --query '[0].value' -o tsv`.
-- The `f5-sales-demo.com` DNS zone (the `dns` repo) applied with
-  `allow_http_lb_managed_records = true` and `www`/`api` not statically managed.
-
-### Local provider (dev_overrides)
-
-```sh
-make -C ../../terraform-provider-xcsh build   # adjust path to your checkout
-
-cat > ~/.terraformrc <<'RC'
-provider_installation {
-  dev_overrides {
-    "registry.terraform.io/f5-sales-demo/xcsh" = "/absolute/path/to/terraform-provider-xcsh"
-  }
-  direct {}
+```json
+{
+  "subscription_id": "00000000-0000-0000-0000-000000000000",
+  "tenant_id": "11111111-1111-1111-1111-111111111111",
+  "expected_azure_user": "operator@example.test"
 }
-RC
 ```
 
-Under `dev_overrides` the `xcsh` provider is not downloaded, but `terraform init`
-is still required once (backend + `azurerm`/`azuread`).
+Replace both synthetic UUIDs and the synthetic UPN with the explicitly approved
+Azure subscription, Entra tenant and human operator. Keep real IDs, user data and
+credentials out of public files. The lifecycle matches that user case-insensitively
+and rejects missing authorization, another user, a service principal, or a wrong
+subscription/tenant before deployment. This private setup is not login automation.
 
-### Configuration (nothing environment-specific is hardcoded)
+Required tools: Terraform 1.8 or later, Python 3, Azure CLI, SSH, cURL and dig.
+Allow access to the provider registry, the tenant API, Azure APIs and both guests.
+The deployment identity needs resource-group, compute and networking permissions.
+Azure CLI authentication is still required for application resources, but local state
+requires no Azure storage or blob-data permissions. Tenant feature entitlements and
+the existing DNS zone's managed-record support must be provisioned before the run.
+The namespace must already exist. Previously created Azure storage is left untouched;
+it is neither a prerequisite nor a lifecycle cleanup target.
 
-| Value | CI source | Local source |
-| --- | --- | --- |
-| Backend coords (`resource_group_name`, `storage_account_name`, `container_name`, `key`) | GitHub **variables** `TFSTATE_*`, via `-backend-config` | `backend.hcl` (copy `backend.hcl.example`; gitignored) |
-| `namespace`, `lb_domains` | GitHub **variables** `WEBAPP_NAMESPACE` / `WEBAPP_LB_DOMAINS` → `TF_VAR_*` | `terraform.tfvars` (copy the example; gitignored) or `TF_VAR_*` |
-| `subscription_id`, `location`, VM sizes, `ssh_public_key_path` | GitHub **variables** `TF_VAR_*` | `terraform.tfvars` |
-| `ARM_ACCESS_KEY` (state auth) | GitHub **secret** | `export ARM_ACCESS_KEY=...` |
-| `XCSH_API_URL`, `XCSH_API_TOKEN` (provider auth) | GitHub **secrets** | `export XCSH_API_URL=... XCSH_API_TOKEN=...` |
-| Azure identity (`ARM_CLIENT_ID`/`ARM_CLIENT_SECRET`/`ARM_TENANT_ID`/`ARM_SUBSCRIPTION_ID`) | GitHub **secrets** (service principal) | `az login` |
+Provider releases are pinned exactly with the root registry lock:
+`f5-sales-demo/xcsh` **12.0.2**, `hashicorp/azurerm` **5.7.0**, and
+`hashicorp/azuread` **3.10.0**. The lifecycle uses `TF_CLI_CONFIG_FILE=/dev/null`
+to exclude development overrides. Provider 12's empty one-of selections are
+object attributes (`field = {}`), not nested blocks.
+
+## Four commands
+
+Use existing environment authentication; never write tokens to tracked files:
 
 ```sh
 export XCSH_API_URL="https://f5-sales-demo.console.ves.volterra.io"
-export XCSH_API_TOKEN="<production-api-token>"
-export ARM_ACCESS_KEY="$(az storage account keys list -g f5-sales-demo-tfstate -n f5salesdemotfstate --query '[0].value' -o tsv)"
-az login                                        # Azure auth for the VM resources
-cp backend.hcl.example backend.hcl              # key = webapp-api-protection.tfstate
-cp terraform.tfvars.example terraform.tfvars    # set subscription_id, sizes, etc.
+export XCSH_API_TOKEN="<api-token>"
+
+# Approved IDs select the existing private per-subscription data directory.
+bash scripts/demo-lifecycle.sh deploy
+bash scripts/demo-lifecycle.sh verify
+bash scripts/demo-lifecycle.sh rebuild
+bash scripts/demo-lifecycle.sh destroy
 ```
 
-## Usage
+These are separate operations, not a sequence to run blindly. `deploy` validates
+both secure local backends and the existing exact namespace. It imports that
+confirmed namespace into the persistent namespace-only root when needed, then
+saves and applies its guarded namespace plan before provisioning disposable
+applications and uploading the versioned schema fixture. Namespace preparation is
+part of `deploy`, not an extra manual step. Readiness, traffic and live acceptance
+must pass before the application zero-change plan is applied. `verify` reads existing
+ownership, checks namespace preservation and fixture integrity, runs live acceptance
+and requires zero drift; it never imports, applies or repairs infrastructure.
+`rebuild` verifies owned application deletion and persistent survival, then redeploys.
+`destroy` deletes only owned disposable application resources and proves their absence;
+it retains local state/receipts, namespace, exact schema fixture and shared DNS zone.
+Rebuild and destroy are destructive and must only be invoked deliberately for this demo.
+
+Each command accepts `--timeout-seconds` (default **1800**, whole-operation
+monotonic deadline), `--state-dir` and `--config`. Configuration accepts identical
+public fixed scope values, `subscription_id`, `tenant_id`, `ssh_key` and
+`expected_azure_user`; a `backend` object is rejected. An explicit `--config`
+replaces `~/.local/state/waap-showcase/operator.json`; files are never merged.
+Each chosen-file field takes precedence over its corresponding explicit environment
+input: `DEMO_AZURE_SUBSCRIPTION_ID`, `DEMO_AZURE_TENANT_ID`, `DEMO_AZURE_USER`.
+Environment inputs are used only for absent fields. Missing or malformed UUIDs
+block before state creation; absent human authorization blocks live operations.
+No scope or operator approval is derived from current Azure or F5 login.
+`--state-dir` selects data location only, not the approval file. Existing data
+and receipts stay in their original subscription directory. To cut over an old
+per-subscription operator file, move it to the base approval path and add the
+approved IDs privately; do not copy it or migrate state. Backend secrets are not accepted.
+Arbitrary Terraform variables are not shell-sourced. Do not invoke raw
+`terraform apply` or `destroy`: that bypasses lifecycle ownership, preservation
+and evidence gates.
+
+## State and preservation
+
+The default private local directory is
+`~/.local/state/waap-showcase/<approved-subscription-id>/`, outside
+the checkout. The lifecycle uses `umask 077`, directory mode 0700 and mode 0600
+for state, backups and JSON receipts; symlink traversal is rejected. Keep this
+directory between runs. It holds saved plans, provider data, deployed inputs,
+outputs, known-hosts and ownership/evidence receipts. Missing receipts are not
+permission to rediscover or adopt resources. SSH uses dedicated accept-new
+known-hosts (TOFU); changed host keys fail closed.
+
+The application root uses the absolute `<state-dir>/application.tfstate` path and
+external `application-data` Terraform data directory. The namespace-only root at
+`terraform/namespace` uses `<state-dir>/namespace.tfstate` and `namespace-data`.
+Both roots use local backends and native file locking under one lifecycle operation
+lock. Namespace state is never included in application destroy; its resource has
+`prevent_destroy = true`. Never disable locking. This is a single-machine workflow,
+not a shared backend: local locks do not coordinate separate machines or copied state.
+
+State and saved plans can contain secrets. Keep credentials out of tracked files
+and never commit state, backups or receipts. The operator is responsible for
+secure, recoverable backups of state and receipts; protect copied backups with
+mode 0600 and restrict access. Local state has no Azure blob versioning, remote
+lease or cloud recovery service. Preserve `application.tfstate.backup` and
+`namespace.tfstate.backup` when present; neither substitutes for independently
+protected backups. No state or saved plan belongs in a public repository or artifact.
+
+The lifecycle checks initialized backend metadata before initialization. A remote
+backend, a different initialized local path, existing incompatible receipts or
+unknown state block operation for explicit migration/recovery. There is no automatic
+state migration, force-copy, state forgetting or fallback. A stale empty generated
+backend configuration is rewritten only when no initialized backend or state exists.
+Previously created Azure storage is left untouched; no storage or role operations
+are part of this lifecycle.
+
+For manual initialization only (not an alternative deployment workflow), choose
+the same external absolute path and Terraform data directory:
 
 ```sh
-terraform init -backend-config=backend.hcl
-terraform fmt -check -recursive
-terraform plan
-terraform apply
-# The origin VM runs cloud-init (Docker + apps) for several minutes after apply.
-curl -s "http://$(terraform output -raw origin_server_public_ip)/health"  # origin nginx → 200 JSON
-curl -s "http://www.f5-sales-demo.com/health"                             # through the LB once healthy
-# Traffic generator drives continuous load automatically (systemd tgen-continuous.timer):
-ssh "$(terraform output -raw traffic_generator_ssh | cut -d' ' -f2-)" \
-  'tail -f /opt/traffic-generator/results/continuous.log'
-terraform destroy
+umask 077
+STATE_DIR="$HOME/.local/state/waap-showcase/<approved-subscription-id>"
+mkdir -p "$STATE_DIR" "$STATE_DIR/application-data" "$STATE_DIR/namespace-data"
+chmod 700 "$STATE_DIR" "$STATE_DIR/application-data" "$STATE_DIR/namespace-data"
+TF_DATA_DIR="$STATE_DIR/application-data" TF_CLI_CONFIG_FILE=/dev/null \
+  terraform -chdir=terraform init -input=false -lockfile=readonly \
+  -backend-config="path=$STATE_DIR/application.tfstate"
+TF_DATA_DIR="$STATE_DIR/namespace-data" TF_CLI_CONFIG_FILE=/dev/null \
+  terraform -chdir=terraform/namespace init -input=false -lockfile=readonly \
+  -backend-config="path=$STATE_DIR/namespace.tfstate"
 ```
 
-> The plan **creates its own namespace** (`xcsh_namespace`, default
-> `webapp-api-protection`) and the load balancer / origin pool inside it, and its
-> own Azure resource groups (`rg-origin-server-webapp-api-protection-*`,
-> `rg-traffic-generator-webapp-api-protection-*`). F5 XC auto-manages the
-> `www`/`api.f5-sales-demo.com` records to the load balancer VIP.
+Run this only for a fresh location or one already initialized with this exact
+local path. Stop if Terraform requests migration. `backend.hcl.example` documents
+the equivalent partial configuration; replace its absolute home placeholder before
+use. Terraform does not expand `~` or environment variables inside HCL paths.
+Do not supply credentials as backend settings or store state under the repository.
+
+Preflight reads the existing `webapp-api-protection` namespace and captures its UID;
+it never imports or applies. Deployment imports only that confirmed namespace into
+`terraform/namespace`, checking its UID against the session/receipt evidence before
+adoption. It never creates an unknown namespace through an out-of-band API path.
+The application state must contain no namespace owner; protected/unknown ownership
+or incompatible receipts fail closed and remain available for explicit recovery.
+Verify and destroy require existing namespace state, a read-only zero-change
+namespace preservation plan and unchanged live UID; neither applies that plan.
+Application teardown therefore preserves the independently managed namespace.
+The exact versioned Swagger stored object and receipt also remain after destroy;
+the application never pins `/latest`. Azure storage is not an owned or preserved
+lifecycle resource, and neither root bootstraps Azure storage, roles or RBAC.
+
+## Evidence and failure contract
+
+Read `operation-receipt.json`, `run-manifest.json`, `persistent.json`,
+`swagger-receipt.json` and `readiness-report.json`, `acceptance-report.json` or
+`absence-report.json` in the private state directory. These contain phase status,
+command exit codes, exact owned/preserved IDs, fixture version/content, and live
+verification results; treat them as sensitive operational data, not public docs.
+A successful API apply, a 200 from `/health`, or a plausible graph is insufficient.
+
+Readiness requires completed cloud-init on both guests, native origin
+service/replica checks, DNS resolution and the expected routed httpbin response
+through **both** domains. `cloud_init: true` means completion under the warning
+policy, not a warning-free boot. `cloud_init_info` records each guest's status,
+fatal-error count and accepted-warning count. Only the observed Azure pattern
+(four copies of the exact first-attempt `reprovisiondata` 404, one per completed
+stage) is accepted as `degraded_done`, with a successful cloud-final unit and
+all functional checks. Unknown warnings, fatal errors and failed units fail closed.
+Warnings during running stages are evaluated at completion within the deadline.
+This is a recovered Azure preprovisioning retry, **not** an unused endpoint.
+Cloud-init [documents exit 2 as recoverable errors](https://cloudinit.readthedocs.io/en/latest/reference/cli.html#status);
+the installed 26.1 [IMDS retry source](https://github.com/canonical/cloud-init/blob/26.1/cloudinit/sources/azure/imds.py)
+retries 404 until data is fetched, and [Azure reprovisioning](https://github.com/canonical/cloud-init/blob/26.1/cloudinit/sources/DataSourceAzure.py)
+consumes that data before provisioning continues. Guest warning state is never cleared.
+The profile in `showcase.tfvars.json` requests blocking
+WAF, API discovery, exact schema validation, endpoint denial, rate limiting and
+MUD with synthetic header identity; CSD is disabled. Readback must match this
+profile before response and log evidence can count.
+
+The shared generator continuously offers **200 aggregate HTTP requests/second**:
+180 benign requests/second, divided equally across both authorized domains, and
+20 requests/second for rotating catalog attacks. Scanners, subprocesses, browsers
+and nested workers share one enforced pacing boundary. TLS/connection probes have
+a separate recorded 20-attempt/second limit; slow headers have at most 20 connections.
+
+The explicit catalog covers shell and JavaScript entrypoints plus all eleven CSD
+browser simulations. Suites execute in catalog order, with bounded scenario-specific
+parallel workers. Each scenario has a fifteen-minute deadline and descendant cleanup.
+Missing dependencies, missing fixtures, skips and zero meaningful launches fail
+coverage. Browser simulation receipts establish activity only; CSD stays disabled.
+
+Continuous acceptance requires two complete meaningful catalog passes, a fresh
+heartbeat and active enabled service, achieved aggregate rate within five percent,
+at least 99% benign success and zero baseline transport failures. Private receipts
+report the source commit/archive digest, current scenario, outcomes and failures.
+Detailed evidence is capped at seven days or 10 GiB. Successful focused-suite passes
+do not establish full catalog coverage.
+
+`/usr/local/bin/tgen-control start|stop|status|run-once` controls the supervised service.
+Start validates certificates, dependencies and every required application route;
+stop terminates workers. An explicitly enabled service resumes after reboot. The
+same immutable checksum-verifying installer is used by cloud-init and live updates.
+Protections remain enabled, HTTP is retained alongside auto-certificate HTTPS, and
+`/WAF/SQL` and `/WAF/XSS` identify synthetic DemoApp-compatible fixtures.
+
+Traffic receipts are measurement evidence. Separate attributed probes must prove
+WAF, schema enforcement, endpoint denial, per-user rate limiting, API discovery,
+MUD detection and mitigation with unaffected benign controls. Missing attribution
+remains incomplete acceptance.
+
+The configured endpoint policy is nominally **20/MINUTE per identified user**.
+It is not evidence of a strict global fixed-window cap or a guarantee that the
+21st concurrent request will be rejected. Owned probes observed actual attributed
+HTTP 429 under sequential and concurrent pressure, but a strict global capacity
+of 20 per minute remains unverified. Performance cadence and independent control
+proof are separate gates; neither substitutes for the other. Existing failed
+history is retained and never relabeled as verified. Helper changes require a
+source-generated VM rebuild and new complete catalog passes before live acceptance.
+
+Acceptance requires attributable security events correlated to run/user,
+endpoint, method, time, policy and mitigation plus discovery/traffic evidence.
+Probes run once; telemetry polling does not repeat attacks. The standalone
+verifier defaults to a 900-second deadline and ten-second polls; the lifecycle
+passes its remaining whole-operation budget. Missing/asynchronous attribution
+is **pending**, never success. MUD requires the verifier's supported live
+High-risk detection join, fresh WAF evidence and delayed MUM_BLOCK service event.
+
+Standalone verifier exit codes are 0 verified, 2 failure, 3 pending. The lifecycle
+returns nonzero and records `blocked` for failed or pending gates, nonzero drift,
+replacement of existing application objects, protected/unknown ownership,
+credential mismatch, or deadline expiry. It attempts to stop traffic, retains
+partial infrastructure and receipts, and preserves the original error if cleanup
+also fails. Inspect the private reports; do not claim full live acceptance or
+silently repair drift. Use an explicitly intended rebuild for recreation.
+
+## Credential-free development gates
+
+```sh
+bash scripts/pre-commit-local.sh
+TF_CLI_CONFIG_FILE=/dev/null terraform -chdir=terraform init -backend=false -input=false -lockfile=readonly
+TF_CLI_CONFIG_FILE=/dev/null terraform -chdir=terraform/namespace init -backend=false -input=false -lockfile=readonly
+terraform -chdir=terraform fmt -check -recursive
+terraform -chdir=terraform validate -no-color
+terraform -chdir=terraform/namespace validate -no-color
+terraform -chdir=terraform test
+```
+
+The focused local hook and Terraform workflow run static Python tests and
+existing plan-level module gates. CI never logs in to Azure or runs the lifecycle,
+a live Azure plan/apply, or the mutating `tests/e2e` suite. Mocked/static tests
+prove implementation contracts only; no security-success claim is valid without
+live acceptance reports. For end-to-end operation, use the local authenticated
+Azure CLI user prerequisite above.
