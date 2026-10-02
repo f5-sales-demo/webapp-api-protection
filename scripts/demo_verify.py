@@ -614,6 +614,27 @@ def _poll_acceptance(
         evidence["traffic_runs"] = []
         evidence["continuous_catalog"] = status.get("catalog_passes", [])
         evidence["continuous_rates"] = status.get("rates", {})
+        if isinstance(args.report, str):
+            progress = Path(args.report).with_name("acceptance-progress.json")
+            temporary = progress.with_suffix(".tmp")
+            temporary.write_text(
+                json.dumps(
+                    {
+                        "updated": time.time(),
+                        "gates": {gate: evidence[gate] for gate in GATES},
+                        "missing_controls": [
+                            probe["control"] + ":" + probe["host"]
+                            for probe in required
+                            if probe["control"] != "mud"
+                            and not window.telemetry(events, [probe])
+                        ],
+                        "event_count": len(events),
+                        "suspicious_log_count": evidence.get("suspicious_log_count", 0),
+                    }
+                )
+            )
+            temporary.chmod(0o600)
+            temporary.replace(progress)
         missing = [gate for gate in GATES if not evidence[gate]]
         if not missing:
             evidence.pop("pending", None)
