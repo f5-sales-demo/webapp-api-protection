@@ -21,6 +21,7 @@ class FixtureExportTests(unittest.TestCase):
                 },
             ),
             patch.object(fixtures, "login", side_effect=["token-a", "token-b"]),
+            patch.object(fixtures, "restaurant_fixtures", return_value={}),
         ):
             result = fixtures.collect()
         assert result["crapi_tokens"] == ["token-a", "token-b"]
