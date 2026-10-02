@@ -30,6 +30,7 @@ BACKOFF = 1
 PAGE_LIMIT = 500
 MAX_PAGES = 20
 MIN_TELEMETRY_WINDOW = 10
+INITIAL_TELEMETRY_WINDOW = 30
 OK = 200
 NOT_FOUND = 404
 TRANSIENT = (429, 503)
@@ -312,6 +313,8 @@ class Client:
         user: str | None = None,
     ) -> list[Any]:
         """Require exact coverage; decode ordinary events once, retain opaque risk logs."""
+        if not suspicious and end - since > INITIAL_TELEMETRY_WINDOW:
+            return self._split_pages(namespace, lb, since, end, suspicious, user)
         resource, key = (
             ("suspicious_user_logs", "logs") if suspicious else ("events", "events")
         )

@@ -44,7 +44,7 @@ class ScopedTransportTests(unittest.TestCase):
             ]
         )
         with patch.object(transport, "MAX_PAGES", 1):
-            records = client.pages("demo", "demo-lb", 100, 140)
+            records = client.pages("demo", "demo-lb", 100, 130)
         ensure_equal(len(records), 1)
 
     def test_full_count_with_live_scroll_token_is_complete(self):
