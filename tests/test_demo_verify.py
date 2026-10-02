@@ -474,6 +474,7 @@ class AcceptanceReadinessTests(unittest.TestCase):
                     "checks": [{"name": "replica", "ready": True}],
                 }
             ),
+            json.dumps({"ready": True}),
         ]
         clock = [0]
         real = fixtures.client()

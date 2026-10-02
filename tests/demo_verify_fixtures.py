@@ -188,6 +188,7 @@ def readiness_client(cloud_status="done", returned_host=None, returned_path="/ge
                 "checks": [{"name": "httpbin-1", "ready": True}],
             }
         ),
+        json.dumps({"ready": True}),
     ]
     client.request.side_effect = [
         (200, {"url": "http://" + (returned_host or domain) + returned_path})

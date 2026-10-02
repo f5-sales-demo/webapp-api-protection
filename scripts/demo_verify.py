@@ -173,6 +173,17 @@ def readiness(
         raise _fail(msg)
     for domain in out["domains"]:
         _application_ready(client, domain)
+    catalog = json.loads(
+        client.ssh(
+            out["generator"],
+            args,
+            "sudo -n python3 /opt/traffic-generator/current/scripts/catalog_readiness.py --config /opt/traffic-generator/catalog-config.json",
+            phase_budget=True,
+        )
+    )
+    if catalog.get("ready") is not True:
+        message = "complete installed catalog readiness failed"
+        raise _fail(message)
     return {
         "effective_controls": True,
         "cloud_init": True,
