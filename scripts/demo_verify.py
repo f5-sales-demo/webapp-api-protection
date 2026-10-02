@@ -47,10 +47,14 @@ SOURCES = [
     "xcsh://api-catalog/suspicious-user-logs",
     "xcsh://api-catalog/suspicious-user-logs-scroll",
     "xcsh://api-spec/virtual?resource=suspicious_user_logs",
-    "https://docs.cloud.f5.com/docs-v2/web-app-and-api-protection/"
-    "how-to/observe/monitor-waap#explore-security-monitoring",
-    "https://docs.cloud.f5.com/docs-v2/web-app-and-api-protection/"
-    "how-to/adv-security/malicious-users#enable-malicious-user-mitigation",
+    (
+        "https://docs.cloud.f5.com/docs-v2/web-app-and-api-protection/"
+        "how-to/observe/monitor-waap#explore-security-monitoring"
+    ),
+    (
+        "https://docs.cloud.f5.com/docs-v2/web-app-and-api-protection/"
+        "how-to/adv-security/malicious-users#enable-malicious-user-mitigation"
+    ),
 ]
 RATE_BUCKET_SOURCE = "https://my.f5.com/manage/s/article/K000161473"
 SUCCESS = 200
@@ -481,6 +485,34 @@ class _FreshEvidenceWindow:
             self.end,
         )
 
+    def ordinary(
+        self, client: transport.Client, required: list[Probe]
+    ) -> list[dict[str, Any]]:
+        """Read complete bounded windows around each attributed request, excluding background time."""
+        windows = []
+        for probe in required:
+            windows.extend(
+                (max(self.since, stamp - 1), min(self.end, stamp + 30))
+                for stamp in (probe["sent_at"], probe.get("mitigation_sent_at"))
+                if stamp is not None
+            )
+        merged = []
+        for start, end in sorted(windows):
+            if merged and start <= merged[-1][1]:
+                merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
+            else:
+                merged.append((start, end))
+        events = []
+        for start, end in merged:
+            events.extend(
+                client.pages(
+                    self.out["namespace"], self.out["loadbalancer_name"], start, end
+                )
+            )
+        return list(
+            {json.dumps(event, sort_keys=True): event for event in events}.values()
+        )
+
     def suspicious(self, client: transport.Client, required: list[Probe]) -> list[Any]:
         """Page opaque detection records for each fresh identified MUD user."""
         logs: list[Any] = []
@@ -581,9 +613,7 @@ def _poll_acceptance(
             evidence["failure"] = "fresh scheduled traffic failed"
             return contracts.FAILURE
         window = _FreshEvidenceWindow(out, since, time.time())
-        events = client.pages(
-            out["namespace"], out["loadbalancer_name"], since, window.end
-        )
+        events = window.ordinary(client, required)
         _rate_attribution(evidence, required, events, window)
         _mud_evidence(client, evidence, required, events, window)
         evidence["scheduled_traffic"] = evaluation.continuous_traffic_ready(
