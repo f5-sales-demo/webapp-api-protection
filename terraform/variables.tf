@@ -412,17 +412,17 @@ variable "lb_https_auto_cert" {
 variable "traffic_generator_commit" {
   description = "Immutable shared traffic-generator source commit; runtime installer validates it."
   type        = string
-  default     = "22db98b9bf2e7aed9d76a4015d990bff1e76a2ef"
+  default     = "8c15b436981e82d9030791878d5da2df5f249c75"
 }
 
 variable "traffic_generator_sha256" {
   description = "Verified SHA-256 of the immutable shared generator archive."
   type        = string
-  default     = "6408ae5e274eeb5a285d79acb1f4fd6d38f7b3f1fae09017add7d85157372cf2"
+  default     = "a899c8bf399cf7ee172796f2968197ee955b5f3113c96c46f090649d39c3e08b"
 }
 
 variable "traffic_generator_installer_sha256" {
   description = "Verified SHA-256 of the exact shared catalog installer."
   type        = string
-  default     = "83cc450b131f103fc08cd1aff5d493dd2360638426557d58fcceb06fe9f01efc"
+  default     = "1249491840045f4f619c86a0c5ff95daf2d0f7675b3c9dccfa9d8ae6d911092e"
 }
