@@ -99,7 +99,12 @@ class OriginTests(unittest.TestCase):
         source = files["/opt/origin-server/juice-shop-framing/preload.cjs"]
         ensure("serve-index" in source)
         ensure("removeHeader('Content-Length')" in source)
-        ensure_equal(TEMPLATE.read_text().count("NODE_OPTIONS=--require=/juice-shop/waap-framing.cjs"), 4)
+        ensure_equal(
+            TEMPLATE.read_text().count(
+                "NODE_OPTIONS=--require=/juice-shop/waap-framing.cjs"
+            ),
+            4,
+        )
 
     def test_dvga_recovery_is_bounded_to_owned_replica_names(self) -> None:
         files = embedded_files()
