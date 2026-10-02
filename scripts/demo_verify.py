@@ -181,7 +181,7 @@ def readiness(
         client.ssh(
             out["generator"],
             args,
-            "sudo -n python3 /opt/traffic-generator/current/scripts/catalog_readiness.py --config /opt/traffic-generator/catalog-config.json",
+            "sudo -n env PATH=/opt/traffic-generator/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin NODE_PATH=/usr/lib/node_modules PYTHONDONTWRITEBYTECODE=1 python3 /opt/traffic-generator/current/scripts/catalog_readiness.py --config /opt/traffic-generator/catalog-config.json",
             phase_budget=True,
         )
     )
