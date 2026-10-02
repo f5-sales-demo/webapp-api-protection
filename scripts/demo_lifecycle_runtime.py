@@ -127,6 +127,7 @@ class Runtime:
         cwd: Path | None = None,
         allowed: tuple[int, ...] = (0,),
         env: Mapping[str, str] | None = None,
+        input_text: str | None = None,
     ) -> tuple[str, int]:
         """Run argv without a shell; kill the process group on interruption."""
         began = time.monotonic()
@@ -136,14 +137,14 @@ class Runtime:
             [str(argument) for argument in argv],
             cwd=cwd or self.context.paths.root,
             env=env or self.context.env,
-            stdin=subprocess.DEVNULL,
+            stdin=subprocess.PIPE if input_text is not None else subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             start_new_session=True,
             text=True,
         ) as proc:
             try:
-                stdout, stderr = proc.communicate(timeout=budget)
+                stdout, stderr = proc.communicate(input=input_text, timeout=budget)
             except BaseException:
                 _terminate_group(proc)
                 self._record_command(

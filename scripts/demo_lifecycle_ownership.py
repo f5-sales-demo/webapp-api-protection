@@ -461,6 +461,41 @@ class Ownership:
         guest = self.owned_guest(resources, "generator")
         self.context.state.outputs = {"generator": guest}
 
+    def catalog_fixtures(self) -> None:
+        """Restore private synthetic fixtures only between two ownership-verified guests."""
+        outputs = self.context.state.outputs
+        if not outputs:
+            message = "fixture destinations unavailable"
+            raise Blocked(message)
+        resources = _resources(self.context)
+        origin = self.owned_guest(resources, "origin", outputs["origin"])
+        generator = self.owned_guest(resources, "generator", outputs["generator"])
+        payload = self.runtime.run(
+            [
+                *self.ssh_argv(origin, "yes"),
+                "sudo",
+                "-n",
+                "/usr/local/bin/demo-catalog-fixtures",
+            ]
+        )[0]
+        fixtures = json.loads(payload)
+        if fixtures.get(
+            "fixture_type"
+        ) != "seeded-synthetic-origin-accounts" or not fixtures.get("crapi_tokens"):
+            message = "private synthetic fixture export failed"
+            raise Blocked(message)
+        save_json(self.context.paths.state / "catalog-fixtures.json", fixtures)
+        self.runtime.run(
+            [
+                *self.ssh_argv(generator, "yes"),
+                "sudo",
+                "-n",
+                "/usr/local/bin/demo-install-catalog-fixtures",
+            ],
+            input_text=json.dumps(fixtures),
+        )
+        self.runtime.phase("synthetic-catalog-fixtures-restored")
+
     def traffic(self, action: Literal["start", "stop"], cleanup: bool = False) -> None:
         """Control only the owned generator, granting cleanup its bounded stop budget."""
         if action not in ("start", "stop"):
@@ -477,6 +512,8 @@ class Ownership:
                 _resources(self.context), "generator", outputs["generator"]
             )
             self.enroll_guest(guest)
+            if action == "start":
+                self.catalog_fixtures()
             self.runtime.run(
                 [
                     *self.ssh_argv(guest, "yes"),

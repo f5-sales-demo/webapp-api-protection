@@ -67,6 +67,21 @@ packages:
   - libasound2-dev
 
 write_files:
+  - path: /usr/local/bin/demo-install-catalog-fixtures
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env python3
+      """Atomically install an ownership-routed private synthetic fixture export."""
+      import json, os, pathlib, sys, tempfile
+      os.umask(0o077)
+      data=json.load(sys.stdin)
+      if data.get("fixture_type") != "seeded-synthetic-origin-accounts" or len(data.get("crapi_tokens", [])) != 2:
+          raise ValueError("invalid synthetic fixture export")
+      root=pathlib.Path("/opt/traffic-generator")
+      fd,name=tempfile.mkstemp(prefix="fixtures-", dir=root)
+      with os.fdopen(fd, "w") as stream: json.dump(data,stream)
+      os.replace(name,root/"fixtures.json")
+
   - path: /usr/local/bin/ghlatest
     permissions: '0755'
     content: |
