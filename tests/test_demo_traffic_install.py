@@ -49,10 +49,9 @@ class CloudInitTests(unittest.TestCase):
                 ["/bin/bash", "-n"], input=source, text=True, check=True, timeout=30
             )
         ensure(len(scripts) > 10)
-        timer = content(data, ".timer")
-        ensure("OnActiveSec=300s" in timer and "OnUnitActiveSec=300s" in timer)
-        ensure("OnBootSec" not in timer)
-        ensure("enable --now tgen-continuous.timer" not in template)
+        ensure(not any(item["path"].endswith(".timer") for item in data["write_files"]))
+        ensure("tgen-continuous.service" in template)
+        ensure("--commit" in template and "--sha256" in template)
         binding = (ROOT / "terraform/main.tf").read_text()
         ensure(
             'custom_data = base64gzip(templatefile("${path.module}/cloud-init/traffic-generator.yaml"'
@@ -74,7 +73,7 @@ class CloudInitTests(unittest.TestCase):
 
     def test_rendered_boot_phase_leaves_traffic_stopped(self):
         _, data = rendered_cloud_config()
-        source = phase(data, "disable --now tgen-continuous.timer")
+        source = phase(data, "disable --now tgen-continuous.service")
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             source = (
@@ -92,7 +91,7 @@ class CloudInitTests(unittest.TestCase):
                 (root / "calls").read_text().splitlines(),
                 [
                     "daemon-reload",
-                    "disable --now tgen-continuous.timer",
+                    "disable --now tgen-continuous.service",
                     "stop tgen-continuous.service",
                 ],
             )
@@ -412,7 +411,6 @@ class PythonInstallerTests(unittest.TestCase):
             "/etc/environment",
             "/etc/profile.d/traffic-generator.sh",
             "/usr/local/bin/tgen-control",
-            "/etc/systemd/system/tgen-continuous.service",
         ):
             ensure(path in files[name])
         ensure("exec /usr/bin/python3" in files["/usr/local/bin/tgen-control"])

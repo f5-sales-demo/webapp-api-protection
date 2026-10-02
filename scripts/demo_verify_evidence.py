@@ -200,6 +200,61 @@ def _traffic_pair(
     return sequences[1] == sequences[0] + 1
 
 
+CONTINUOUS_HEARTBEAT_MAX_AGE = 10
+CONTINUOUS_RATE_MIN, CONTINUOUS_RATE_MAX = 190, 210
+CONTINUOUS_BENIGN_SUCCESS = 0.99
+
+
+def continuous_traffic_ready(status: Any, domains: list[str], since: float) -> bool:
+    """Require two meaningful complete passes and fresh measured continuous traffic."""
+    if (
+        not isinstance(status, dict)
+        or status.get("service_active") is not True
+        or status.get("service_enabled") is not True
+    ):
+        return False
+    now = time.time()
+    heartbeat = status.get("heartbeat", 0)
+    passes = status.get("catalog_passes", [])
+    rates = status.get("rates", {})
+    if (
+        not isinstance(heartbeat, (int, float))
+        or not since <= heartbeat <= now
+        or now - heartbeat > CONTINUOUS_HEARTBEAT_MAX_AGE
+    ):
+        return False
+    if (
+        not isinstance(passes, list)
+        or len(passes) < PAIR_LENGTH
+        or any(
+            not p.get("complete") or not p.get("passed") or p.get("started", 0) < since
+            for p in passes[-2:]
+        )
+    ):
+        return False
+    elapsed = rates.get("elapsed", 0)
+    count = rates.get("benign_requests", 0)
+    attacks = rates.get("attack_requests", 0)
+    if (
+        elapsed <= 0
+        or count <= 0
+        or not CONTINUOUS_RATE_MIN <= (count + attacks) / elapsed <= CONTINUOUS_RATE_MAX
+    ):
+        return False
+    if (
+        rates.get("benign_success", 0) / count < CONTINUOUS_BENIGN_SUCCESS
+        or rates.get("benign_transport_failures", 1) != 0
+        or rates.get("attack_transport_failures", 1) != 0
+    ):
+        return False
+    per_domain = rates.get("benign_per_domain", {})
+    return (
+        set(per_domain) == set(domains)
+        and all(per_domain[d] > 0 for d in domains)
+        and not status.get("failures")
+    )
+
+
 def traffic_ready(status: Any, domains: list[str], since: float) -> bool:
     """Require fresh adjacent guest-evaluated cycles at one captured instant."""
     now = time.time()

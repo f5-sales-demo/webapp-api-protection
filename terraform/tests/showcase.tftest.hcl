@@ -5,6 +5,7 @@ variables {
   lb_domains                        = jsondecode(file("showcase.tfvars.json")).lb_domains
   origin_ip                         = "203.0.113.10"
   csd_enabled                       = jsondecode(file("showcase.tfvars.json")).csd_enabled
+  lb_https_auto_cert                = true
   waf_mode                          = jsondecode(file("showcase.tfvars.json")).waf_mode
   waf_blocking_page_mode            = jsondecode(file("showcase.tfvars.json")).waf_blocking_page_mode
   waf_blocking_page                 = jsondecode(file("showcase.tfvars.json")).waf_blocking_page
@@ -39,7 +40,8 @@ run "showcase_effective_controls" {
 
   assert {
     condition = (
-      xcsh_http_loadbalancer.this.http.port == 80 &&
+      xcsh_http_loadbalancer.this.https_auto_cert.port == 443 &&
+      xcsh_http_loadbalancer.this.https_auto_cert.http_redirect == false &&
       toset(xcsh_http_loadbalancer.this.domains) == toset(["www.f5-sales-demo.com", "api.f5-sales-demo.com"]) &&
       xcsh_http_loadbalancer.this.client_side_defense == null &&
       xcsh_app_firewall.this.blocking != null &&
@@ -47,7 +49,7 @@ run "showcase_effective_controls" {
       xcsh_http_loadbalancer.this.app_firewall.name == xcsh_app_firewall.this.name &&
       xcsh_http_loadbalancer.this.enable_api_discovery != null
     )
-    error_message = "Effective LB must remain HTTP, serve both domains, attach blocking WAF, enable discovery, and omit CSD."
+    error_message = "Effective LB must offer auto-certificate HTTPS and retain HTTP, serve both domains, attach blocking WAF, enable discovery, and omit CSD."
   }
 
   assert {
@@ -144,7 +146,10 @@ run "showcase_effective_controls" {
 run "explicit_monitoring_choice_renders" {
   command = plan
   module { source = "./modules/http-lb" }
-  variables { waf_mode = "monitoring" }
+  variables {
+    waf_mode           = "monitoring"
+    lb_https_auto_cert = false
+  }
   assert {
     condition = (
       xcsh_app_firewall.this.monitoring != null &&

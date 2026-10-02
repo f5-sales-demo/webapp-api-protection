@@ -575,12 +575,12 @@ def _poll_acceptance(
         )
         _rate_attribution(evidence, required, events, window)
         _mud_evidence(client, evidence, required, events, window)
-        evidence["scheduled_traffic"] = evaluation.traffic_ready(
+        evidence["scheduled_traffic"] = evaluation.continuous_traffic_ready(
             status, out["domains"], invoked_at
         )
-        evidence["traffic_runs"] = (
-            _traffic_projection(status) if evidence["scheduled_traffic"] else []
-        )
+        evidence["traffic_runs"] = []
+        evidence["continuous_catalog"] = status.get("catalog_passes", [])
+        evidence["continuous_rates"] = status.get("rates", {})
         missing = [gate for gate in GATES if not evidence[gate]]
         if not missing:
             evidence.pop("pending", None)

@@ -221,6 +221,8 @@ class AcceptanceEvidence(TypedDict):
     traffic_failure: NotRequired[TrafficFailure]
     failure: NotRequired[str]
     traffic_runs: NotRequired[list[TrafficRunSummary]]
+    continuous_catalog: NotRequired[list[dict[str, Any]]]
+    continuous_rates: NotRequired[dict[str, Any]]
     pending: NotRequired[str]
 
 

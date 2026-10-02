@@ -129,6 +129,49 @@ def mud_evidence() -> tuple[Any, contracts.Probe, dict[str, Any]]:
     return fixture["logs"][0], request, record
 
 
+def continuous_status(status):
+    """Translate synthetic legacy timings into complete continuous catalog fixture evidence."""
+    history = status.get("history", [])
+    if len(history) < 2:
+        return {**status, "catalog_passes": []}
+    now = time.time()
+    start = (
+        history[0]["started_epoch"]
+        if isinstance(history[0].get("started_epoch"), (float, int))
+        else now - 60
+    )
+    return {
+        **status,
+        "service_active": True,
+        "service_enabled": True,
+        "heartbeat": now,
+        "catalog_passes": [
+            {
+                "id": "pass-fixture-a",
+                "complete": True,
+                "passed": True,
+                "started": start,
+            },
+            {
+                "id": "pass-fixture-b",
+                "complete": True,
+                "passed": True,
+                "started": now - 1,
+            },
+        ],
+        "rates": {
+            "elapsed": 30,
+            "benign_requests": 5400,
+            "benign_success": 5400,
+            "attack_requests": 600,
+            "benign_transport_failures": 0,
+            "attack_transport_failures": 0,
+            "benign_per_domain": dict.fromkeys(DOMAINS, 2700),
+        },
+        "failures": [],
+    }
+
+
 def readiness_client(cloud_status="done", returned_host=None, returned_path="/get"):
     client = Mock()
     client.ssh.side_effect = [

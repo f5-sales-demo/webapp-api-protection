@@ -55,8 +55,9 @@ module "origin_server" {
 module "http_lb" {
   source = "./modules/http-lb"
 
-  namespace  = var.namespace
-  lb_domains = var.lb_domains
+  namespace          = var.namespace
+  lb_domains         = var.lb_domains
+  lb_https_auto_cert = var.lb_https_auto_cert
   # Point the origin pool at the Azure origin server's public IP (created above).
   # Terraform orders VM creation before the pool that references its IP.
   origin_ip         = module.origin_server.public_ip
@@ -321,6 +322,9 @@ module "traffic_generator" {
     target_domains   = jsonencode(var.lb_domains)
     target_origin_ip = module.origin_server.public_ip
     tool_tier        = var.traffic_gen_tool_tier
+    generator_commit = var.traffic_generator_commit
+    generator_sha256 = var.traffic_generator_sha256
+    installer_sha256 = var.traffic_generator_installer_sha256
     # Emit identifiable malicious-user traffic each burst so MUD scores a user and
     # applies the configured mitigation (only meaningful when mud_enabled).
     mud_bad_traffic = var.mud_enabled && var.mud_bad_traffic

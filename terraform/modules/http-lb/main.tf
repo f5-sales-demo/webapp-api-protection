@@ -344,12 +344,21 @@ resource "xcsh_http_loadbalancer" "this" {
 
   domains = var.lb_domains
 
-  http {
-    port = 80
-    # Let F5 XC auto-manage DNS records for `domains` (www/api.f5-sales-demo.com)
-    # to this LB's VIP. Prerequisite: the domain is delegated to F5 XC (it is) and
-    # the zone has allow_http_lb_managed_records enabled (see the dns repo).
-    dns_volterra_managed = true
+  dynamic "http" {
+    for_each = var.lb_https_auto_cert ? [] : [1]
+    content {
+      port                 = 80
+      dns_volterra_managed = true
+    }
+  }
+
+  dynamic "https_auto_cert" {
+    for_each = var.lb_https_auto_cert ? [1] : []
+    content {
+      port          = 443
+      http_redirect = false
+      no_mtls       = {}
+    }
   }
 
   default_route_pools {

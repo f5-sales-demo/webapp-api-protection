@@ -1051,6 +1051,26 @@ write_files:
               proxy_set_header X-Forwarded-Proto $scheme;
           }
 
+          # Synthetic DemoApp-compatible fixtures: no real SQL engine or script execution.
+          location = /WAF/SQL {
+              add_header X-Demo-Fixture "synthetic-demoapp-sql" always;
+              default_type application/json;
+              return 200 '{"fixture":"synthetic DemoApp-compatible SQL","executed":false}';
+          }
+          location = /WAF/XSS {
+              add_header X-Demo-Fixture "synthetic-demoapp-xss" always;
+              default_type application/json;
+              return 200 '{"fixture":"synthetic DemoApp-compatible XSS","executed":false}';
+          }
+          location /crapi/ {
+              proxy_pass http://127.0.0.1:8888/;
+              proxy_http_version 1.1;
+              proxy_set_header Connection "";
+              proxy_set_header Host $host;
+              proxy_set_header X-Forwarded-Proto $scheme;
+              proxy_redirect / /crapi/;
+          }
+
           location /restaurant/ {
               proxy_pass http://restaurant/;
               proxy_http_version 1.1;
@@ -1100,7 +1120,7 @@ write_files:
         <li><a href="/csd-demo/">CSD Demo</a> - Client-Side Defense testing (skimming, formjacking)</li>
         <li><a href="/dvga/">DVGA</a> - GraphQL security (introspection, batching, injection)</li>
         <li><a href="/restaurant/">RESTaurant</a> - REST API security (OWASP API Top 10 2023)</li>
-        <li><a href="javascript:void(0)" onclick="window.open('http://'+location.hostname+':8888','_blank')">crAPI</a> - Microservices API security (BOLA, BFLA, SSRF)</li>
+        <li><a href="/crapi/">crAPI</a> - Microservices API security (BOLA, BFLA, SSRF)</li>
       </ul>
       <p><a href="/health">Health Check</a></p>
       </body>

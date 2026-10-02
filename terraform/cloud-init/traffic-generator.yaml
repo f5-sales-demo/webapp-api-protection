@@ -360,35 +360,7 @@ write_files:
       export PATH=/opt/traffic-generator/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       exec /usr/bin/python3 /usr/local/lib/demo_traffic.py "$@"
 
-  - path: /etc/systemd/system/tgen-continuous.service
-    content: |
-      [Unit]
-      Description=One aggregate bounded showcase run
-      After=network-online.target
-      Wants=network-online.target
-
-      [Service]
-      Type=oneshot
-      User=root
-      Environment="PATH=/opt/traffic-generator/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-      ExecStart=/usr/local/bin/tgen-control scheduled
-      TimeoutStartSec=90
-      UMask=0077
-
-  - path: /etc/systemd/system/tgen-continuous.timer
-    content: |
-      [Unit]
-      Description=Showcase scheduled cadence (explicit readiness start only)
-
-      [Timer]
-      OnActiveSec=300s
-      OnUnitActiveSec=300s
-      AccuracySec=1s
-      RandomizedDelaySec=0
-      Unit=tgen-continuous.service
-
-      [Install]
-      WantedBy=timers.target
+  # Installed from the immutable shared catalog; service starts only after readiness.
 
 runcmd:
   # cloud-init emits all runcmd entries into one /bin/sh script: strictness applies to every phase.
@@ -618,18 +590,35 @@ runcmd:
       timeout 600 /tmp/msfinstall
     fi
 
-  # --- Phase 8: Clone traffic-generator suites ---
-  - mkdir -p /opt/traffic-generator/suites /opt/traffic-generator/results
+  # --- Phase 8: verified shared generator installation ---
   - |
     . /usr/local/lib/cloud-init-helpers.sh
-    log_phase "phase8" "cloning traffic generator suites"
-    clone_repo "https://github.com/f5-sales-demo/traffic-generator.git" /opt/traffic-generator/repo 1 || log_phase "warning" "traffic-generator repo clone failed — suites will be from cloud-init"
-  - |
-    if [ -d /opt/traffic-generator/repo/suites ]; then
-      cp -r /opt/traffic-generator/repo/suites/* /opt/traffic-generator/suites/
-      chmod -R +x /opt/traffic-generator/suites/
+    log_phase "phase8" "installing immutable shared traffic catalog"
+    fetch_url "https://raw.githubusercontent.com/f5-sales-demo/traffic-generator/${generator_commit}/scripts/install_catalog.py" /tmp/install-catalog.py 'immutable catalog installer'
+    printf '%s  %s\n' '${installer_sha256}' /tmp/install-catalog.py | sha256sum --check --strict -
+    python3 /tmp/install-catalog.py --commit '${generator_commit}' --sha256 '${generator_sha256}'
+    ln -sfn /opt/SecLists /opt/seclists
+    if [ ! -f /opt/seclists/Passwords/Common-Credentials/best15.txt ]; then
+      printf '%s\n' password 123456 admin admin123 letmein welcome changeme password1 qwerty abc123 12345678 test secret demo synthetic > /opt/seclists/Passwords/Common-Credentials/best15.txt
     fi
-  - chown -R azureuser:azureuser /opt/traffic-generator/suites /opt/traffic-generator/results
+    install -m 0755 /opt/traffic-generator/current/scripts/tgen-control /usr/local/bin/tgen-control
+    install -m 0644 /opt/traffic-generator/current/scripts/tgen-continuous.service /etc/systemd/system/tgen-continuous.service
+    python3 - <<'PYCONFIG'
+    import json, os
+    config = {
+        "schema_version": 1, "domains": ${target_domains}, "protocol": "https",
+        "http_rps": 200, "benign_rps": 180, "attack_rps": 20,
+        "connection_rps": 20, "slow_connections": 20,
+        "csd_enabled": False, "protections_enabled": True,
+        "scenario_timeout_seconds": 900, "retention_days": 7,
+        "retention_bytes": 10737418240,
+        "results_dir": "/opt/traffic-generator/runtime",
+        "source_commit": "${generator_commit}", "artifact_sha256": "${generator_sha256}"
+    }
+    path = "/opt/traffic-generator/catalog-config.json"
+    with open(path, "w") as stream: json.dump(config, stream)
+    os.chmod(path, 0o600)
+    PYCONFIG
 
   # --- Phase 9: Smoke test and status update ---
   - |
@@ -653,7 +642,7 @@ runcmd:
   - |
     set -eu
     systemctl daemon-reload
-    systemctl disable --now tgen-continuous.timer
+    systemctl disable --now tgen-continuous.service
     systemctl stop tgen-continuous.service
     printf '{"status":"stopped","history":[],"tool_tier":"${tool_tier}"}\n' > /opt/traffic-generator/status.json
 

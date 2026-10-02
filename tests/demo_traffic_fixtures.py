@@ -57,6 +57,9 @@ def rendered_cloud_config(tier: str = "standard") -> tuple[str, dict[str, Any]]:
         "target_origin_ip": "192.0.2.1",
         "tool_tier": tier,
         "mud_bad_traffic": "true",
+        "generator_commit": "22db98b9bf2e7aed9d76a4015d990bff1e76a2ef",
+        "generator_sha256": "6408ae5e274eeb5a285d79acb1f4fd6d38f7b3f1fae09017add7d85157372cf2",
+        "installer_sha256": "a" * 64,
         "traffic_script": script.replace("\n", "\n      "),
     }
     for key, value in substitutions.items():

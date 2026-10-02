@@ -136,7 +136,7 @@ class AcceptanceReadinessTests(unittest.TestCase):
         with (
             patch.object(scope, "effective"),
             patch.object(v, "probes", return_value=(USER, [fixtures.probe("mud")], [])),
-            patch.object(evaluation, "traffic_ready", return_value=True),
+            patch.object(evaluation, "continuous_traffic_ready", return_value=True),
         ):
             client.ssh.return_value = json.dumps({"history": []})
             code, report = v.acceptance(client, out, Mock(poll_seconds=1))
@@ -192,7 +192,7 @@ class AcceptanceReadinessTests(unittest.TestCase):
             dict(fixtures.probe("rate-limit"), host=domain) for domain in DOMAINS
         ]
         client = Mock(deadline=time.monotonic())
-        client.ssh.return_value = json.dumps(status)
+        client.ssh.return_value = json.dumps(fixtures.continuous_status(status))
         client.pages.side_effect = [
             [waf, fixtures.mud_fixture()["mitigation_event"]],
             [raw],
@@ -215,7 +215,7 @@ class AcceptanceReadinessTests(unittest.TestCase):
         ensure(not report["controls_attributed"])
         ensure(bool(report["mud_detection"]))
         ensure(bool(report["mud_mitigation"]))
-        ensure_equal(len(report["traffic_runs"]), 2)
+        ensure_equal(len(report["continuous_catalog"]), 2)
         ensure(
             bool(
                 all(
@@ -245,7 +245,7 @@ class AcceptanceReadinessTests(unittest.TestCase):
         with (
             patch.object(scope, "effective"),
             patch.object(v, "probes", return_value=(USER, [probe, other], [])),
-            patch.object(evaluation, "traffic_ready", return_value=True),
+            patch.object(evaluation, "continuous_traffic_ready", return_value=True),
             patch.object(v.time, "sleep"),
             patch.object(v.time, "time", side_effect=[100, 104, 104, 106, 106, 107]),
         ):
@@ -278,7 +278,7 @@ class AcceptanceReadinessTests(unittest.TestCase):
                 client = Mock(deadline=100, read_retries=[])
                 client.ssh.side_effect = [
                     json.dumps({"history": []}),
-                    json.dumps(status),
+                    json.dumps(fixtures.continuous_status(status)),
                 ]
                 client.pages.side_effect = [events, [raw], events, [raw]]
                 out = {
@@ -347,7 +347,7 @@ class AcceptanceReadinessTests(unittest.TestCase):
                         "mud_mitigation",
                     ):
                         ensure(bool(evidence[gate]))
-                    ensure_equal(len(evidence["traffic_runs"]), 2)
+                    ensure_equal(len(evidence["continuous_catalog"]), 2)
                     ensure_equal(evidence["probe_count"], 3)
                     ensure(evidence["suspicious_log_count"] > 0)
                     ensure(
