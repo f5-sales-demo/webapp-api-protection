@@ -403,10 +403,10 @@ class Client:
     ) -> tuple[int, Any]:
         """Issue a synthetic HTTP probe without accepting redirects as evidence."""
         identified_user(user)
-        url = "http://" + host + path
+        url = "https://" + host + path
         parsed = urllib.parse.urlsplit(url)
-        if parsed.scheme != "http" or parsed.netloc != host or parsed.username:
-            msg = "valid application HTTP host required"
+        if parsed.scheme != "https" or parsed.netloc != host or parsed.username:
+            msg = "valid application HTTPS host required"
             raise _fail(msg)
         data = json.dumps(body).encode() if body is not None else None
         request = urllib.request.Request(  # noqa: S310 - validated explicit HTTP scheme
