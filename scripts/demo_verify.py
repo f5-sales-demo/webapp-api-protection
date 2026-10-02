@@ -489,20 +489,20 @@ class _FreshEvidenceWindow:
         self, client: transport.Client, required: list[Probe]
     ) -> list[dict[str, Any]]:
         """Read complete bounded windows around each attributed request, excluding background time."""
-        windows = []
+        windows: list[tuple[float, float]] = []
         for probe in required:
             windows.extend(
                 (max(self.since, stamp - 1), min(self.end, stamp + 30))
                 for stamp in (probe["sent_at"], probe.get("mitigation_sent_at"))
                 if stamp is not None
             )
-        merged = []
+        merged: list[tuple[float, float]] = []
         for start, end in sorted(windows):
             if merged and start <= merged[-1][1]:
                 merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
             else:
                 merged.append((start, end))
-        events = []
+        events: list[dict[str, Any]] = []
         for start, end in merged:
             events.extend(
                 client.pages(
