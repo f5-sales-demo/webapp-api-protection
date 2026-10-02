@@ -94,6 +94,14 @@ class FixtureResponse(addinfourl):
 class OriginTests(unittest.TestCase):
     """Verify origin guest contracts without reaching deployed applications."""
 
+    def test_dvga_recovery_is_bounded_to_owned_replica_names(self) -> None:
+        files = embedded_files()
+        source = files["/usr/local/bin/demo-dvga-recovery"]
+        ensure("range(1, 5)" in source)
+        ensure("container_name" in source)
+        ensure("040aa33c199d99f" in source)
+        compile(source, "recovery", "exec")
+
     def test_extract_compile_and_empty_terraform_variables(self) -> None:
         """Check the named origin guest regression contract."""
         text = TEMPLATE.read_text()
