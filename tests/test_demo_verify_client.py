@@ -23,13 +23,15 @@ DOMAINS = fixtures.DOMAINS
 
 
 class ScopedTransportTests(unittest.TestCase):
-    def test_exact_event_query_uses_local_user_join(self):
+    def test_exact_event_query_filters_the_identified_user(self):
         client = fixtures.client()
         client.api = Mock(return_value=(200, {"events": [], "total_hits": "0"}))
         client.pages("demo", "demo-lb", 100, 110, user=USER)
         ensure_equal(
             client.api.call_args.args[1]["query"],
-            '{vh_name="ves-io-http-loadbalancer-demo-lb"}',
+            '{vh_name="ves-io-http-loadbalancer-demo-lb",user="'
+            + evaluation.identified_user(USER)
+            + '"}',
         )
 
     def test_large_event_window_splits_with_complete_child_coverage(self):

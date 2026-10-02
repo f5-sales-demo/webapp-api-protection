@@ -50,12 +50,11 @@ def _fail(message: str) -> EvidenceError:
     return EvidenceError(message)
 
 
-def _query(lb: str, suspicious: bool, user: str | None) -> str:
+def _query(lb: str, _suspicious: bool, user: str | None) -> str:
     query = "{vh_name=" + json.dumps(virtual_host(lb))
     if user is not None:
         identity = identified_user(user)
-        if suspicious:
-            query += ",user=" + json.dumps(identity)
+        query += ",user=" + json.dumps(identity)
     return query + "}"
 
 
@@ -313,7 +312,7 @@ class Client:
         user: str | None = None,
     ) -> list[Any]:
         """Require exact coverage; decode ordinary events once, retain opaque risk logs."""
-        if not suspicious and end - since > INITIAL_TELEMETRY_WINDOW:
+        if not suspicious and user is None and end - since > INITIAL_TELEMETRY_WINDOW:
             return self._split_pages(namespace, lb, since, end, suspicious, user)
         resource, key = (
             ("suspicious_user_logs", "logs") if suspicious else ("events", "events")

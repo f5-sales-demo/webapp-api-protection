@@ -193,10 +193,11 @@ class AcceptanceReadinessTests(unittest.TestCase):
         ]
         client = Mock(deadline=time.monotonic())
         client.ssh.return_value = json.dumps(fixtures.continuous_status(status))
-        client.pages.side_effect = [
-            [waf, fixtures.mud_fixture()["mitigation_event"]],
-            [raw],
-        ]
+        client.pages.side_effect = lambda *args: (
+            [raw]
+            if len(args) > 4 and args[4]
+            else [waf, fixtures.mud_fixture()["mitigation_event"]]
+        )
         out = {
             "namespace": "demo",
             "loadbalancer_name": "demo-lb",
@@ -232,7 +233,9 @@ class AcceptanceReadinessTests(unittest.TestCase):
         other = fixtures.probe()
         events = [waf, fixtures.event(), mitigation]
         client = Mock(deadline=time.monotonic() + 100)
-        client.pages.side_effect = [events, [raw], events, [raw], events, [raw]]
+        client.pages.side_effect = lambda *args: (
+            [raw] if len(args) > 4 and args[4] else events
+        )
         client.request.side_effect = [(200, {}), (200, {}), (403, {}), (200, {})]
         client.ssh.return_value = json.dumps({"history": []})
         out = {
@@ -280,7 +283,9 @@ class AcceptanceReadinessTests(unittest.TestCase):
                     json.dumps({"history": []}),
                     json.dumps(fixtures.continuous_status(status)),
                 ]
-                client.pages.side_effect = [events, [raw], events, [raw]]
+                client.pages.side_effect = lambda *args, raw=raw, events=events: (
+                    [raw] if len(args) > 4 and args[4] else events
+                )
                 out = {
                     "namespace": "demo",
                     "loadbalancer_name": "demo-lb",
