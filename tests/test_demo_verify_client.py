@@ -43,7 +43,10 @@ class ScopedTransportTests(unittest.TestCase):
                 (200, {"events": [event], "total_hits": "1"}),
             ]
         )
-        with patch.object(transport, "MAX_PAGES", 1):
+        with (
+            patch.object(transport, "MAX_PAGES", 1),
+            patch.object(transport, "INITIAL_TELEMETRY_WINDOW", 30),
+        ):
             records = client.pages("demo", "demo-lb", 100, 130)
         ensure_equal(len(records), 1)
 
@@ -59,7 +62,7 @@ class ScopedTransportTests(unittest.TestCase):
                 },
             )
         )
-        ensure_equal(client.pages("demo", "demo-lb", 100, 110), [fixtures.event()])
+        ensure_equal(client.pages("demo", "demo-lb", 100, 101), [fixtures.event()])
         ensure_equal(client.api.call_count, 1)
 
     def test_object_wire_item_is_not_legacy_success(self):
@@ -68,7 +71,7 @@ class ScopedTransportTests(unittest.TestCase):
             return_value=(200, {"events": [fixtures.event()], "total_hits": "1"})
         )
         with expect_error(contracts.EvidenceError):
-            client.pages("demo", "demo-lb", 100, 110)
+            client.pages("demo", "demo-lb", 100, 101)
 
     def test_pagination_complete(self):
         client = fixtures.client()
@@ -92,7 +95,7 @@ class ScopedTransportTests(unittest.TestCase):
                 ),
             ]
         )
-        ensure_equal(len(client.pages("demo", "demo-lb", 100, 110)), 2)
+        ensure_equal(len(client.pages("demo", "demo-lb", 100, 101)), 2)
 
     def test_truncated_malformed_repeated_and_unavailable_pages(self):
         malformed_pages: tuple[list[tuple[int, dict[str, Any]]], ...] = (
@@ -117,7 +120,7 @@ class ScopedTransportTests(unittest.TestCase):
             client = fixtures.client()
             client.api = Mock(side_effect=pages)
             with expect_error(contracts.EvidenceError):
-                client.pages("demo", "demo-lb", 100, 110)
+                client.pages("demo", "demo-lb", 100, 101)
 
     def test_stable_scroll_token_with_distinct_batches_proves_progress(self):
         client = fixtures.client()
@@ -143,7 +146,7 @@ class ScopedTransportTests(unittest.TestCase):
                 ),
             ]
         )
-        ensure_equal(len(client.pages("demo", "demo-lb", 100, 110)), 2)
+        ensure_equal(len(client.pages("demo", "demo-lb", 100, 101)), 2)
 
     def test_commands_fail_closed(self):
         client = fixtures.client()
