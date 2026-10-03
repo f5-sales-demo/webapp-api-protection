@@ -836,3 +836,8 @@ Native Juice Shop browser verification failed all four replicas: published front
 with HTTP 200 instead of product JSON. Source adapter now strips the application prefix before native request and
 WebSocket dispatch while preserving origin nginx routing and framing repairs. Source checks pass 65 tests and hooks;
 immutable installation and native browser retry remain pending. Earlier native failures remain failed evidence.
+
+The next Juice Shop native retry still failed because existing processes retained the old bind-mounted preload inode.
+A source configuration digest label now changes the Compose service declaration whenever the preload changes, forcing
+container recreation through immutable provisioning. Source checks pass 66 tests and hooks. Installed recreation
+and native browser acceptance remain pending; staged file presence was not treated as running-source acceptance.
