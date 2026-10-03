@@ -1028,3 +1028,17 @@ Focused installed ZAP active scanning passed per-application phase completion an
 attributed requests, 2,226 mitigation candidates, no transport failures and no cancellations. ZAP baseline remained
 failed because spidering did not complete. Private receipt: `resume-focused-zap-completion/pass-focused-1791040551262201274/receipt.json`.
 Continuous traffic restart is in progress; complete scanner semantics and final catalog acceptance remain open.
+
+Focused ZAP baseline qualification passed on generator `e0abbc2` with all six intended target dispatches,
+105 attributed HTTP requests, completed native spider/passive phases, no transport failures and no cancellations.
+Private receipt: `resume-focused-zap-baseline-final/pass-focused-1791041121612358575/receipt.json`. Earlier
+incomplete baseline remains failed. Pinned runtime option names were verified and update/telemetry flags corrected;
+next immutable scanner rerun is pending.
+
+
+Scanner continuation: generator `6e854c3` completed focused baseline and active phases with 105 and 743
+attributed requests, zero transport failures and zero cancellations. Silent startup suppressed unsolicited update
+requests; private receipt: `resume-focused-zap-completion/pass-focused-1791041915359446641/receipt.json`.
+This remains phase qualification only: generator `f0bfeaa` now requires distinct native active-scan message IDs
+per application, and its installed qualification is pending. Source verification passed 132 Python tests and
+9 subtests. The complete application matrix on origin `7b96647` is running; final coverage remains open.
