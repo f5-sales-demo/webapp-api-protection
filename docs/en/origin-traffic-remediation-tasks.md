@@ -817,3 +817,8 @@ The focused rapid retry completed 360 records and closed Chromium on generator `
 not establish scenario acceptance. Private receipt: `resume-focused-rapid-fresh/pass-focused-1791030621163638487/receipt.json`.
 Origin `62d25ed` passed immutable installation and the expanded seven-check crAPI verifier through origin nginx,
 including mechanic form navigation and vehicle image return. Published verification is in progress.
+
+The expanded seven-check crAPI workflow passed through origin nginx and both HTTP domains. HTTPS rendered all
+seven views but failed a mixed-content redirect at the mechanic list endpoint. The frontend adapter now requests the
+canonical trailing-slash endpoint directly, matching native Django routing. Source checks pass 64 tests and repository
+hooks; immutable rebuild and HTTPS retry remain pending. Those mixed-content failures remain failed evidence.
