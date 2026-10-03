@@ -1018,3 +1018,13 @@ Generator `be35a22` passes required CI and 128 source tests plus nine subtests w
 The active pass retained rapid-browsing failure and was stopped for focused scanner qualification. Immutable
 scanner candidate installation passed; ZAP baseline/active completion verification is now running through the shared
 budget. No scanner or full catalog acceptance is claimed from source contracts alone.
+
+Focused installed ZAP baseline dispatched each declared target but failed incomplete spidering. The failed
+receipt remains failed. The aggregate verifier now also requires a launched terminal outcome before keeping
+dispatch acceptance true; a failed scanner cannot retain aggregate acceptance just because its GETs dispatched.
+Active ZAP qualification is still running.
+
+Focused installed ZAP active scanning passed per-application phase completion and intended dispatch with 2,459
+attributed requests, 2,226 mitigation candidates, no transport failures and no cancellations. ZAP baseline remained
+failed because spidering did not complete. Private receipt: `resume-focused-zap-completion/pass-focused-1791040551262201274/receipt.json`.
+Continuous traffic restart is in progress; complete scanner semantics and final catalog acceptance remain open.
