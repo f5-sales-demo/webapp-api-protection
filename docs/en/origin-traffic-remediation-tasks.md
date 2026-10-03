@@ -1133,3 +1133,9 @@ probe returned SPA HTML and remains failed. Source regression now binds the real
 root. The concurrent prior matrix crossed an origin update and cannot qualify same-source acceptance;
 a fresh matrix and published crawls are running. Traffic remains in focused qualification and must be
 restarted afterward.
+
+Origin `c74a0bd` passed ten Juice Shop browser checks on all four native replicas and both published
+domains over HTTP and HTTPS after the local font repair. Current full matrix/crawls are running. Generator
+`e52a996` rapid qualification overlapped that origin reinstall and retained one HTTP 503 and two HTTP 502
+failures; that run cannot establish acceptance. It must finish as failed, followed by a stable-origin rerun.
+Origin `9347439` adds end-of-run installer-provenance comparison to reject matrix source drift.
