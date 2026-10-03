@@ -780,3 +780,9 @@ remain preserved. Full control attribution and final unchanged Terraform apply r
 RESTaurant passed all five rendered role/docs checks on both published domains over HTTP and HTTPS. Native
 replica verification and screenshot review are in progress. Continuous traffic is active on `96f2fad`; the current
 full catalog pass remains incomplete.
+
+RESTaurant native browser checks exposed 404 at the advertised prefix on every replica despite successful root
+responses and generated prefixed documentation. The pinned ASGI adapter now strips only the declared prefix for native
+requests. Source checks pass 62 tests and repository hooks. Immutable installation and native/published reruns are
+in progress. The earlier native failures remain failed evidence; the catalog pass interrupted for installation remains
+incomplete with thirteen accepted receipts.
