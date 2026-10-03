@@ -152,6 +152,11 @@ locks, preventing nested actors from racing restoration. Source checks and catal
 pass; installed nested qualification remains pending. Cooperative DVGA published baseline/two/five-operation
 JSON responses passed; ten/mixed remain running. Native ten-operation comparison is retained separately.
 
+Native ten-operation systemUpdate probe on cooperative origin returned HTTP 200 with complete JSON
+in 323 seconds, preserving all operations. The paced published counterpart remains pending; a direct
+published comparison is running to distinguish proxy behavior from WAAP serving. Results remain
+provisional and cannot establish full batch/catalog acceptance.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
