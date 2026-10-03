@@ -195,6 +195,12 @@ records the exact immutable commit, archive and installer in origin installation
 `4a557deb9c2f953b08739f93a1c444cfec9745b9` passed immutable installation; 50 source tests and 69 subtests,
 type/lint checks pass. Full rendering failures remain failures. Continuous generator restart is being verified.
 
+Quiet-period diagnostic retry on origin `a2a3e4149cf136cea0ecd8859eaa9d2ea2d38270` remains failed. Both
+external-map requests report net::ERR_FAILED in subframes, not ERR_ABORTED navigation cancellation. All five native
+application view checks pass; full rendered acceptance is still false. Private receipt:
+`/opt/origin-server/private-browser-1791019546050759919/receipt.json`. Immutable installer and provenance passed;
+WAAP candidate pins are reconciled with this revision and credential-free tests pass.
+
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
 response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
