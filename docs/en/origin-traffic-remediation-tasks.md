@@ -723,3 +723,11 @@ Installed origin `ea66d4bddc418a3204f24a6488aa865333092f48` passed two consecuti
 Both exited zero and retained the receiver count at 227, confirming the scoped probe leaves no new entry.
 The first controller invocation used an unsupported positional argument and remains a failed tool receipt.
 This focused idempotence proof does not complete all fixture reruns or final Terraform convergence.
+
+## crAPI published image qualification
+
+The published five-view crAPI verifier passed on the API HTTP domain but failed premature shop image assertions
+on the other three layers, while refresh and all view identities passed without browser transport errors. Those runs
+remain failed. The source now waits for pending requests and completed image loading before asserting image dimensions.
+Pinned immutable installation and fresh published retry are pending. Signup, workshop, MailHog and complete fixture
+restoration remain open. Origin readiness repair CI passed all required checks at `ea66d4b`.
