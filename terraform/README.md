@@ -51,7 +51,7 @@ The namespace must already exist. Previously created Azure storage is left untou
 it is neither a prerequisite nor a lifecycle cleanup target.
 
 Provider releases are pinned exactly with the root registry lock:
-`f5-sales-demo/xcsh` **12.0.2**, `hashicorp/azurerm` **5.7.0**, and
+`f5-sales-demo/xcsh` **13.0.2**, `hashicorp/azurerm` **5.7.0**, and
 `hashicorp/azuread` **3.10.0**. The lifecycle uses `TF_CLI_CONFIG_FILE=/dev/null`
 to exclude development overrides. Provider 12's empty one-of selections are
 object attributes (`field = {}`), not nested blocks.
