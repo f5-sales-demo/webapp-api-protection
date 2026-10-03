@@ -112,6 +112,14 @@ dependency. Source now declares an immutable native chatbot image and functional
 `18fd2a27ce87a6e934af315868f458076e881eb3` passes 45 tests and 69 subtests; installation is pending. Accumulated
 synthetic community posts remain a fixture-cleanup failure. Full crAPI/browser acceptance remains open.
 
+The pinned chatbot dependency installed and its real uninitialized-state readiness passed. Diagnostic browser views
+rendered vehicle, Community and Shop with native navigation and refresh, with the previous chatbot 404 eliminated.
+The reusable stricter browser verifier at origin `522d0d5` nevertheless fails on external map transport requests.
+Its five application view assertions pass, but both transport-failure runs remain failures. Private receipts:
+`private-crapi-verifier-1791015610823458000/receipt.json` and `private-crapi-verifier-1791015662983845000/receipt.json`.
+Source-controlled verification is installed by the shared origin installer; full rendered completeness remains open.
+Origin source passes 45 tests and 69 subtests; generator source passes 119 tests and nine subtests.
+
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
 response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
