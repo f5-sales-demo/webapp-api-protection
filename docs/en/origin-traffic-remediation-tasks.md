@@ -357,3 +357,12 @@ The most recent interrupted full pass had 23 receipts, twenty passing and three 
 maximum workloads. Every failed/interrupted pass remains failed. Full two-pass catalog acceptance, scanner semantics,
 fixture restoration, nested attribution, rendered completeness, merged-artifact delivery, clean rebuild, sustained-rate
 and repeat-apply qualification remain outstanding.
+
+## Multi-client repair qualification
+
+Generator source `50d3ce4ff13e1a97fce76d86861085b81a7ba05f` passes 94 tests and nine subtests, mypy, Pylint,
+Ruff and full pre-commit. All 164 source execution contracts remain present. Multi-client source now runs twenty isolated
+synthetic clients, each completing five requests, and checks its own returned cookie, True-Client-IP and Fastly-Client-IP.
+WAAP sanitizes client-supplied X-Forwarded-For; request dispatch and received forwarding semantics are distinguished.
+Installed multi-client qualification is pending. Earlier regex, missing-content, worker and cancellation failures remain
+failed evidence. Nested stress attribution and fixture restoration remain open.
