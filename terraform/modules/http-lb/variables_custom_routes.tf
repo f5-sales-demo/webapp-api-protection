@@ -29,6 +29,7 @@ variable "custom_routes" {
     # --- advanced_options (CR-3): per-route action tuning. All optional; when any is set the
     # block is emitted. Heavy sub-blocks (cors/csrf/retry/mirror/hash/buffer/websocket/bot-js)
     # are deferred. WAF selector: inherited (default) | app_firewall (module WAF) | disable.
+    use_websocket = optional(bool, false)
     prefix_rewrite = optional(string)            # advanced_options.prefix_rewrite
     priority       = optional(string, "DEFAULT") # advanced_options.priority DEFAULT|HIGH
     # (Optional-not-Computed, server defaults DEFAULT, so emit explicitly)
