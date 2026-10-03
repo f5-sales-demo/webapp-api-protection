@@ -1116,3 +1116,12 @@ and 33 native serving ports. Traffic source drift was reconciled with current de
 immutable CloudWatch changes; source checks passed after the merge. Generator `d32363b` is the next immutable
 source candidate. Installed focused qualification remains on `43e7f73`: API denial passed three HTTP 403
 responses and one allowed HTTP 200 control, and rapid qualification is incomplete. Earlier failures remain failed.
+
+Focused generator `43e7f73` completed all 360 rapid action records but remained failed: 310 rendered,
+48 mitigated and two resource-drain failures, with twenty cancellations. Both failed route diagnostics
+contained an external VT323 font transport failure. Private receipt:
+`resume-focused-deny-rapid/pass-focused-1791047207784715965/receipt.json`. API denial in that run passed.
+Origin `1392e22` packages the licensed VT323 font locally under the Juice Shop application route with
+idempotent HTML adaptation; 77 source tests and 69 subtests pass. Immutable installation and focused
+render/traffic qualification are pending. The next traffic candidate `e52a996` retains pending-request
+diagnostics and includes merged default-branch repairs. Complete coverage and clean rebuild remain open.
