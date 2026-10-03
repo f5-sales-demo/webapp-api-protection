@@ -954,3 +954,7 @@ The installed signup completion-aware run rendered success but failed because th
 Response without consuming its body. Its exact account, vehicle and mail cleanup passed. The immutable frontend
 adapter now consumes the JSON success response before signalling UI completion. Source regression and rebuild
 qualification are in progress; the failed run remains failed evidence.
+
+The combined matrix now includes signup and MailHog assertions only after exact source/layer/browser success
+and passing synthetic account/vehicle/mail recovery. A false-recovery regression fails; source checks pass 76 tests
+and hooks. Immutable response-consumption frontend rebuild and actual signup qualification are still in progress.
