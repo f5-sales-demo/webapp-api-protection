@@ -866,3 +866,8 @@ runtime cleanup, no browser errors and every required per-workflow check. It rej
 and missing replicas. The installed browser runtime now records kind and base. Source checks pass 69 tests, mypy,
 Pylint and repository hooks. Whoami proxy checks additionally require actual received forwarding headers; native
 diagnostics remain separate. Immutable combined-matrix installation and execution are pending.
+
+The active rapid catalog scenario now retains thirteen failed records among 264 persisted actions; it remains
+incomplete. Failure details show a successful SPA document with a blocked supporting product request, so each
+fragment route will now dispatch from a fresh document. Source regression checks pass; installed retry is pending.
+Browser runtime and matrix receipts additionally require an exact verifier digest.
