@@ -236,3 +236,22 @@ Continuous catalog qualification is running on the next immutable candidate; no 
 T03/T11 remain in progress because declared contracts do not by themselves prove application workflows, native scanner
 completion, expected outcome semantics, scoped fixture restoration, browser screenshots or final clean-deployment
 acceptance. All clean rebuild, merged installation, sustained 200-RPS, restart/reboot and repeat-apply gates remain open.
+
+## Post-matrix acceptance hardening
+
+Generator source now passes 85 tests and nine subtests. The source execution matrix still contains all 164 scenarios:
+144 request contracts, eleven CSD browser contracts, seven connection adapters and two aggregate report contracts.
+Declared response outcomes are joined to exact matched actions, and each required dispatch needs a terminal response.
+Aggregate report receipts must match the current source digest. Native scanner invocation/completion, actual workload
+concurrency/connection reuse and wrong-content HTTP 200 checks remain separate acceptance assertions.
+
+Installed follow-up passed both the corrected intentional shadow endpoint statuses and a 300-request workload ramp at
+levels 1/10/20 across all nine applications, including content identity, actual concurrency and connection reuse, with no
+transport failures or cancellations. Hydra dispatched 99 credential guesses per DVWA/Juice Shop/VAmPI endpoint after
+native module-option repair. Native workflow rerun passed all 33 application checks. Failed/incomplete full catalog
+passes remain failed and were not relabeled. Continuous traffic is running on the next candidate while CI is pending.
+
+Nested worker verification now fails a zero-exit child without observed action receipts. Concurrent child attribution,
+fixture mutation restoration, scanner outcome semantics, declared cache behavior, complete rendered navigation and
+all required application workflows remain open. No clean rebuild, accepted complete catalog pass, sustained final rate,
+merged installation, reboot recovery or zero-change repeat apply is claimed.
