@@ -11,9 +11,10 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `dde4edbf2af251d066e7eb5587b9b817ec4a0b98` preserves all 164 scenarios across 22 suites.
+Generator source `8838ec28aeac614c0c90dacb14c61069dfd9262d` preserves all 164 scenarios across 22 suites.
 Current source checks pass 112 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
-pass. Required CI remains pending. The pinned archive is installed; continuous-service restart is being verified.
+pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
+repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
 Origin `5706801ed48b19f8433874454a142ce8a7c29204` passed the digest-checked immutable release installer and
 all native readiness checks. Source checks pass 42 tests and 68 subtests. The private actor-repeat receipt
