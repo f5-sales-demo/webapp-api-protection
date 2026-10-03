@@ -11,36 +11,44 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source candidates are origin `9347439` and generator `b8ec277`; Terraform pins bind their exact
-commits, archive digests and installer digests. Source checks pass 77 origin tests with 69 subtests,
-141 generator tests with nine subtests, eight focused Node tests, and 333 WAAP pytest checks with
-396 subtests and one environment skip. Required CI passed for origin and generator; WAAP latest receipt
-documentation checks are pending. The three application manifests match byte-for-byte and declare nine
-applications with 33 native serving ports.
+Current source candidates are origin `56fe2c8` and generator `937bf7b`. Terraform pins are being refreshed
+from pushed commits and verified archive/installer digests. Source verification passed 79 origin tests with
+69 subtests and 143 generator tests with nine subtests. Required CI for the latest heads is pending.
+The three application manifests declare nine applications with 33 native serving ports.
 
-The last complete origin matrix (`c74a0bd`) has 66 passing browser receipts and no missing workflow/layer
-entries, with 315 screenshots manually reviewed. All native Juice Shop replicas and both published domains
-over HTTP/HTTPS passed ten rendered checks after the local font repair. The five landing crawl layers passed
-28 checks each. Origin `9347439` additionally rejects installer source drift during a matrix; its installed
-full matrix passed the source-stability gate; screenshot review remains provisional. Broad fixture restoration and fresh/merged installation acceptance remain incomplete.
+The last complete origin matrix (`9347439`) passed 66 browser receipts and all declared workflow/layer entries.
+Its 315 screenshots were reviewed provisionally. Five landing crawl layers passed 28 checks each. These
+receipts remain candidate evidence; a same-source final matrix and fresh/merged installation are required.
+Fixture exporter reruns retained counts and object identities, but broad mutation restoration remains incomplete.
 
-The installed generator is `b40132d` during focused rapid qualification. API fuzzing passed all 169
-dispatch/response requirements; API denial passed three HTTP 403 responses plus an allowed HTTP 200 control.
-Native ZAP phase/message qualification and nested Nikto attribution passed their focused receipts. The prior
-stable rapid run completed 360 action records (312 rendered, 48 mitigated) but remained failed for seven
-Socket.IO cleanup cancellations. The installed correction scopes cleanup to dispatched polling sessions
-during navigation or browser closure. Its focused qualification passed all 360 actions with zero failed action records, transport failures or cancellations; full catalog acceptance remains open.
+Origin `987c161` passed immutable installation with seven-day DVWA session retention. Fresh synthetic
+sessions returned authenticated SQL content on every native replica and both HTTPS published domains.
+Generator `5caa791` then passed focused dispatch/response checks for all 15 SQLi and 18 XSS payloads, with
+zero transport failures or cancellations. The herd scenario passed 303 requests with native completion.
+Private receipts are retained under `resume-focused-dvwa-restoration-latest/` and the lifecycle
+private install directory.
 
-Fixture-export rerun idempotence passed twice with unchanged crAPI/DVWA/RESTaurant counts and identities;
-broad attack mutation restoration remains open. Rate evidence includes failed 185.2 RPS and later 197.2–197.3
-RPS windows with 100 percent benign success and zero baseline transport failures. Historical cumulative
-counters include benign HTTP 503 responses. No sustained fresh-deployment rate acceptance is claimed.
-Continuous service is enabled and active on generator `b40132d` after focused qualification; its fresh
-full catalog pass is running.
+The same focused run failed RESTaurant BOPLA despite successful fixture restoration: unsupported `Admin`
+and `Manager` roles returned application HTTP 500. The failure remains failed. Origin `3f4df8a` adds an
+idempotent native adapter that returns HTTP 422 before database mutation for unsupported roles, preserving
+valid-role mass assignment. Its immutable installation passed; the focused retry passed all six intended payload requirements,
+profile restoration and zero transport failures/cancellations. Private receipts remain under
+`resume-focused-restaurant-invalid-role/`. The previous HTTP 500 run remains failed.
 
-Remaining gates include scanner/nested/connection scope, all mutation restoration, two accepted full catalog
-passes, final control attribution and sustained load, merged immutable installation, ownership-scoped clean
-rebuild, stop/restart/reboot recovery, unchanged apply and zero-action plan. All T01–T16 tasks remain open.
+Generator `a4d6c7d` fixes OTP receipt counters lost in a background subshell and removes unsupported
+full-keyspace feasibility claims. A deterministic shell regression first reproduced the failure, then passed
+with both batches counted. This does not repair registration/OTP fixture isolation or establish full coverage.
+The latest installed generator is `937bf7b`; source and installed provenance were checked independently.
+
+The interrupted full catalog baseline recorded 76 scenarios, with 62 passing and 14 failing. No complete
+catalog pass is accepted. Earlier rapid, API fuzz, ZAP and Nikto focused successes remain bound to their
+recorded sources. Failed stress, crAPI fixture and DVGA timeout evidence is preserved. Traffic is stopped
+for focused qualification and will be restarted after the boundary is released.
+
+Remaining gates include complete native stress/nested/connection behavior, all mutation restoration,
+two accepted full catalog passes, final control attribution and sustained load, merged immutable installation,
+ownership-scoped clean rebuild, stop/restart/reboot recovery, unchanged apply and zero-action plan.
+All T01–T16 tasks remain open. CSD remains disabled.
 
 ## Historical observations
 
