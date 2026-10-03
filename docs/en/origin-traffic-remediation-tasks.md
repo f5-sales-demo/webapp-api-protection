@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `708e5bcb696f18351b0fc0ca4a89073664c98ce8` preserves all 164 scenarios across 22 suites.
-Current source checks pass 110 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
+Generator source `dde4edbf2af251d066e7eb5587b9b817ec4a0b98` preserves all 164 scenarios across 22 suites.
+Current source checks pass 112 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Required CI remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
 Origin `5706801ed48b19f8433874454a142ce8a7c29204` passed the digest-checked immutable release installer and
@@ -52,6 +52,12 @@ reused connection and 100 on fresh connections, valid content and zero transport
 reverified retained churn/profile/ephemeral workload evidence with the stricter all-samples gate; all passed. That
 reverification qualifies the verifier against existing evidence and is not a new full catalog pass. Private receipt:
 `workload-reverification-708e5bc.json`. Continuous service restart is being verified.
+
+Nested BOLA child qualification passed through the shared pacing boundary on `fe3b7b65de395a10b400b0d1c46c4efcba0ee3df`,
+with 22 attributed child requests, every declared dispatch/response requirement and profile restoration. Private receipt:
+`resume-focused-nested/pass-focused-1791012333150743754/nested-restaurant-exploits/restaurant-exploits--02-bola-profile/receipt.json`.
+Browser children now propagate validated opaque markers; native tool resolution skips owned wrapper chains. Aggregate
+reports reject foreign receipt symlinks. Installed nested scanner/browser and complete parent stress remain open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
