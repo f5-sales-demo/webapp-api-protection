@@ -851,3 +851,7 @@ Origin `e536986` passed all ten Juice Shop browser checks on all four native rep
 and HTTPS. Published checks reverified images, login, basket, supporting routes and Socket.IO after container recreation.
 The workflow aggregate now additionally reconciles actual HTTP assertions against every manifest workflow and reports
 missing assertions; supported HTTP slices remain distinct from complete declared-workflow acceptance.
+
+Installed origin `f99a17f` passed all 33 supported native HTTP checks and correctly reported declared-workflow
+acceptance false with explicit missing-workflow lists. Separate browser slices remain evidence requiring a combined
+source/layer receipt; the HTTP report alone cannot establish complete coverage.
