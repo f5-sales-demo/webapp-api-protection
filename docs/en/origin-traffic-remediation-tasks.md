@@ -958,3 +958,13 @@ qualification are in progress; the failed run remains failed evidence.
 The combined matrix now includes signup and MailHog assertions only after exact source/layer/browser success
 and passing synthetic account/vehicle/mail recovery. A false-recovery regression fails; source checks pass 76 tests
 and hooks. Immutable response-consumption frontend rebuild and actual signup qualification are still in progress.
+
+The response-consumption frontend installed successfully. Signup request completion, rendered success, welcome mail
+and scoped account/vehicle/mail recovery passed; the browser slice still failed on MailHog GET /api/v2/jim 404.
+The same endpoint returns 404 on the direct MailHog replica, so intentional disabled-feature semantics are being
+checked against the pinned runtime. No arbitrary 404 is accepted.
+
+Pinned MailHog help and container arguments prove Jim is disabled: its chaos-monkey opt-in flag is absent and
+GET /api/v2/jim returns 404 natively. The signup verifier now declares only that exact 404 as the expected disabled
+feature outcome; other MailHog errors still fail. Signup request completion, UI success and recovery already passed
+separately; immutable expected-outcome retry remains pending.
