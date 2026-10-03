@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `d9fcf0813702dfab5d41732ac2d97e53791769a7` preserves all 164 scenarios across 22 suites.
-Current source checks pass 118 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
+Generator source `7a07b1324cd1afdffdac9ad6c0d8569ebbde1976` preserves all 164 scenarios across 22 suites.
+Current source checks pass 122 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
@@ -147,7 +147,19 @@ requests/sec, 100 percent completed benign success and zero benign transport fai
 `rate-window-receipt.json`. This is an observation before clean deployment, not final sustained-rate acceptance.
 Multi-client source now retains its 100 correlated identity echoes and adds twenty clients each rotating through all
 nine application content contracts (280 total requests). Source checks pass 122 tests and nine subtests; focused
-installed qualification is pending. Original randomized deep paths and all workload semantics remain open.
+installed qualification passed 280 requests: 100 identity echoes and twenty dispatches to each of nine apps,
+per-client content/cleanup evidence, zero transport failures/cancellations. Private receipt:
+`resume-focused-multiclient-all/pass-focused-1791016780937147850/receipt.json`. Original randomized deep paths and all workload semantics remain open.
+
+The remaining eighteen scenario-level blanket HTTP 500 classifications were removed to keep application crashes
+distinct from expected outcomes. Request contracts already reject broad 500 allowances. VAmPI mutation scope and
+shared-account restoration remain open. Current generator source preserves all 164 scenarios and passes 122 tests
+with nine subtests; immutable install completed and continuous readiness/start verification is pending.
+
+Installed verifier runtime audit found that origin provisioning installs the browser scripts but does not provision
+Node/Playwright. Script digest equality is verified; installed browser runtime acceptance is incomplete. The successful
+origin crawl used the operator browser host and cannot substitute for a reproducible installed verifier runtime.
+Pinned runtime provisioning is an explicit remaining T09/T13 gate.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
