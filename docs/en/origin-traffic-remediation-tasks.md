@@ -157,6 +157,13 @@ in 323 seconds, preserving all operations. The paced published counterpart remai
 published comparison is running to distinguish proxy behavior from WAAP serving. Results remain
 provisional and cannot establish full batch/catalog acceptance.
 
+Full published batch on cooperative origin remains failed: ten-operation request hit its 600-second
+client timeout, then the mixed request was interrupted at the 900-second scenario deadline. Every
+dispatch launched but response/content acceptance did not pass; two cancellations remain failure.
+Native ten-operation comparison passed HTTP 200 in 323 seconds. Direct published comparison remains
+running; the request path difference must be reconciled before acceptance. Continuous traffic is being
+restored on current immutable generator.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
