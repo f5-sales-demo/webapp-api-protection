@@ -11,9 +11,9 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source candidates are origin `b30656c` and generator `15b27f1`; Terraform pins bind their exact
+Current source candidates are origin `b30656c` and generator `43e7f73`; Terraform pins bind their exact
 commits, archive digests and installer digests. Source checks pass 76 origin tests with 69 subtests,
-136 generator tests with nine subtests, eight focused Node tests, and 308 WAAP tests with one environment skip.
+138 generator tests with nine subtests, eight focused Node tests, and 308 WAAP tests with one environment skip.
 Origin and WAAP required CI passed; generator's latest scanner attribution correction is awaiting required CI.
 
 The last complete origin matrix (`695c07c`) has 66 passing browser receipts and no missing declared workflow/layer
@@ -1099,3 +1099,13 @@ The prior rapid run reached 336 successful rendered/mitigated action records but
 user-agent session, leaving 24 required actions absent. That run remains failed. `15b27f1` reduces only idle
 settling time after pending requests finish; installed full rapid/catalog qualification remains open.
 Continuous restart is in progress. No clean rebuild or final Terraform convergence is claimed.
+
+Fixture exporter idempotence passed two reruns on origin `b30656c`: crAPI user/vehicle/video/order, DVWA user
+and RESTaurant user counts and returned object identities stayed stable. Private receipt:
+`private-fixture-rerun-1791046618208888465/receipt.json`. Attack mutation recovery remains incomplete.
+Generator `1939ebe` binds complete pass receipts to exact scenario IDs/source/archive digests and passed
+138 tests with nine subtests and repository Pylint. WAAP acceptance now also requires matching catalog
+provenance, the benign rate budget, balanced domains and all nine application paths; its full pytest run passed
+333 tests and 396 subtests with one environment skip. Generator `43e7f73` records document commit before
+render checks and extends per-page/drain waits while retaining the 900-second scenario deadline. Installed
+qualification is pending. The current older pass retains its API-denial timeout failure and rapid failures.
