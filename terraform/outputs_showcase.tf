@@ -1,9 +1,12 @@
 output "showcase" {
   description = "Application endpoints, VM access metadata, and configured protection modes for the unattended showcase lifecycle."
   value = {
-    namespace         = var.namespace
-    domains           = module.http_lb.domains
-    loadbalancer_name = module.http_lb.loadbalancer_name
+    application_manifest_sha256 = filesha256("${path.module}/origin-applications.json")
+    application_urls            = { for app in local.origin_applications : app.id => "http://${module.origin_server.public_ip}${app.prefix}" }
+    origin_source               = { commit = var.origin_commit, archive_sha256 = var.origin_archive_sha256, installer_sha256 = var.origin_installer_sha256 }
+    namespace                   = var.namespace
+    domains                     = module.http_lb.domains
+    loadbalancer_name           = module.http_lb.loadbalancer_name
     origin = {
       public_ip      = module.origin_server.public_ip
       resource_group = module.origin_server.resource_group_name
