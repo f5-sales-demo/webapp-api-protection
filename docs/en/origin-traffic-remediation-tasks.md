@@ -1125,3 +1125,11 @@ Origin `1392e22` packages the licensed VT323 font locally under the Juice Shop a
 idempotent HTML adaptation; 77 source tests and 69 subtests pass. Immutable installation and focused
 render/traffic qualification are pending. The next traffic candidate `e52a996` retains pending-request
 diagnostics and includes merged default-branch repairs. Complete coverage and clean rebuild remain open.
+
+Local font delivery passed native/origin/published live byte checks on origin `c74a0bd`: 153,116-byte
+VT323 asset at SHA-256 `cf4de751ada78ceac033dbe16a687742939995b77bc2a052ae17a4957958594d`;
+HTML contains the local font declaration and no external Google Fonts links. The earlier `1392e22` font
+probe returned SPA HTML and remains failed. Source regression now binds the real native frontend asset
+root. The concurrent prior matrix crossed an origin update and cannot qualify same-source acceptance;
+a fresh matrix and published crawls are running. Traffic remains in focused qualification and must be
+restarted afterward.
