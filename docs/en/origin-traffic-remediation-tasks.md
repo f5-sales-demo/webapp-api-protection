@@ -124,6 +124,11 @@ as contact sheets and key pages; private manual review remains final_acceptance=
 for Juice Shop about/supporting-media loading indicators. The rendered slice is provisional, not fresh
 final delivery. Native fixture exporter reruns remain stable.
 
+No-retry costly DVGA sequence also reached its 900-second deadline before ten-operation response
+completion; mixed batch was not launched. Baseline/two/five JSON responses passed, but the full scenario
+remains timeout with one cancellation. Preserve this failure under `resume-focused-dvga-costly-query/`.
+Latest setup-outcome source is being immutably installed and continuous traffic restarted.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
