@@ -55,6 +55,16 @@ two accepted full catalog passes, final control attribution and sustained load, 
 ownership-scoped clean rebuild, stop/restart/reboot recovery, unchanged apply and zero-action plan.
 All T01–T16 tasks remain open. CSD remains disabled.
 
+Latest continuation: generator `bc328c6` restores ten-minute stress duration, waits for native/nested
+workers, bounds Vegeta queues, requires native tools plus scheduled bursts and Lua diversity, extends
+paced SQLMap response deadlines, and removes unsupported video-execution claims. Source checks pass
+147 tests and nine subtests. The first full native stress retry (`6386a69`) remains failed with ApacheBench
+errors and thousands of client cancellations; its owned process group was interrupted after preserving
+failure evidence. Corrected retry is running under `resume-focused-kraken-native/`; continuous traffic
+is stopped while that single shared boundary is occupied. Origin `fa7156d` is immutably installed with
+green required CI. Its current matrix has 62 passing browser receipts and signup checks still running.
+WAAP `5eb8ad8` required CI is green; final coverage/rebuild gates remain open.
+
 ## Historical observations
 
 Earlier revisions and measurements below are retained as evidence of their original outcomes.
