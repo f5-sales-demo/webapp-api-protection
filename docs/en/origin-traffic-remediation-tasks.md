@@ -141,6 +141,12 @@ duration and correct JSON while simultaneous __typename returned in 6–8 ms. Pr
 Continuous pass retains credential-stuffing failure for thirteen of fifteen actual submissions after
 two login-form setup errors; it cannot establish catalog acceptance.
 
+Generator `1e79a44` retries only login-page setup for transient 502/503/504 with a bounded three-attempt
+limit and longer browser deadline; all fifteen credential pairs remain unchanged and actual submissions
+are counted. Previous thirteen-submission failure remains failed with its explicit HTTP 503 evidence.
+Cooperative DVGA full published batch qualification is in progress; native responsiveness proof passed
+all replicas without changing original load duration. No full catalog/fresh acceptance is claimed.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
