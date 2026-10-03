@@ -11,10 +11,10 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source candidates are origin `b30656c` and generator `f980a6e`; Terraform pins bind their exact
+Current source candidates are origin `b30656c` and generator `287ebda`; Terraform pins bind their exact
 commits, archive digests and installer digests. Source checks pass 76 origin tests with 69 subtests,
 135 generator tests with nine subtests, eight focused Node tests, and 308 WAAP tests with one environment skip.
-Origin and WAAP required CI passed; generator's latest catalog correction is awaiting required CI.
+Origin and WAAP required CI passed; generator's latest scanner attribution correction is awaiting required CI.
 
 The last complete origin matrix (`695c07c`) has 66 passing browser receipts and no missing declared workflow/layer
 entries. Manual review caught capture timing gaps; `b30656c` loads visible images before screenshot capture. Its
@@ -1071,3 +1071,15 @@ in those windows was 100 percent with zero baseline transport failures; cumulati
 two HTTP 503 responses. These windows do not establish final sustained fresh-deployment acceptance. WAAP
 required CI is green after Python assertion/formatting and Terraform formatting repairs. Full catalog, broad
 fixture restoration, merged artifacts, clean rebuild and repeat apply gates remain open.
+
+Latest origin `b30656c` passed all four published landing crawls (28 checks per layer), including HTTP-www
+after lazy-image verification repair; the original failed HTTP-www receipt remains failed. Same-source full
+workflow matrix and screenshot review are pending. Generator `2e30e63` focused API fuzz dispatched 169 requests
+with zero transport failures/cancellations but failed three stale catalog CONNECT requirements; `f980a6e`
+corrects all thirteen forwarded-method contracts and passed required CI. Rapid qualification has reached
+240 exact actions, 192 rendered and 48 mitigated, with no failed action records yet; it remains incomplete.
+
+Generator `287ebda` adds Nikto nested attribution using the pinned scanner's supported `-config` and USERAGENT
+interface while retaining native version/test identifiers and plugin paths. Source checks passed 136 tests and
+nine subtests; installed child attribution qualification remains pending. No task is marked complete from these
+focused checks.
