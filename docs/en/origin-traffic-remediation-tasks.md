@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `a203ef7fa38122f5c1f7043fc8974c82c86dd1fb` preserves all 164 scenarios across 22 suites.
-Current source checks pass 123 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
+Generator source `f93796fe0489cf03272fecce7794cf2ec9c91316` preserves all 164 scenarios across 22 suites.
+Current source checks pass 124 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
@@ -177,6 +177,11 @@ Source regression rejects adapter revision mismatch; 123 tests and nine subtests
 Installed nested provenance qualification passed child dispatch/restoration, matching source commit/archive
 and the aggregate report. Private child receipt:
 `resume-focused-nested/pass-focused-1791017796681530580/nested-restaurant-exploits/restaurant-exploits--02-bola-profile/receipt.json`. Full nested stress and all catalog semantics remain open.
+
+Exact request/workload endpoints are reconciled into the target matrix for 125 scenarios. Validation now rejects an
+exact executable target missing from its scenario matrix. Root discovery and intentional-negative probes remain separate
+from hosted application identity acceptance. All 164 entries remain; source checks pass 124 tests and nine subtests,
+mypy, configured Pylint and changed-file pre-commit. Installed catalog completed; continuous startup is pending.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
