@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source candidates are origin `56fe2c8` and generator `937bf7b`. Terraform pins are being refreshed
+Current source candidates are origin `fa7156d` and generator `70dacf7`. Terraform pins are being refreshed
 from pushed commits and verified archive/installer digests. Source verification passed 79 origin tests with
 69 subtests and 143 generator tests with nine subtests. Required CI for the latest heads is pending.
 The three application manifests declare nine applications with 33 native serving ports.
@@ -31,19 +31,24 @@ private install directory.
 The same focused run failed RESTaurant BOPLA despite successful fixture restoration: unsupported `Admin`
 and `Manager` roles returned application HTTP 500. The failure remains failed. Origin `3f4df8a` adds an
 idempotent native adapter that returns HTTP 422 before database mutation for unsupported roles, preserving
-valid-role mass assignment. Its immutable installation passed; the focused retry passed all six intended payload requirements,
-profile restoration and zero transport failures/cancellations. Private receipts remain under
-`resume-focused-restaurant-invalid-role/`. The previous HTTP 500 run remains failed.
+valid-role mass assignment. Its immutable installation and focused retry passed six intended role payloads, profile restoration,
+zero transport failures and zero cancellations; prior failures remain failed.
 
 Generator `a4d6c7d` fixes OTP receipt counters lost in a background subshell and removes unsupported
 full-keyspace feasibility claims. A deterministic shell regression first reproduced the failure, then passed
 with both batches counted. This does not repair registration/OTP fixture isolation or establish full coverage.
-The latest installed generator is `937bf7b`; source and installed provenance were checked independently.
+The latest installed generator is `70dacf7`; source and installed provenance were checked independently.
 
 The interrupted full catalog baseline recorded 76 scenarios, with 62 passing and 14 failing. No complete
 catalog pass is accepted. Earlier rapid, API fuzz, ZAP and Nikto focused successes remain bound to their
-recorded sources. Failed stress, crAPI fixture and DVGA timeout evidence is preserved. Traffic is stopped
-for focused qualification and will be restarted after the boundary is released.
+recorded sources. Failed stress, crAPI fixture and DVGA timeout evidence is preserved. Continuous traffic is active and enabled on generator `70dacf7` after complete startup readiness.
+No accepted full catalog pass is claimed.
+
+Coupon retry on `70dacf7` passed the valid seeded coupon control, exact invalid-code HTTP 500/empty JSON
+contract and three injection payloads, with zero transport failures/cancellations. A blocked control cannot
+satisfy this contract. Other focused crAPI passes include mechanic reports/discovery, unauthenticated order
+probes and JWT confusion. Private evidence: `resume-focused-crapi-latest/` and `resume-focused-coupon-retry/`.
+The origin type regression was repaired after required CI failed; latest CI remains pending.
 
 Remaining gates include complete native stress/nested/connection behavior, all mutation restoration,
 two accepted full catalog passes, final control attribution and sustained load, merged immutable installation,
