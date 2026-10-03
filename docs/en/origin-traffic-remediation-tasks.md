@@ -77,6 +77,12 @@ Source checks pass 153 tests and nine subtests. Terraform plan regressions pass 
 stream timeout on both protected listeners. The published baseline/two/five-operation DVGA responses passed
 all JSON assertions; ten-operation and mixed checks remain running.
 
+Strict repaired DVGA run remains failed: baseline/two/five-operation responses passed full JSON
+assertions, but the ten-operation request did not finish before the 900-second scenario deadline and
+mixed batch was not launched. Preserve this timeout receipt; it is not full application/scenario acceptance.
+Continuous traffic is being restored on latest immutable source while remaining long-query and fixture
+contracts are repaired.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
