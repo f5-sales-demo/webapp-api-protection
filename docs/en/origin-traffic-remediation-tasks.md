@@ -826,3 +826,8 @@ hooks; immutable rebuild and HTTPS retry remain pending. Those mixed-content fai
 Rapid failure records now distinguish attempted from performed actions and retain private response size, script count
 and body-character count for failed navigation. Eight focused Node tests and repository hooks pass. Source `3722a58`
 is pushed; immutable installed qualification is pending. This diagnostic change does not accept the earlier failed run.
+
+Origin `c55a6ec` passed the expanded seven-check crAPI verifier on both domains over HTTP and HTTPS after the
+canonical mechanic endpoint repair. All views, mechanic form, vehicle image return and deep-link refresh checks passed
+without browser errors or transport failures. Signup, service-request mutation workflows, MailHog rendering and
+comprehensive fixture recovery remain incomplete; this slice does not establish full crAPI acceptance.
