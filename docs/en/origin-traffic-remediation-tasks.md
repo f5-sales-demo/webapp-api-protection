@@ -711,3 +711,10 @@ and both domains over HTTP and HTTPS. Every run verified receiver identity, coun
 dashboard, native scoped-clear action and preservation of the pre-existing receiver entries. Earlier overlapping,
 resource-cancellation and interrupted runs remain failed evidence. Screenshot contact sheets and a full-size dashboard crop were reviewed; the dashboard renders existing synthetic entries.
 Continuous traffic restart is in progress. Complete application/catalog and Terraform acceptance remain open.
+
+## Readiness fixture cleanup
+
+Screenshot review exposed repeated CSD readiness receiver entries. The readiness source now sends a unique fixture ID,
+clears only that probe in a finally block and requires its absence. A failing regression reproduced the missing cleanup;
+59 source tests and repository hooks now pass. Installed repeated-readiness qualification is pending. Historical
+receiver data stays preserved; complete repeat-install and clean-rebuild acceptance remain open.
