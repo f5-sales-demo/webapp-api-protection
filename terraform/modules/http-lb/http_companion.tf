@@ -19,6 +19,29 @@ resource "xcsh_http_loadbalancer" "http" {
     weight   = 1
     priority = 1
   }
+  dynamic "routes" {
+    for_each = [for route in var.custom_routes : route if route.type == "simple" && route.use_websocket]
+    content {
+      simple_route {
+        http_method = routes.value.http_method
+        path {
+          prefix = routes.value.path_mode == "prefix" ? routes.value.path_value : null
+          path   = routes.value.path_mode == "exact" ? routes.value.path_value : null
+          regex  = routes.value.path_mode == "regex" ? routes.value.path_value : null
+        }
+        origin_pools {
+          pool {
+            name      = xcsh_origin_pool.origin.name
+            namespace = var.namespace
+          }
+        }
+        advanced_options {
+          priority = routes.value.priority
+          web_socket_config { use_websocket = true }
+        }
+      }
+    }
+  }
   app_firewall {
     name      = xcsh_app_firewall.this.name
     namespace = var.namespace

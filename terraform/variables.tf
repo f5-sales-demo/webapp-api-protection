@@ -57,8 +57,8 @@ variable "csd_cdn_simulator_host" {
     # host, and the origin's <script src> host must match it exactly for the
     # detect -> mitigate -> block cycle. A raw IPv4 cannot be registered reliably.
     condition = (
-      !can(regex("^(\\d{1,3}\\.){3}\\d{1,3}$", var.csd_cdn_simulator_host))
-      && can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", var.csd_cdn_simulator_host))
+      !can(regex("^(\\d{1,3}\\.){3}\\d{1,3}$", var.csd_cdn_simulator_host)) &&
+      can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", var.csd_cdn_simulator_host))
     )
     error_message = "csd_cdn_simulator_host must be an FQDN (e.g. the cdn-simulator edge_fqdn), not a raw IP, so it matches the F5 XC CSD mitigated-domain exactly."
   }

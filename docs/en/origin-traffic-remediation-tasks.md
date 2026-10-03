@@ -259,6 +259,25 @@ errors. Its eight screenshots were manually reviewed for product images, labels,
 Private receipt: `/opt/origin-server/private-browser-1791023435742027870/receipt.json`. Published browser layers
 are now running. This does not complete checkout or all serving-layer workflows. Full application acceptance remains open.
 
+Published Juice Shop browser runs passed ten workflow checks on HTTPS www; HTTP www and HTTP api remain failed
+with Socket.IO error and incomplete product-image assertion. All other declared workflow views rendered. These HTTP
+failures are not accepted. Private outputs: `private-browser-juice-1791023514147314482`,
+`private-browser-juice-1791023534348957858`, and successful HTTPS `private-browser-juice-1791023551194020428`.
+HTTPS api also passed all ten checks in `private-browser-juice-1791023566571231582`. Serving-layer completeness remains open.
+
+HTTP companion listener lacked the declared WebSocket routes. An ownership-checked saved plan updated only that
+listener; apply failed provider readback because route priority materialized DEFAULT from null. Failed apply receipt is
+preserved. Source now emits DEFAULT explicitly. The repair saved plan had zero resource actions and applied successfully
+(0 added/changed/destroyed). This is a targeted repair check, not final full Terraform convergence. Origin verifier
+`d534acf` waits for terminal product images before assertion; Immutable installation passed. Both HTTP domains now passed ten rendered workflow checks with zero errors;
+private outputs: `private-browser-juice-1791024250681555708` and `private-browser-juice-1791024271883735139`.
+Both HTTPS domains passed earlier on the prior verifier source. Final same-source all-layer acceptance remains open.
+
+Checkov parsing failed the existing multiline FQDN boolean validation. The expression was reformatted with the operator
+on the preceding line, preserving validation semantics; intact scanner retry is running. HTTP WebSocket source repair
+is verified through saved ownership-checked plan/readback and browser checks, but final full Terraform convergence
+remains open. Continuous traffic is enabled and running.
+
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
 response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
