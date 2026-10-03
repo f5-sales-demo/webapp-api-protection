@@ -15,7 +15,7 @@ Generator source `506d54244fc788a754486c31ba574f6ece866fa6` preserves all 164 sc
 Its required CI passed. Source checks pass 125 Python tests and nine subtests, repository-configured mypy and Pylint
 across sixty Python files, and focused Node checks. No full catalog pass has yet satisfied acceptance.
 
-Origin source `5447d062965aae4cd96d37ec298974c03d98a6e1` passes 56 Python tests, type checking and
+Origin source `a2409bdcc4b6b77d7ada4b32fef22d61fde01306` passes 57 Python tests, type checking and
 changed-file repository hooks. The DVWA redirect repair prevents already-prefixed upstream redirects from acquiring
 a second prefix. Its immutable predecessor `be736289794fdc10d6a7eaf239cd37fd74d9f574` passed four rendered
 checks through origin nginx and both published domains over HTTP and HTTPS. Checks covered authenticated home,
@@ -671,3 +671,15 @@ Focused installed multi-client qualification passed all 100 requests across twen
 assertions and closed connections. No transport failures or cancellations occurred. This qualifies the bounded identity
 adapter; broader nested stress, fixture restoration, rendered completeness and final full-catalog acceptance remain open.
 Continuous traffic is restarting on `50d3ce4ff13e1a97fce76d86861085b81a7ba05f`.
+
+## DVGA replica consistency repair
+
+The native browser verifier passed six checks on each of all four replicas, including native paste submission,
+subscription delivery and scoped fixture removal. Published HTTP and HTTPS runs exposed unstable replica selection:
+three runs missed subscription updates and all four failed cleanup. Those outcomes remain failed evidence.
+The four exact synthetic paste objects left by those runs were recovered through native replica requests with title,
+content and ID ownership assertions, confirmed removal and a separate private recovery receipt. No failed receipt changed.
+
+The current origin candidate binds browser, GraphQL and WebSocket requests to a replica cookie and retains a private
+fixture journal for recovery. Source checks pass 57 tests, type checking and changed-file repository hooks.
+Immutable installation and published-layer retry are in progress. Complete catalog and final deployment gates remain open.
