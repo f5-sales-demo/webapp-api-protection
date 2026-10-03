@@ -71,6 +71,11 @@ fixture and executable changes pass enforcement with zero findings; remaining fu
 Full-head gate remains failed. Private receipt: `catalog-pii-final-english-1791069127496844001.log`.
 Earlier failed scan receipts remain failed. No suppression or sourceHash refresh establishes acceptance.
 
+PII English/scenario remediation is committed in generator `3973098`. Full-head enforcement now
+reports exactly 12 remaining localized deployment-example findings; all staged English/source changes
+passed enforcement. Private current receipt: `catalog-pii-final-english-1791069127496844001.log`.
+Origin and generator required CI passed on these source candidates.
+
 The fresh rendered matrix on installed origin `d6930ea` is under
 `private-browser-matrix-1791068709010064608/`. It has two failed CSD HTTP dashboard transport checks;
 all content/restoration checks in those receipts passed, but cancellation remains failure. The clear button
