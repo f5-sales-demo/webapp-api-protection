@@ -127,6 +127,13 @@ Earlier zero-launch prerequisite evidence remains failed. Continuous traffic res
 Current source/installed origin is `2990de0`; generator is `67e9cf9`. WAAP pins those archive/installer digests.
 Provider remains 13.0.2 with enriched v10.0.0 provenance. All T01–T16 completion gates remain open.
 
+Generator source/installed candidate is now `551428e`, which also rejects missing, duplicate and unknown
+fixture-refresh declarations. Source checks pass 168 tests/nine subtests and staged PII/pre-commit.
+The installed shadow-scenario repeat passed all 12 intended GETs with zero transport failures/cancellations.
+Private receipt: `resume-focused-shadow-fixture-scope/pass-focused-1791070532637659694/receipt.json`.
+Continuous restart is underway on this exact source. The fresh origin `2990de0` matrix is in progress;
+its first 27 browser receipts passed with no failures. No full acceptance is claimed.
+
 ## Earlier repair-round observations
 
 These earlier observations retain their original source revisions and failed evidence;
