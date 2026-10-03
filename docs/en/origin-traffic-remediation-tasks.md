@@ -221,7 +221,11 @@ Origin evidence retention now evicts only completed owned browser runs by age/si
 deadline. Source tests preserve active/unrelated paths and reject unowned eviction. Origin `83beebf` installed
 successfully. Subsequent header-scope correction keeps workflow tracking headers off third-party frames; its diagnostic
 run no longer reported the prior map transport errors but hit a pending-request deadline and remains failed.
-Origin `8f9c5e7` passes 53 tests and 69 subtests; immutable installed retry is pending. No browser failures were suppressed.
+Origin `8f9c5e7` passes 53 tests and 69 subtests; Immutable installation passed. The locked-runtime crAPI retry passed all five rendered view checks with zero
+errors; its five screenshots were manually reviewed for vehicle image/map, Community and Shop before/after refresh.
+Private receipt: `/opt/origin-server/private-browser-1791021207307010849/receipt.json`. Earlier failures remain failed.
+This qualifies native login and read-only views; signup, workshop mutations, fixtures and all published browser layers
+remain open. No browser failures were suppressed.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
