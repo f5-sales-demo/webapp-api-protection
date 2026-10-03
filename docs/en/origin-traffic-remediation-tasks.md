@@ -111,6 +111,13 @@ Current rendered matrix on origin `3a62623` has 33 passing browser receipts/no f
 and screenshot review remain pending. Fixture exporter rerun idempotence passed after native video media
 repair. Continuous catalog has thirteen passing receipts/no failures; no full pass is accepted.
 
+Source fixture authentication now retains per-path outcome/status receipts and fails transport errors
+before dependent scenario setup; mitigated requests remain distinct from rejection or timeout. Source
+verification passes 158 generator tests/nine subtests and repository lint. Installed qualification is
+pending. Refreshed origin matrix currently has 56 passing browser receipts/no failures. Costly batch
+retry with no upstream retries has passing baseline and two-operation JSON responses; larger batches
+remain running and are not yet acceptance.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
