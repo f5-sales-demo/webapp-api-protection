@@ -758,3 +758,12 @@ pass is accepted. The next immutable generator has green required CI and rejects
 HTTPBin source now derives native assets, specification and form routes from the request prefix; 61 origin source tests
 and type checking pass. Its browser verifier requires actual form submit and returned synthetic field values.
 Installed qualification is pending after the completed rapid run.
+
+## HTTPBin published form schema repair
+
+The owned API-definition saved plan updated one existing resource and applied successfully. Twelve JSON control
+responses passed: valid synthetic JSON returned 200 and missing/wrong demo IDs returned 403 on both domains over
+HTTP and HTTPS. Native form submissions still failed. Attributed API-security events identified omitted optional
+form fields as non-nullable, so the form schema now explicitly permits empty values while retaining the JSON contract.
+A new exact schema upload, ownership-checked plan, apply and published browser retry are in progress. First plan/input
+failure and all failed form runs remain preserved. No control or final Terraform convergence acceptance is claimed.
