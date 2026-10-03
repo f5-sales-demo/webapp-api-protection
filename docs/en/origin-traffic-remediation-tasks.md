@@ -298,3 +298,28 @@ values, application identity and decoded response content. Native credential-stu
 form submits with no transport failure or cancellation after waiting for page resources before submission. Continuous
 traffic is enabled and running on the current immutable candidate; the current pass has eight verified scenarios so far.
 CI, full catalog acceptance, complete application workflows and the Terraform rebuild/zero-change gates remain open.
+
+## Current full catalog progression
+
+Generator source is `67409fef99dea9635b1cc518f787c4511bc25b90`; validation passes 92 tests and nine subtests,
+Ruff, mypy and required pre-commit. The full source matrix is 164 entries across 22 suites, with mandatory request,
+browser, connection or report execution evidence. No catalog entry was removed.
+
+The latest continuous pass reached twenty receipts, nineteen accepted launches and a failed baseline load scenario.
+Baseline wrk cutoffs cancelled 158 outstanding requests; it remains failed evidence. Source now uses a fixed-count
+completion baseline with measured concurrency, connection reuse, per-request content identity and no abandoned
+requests. Focused installed qualification is in progress. Remaining baseline randomized-path coverage stays open.
+
+Dynamic query/encoding qualification passed 72 and 24 action/content assertions respectively. Native registration,
+contact, credential stuffing, Hydra, scraper, SQL/NoSQL, VAmPI and focused DVWA/RESTaurant dispatch repairs retain their
+individual installed receipts. Those do not complete all application workflows or all catalog contracts.
+
+CI source type/format findings in payload-encoding and CDN regression tests were repaired. Current CI is pending.
+Continuous traffic will restart after focused qualification. Complete fresh catalog passes, mutation restoration, nested
+attribution, scanner semantics, complete rendered workflows, merged installation and clean Terraform acceptance remain
+open. T11 is in progress; failed and interrupted passes were not relabeled.
+
+A separate installed baseline completion qualification passed all 200 requests with valid content, actual concurrency
+and connection reuse, zero transport failures and zero cancellations. Non-GET bypass qualification passed all nine
+request/response/cache-control requirements with zero transport failures/cancellations. Continuous traffic is restarting
+on `67409fef99dea9635b1cc518f787c4511bc25b90`; complete catalog and final deployment acceptance remain open.
