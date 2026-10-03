@@ -1145,3 +1145,10 @@ cancellations. Private receipt: `resume-focused-rapid-fresh/pass-focused-1791048
 One HTTP 503 and two HTTP 502 responses during origin replacement remain failures. A stable-origin rapid
 rerun is now in progress with no further origin mutation. Current origin source `9347439` required CI is green;
 installed application source remains `c74a0bd` during matrix qualification.
+
+Origin `c74a0bd` completed a stable full workflow matrix with 66 passing browser receipts and no missing
+workflow/layer entries (`private-browser-matrix-1791048776842279571/matrix-receipt.json`); screenshots are
+being reviewed. Generator `be578b6` records explicit navigation/closing phases and permits only dispatched
+Socket.IO polling-session cleanup in those phases; asset cancellation and execution-phase failure still fail.
+The previous verifier recorded those deliberate long-poll closures as generic transport errors. Source checks
+pass 139 tests and nine subtests; current installed rapid rerun remains on `e52a996` and is incomplete.
