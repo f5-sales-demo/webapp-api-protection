@@ -425,17 +425,22 @@ resource "xcsh_http_loadbalancer" "this" {
           # deferred to a later slice.
           dynamic "advanced_options" {
             for_each = anytrue([
-              routes.value.prefix_rewrite != null, routes.value.disable_location_add,
+              routes.value.use_websocket, routes.value.disable_retries, routes.value.prefix_rewrite != null, routes.value.disable_location_add,
               routes.value.timeout_ms != null, length(routes.value.req_headers_add) > 0,
               length(routes.value.req_headers_remove) > 0, length(routes.value.resp_headers_add) > 0,
               length(routes.value.resp_headers_remove) > 0, length(routes.value.req_cookies_remove) > 0,
               length(routes.value.resp_cookies_remove) > 0, routes.value.waf_mode != "inherited",
             ]) ? [1] : []
             content {
+              dynamic "web_socket_config" {
+                for_each = routes.value.use_websocket ? [1] : []
+                content { use_websocket = true }
+              }
               prefix_rewrite             = routes.value.prefix_rewrite
               priority                   = routes.value.priority
               disable_location_add       = routes.value.disable_location_add
               timeout                    = routes.value.timeout_ms
+              no_retry_policy            = routes.value.disable_retries ? {} : null
               request_headers_to_remove  = length(routes.value.req_headers_remove) > 0 ? routes.value.req_headers_remove : null
               response_headers_to_remove = length(routes.value.resp_headers_remove) > 0 ? routes.value.resp_headers_remove : null
               request_cookies_to_remove  = length(routes.value.req_cookies_remove) > 0 ? routes.value.req_cookies_remove : null
@@ -1421,7 +1426,7 @@ resource "xcsh_http_loadbalancer" "this" {
   # Header/cookie manipulation (LPC-2) via more_option. Emitted only when a header/cookie
   # list is set (0-change otherwise); *_to_remove lists null-when-empty.
   dynamic "more_option" {
-    for_each = (length(var.request_headers_to_add) + length(var.request_headers_to_remove) + length(var.response_headers_to_add) + length(var.response_headers_to_remove) + length(var.request_cookies_to_remove) + length(var.response_cookies_to_remove)) > 0 || var.disable_default_error_pages ? [1] : []
+    for_each = (length(var.request_headers_to_add) + length(var.request_headers_to_remove) + length(var.response_headers_to_add) + length(var.response_headers_to_remove) + length(var.request_cookies_to_remove) + length(var.response_cookies_to_remove)) > 0 || var.disable_default_error_pages || var.lb_stream_idle_timeout_ms != null ? [1] : []
     content {
       dynamic "request_headers_to_add" {
         for_each = var.request_headers_to_add
@@ -1443,6 +1448,7 @@ resource "xcsh_http_loadbalancer" "this" {
       response_headers_to_remove  = length(var.response_headers_to_remove) > 0 ? var.response_headers_to_remove : null
       request_cookies_to_remove   = length(var.request_cookies_to_remove) > 0 ? var.request_cookies_to_remove : null
       response_cookies_to_remove  = length(var.response_cookies_to_remove) > 0 ? var.response_cookies_to_remove : null
+      idle_timeout                = var.lb_stream_idle_timeout_ms
       disable_default_error_pages = var.disable_default_error_pages
     }
   }
