@@ -183,6 +183,18 @@ exact executable target missing from its scenario matrix. Root discovery and int
 from hosted application identity acceptance. All 164 entries remain; source checks pass 124 tests and nine subtests,
 mypy, configured Pylint and changed-file pre-commit. Installed catalog completed; continuous startup is pending.
 
+WAAP candidate deployment inputs now pin the exact installed origin/generator commits, archive digests and both
+installer digests. Its vendored manifest matches pinned origin content, including the chatbot dependency, and outputs
+carry generator source provenance plus the origin Python installer digest. Credential-free WAAP checks pass 306 tests
+with one existing skip. These are candidate pins; merged-source installation and ownership-checked Terraform rebuild
+remain open. Current generator CI is green and its early full pass has ten verified receipts with no failures.
+
+Origin browser runtime now performs exact ownership-checked cleanup, rejects symlink evidence destinations and retains
+a separate failed runtime receipt. Controlled installed failure left zero owned verifier containers. Source provenance
+records the exact immutable commit, archive and installer in origin installation and browser runtime receipts. Origin
+`4a557deb9c2f953b08739f93a1c444cfec9745b9` passed immutable installation; 50 source tests and 69 subtests,
+type/lint checks pass. Full rendering failures remain failures. Continuous generator restart is being verified.
+
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
 response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
