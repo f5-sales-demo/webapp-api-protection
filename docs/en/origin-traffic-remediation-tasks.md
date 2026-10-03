@@ -683,3 +683,15 @@ content and ID ownership assertions, confirmed removal and a separate private re
 The current origin candidate binds browser, GraphQL and WebSocket requests to a replica cookie and retains a private
 fixture journal for recovery. Source checks pass 57 tests, type checking and changed-file repository hooks.
 Immutable installation and published-layer retry are in progress. Complete catalog and final deployment gates remain open.
+
+## Published DVGA workflow qualification
+
+Origin `a2409bdcc4b6b77d7ada4b32fef22d61fde01306` passed the six-check browser workflow on both domains
+over HTTP and HTTPS, including actual subscription delivery and scoped fixture removal. Fifty-four screenshots from
+native replicas, origin nginx and published layers were reviewed as a contact sheet, with a full-size form review.
+Earlier inconsistent-affinity runs remain failed. This qualifies the declared paste/subscription slice, not all DVGA
+features, full scenario scope, or final fresh-deployment acceptance.
+
+The next CSD candidate derives native and published routes and scopes clear-log requests carrying a synthetic fixture
+ID to that run while preserving other entries. Source checks pass 58 tests and type checking; installed browser checks
+are pending. CSD protection remains disabled. All T01-T16 completion gates remain open.
