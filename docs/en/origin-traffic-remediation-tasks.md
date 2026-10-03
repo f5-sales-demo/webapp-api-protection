@@ -786,3 +786,8 @@ responses and generated prefixed documentation. The pinned ASGI adapter now stri
 requests. Source checks pass 62 tests and repository hooks. Immutable installation and native/published reruns are
 in progress. The earlier native failures remain failed evidence; the catalog pass interrupted for installation remains
 incomplete with thirteen accepted receipts.
+
+Origin `f4c8d2f` passed all five RESTaurant browser checks on every native replica. Published reruns retained
+intermittent 403 blocks on documentation assets and login, while the HTTPS www layer passed. These are failed
+serving-layer evidence and require control attribution; the native prefix adapter does not establish published
+acceptance. Continuous traffic restart is in progress.
