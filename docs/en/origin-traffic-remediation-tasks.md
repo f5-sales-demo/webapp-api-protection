@@ -822,3 +822,7 @@ The expanded seven-check crAPI workflow passed through origin nginx and both HTT
 seven views but failed a mixed-content redirect at the mechanic list endpoint. The frontend adapter now requests the
 canonical trailing-slash endpoint directly, matching native Django routing. Source checks pass 64 tests and repository
 hooks; immutable rebuild and HTTPS retry remain pending. Those mixed-content failures remain failed evidence.
+
+Rapid failure records now distinguish attempted from performed actions and retain private response size, script count
+and body-character count for failed navigation. Eight focused Node tests and repository hooks pass. Source `3722a58`
+is pushed; immutable installed qualification is pending. This diagnostic change does not accept the earlier failed run.
