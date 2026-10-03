@@ -147,6 +147,37 @@ but six TimeoutError baseline transport failures fail acceptance. Earlier zero-f
 this receipt. Current origin `2990de0` full matrix has 62 passing browser receipts/no failures so far;
 complete matrix and manual screenshot review remain pending. All final acceptance gates remain open.
 
+The complete installed origin `2990de0` matrix passed with 66 browser receipts, no missing workflow/layer
+entries and zero recorded browser failures. Private matrix: `private-browser-matrix-1791070127766279518/`.
+All 315 screenshots were collected; eight application contact sheets and full-size key pages were reviewed.
+Manual review still rejects rendered completeness because a Juice Shop About gallery remains a loading
+spinner on one HTTPS capture. Private review: `manual-render-review-2990de0.json`. HTTP/DOM matrix success
+does not override that visual limitation. Remaining gallery resource behavior is under investigation.
+Corrected native stress `82646ba` is running with worker attribution and zero failures/cancellations through
+its first four minutes; full ten-minute completion remains pending. Continuous service restart follows.
+
+Manual gallery investigation found lazy carousel images and no broken published asset prefix. Origin source
+`644b9f5` now advances through each native Next control and requires the active image to load before accepting
+About content; immutable installation is underway. The prior `2990de0` matrix stays automated-pass/manual-
+incomplete, with 315 reviewed screenshots and the loading-state limitation retained.
+
+Generator source `b352c64` repairs required native-regression CI typing, protocol-method naming and Ruff
+annotation placement; Pylint/mypy/Ruff pass directly. Installed stress remains `82646ba` so its receipt stays
+bound to its original revision. Corrected native workers pass nine minutes so far without transport failures
+or cancellations; final drain/native report verification remains pending. Earlier argument-order failure is
+preserved as tool failure and interrupted after confirmed error.
+
+Installed origin `ecb553e` passed the stricter HTTPS API Juice Shop browser run: ten checks, zero failures,
+including populated lazy gallery navigation. Private receipt: `private-browser-1791071785759617282/`.
+Current full matrix on this strengthened verifier is running; prior complete `2990de0` matrix remains
+automated-pass/manual-incomplete. Gallery screenshot re-review is pending.
+
+Corrected ten-minute native stress on installed `82646ba` completed all intended dispatches but remains
+failed for 20 client cancellations: two per wrk worker and one per ApacheBench worker at timed completion.
+Worker markers and timestamps now bind that behavior to completed native reports. Final receipt remains
+tool_failure; those cancellations are not ignored or relabeled. Continuous traffic restarted on installed
+`b352c64`; final fixture/scenario/load/rebuild gates remain open. All failed evidence is retained.
+
 ## Earlier repair-round observations
 
 These earlier observations retain their original source revisions and failed evidence;
