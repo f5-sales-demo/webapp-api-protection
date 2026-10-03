@@ -11,9 +11,9 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source candidates are origin `9347439` and generator `b40132d`; Terraform pins bind their exact
+Current source candidates are origin `9347439` and generator `b8ec277`; Terraform pins bind their exact
 commits, archive digests and installer digests. Source checks pass 77 origin tests with 69 subtests,
-139 generator tests with nine subtests, eight focused Node tests, and 333 WAAP pytest checks with
+141 generator tests with nine subtests, eight focused Node tests, and 333 WAAP pytest checks with
 396 subtests and one environment skip. Required CI passed for origin and generator; WAAP latest receipt
 documentation checks are pending. The three application manifests match byte-for-byte and declare nine
 applications with 33 native serving ports.
@@ -1181,3 +1181,11 @@ profile role verification; 141 source tests and nine subtests pass, but installe
 Continuous service remains on accepted focused candidate `b40132d` without interrupting the full pass.
 The source-stability matrix screenshot review on origin `9347439` is recorded with final acceptance false
 while mutation/scanner/connection, full-catalog and clean-deployment gates remain open.
+
+The continuous pass on `b40132d` reached forty scenario receipts and retained failures in Kraken, origin
+torture and crAPI. Native wrk logs show threads exceeded configured connections; source `3e31b94` fixes
+that constraint. Herd source `cadc2ab` now retains native reports and fails incomplete requests/errors.
+crAPI source `b8ec277` fixes decimal OTP generation, the invalid mechanic fallback path and mitigation
+classification for coupon probes. Source checks pass 141 tests and nine subtests; installed qualification
+is pending. Registration/OTP fixture semantics, video lifecycle and broad mutation restoration remain open.
+These failed passes remain failed and cannot establish final coverage. Continuous traffic remains running.
