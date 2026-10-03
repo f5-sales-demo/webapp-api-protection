@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `6dc596ea7d21e9c0b21f63540d57443a4f2cab0c` preserves all 164 scenarios across 22 suites.
+Generator source `506d54244fc788a754486c31ba574f6ece866fa6` preserves all 164 scenarios across 22 suites.
 Current source checks pass 125 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
@@ -226,6 +226,31 @@ errors; its five screenshots were manually reviewed for vehicle image/map, Commu
 Private receipt: `/opt/origin-server/private-browser-1791021207307010849/receipt.json`. Earlier failures remain failed.
 This qualifies native login and read-only views; signup, workshop mutations, fixtures and all published browser layers
 remain open. No browser failures were suppressed.
+
+DVWA CSRF source no longer prints unconditional exploit success. Origin `0bc63fa` provisions a dedicated
+synthetic tgen_csrf account and per-domain real sessions; managed traffic uses that identity for a distinct password
+change and requires original-password authentication restoration evidence. Shared admin identity is preserved.
+Origin source passes 54 tests and 69 subtests; generator source passes 125 tests and nine subtests. Immutable install
+and focused mutation/restoration verification are running; this task remains incomplete until observed checks pass.
+
+First dedicated DVWA seed failed because pinned native users.user_id has no default. That fixture failure remains
+failed. Origin source now supplies a noncolliding native ID and tests require it. Corrected origin `acc37c3` immutable
+installation is running; full CSRF qualification remains pending. The scoped mutation cannot be accepted until real
+fixture authentication and restoration both pass.
+
+Corrected dedicated CSRF fixture export passed after native user_id repair. The first focused mutation dispatched
+change/restore but failed authenticated restoration; its receipt remains failed. Source now follows login redirects
+and requires Logout content instead of assuming any redirect proves authentication. Fixture was regenerated before
+retry; Installed focused qualification on `4aa9c10` passed distinct password mutation, changed-password authentication,
+original-password restoration/authenticated content, both intended dispatches and zero transport failures/cancellations.
+Private receipt: `resume-focused-csrf-scoped/pass-focused-1791022734105439066/receipt.json`. Shared admin fixture
+was preserved. Earlier seed and restore failures remain failed evidence. No exploit success is printed without observed mutation
+and changed-password authentication.
+
+Scoped CSRF also restores its dedicated account on early script exit and retains failed cleanup. The final source
+`506d542` is installed; Focused normal-flow repeat passed both dispatches, real mutation/authentication/restoration, and zero transport
+failures/cancellations. Private receipt: `resume-focused-csrf-scoped/pass-focused-1791022987278269891/receipt.json`. Prior accepted normal-flow source remains its own receipt and does
+not qualify interruption behavior. Shared admin and unrelated fixtures remain preserved.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
