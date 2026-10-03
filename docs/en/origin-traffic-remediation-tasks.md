@@ -1175,3 +1175,9 @@ Source-stability matrix `9347439` passed with all 66 browser receipts and no mis
 entries (`private-browser-matrix-1791050358484229414/matrix-receipt.json`). Continuous traffic is enabled
 and active on `b40132d`; six early catalog receipts pass. Full pass acceptance remains pending, and no
 clean rebuild, broad mutation-restoration acceptance or unchanged repeat apply is claimed.
+
+Generator `86a8d42` adds scoped synthetic RESTaurant role mutation journaling/restoration and current
+profile role verification; 141 source tests and nine subtests pass, but installed qualification is pending.
+Continuous service remains on accepted focused candidate `b40132d` without interrupting the full pass.
+The source-stability matrix screenshot review on origin `9347439` is recorded with final acceptance false
+while mutation/scanner/connection, full-catalog and clean-deployment gates remain open.
