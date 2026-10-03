@@ -745,3 +745,9 @@ requests for both seeded customer and chef roles. Those four checks passed live.
 asset assertion because FastAPI still added a Google Fonts style sheet. The adapter now disables external font loading;
 60 source tests, type checking and repository hooks pass. Immutable installed verification remains pending while the
 active rapid-browsing catalog scenario finishes. No ReDoc or full RESTaurant acceptance is claimed yet.
+
+Rapid browsing remains in progress on installed generator `506d542`: 216 persisted action records include 17 failed
+rendered assertions. A source regression also exposed stale 403 evidence incorrectly reused for SPA fragment routes.
+Generator `96f2fad` rejects that stale success and performs a fresh navigation when the previous document was blocked.
+Seven focused Node tests and repository hooks pass; candidate CI and installed qualification remain pending.
+The active older-source run remains untouched for its terminal receipt.
