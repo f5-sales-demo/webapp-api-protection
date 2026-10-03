@@ -940,3 +940,12 @@ MailHog welcome-body discovery required raw MIME decoding: its v2 list content b
 content retained the quoted-printable VIN. Recovery now parses that raw message and accepts its actual message-ID
 format, with confirmed removal. The second signup run also stalled on browser response completion and remains
 failed. The next verifier bounds response-body reads; installed recovery and signup retry remain pending.
+
+Separate recovery receipts passed for both interrupted signup runs, removing their exact synthetic account, welcome
+vehicle and MailHog message. Original failed receipts remain unchanged. The bounded signup retry failed explicitly
+on response-body completion; response framing and native UI outcome are being investigated.
+
+Signup diagnostics confirmed the native UI success text is "User Registered Successfully!", while the verifier
+expected backend wording. The browser now verifies that actual rendered success and welcome-mail identity instead
+of relying on a browser response-body read not consumed by the upstream success path. Earlier timeout runs remain
+failed; synthetic diagnostic fixtures are being recovered and final installed signup qualification remains pending.
