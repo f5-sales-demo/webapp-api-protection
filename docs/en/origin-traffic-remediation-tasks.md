@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source candidates are origin `b30656c` and generator `43e7f73`; Terraform pins bind their exact
+Current source candidates are origin `b30656c` and generator `d32363b`; Terraform pins bind their exact
 commits, archive digests and installer digests. Source checks pass 76 origin tests with 69 subtests,
 138 generator tests with nine subtests, eight focused Node tests, and 308 WAAP tests with one environment skip.
 Origin and WAAP required CI passed; generator's latest scanner attribution correction is awaiting required CI.
@@ -1109,3 +1109,10 @@ provenance, the benign rate budget, balanced domains and all nine application pa
 333 tests and 396 subtests with one environment skip. Generator `43e7f73` records document commit before
 render checks and extends per-page/drain waits while retaining the 900-second scenario deadline. Installed
 qualification is pending. The current older pass retains its API-denial timeout failure and rapid failures.
+
+The three application manifest copies match byte-for-byte at SHA-256
+`a0f63e1e5c2361e70b6af46efa42ffe9eebc95ab93258d421da796bdaae4067b`, declaring nine applications
+and 33 native serving ports. Traffic source drift was reconciled with current default-branch CSD cleanup and
+immutable CloudWatch changes; source checks passed after the merge. Generator `d32363b` is the next immutable
+source candidate. Installed focused qualification remains on `43e7f73`: API denial passed three HTTP 403
+responses and one allowed HTTP 200 control, and rapid qualification is incomplete. Earlier failures remain failed.
