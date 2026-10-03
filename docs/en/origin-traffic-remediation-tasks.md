@@ -177,5 +177,9 @@ unit test is excluded outside its declared AWS runtime; this does not count as l
 The latest native form retry still failed registration: both required registration requests were absent, while both
 contact submissions completed with HTTP 201. A cancellation also failed the scenario. Native controls are now used for
 question selection and submission, and the failure remains open. The prior disabled-control and pointer-interception
-receipts remain failures. Continuous traffic is being restored on the immutable candidate after focused qualification.
+receipts remain failures. Continuous traffic was restored after focused qualification and verified enabled and running on the immutable candidate.
 No merged-artifact acceptance, clean Terraform rebuild, complete catalog pass or repeat apply has been performed.
+
+The restored service reported revision `394c7f9fbdc7b81eed470459c5c639122fc5e433`, enabled and running, with
+2,769 of 2,769 benign requests successful in its initial status sample. This is liveness evidence, not sustained-rate or
+full-catalog acceptance.
