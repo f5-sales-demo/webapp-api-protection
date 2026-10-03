@@ -96,3 +96,27 @@ a focused batch/recursion pass timed out and recorded cancellations; it is faile
 rejection. Cancelling tool requests now causes scenario failure.
 
 Generator source tests currently pass 58 tests and nine subtests. Full pre-commit passes. Native application readiness passed at resumption. CI repair, remaining catalog action contracts, every required authenticated workflow, HTTP serving-layer checks, immutable merged installation, clean rebuild, restart/reboot recovery and final repeat apply remain open.
+
+A later native DVGA batch/recursion qualification failed and left an orphan task proxy after its controller stopped. Its private receipt remains failed. Proxy recovery now records PID, process start ticks and exact source script; tests reject PID reuse and command mismatch. The exact orphan proxy was removed without signalling unrelated processes, and continuous traffic was restarted.
+
+Current generator source validation passes 61 tests and nine subtests plus full pre-commit. Four API-protection contracts and refreshed DVWA payload contracts have installed evidence. Eight DVGA contracts are implemented but have not passed installed acceptance. Full 164-scenario contracts, application workflow completeness and final clean rebuild remain open.
+
+Issued-authentication workflow checks passed 17 native replica checks for Juice Shop, DVWA, VAmPI, RESTaurant
+customer/chef roles and crAPI vehicle/community/workshop/MailHog content. Those checks also passed through origin nginx
+and both WAAP domains over HTTP and HTTPS. The reusable verifier is committed in origin-server; complete browser
+interactions and fixture mutation cleanup remain separate open requirements.
+
+The extended reusable verifier passed 33 native application checks and nine application checks at each of origin nginx,
+both WAAP HTTP domains and both WAAP HTTPS domains. HTTPBin's positive POST body was corrected to the deployed demo_id
+schema; malformed bodies remain attack scenarios. These checks prove the implemented authentication and seeded content
+assertions, while full browser interaction coverage and fixture cleanup remain outstanding.
+
+The corrected nonmutating HTTPS crawl passed 56 content checks after excluding the DVGA start-over reset link. Earlier
+passing-looking crawls that visited reset links are retained as diagnostic evidence, not nonmutating acceptance. Source
+dispatch contracts currently cover 14 of 164 scenarios; seven connection scenarios have separate probe receipts. The
+remaining action contracts prevent full catalog acceptance.
+
+The all-nine application workflow verifier passed 33 native checks, plus nine checks at origin nginx and each WAAP
+HTTP/HTTPS endpoint. crAPI source dispatch contracts now cover its 15 scenarios; installed crAPI action qualification
+remains pending. Current source action contracts cover 29 of 164 scenarios, with seven additional connection probe
+scenarios. Complete action coverage and final rebuild acceptance remain open.
