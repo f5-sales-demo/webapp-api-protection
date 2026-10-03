@@ -11,9 +11,9 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source candidates are origin `b30656c` and generator `287ebda`; Terraform pins bind their exact
+Current source candidates are origin `b30656c` and generator `15b27f1`; Terraform pins bind their exact
 commits, archive digests and installer digests. Source checks pass 76 origin tests with 69 subtests,
-135 generator tests with nine subtests, eight focused Node tests, and 308 WAAP tests with one environment skip.
+136 generator tests with nine subtests, eight focused Node tests, and 308 WAAP tests with one environment skip.
 Origin and WAAP required CI passed; generator's latest scanner attribution correction is awaiting required CI.
 
 The last complete origin matrix (`695c07c`) has 66 passing browser receipts and no missing declared workflow/layer
@@ -1083,3 +1083,19 @@ Generator `287ebda` adds Nikto nested attribution using the pinned scanner's sup
 interface while retaining native version/test identifiers and plugin paths. Source checks passed 136 tests and
 nine subtests; installed child attribution qualification remains pending. No task is marked complete from these
 focused checks.
+
+Origin `b30656c` completed its same-source workflow matrix: 66 passing browser receipts, no missing
+workflow/layer entries, and 315 manually reviewed screenshots. Key full-size images showed loaded products,
+populated score-board cards, seeded DVGA pastes and rendered ReDoc. Private receipts:
+`private-browser-matrix-1791044273150348894/matrix-receipt.json` and `manual-render-review.json`. All five
+landing crawls (origin plus both domains over HTTP/HTTPS) passed 28 checks each. Broad fixture restoration
+and fresh-deployment acceptance remain open.
+
+Installed `15b27f1` passed API fuzzing with all 169 dispatch/response requirements, seven native tool
+invocations, zero transport failures and zero cancellations. Private receipt:
+`resume-focused-api-final/pass-focused-1791045397187588237/receipt.json`. Native nested Nikto passed its
+child dispatch and tool receipt (`resume-focused-nikto-native/pass-focused-1791045434542675296/nested-web-app-attacks/web-app-attacks--05-nikto-scan/receipt.json`).
+The prior rapid run reached 336 successful rendered/mitigated action records but timed out before the final
+user-agent session, leaving 24 required actions absent. That run remains failed. `15b27f1` reduces only idle
+settling time after pending requests finish; installed full rapid/catalog qualification remains open.
+Continuous restart is in progress. No clean rebuild or final Terraform convergence is claimed.
