@@ -89,6 +89,13 @@ acceptance remains pending. Source crAPI video mutation repair snapshots origina
 restores through native APIs and verifies exact identity; missing recovery fails acceptance. Source tests
 pass 156 tests/nine subtests plus lint/type checks; installed/live video qualification remains pending.
 
+Latest full native stress iteration completed all declared dispatches/native reports but remains failed
+for twenty client cancellations at timed-worker termination. Private receipt: `resume-focused-kraken-native/`.
+The repaired video fixture now returns native HTTP 200 with media and matching identity. Focused video
+qualification failed before mutation: prerequisite/request client cancellations made its reachability
+probe time out, so no command launch or restoration acceptance is claimed. Preserve that receipt under
+`resume-focused-crapi-video-restoration/`. Continuous traffic restart is in progress on installed `143dde9`.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
