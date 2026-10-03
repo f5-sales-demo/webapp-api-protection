@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `3edcadd371784d336645de59ed82ad222c6e94de` preserves all 164 scenarios across 22 suites.
-Current source checks pass 105 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
+Generator source `2cc17e4ebf37102f5138bc3a1ff715005576d8f8` preserves all 164 scenarios across 22 suites.
+Current source checks pass 108 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
 pass. Required CI remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
 Origin `5706801ed48b19f8433874454a142ce8a7c29204` passed the digest-checked immutable release installer and
@@ -34,6 +34,14 @@ requirements, all five synthetic profile restorations, zero transport failures a
 `resume-focused-bola-fixtures/pass-focused-1791011143124566516/receipt.json`. The prior duplicate-phone run remains
 failed: its five application 500s were not accepted. Expanded probes target synthetic privileged accounts. All 33 supported
 native HTTP workflows passed after the immutable reinstall. Full rendered/workflow/catalog acceptance remains open.
+
+BOLA rerun on `ba75fb9394e34c42e416cca5e7e29390b326165d` passed without registration requests, with
+all five profile restorations and zero transport failures/cancellations. Private receipt:
+`resume-focused-bola-fixtures/pass-focused-1791011321925464310/receipt.json`. Self-profile source now measures CPU,
+memory, disk, network, TCP states and descriptors before/during/after load. Installed `d3596fbcf6e9105dff0489db0ebd17b0d2e6bbb0`
+passed 300 requests across all nine applications, actual concurrency, resource phases and minimum duration, with zero
+transport failures/cancellations. Private receipt: `resume-focused-profile/pass-focused-1791011590430151567/receipt.json`.
+Ephemeral workload source requires all 20/50/100 batches; focused installed qualification is pending.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
