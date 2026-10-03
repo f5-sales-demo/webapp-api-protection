@@ -67,6 +67,10 @@ and only four ownership-verified DVGA containers were restarted without deleting
 Installed generator `7f68b3f` also refuses empty timing samples as efficiency evidence. One strict batch
 sequence is now running against the complete timeout chain. Complete acceptance remains open.
 
+The repaired published costly-query retry returned HTTP 200 for the baseline and two-operation batch,
+with every nonempty systemUpdate JSON assertion passing. Recovery logs confirm the busy replica remains
+running. Larger batches/mixed sequence remain in progress and are not yet accepted.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
