@@ -1035,7 +1035,6 @@ Private receipt: `resume-focused-zap-baseline-final/pass-focused-179104112161235
 incomplete baseline remains failed. Pinned runtime option names were verified and update/telemetry flags corrected;
 next immutable scanner rerun is pending.
 
-
 Scanner continuation: generator `6e854c3` completed focused baseline and active phases with 105 and 743
 attributed requests, zero transport failures and zero cancellations. Silent startup suppressed unsolicited update
 requests; private receipt: `resume-focused-zap-completion/pass-focused-1791041915359446641/receipt.json`.
