@@ -11,6 +11,49 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
+Current source is origin `50e94c0`, generator `baed7cf`, and
+WAAP `6f6ee5c`. Terraform runtime, root/module/namespace pins and lock files select provider 13.0.2;
+its exact spec provenance matches enriched specs v10.0.0. WAAP required CI is green. Source checks pass
+81 origin tests with 69 subtests, 150 generator tests with nine subtests, and 334 WAAP tests with
+396 subtests/one environment skip. All nine applications and 33 native ports remain declared.
+
+The latest complete rendered matrix is origin `fa7156d`: 66 passing browser receipts, no missing
+workflow/layer entries, and 315 screenshots reviewed with full-size key pages. Private evidence:
+`private-browser-matrix-1791055912416669296/`. Final acceptance remains false; timeout-source changes
+require another matrix and final fresh/merged deployment checks. DVWA session retention, all 15 SQLi
+and 18 XSS payloads, RESTaurant BOPLA restoration, coupon controls, and SQLMap native dispatch passed
+focused qualification on their recorded sources. Earlier failed evidence remains failed.
+
+A full ten-minute native stress retry on generator `2400574` completed all declared dispatches but
+failed for 35 client cancellations. ApacheBench reports show variable response-length errors during
+mitigation; native workers completed, but that does not establish successful coverage. Private evidence:
+`resume-focused-kraken-native/`. New source requires retained completed native wrk/hey/Vegeta/ApacheBench
+reports, retains scheduled burst reports, extends sustained hey timeouts and uses native ApacheBench
+variable-length mode. Regressions reject empty/missing/native-error reports independently of counts.
+
+Origin nginx, both WAAP route timeouts and the existing origin-pool idle timeout were updated through
+saved ownership-checked plans. The first two costly-query retries remain failed. A later receipt was
+only dispatch-qualified because its response contract was missing; it is not accepted as complete.
+Generator now requires JSON containing nonempty systemUpdate results for every single/batch element,
+rejecting partial batches, GraphQL errors and wrong-content 200s. Installed `4e6a784` failed the
+stricter focused retry under `resume-focused-dvga-costly-query/`. Continuous traffic is stopped while
+the single shared boundary is occupied and will restart afterward.
+
+No complete catalog pass is accepted. Remaining work includes complete native stress/nested/connection
+behavior, isolated signup/OTP/video fixtures and broad mutation restoration, two accepted full catalog
+passes, control attribution, sustained load, merged immutable installation, ownership-scoped clean rebuild,
+stop/restart/reboot recovery, unchanged apply and zero-action plan. All T01–T16 tasks remain open.
+CSD remains disabled. The provider13 full live plan succeeds but its two custom_data VM replacements
+remain unapplied pending completed source/workflow gates.
+
+Native two-operation DVGA probes passed JSON identity through a replica (70 seconds) and nginx
+(40 seconds). Private recovery logs showed the thirty-second recovery timer restarting busy replicas.
+Origin `50e94c0` now requires 900 seconds of sustained unresponsiveness before restart, preserving long
+operations; a synthetic regression verifies grace, eventual recovery and healthy reset. Source tests pass
+81 tests/69 subtests. Immutable install is running; published strict-response qualification remains open.
+
+## Previous continuation evidence
+
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
 from pushed commits and verified archive/installer digests. Source verification passed 79 origin tests with
 69 subtests and 143 generator tests with nine subtests. Required CI for the latest heads is pending.
