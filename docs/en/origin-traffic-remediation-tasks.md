@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source is origin `3a62623`, generator `f7ee0f9`, and
+Current source is origin `3a62623`, generator `3583ccf`, and
 WAAP `6f6ee5c`. Terraform runtime, root/module/namespace pins and lock files select provider 13.0.2;
 its exact spec provenance matches enriched specs v10.0.0. WAAP required CI is green. Source checks pass
 82 origin tests with 69 subtests, 156 generator tests with nine subtests, and 334 WAAP tests with
