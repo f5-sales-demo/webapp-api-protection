@@ -11,10 +11,10 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source is origin `50e94c0`, generator `02b10b1`, and
+Current source is origin `3a62623`, generator `f7ee0f9`, and
 WAAP `6f6ee5c`. Terraform runtime, root/module/namespace pins and lock files select provider 13.0.2;
 its exact spec provenance matches enriched specs v10.0.0. WAAP required CI is green. Source checks pass
-81 origin tests with 69 subtests, 153 generator tests with nine subtests, and 334 WAAP tests with
+82 origin tests with 69 subtests, 156 generator tests with nine subtests, and 334 WAAP tests with
 396 subtests/one environment skip. All nine applications and 33 native ports remain declared.
 
 The latest complete rendered matrix is origin `fa7156d`: 66 passing browser receipts, no missing
@@ -82,6 +82,12 @@ assertions, but the ten-operation request did not finish before the 900-second s
 mixed batch was not launched. Preserve this timeout receipt; it is not full application/scenario acceptance.
 Continuous traffic is being restored on latest immutable source while remaining long-query and fixture
 contracts are repaired.
+
+Current native stress qualification on installed `02b10b1` is past four minutes with zero transport
+failures/cancellations and a completed retained scheduled-burst report. Its full ten-minute native-report
+acceptance remains pending. Source crAPI video mutation repair snapshots original media/name/parameters,
+restores through native APIs and verifies exact identity; missing recovery fails acceptance. Source tests
+pass 156 tests/nine subtests plus lint/type checks; installed/live video qualification remains pending.
 
 ## Previous continuation evidence
 
