@@ -1139,3 +1139,9 @@ domains over HTTP and HTTPS after the local font repair. Current full matrix/cra
 `e52a996` rapid qualification overlapped that origin reinstall and retained one HTTP 503 and two HTTP 502
 failures; that run cannot establish acceptance. It must finish as failed, followed by a stable-origin rerun.
 Origin `9347439` adds end-of-run installer-provenance comparison to reject matrix source drift.
+
+The overlapping rapid run completed with 360 records (309 rendered, 48 mitigated, three failed) and seven
+cancellations. Private receipt: `resume-focused-rapid-fresh/pass-focused-1791048417035287680/receipt.json`.
+One HTTP 503 and two HTTP 502 responses during origin replacement remain failures. A stable-origin rapid
+rerun is now in progress with no further origin mutation. Current origin source `9347439` required CI is green;
+installed application source remains `c74a0bd` during matrix qualification.
