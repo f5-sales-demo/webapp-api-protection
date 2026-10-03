@@ -425,13 +425,17 @@ resource "xcsh_http_loadbalancer" "this" {
           # deferred to a later slice.
           dynamic "advanced_options" {
             for_each = anytrue([
-              routes.value.prefix_rewrite != null, routes.value.disable_location_add,
+              routes.value.use_websocket, routes.value.prefix_rewrite != null, routes.value.disable_location_add,
               routes.value.timeout_ms != null, length(routes.value.req_headers_add) > 0,
               length(routes.value.req_headers_remove) > 0, length(routes.value.resp_headers_add) > 0,
               length(routes.value.resp_headers_remove) > 0, length(routes.value.req_cookies_remove) > 0,
               length(routes.value.resp_cookies_remove) > 0, routes.value.waf_mode != "inherited",
             ]) ? [1] : []
             content {
+              dynamic "web_socket_config" {
+                for_each = routes.value.use_websocket ? [1] : []
+                content { use_websocket = true }
+              }
               prefix_rewrite             = routes.value.prefix_rewrite
               priority                   = routes.value.priority
               disable_location_add       = routes.value.disable_location_add
