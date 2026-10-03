@@ -801,3 +801,7 @@ Generator `808cd6b` adds a second regression distinguishing fresh blocked docume
 evidence; all eight focused Node checks and repository hooks pass. Origin `2e51126` assigns a fresh synthetic
 RESTaurant actor per verifier run. Both immutable installs and next installed qualifications are in progress.
 All 164 catalog entries remain, and two complete accepted catalog passes are still outstanding.
+
+Installed origin `2e51126` passed the fresh-actor RESTaurant five-check browser workflow on both HTTP domains.
+HTTPS rechecks and the focused rapid-browsing retry continue. Required origin CI is green. Complete workflow,
+mutation restoration, scanner scope, fresh deployment and final catalog acceptance remain open.
