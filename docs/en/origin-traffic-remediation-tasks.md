@@ -737,3 +737,11 @@ domains over HTTP and HTTPS. Every seeded view, shop image and deep-link refresh
 errors or transport failures. Earlier premature-image assertions remain failed evidence. Signup, additional workshop
 workflows, MailHog rendering, comprehensive fixture restoration and final merged/fresh deployment remain open.
 Continuous traffic is enabled and running; the current pass has one accepted receipt so far.
+
+## RESTaurant rendered role workflows
+
+The reusable browser verifier executes Swagger OAuth password authentication and actual authenticated GET profile
+requests for both seeded customer and chef roles. Those four checks passed live. ReDoc rendered but failed its local
+asset assertion because FastAPI still added a Google Fonts style sheet. The adapter now disables external font loading;
+60 source tests, type checking and repository hooks pass. Immutable installed verification remains pending while the
+active rapid-browsing catalog scenario finishes. No ReDoc or full RESTaurant acceptance is claimed yet.
