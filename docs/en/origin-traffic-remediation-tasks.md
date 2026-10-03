@@ -855,3 +855,8 @@ missing assertions; supported HTTP slices remain distinct from complete declared
 Installed origin `f99a17f` passed all 33 supported native HTTP checks and correctly reported declared-workflow
 acceptance false with explicit missing-workflow lists. Separate browser slices remain evidence requiring a combined
 source/layer receipt; the HTTP report alone cannot establish complete coverage.
+
+A reusable combined matrix is being added to join source-pinned browser assertions and HTTP checks across every
+native replica, origin nginx and four published layers. Foreign source, layer, failed runtime and missing-replica
+regressions pass. Missing declared workflows remain explicit, and screenshot/manual fixture acceptance remains
+separate. The matrix is not yet installed or accepted.
