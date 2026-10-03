@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `2cc17e4ebf37102f5138bc3a1ff715005576d8f8` preserves all 164 scenarios across 22 suites.
-Current source checks pass 108 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
+Generator source `708e5bcb696f18351b0fc0ca4a89073664c98ce8` preserves all 164 scenarios across 22 suites.
+Current source checks pass 110 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
 pass. Required CI remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
 Origin `5706801ed48b19f8433874454a142ce8a7c29204` passed the digest-checked immutable release installer and
@@ -41,7 +41,17 @@ all five profile restorations and zero transport failures/cancellations. Private
 memory, disk, network, TCP states and descriptors before/during/after load. Installed `d3596fbcf6e9105dff0489db0ebd17b0d2e6bbb0`
 passed 300 requests across all nine applications, actual concurrency, resource phases and minimum duration, with zero
 transport failures/cancellations. Private receipt: `resume-focused-profile/pass-focused-1791011590430151567/receipt.json`.
-Ephemeral workload source requires all 20/50/100 batches; focused installed qualification is pending.
+Ephemeral workload qualification passed all 20/50/100 batches, 170 completed requests across all nine applications,
+measured fresh connections and cleanup, with zero transport failures/cancellations. Private receipt:
+`resume-focused-ephemeral/pass-focused-1791011683915132895/receipt.json`. This does not establish port exhaustion
+or replace complete catalog and sustained-rate acceptance.
+
+Connection comparison passed installed on `a095743c633fb132171906d93b1d84b5b0d08c8e`: 100 requests on one
+reused connection and 100 on fresh connections, valid content and zero transport failures/cancellations. Private receipt:
+`resume-focused-churn/pass-focused-1791011861378822523/receipt.json`. Installed `708e5bcb696f18351b0fc0ca4a89073664c98ce8`
+reverified retained churn/profile/ephemeral workload evidence with the stricter all-samples gate; all passed. That
+reverification qualifies the verifier against existing evidence and is not a new full catalog pass. Private receipt:
+`workload-reverification-708e5bc.json`. Continuous service restart is being verified.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
