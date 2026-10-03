@@ -51,3 +51,9 @@ Continuous traffic is enabled and running. The scoped saved WebSocket route plan
 Both public HTTPS domains passed authenticated DVWA login, security selection, seeded SQL lookup and reflected-XSS benign workflow. CSD replica state matched. A later 46-second traffic interval passed at 197.38 aggregate requests/sec with 100% benign success and no benign transport failures.
 
 The clean-install review added explicit nginx cache creation, adapter image provenance for DVGA recovery and manifest-derived readiness. Origin has 35 passing tests and 68 passing subtests; generator has 43 passing tests and nine passing subtests. All three PRs remain drafts because required delivery and acceptance tasks remain open.
+
+## Outstanding delivery gates
+
+The precise method, endpoint and payload contract is currently implemented for the two DVWA payload scenarios. The remaining catalog scenarios require reconciliation before full-catalog acceptance. Source CI and rendered diagnostics do not complete T11, T15 or T16.
+
+No clean rebuild, two accepted complete catalog passes, unchanged repeat apply, reboot recovery or merged-artifact installation has been claimed. All three implementation PRs remain drafts. Current source, candidate installation and failed iterations are retained separately in private receipts.
