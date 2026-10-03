@@ -767,3 +767,16 @@ HTTP and HTTPS. Native form submissions still failed. Attributed API-security ev
 form fields as non-nullable, so the form schema now explicitly permits empty values while retaining the JSON contract.
 A new exact schema upload, ownership-checked plan, apply and published browser retry are in progress. First plan/input
 failure and all failed form runs remain preserved. No control or final Terraform convergence acceptance is claimed.
+
+## HTTPBin form acceptance after attributed repair
+
+The corrected nullable form schema applied through a saved ownership-checked plan updating one API definition.
+The HTTPBin four-check browser verifier then passed on both domains over HTTP and HTTPS, including actual
+form submission and echoed fields, local Swagger assets and the correct specification prefix. All twelve JSON
+control cases remained valid: the correct demo ID returned 200, missing/wrong IDs returned 403. Attributed event
+evidence identified optional-field nullability in the earlier failure. Those failures and the ambiguous-name upload
+remain preserved. Full control attribution and final unchanged Terraform apply remain open.
+
+RESTaurant passed all five rendered role/docs checks on both published domains over HTTP and HTTPS. Native
+replica verification and screenshot review are in progress. Continuous traffic is active on `96f2fad`; the current
+full catalog pass remains incomplete.
