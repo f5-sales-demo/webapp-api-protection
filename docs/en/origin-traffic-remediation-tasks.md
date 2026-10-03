@@ -894,3 +894,7 @@ The most recent completed rapid pass retained 46 failed actions and stays failed
 Current origin candidate `a23d46e` passed required CI. The consolidated installed matrix passed all supported
 HTTP checks on every native replica, origin nginx and both domains over HTTP and HTTPS; its first four browser
 receipts passed. The run remains in progress with declared-workflow and screenshot gates open.
+
+The current consolidated matrix has passed all HTTP layers and 26 browser receipts without a browser failure so far.
+Continuous traffic remains active. The matrix is not complete; source/layer assertion reconciliation and manual
+screenshot review remain required, with signup and fixture recovery still explicit gaps.
