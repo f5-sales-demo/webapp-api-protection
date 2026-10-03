@@ -71,6 +71,35 @@ focused qualification passed all three native invocations and intended endpoint/
 230 requests, zero transport failures and zero cancellations (`resume-focused-sqlmap-retry/`). Continuous traffic restart is in progress on `bc328c6` after releasing the focused boundary.
 WAAP `5eb8ad8` required CI is green; final coverage/rebuild gates remain open.
 
+DVGA timeout continuation: origin `4dc6f02` derives a 600-second proxy read timeout from the shared
+manifest only for DVGA. Generator `d2cba83` preserves the costly query client timeout. WAAP `e9a4f88`
+applies that route timeout to both HTTP and HTTPS listeners. Source checks pass 80 origin tests with
+69 subtests, 147 generator tests with nine subtests and 334 WAAP tests with 396 subtests/one environment
+skip. Immutable origin/generator installation passed. A saved ownership-checked Terraform plan initially
+exposed stale schema inputs; it was not applied. The corrected plan preserved the installed schema and
+updated only the two owned listeners (zero additions/destroys). Focused costly-batch qualification is
+running under `resume-focused-dvga-costly-query/`; continuous service is stopped for that boundary.
+
+The first costly DVGA retry after route/nginx timeout repair remained failed: baseline returned JSON,
+but batches returned HTTP 504 near 30 seconds. The configured route timeout was verified live. A second
+ownership-checked saved plan updated only the existing origin pool idle timeout to 600000 ms, preserving
+its name/ID, schema, namespace and other resources (zero additions/destroys). Generator `45800ca` additionally
+drains finite stress burst/mixed loops, retains ApacheBench against the owned HTTP companion, and extends
+mixed-request client deadlines. Its installed digest is verified. Second costly-query qualification is
+running; no final application/catalog/rebuild acceptance is claimed.
+
+Ecosystem version verification: the prior showcase runtime and both lock files selected xcsh 12.0.2,
+while Registry/GitHub latest was 13.0.2. Root, HTTP-LB module and namespace pins now select exactly
+13.0.2. Registry installation verified signing key 7282C542DC88E217; binary build commit matches
+release 6d488749cd8995795a91e43b9a1892866fd73f87. Provider tracked spec-release pin is v10.0.0 /
+ac024ccbfb8b9f84412813f3e2ab9f5821937ef2; its SHA256 exactly matches the provider publication receipt
+(0e278b4afb598ac8628ac74dca6a1b2831cd8607de1d26f56e72e3461a7440c7). Registry lock checks include
+Linux amd64 and Mac arm64. Terraform validate and 334 source tests/396 subtests passed with one
+environment skip. The private full live plan succeeded on 13.0.2; only the two VM custom_data changes
+require replacement. That rebuild plan remains unapplied. Previous 12.0.2 applies retain their original
+provider evidence and are not relabeled. The latest costly-query receipt passed dispatch but lacks
+status-specific response assertions; its completeness is not accepted until response contracts reconcile.
+
 ## Historical observations
 
 Earlier revisions and measurements below are retained as evidence of their original outcomes.

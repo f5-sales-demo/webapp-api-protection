@@ -759,7 +759,7 @@ class NamespaceTerraform(unittest.TestCase):
             'backend "local" {}',
             'provider "xcsh" {}',
             "f5-sales-demo/xcsh",
-            '"= 12.0.2"',
+            '"= 13.0.2"',
             'resource "xcsh_namespace" "this"',
             "prevent_destroy = true",
         ):
