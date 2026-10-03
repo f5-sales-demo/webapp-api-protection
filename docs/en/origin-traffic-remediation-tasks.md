@@ -949,3 +949,8 @@ Signup diagnostics confirmed the native UI success text is "User Registered Succ
 expected backend wording. The browser now verifies that actual rendered success and welcome-mail identity instead
 of relying on a browser response-body read not consumed by the upstream success path. Earlier timeout runs remain
 failed; synthetic diagnostic fixtures are being recovered and final installed signup qualification remains pending.
+
+The installed signup completion-aware run rendered success but failed because the upstream frontend returned a
+Response without consuming its body. Its exact account, vehicle and mail cleanup passed. The immutable frontend
+adapter now consumes the JSON success response before signalling UI completion. Source regression and rebuild
+qualification are in progress; the failed run remains failed evidence.
