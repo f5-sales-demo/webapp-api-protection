@@ -703,3 +703,11 @@ published checks retained fixture-baseline failures, and published checks retain
 The verifier now bounds waits, synchronizes the receiver counter, checks the clear response against real receiver state,
 and finishes checkout resources before navigation. It retains a private fixture identity journal for interrupted recovery.
 Sequential same-source native and published retries remain pending; no failed run was relabeled.
+
+## Sequential CSD workflow qualification
+
+Origin `379fabe55afe057d84ce80f82a82eb4bab551fbc` passed five browser checks on all four native replicas
+and both domains over HTTP and HTTPS. Every run verified receiver identity, counter, actual checkout submission,
+dashboard, native scoped-clear action and preservation of the pre-existing receiver entries. Earlier overlapping,
+resource-cancellation and interrupted runs remain failed evidence. Screenshot contact sheets and a full-size dashboard crop were reviewed; the dashboard renders existing synthetic entries.
+Continuous traffic restart is in progress. Complete application/catalog and Terraform acceptance remain open.
