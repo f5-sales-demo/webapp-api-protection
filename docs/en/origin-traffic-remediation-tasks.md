@@ -890,3 +890,7 @@ The combined application matrix is now running on digest-verified origin `a23d46
 synthetic fixtures and sequential browser checks across native replicas, origin nginx and both HTTP/HTTPS domains.
 Continuous traffic restart is in progress on generator `92b5d26`. Source checks remain separate from matrix acceptance.
 The most recent completed rapid pass retained 46 failed actions and stays failed evidence.
+
+Current origin candidate `a23d46e` passed required CI. The consolidated installed matrix passed all supported
+HTTP checks on every native replica, origin nginx and both domains over HTTP and HTTPS; its first four browser
+receipts passed. The run remains in progress with declared-workflow and screenshot gates open.
