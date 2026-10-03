@@ -86,6 +86,14 @@ mutation response. Wrong-content 200 and wrong-actor regressions fail. Installed
 `resume-focused-bola-fixtures/pass-focused-1791013673736185449/receipt.json`. All 59 Python files pass mypy and
 repository-configured Pylint. Continuous startup is being verified; complete catalog/workflow acceptance remains open.
 
+Origin rendering crawl retained 27 screenshots and 28 checks, with one Juice Shop failure: seven Socket.IO 400
+responses and eight console errors. Private run `private-render-1791013788038158000` remains failed. Direct origin
+clients had an empty forwarding-header affinity key and sessions moved across replicas. Source `b91654a31f5f42e9906f81bae7225c98a8785875`
+adds a remote-address fallback; 43 source tests and 68 subtests pass. Its digest-checked immutable installer passed.
+Focused polling continuity now passes five of five native and five of five nginx sessions; Chromium observes an actual
+WebSocket frame without a socket error. A fresh full origin rendering crawl is running; authenticated workflows and
+published serving-layer acceptance remain open. The reviewed contact sheet is a preliminary visual review only.
+
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
 response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
