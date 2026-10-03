@@ -731,3 +731,9 @@ on the other three layers, while refresh and all view identities passed without 
 remain failed. The source now waits for pending requests and completed image loading before asserting image dimensions.
 Pinned immutable installation and fresh published retry are pending. Signup, workshop, MailHog and complete fixture
 restoration remain open. Origin readiness repair CI passed all required checks at `ea66d4b`.
+
+Origin `f7ddb6d4bdf9566a9d00ff7266281e7b9bd198e1` passed the crAPI five-view browser verifier on both
+domains over HTTP and HTTPS. Every seeded view, shop image and deep-link refresh assertion passed without browser
+errors or transport failures. Earlier premature-image assertions remain failed evidence. Signup, additional workshop
+workflows, MailHog rendering, comprehensive fixture restoration and final merged/fresh deployment remain open.
+Continuous traffic is enabled and running; the current pass has one accepted receipt so far.
