@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `e1fde3384ba1425ddc961719f982ef7cc8ea8d2c` preserves all 164 scenarios across 22 suites.
+Generator source `4aa6a2cc653b21a35fd95dac3a6bb52d140dc014` preserves all 164 scenarios across 22 suites.
 Current source checks pass 118 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
@@ -127,7 +127,13 @@ a nonempty posts response and exact content type/JSON keys at the real recent-po
 passed on `e1fde3384ba1425ddc961719f982ef7cc8ea8d2c`, with actual GET/query dispatch and response assertions,
 zero transport failures/cancellations. Private receipt:
 `resume-focused-community-read/pass-focused-1791016048498089525/receipt.json`. Historical duplicate data remains
-a cleanup failure. Generator source passes 120 tests and nine subtests and all sixty Python files pass type checking.
+a cleanup failure. Generator source passes 121 tests and nine subtests and all sixty Python files pass type checking.
+
+The stricter seeded response contract also rejects empty or malformed posts lists; every observed post must contain
+nonempty ID, title and content. Installed retry passed actual dispatch and all nonempty object assertions with zero transport failures/cancellations.
+Private receipt: `resume-focused-community-read/pass-focused-1791016261901811208/receipt.json`. All sixty Python
+files pass mypy and repository-configured Pylint. Full catalog completion, merged
+artifacts, clean rebuild, sustained-rate/control proof and repeated Terraform apply remain open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
