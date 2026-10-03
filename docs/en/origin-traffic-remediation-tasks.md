@@ -11,28 +11,34 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source candidates are origin `b30656c` and generator `d32363b`; Terraform pins bind their exact
-commits, archive digests and installer digests. Source checks pass 76 origin tests with 69 subtests,
-138 generator tests with nine subtests, eight focused Node tests, and 308 WAAP tests with one environment skip.
-Origin and WAAP required CI passed; generator's latest scanner attribution correction is awaiting required CI.
+Current source candidates are origin `9347439` and generator `b40132d`; Terraform pins bind their exact
+commits, archive digests and installer digests. Source checks pass 77 origin tests with 69 subtests,
+139 generator tests with nine subtests, eight focused Node tests, and 333 WAAP pytest checks with
+396 subtests and one environment skip. Required CI passed for origin and generator; WAAP latest receipt
+documentation checks are pending. The three application manifests match byte-for-byte and declare nine
+applications with 33 native serving ports.
 
-The last complete origin matrix (`695c07c`) has 66 passing browser receipts and no missing declared workflow/layer
-entries. Manual review caught capture timing gaps; `b30656c` loads visible images before screenshot capture. Its
-full matrix is running. Published HTTP-www crawl passed after the lazy-image fix; other published layers are
-rerunning on the same source. Broad fixture restoration remains incomplete. These receipts remain provisional.
+The last complete origin matrix (`c74a0bd`) has 66 passing browser receipts and no missing workflow/layer
+entries, with 315 screenshots manually reviewed. All native Juice Shop replicas and both published domains
+over HTTP/HTTPS passed ten rendered checks after the local font repair. The five landing crawl layers passed
+28 checks each. Origin `9347439` additionally rejects installer source drift during a matrix; its installed
+full matrix is running. Broad fixture restoration and fresh/merged installation acceptance remain incomplete.
 
-The installed generator is `2e30e63` during focused API-fuzz and rapid qualification. API fuzzing dispatched all
-169 requests with zero cancellations or transport failures, but failed three stale CONNECT catalog expectations;
-`f980a6e` repairs those expectations and requires an immutable installed rerun. Rapid qualification is in progress.
-The earlier full-pass rapid run retained 360 actions: 78 rendered, 257 mitigated and 25 failed. It remains failed.
+The installed generator is `b40132d` during focused rapid qualification. API fuzzing passed all 169
+dispatch/response requirements; API denial passed three HTTP 403 responses plus an allowed HTTP 200 control.
+Native ZAP phase/message qualification and nested Nikto attribution passed their focused receipts. The prior
+stable rapid run completed 360 action records (312 rendered, 48 mitigated) but remained failed for seven
+Socket.IO cleanup cancellations. The installed correction scopes cleanup to dispatched polling sessions
+during navigation or browser closure. Its fresh qualification remains incomplete.
 
-Native ZAP baseline and active-message gates passed on `f0bfeaa`; final complete catalog coverage is unproven.
-Rate evidence includes a failed 185.2 RPS window and later 197.3 RPS windows with 100 percent benign success and
-zero baseline transport failures. Cumulative counters include two benign HTTP 503 responses. No sustained final
-rate acceptance is claimed. Continuous service was enabled/running, then stopped for exclusive focused boundary
-ownership. It must be restarted after qualification.
+Fixture-export rerun idempotence passed twice with unchanged crAPI/DVWA/RESTaurant counts and identities;
+broad attack mutation restoration remains open. Rate evidence includes failed 185.2 RPS and later 197.2–197.3
+RPS windows with 100 percent benign success and zero baseline transport failures. Historical cumulative
+counters include benign HTTP 503 responses. No sustained fresh-deployment rate acceptance is claimed.
+Continuous service was enabled/running, then stopped for exclusive focused boundary ownership; it must
+be restarted after qualification.
 
-Remaining gates include scanner/nested/connection semantics, all mutation restoration, two accepted full catalog
+Remaining gates include scanner/nested/connection scope, all mutation restoration, two accepted full catalog
 passes, final control attribution and sustained load, merged immutable installation, ownership-scoped clean
 rebuild, stop/restart/reboot recovery, unchanged apply and zero-action plan. All T01–T16 tasks remain open.
 
