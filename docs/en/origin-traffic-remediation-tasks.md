@@ -8,7 +8,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 
 ## Current acceptance status
 
-Origin source/installed candidate is `d6930ea`; generator source/installed candidate is `58570a3`.
+Origin source/installed candidate is `d6930ea`; generator source/installed candidate is `695c459`.
 The provider release was checked again against the current release API: v13.0.2 remains latest.
 The installed provider receipt binds its exact binary/source to enriched API specs v10.0.0.
 Terraform replacement plans remain unapplied. No full catalog or clean-rebuild acceptance is claimed.
@@ -36,6 +36,25 @@ connection behavior, isolated signup/OTP/video deletion fixtures, broad mutation
 catalog passes, sustained load/control attribution, cleanup/restart/reboot, merged immutable installation,
 one ownership-scoped clean rebuild and unchanged apply/zero-action plan remain required.
 All T01–T16 tasks remain open. CSD remains disabled.
+
+Generator `695c459` adds the missing native conversion action after each of three video-parameter
+updates. The installed focused receipt confirms all six intended actions, 12 total requests, exact
+original video restoration, zero transport failures and zero tool cancellations. All three conversion
+responses were JSON HTTP 403; these are observed rejections and do not establish attributed WAAP
+mitigation or command execution. Private evidence: `resume-focused-crapi-video-restoration/`.
+Source tests pass 159 Python tests/nine subtests and required pre-commit hooks.
+
+Required PII enforcement remains failed: changed catalog scope reports 86 existing findings, and a
+follow-up full-head scan reports 156 findings. These include payload email domains and synthetic phone
+formats that do not meet the current published-data contract. The conversion commit was pushed before
+the failed scan result was inspected; that does not establish source acceptance. Private failed scan:
+`catalog-pii-failure-1791068316508907847.log`. Repair payload sources/contracts together and retain original
+counts/intents; do not suppress the gate or describe CI alone as complete acceptance.
+
+A new direct origin-nginx ten-operation DVGA probe passed HTTP 200 and all ten nonempty GraphQL values
+in 392.963 seconds. Private receipt: `private-nginx-ten-1791068117606041356/receipt.json`.
+The strict published-route repeat is running; the earlier published timeout remains failed.
+Continuous traffic is being restored on installed `695c459` after focused qualification.
 
 ## Earlier repair-round observations
 
