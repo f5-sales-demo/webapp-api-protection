@@ -1013,3 +1013,8 @@ provisional until corrected rendered evidence and comprehensive fixture/fresh-de
 The corrected loaded Juice Shop score-board screenshot was manually reviewed at full size and shows populated
 challenge cards and counters. The active catalog pass has seventeen receipts, sixteen accepted and failed rapid
 browsing. That failure remains; its timeout/cancellation is not mitigation acceptance.
+
+Generator `be35a22` passes required CI and 128 source tests plus nine subtests with runtime dependencies.
+The active pass retained rapid-browsing failure and was stopped for focused scanner qualification. Immutable
+scanner candidate installation passed; ZAP baseline/active completion verification is now running through the shared
+budget. No scanner or full catalog acceptance is claimed from source contracts alone.
