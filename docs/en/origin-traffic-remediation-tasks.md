@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `0692e0f3f6ec3940860f4f0971ed6e631665d602` preserves all 164 scenarios across 22 suites.
+Generator source `e1fde3384ba1425ddc961719f982ef7cc8ea8d2c` preserves all 164 scenarios across 22 suites.
 Current source checks pass 118 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
@@ -121,6 +121,13 @@ Origin `522d0d5b12cbd33ebb4eac558ef2233e1f1f0e62` passed the immutable installer
 matches committed source in `installed-crapi-verifier-digest.json`; strict browser transport failures remain open.
 Full rendered completeness remains open.
 Origin source passes 45 tests and 69 subtests; generator source passes 119 tests and nine subtests.
+
+Community data-exposure scenario now reads pinned native seeded posts without creating random duplicates. It requires
+a nonempty posts response and exact content type/JSON keys at the real recent-posts endpoint. Installed qualification
+passed on `e1fde3384ba1425ddc961719f982ef7cc8ea8d2c`, with actual GET/query dispatch and response assertions,
+zero transport failures/cancellations. Private receipt:
+`resume-focused-community-read/pass-focused-1791016048498089525/receipt.json`. Historical duplicate data remains
+a cleanup failure. Generator source passes 120 tests and nine subtests and all sixty Python files pass type checking.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
