@@ -10,7 +10,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 | --- | --- | --- | --- | --- | --- | --- |
 | T01 — Record baseline | In progress | none | Capture routes, replicas, fixtures, rendered failures, catalog, deployed digests, Terraform ownership and shared identities; retain private receipt. | <https://github.com/f5-sales-demo/webapp-api-protection/issues/553>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Private remediation-baseline/receipt.json; live baseline captured, preservation reconciliation pending |
 | T02 — Application manifest | Open | T01 | Exactly nine applications reconciled across declaration, docs, landing, outputs and traffic. | <https://github.com/f5-sales-demo/origin-server/issues/710>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
-| T03 — Coverage matrix | Open | T02 | Native/published routes, replicas, assertions, fixtures and scenarios; no missing/orphan entries. | <https://github.com/f5-sales-demo/traffic-generator/issues/711>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
+| T03 — Coverage matrix | In progress | T02 | Native/published routes, replicas, assertions, fixtures and scenarios; no missing/orphan entries. | <https://github.com/f5-sales-demo/traffic-generator/issues/711>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
 | T04 — Unified provisioning | Open | T02 | Both roots consume one immutable origin installer including existing pinned dependencies and repairs. | <https://github.com/f5-sales-demo/origin-server/issues/710>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
 | T05 — Prefix handling | Open | T04 | Assets, links, forms, API, redirects, cookies and SPA routes retain application prefixes. | <https://github.com/f5-sales-demo/origin-server/issues/710>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
 | T06 — Application defects | Open | T05 | All nine applications pass specified authenticated/seeded/rendered workflows and replica checks. | <https://github.com/f5-sales-demo/origin-server/issues/710>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
@@ -18,7 +18,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 | T08 — Repeatable fixtures | Open | T04 | Synthetic fixture reruns produce no duplicates; scoped mutations restored; blocked setup cannot suppress launches. | <https://github.com/f5-sales-demo/origin-server/issues/710>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
 | T09 — Content verifier | Open | T03 | Landing reconciliation, navigation, rendered assets/images, console/network, forms and authentication fail closed; screenshots reviewed. | <https://github.com/f5-sales-demo/origin-server/issues/710>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
 | T10 — Serving layers | Open | T06,T09 | All native replicas, origin nginx, both domains HTTP/HTTPS; identity/type correct; wrong-content 200 fails. | <https://github.com/f5-sales-demo/origin-server/issues/710>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
-| T11 — Scenario receipts | Open | T03,T07 | 164 entries across 22 suites; intended method/path/payload and browser/connection action observed apart from setup/filler. | <https://github.com/f5-sales-demo/traffic-generator/issues/711>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
+| T11 — Scenario receipts | In progress | T03,T07 | 164 entries across 22 suites; intended method/path/payload and browser/connection action observed apart from setup/filler. | <https://github.com/f5-sales-demo/traffic-generator/issues/711>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Generator `12ccf1fd1a3fe099ef7e910a1b57cc85e399a4fd` | Source contract matrix complete; installed full-pass qualification pending |
 | T12 — Outcome attribution | Open | T11 | Explicit negative cases; mitigation, rejection, fixture/tool/transport failure and timeout distinguished. | <https://github.com/f5-sales-demo/traffic-generator/issues/711>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
 | T13 — Lifecycle integration | Open | T04,T08,T10,T12 | Existing lifecycle/control verbs preserved; immutable inputs/digests/URL maps recorded; startup gated on complete readiness. | <https://github.com/f5-sales-demo/webapp-api-protection/issues/553>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
 | T14 — Repair loop | Open | T13 | Source checks, installed and live gates pass on committed immutable configuration; failed receipts retained. | <https://github.com/f5-sales-demo/webapp-api-protection/issues/553>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Pending |
@@ -183,3 +183,34 @@ No merged-artifact acceptance, clean Terraform rebuild, complete catalog pass or
 The restored service reported revision `394c7f9fbdc7b81eed470459c5c639122fc5e433`, enabled and running, with
 2,769 of 2,769 benign requests successful in its initial status sample. This is liveness evidence, not sustained-rate or
 full-catalog acceptance.
+
+## Full source contract matrix
+
+Generator revision `12ccf1fd1a3fe099ef7e910a1b57cc85e399a4fd` declares execution evidence for every one of the
+164 scenarios across 22 suites: 144 request contracts, eleven CSD browser contracts, seven connection adapters and two
+aggregate report contracts. Catalog validation rejects missing contracts. Source tests pass 78 tests and nine subtests;
+Ruff, mypy, Pylint and full pre-commit pass. This completes source declaration only; T11 remains in progress until
+installed actions, prerequisites, output semantics and complete catalog passes qualify.
+
+Native browser registration/contact now each dispatch twice through actual UI controls with zero transport failures or
+cancellations after closing the security-question menu and draining pending requests. The first fresh requests returned
+201; repeat registration of existing synthetic accounts returned 400 while both contact actions returned 201. Those
+responses remain distinct application outcomes, and repeatable account cleanup remains open.
+
+Installed exact contracts passed VAmPI OWASP (22 requirements), Juice Shop SQL login (five payloads twice), SQL search
+(nineteen queries), NoSQL (twenty-one payloads), and RESTaurant mass assignment (six requirements). RESTaurant command
+injection first failed raw ampersand transport; source now URL-encodes the complete parameter, and a separate run passed
+all nine payloads. DVWA SQL first failed quoting before dispatch; argument-based encoding repaired the source and a
+separate pass dispatched all six SQL requirements. Web SSRF passed all fifteen exact payloads after header/body argv
+repair. Prior failed runs remain failed evidence.
+
+Real origin-issued DVWA sessions now feed all fourteen installed DVWA scenarios. Focused dispatch passed command
+injection, file inclusion, reflected XSS and open redirects. Weak-session dispatch generated twenty probes but returned
+no captured IDs; this remains incomplete workflow evidence. Scanner tool wrappers now retain binary digests, intended
+invocation matches and completion status independently of request dispatch. Aggregate reports require successful
+current-pass dependency receipts and source hashes rather than static coverage claims.
+
+Outstanding acceptance includes meaningful workload/concurrency receipts, native scanner completion, per-request
+expected responses, scoped fixture restoration, full browser content assertions and all live application layers.
+Immutable full-catalog qualification is starting; no accepted full pass, merged installation, clean Terraform rebuild,
+sustained-rate acceptance or repeat apply is claimed.
