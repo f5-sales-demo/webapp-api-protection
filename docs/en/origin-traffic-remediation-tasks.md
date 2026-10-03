@@ -147,6 +147,11 @@ are counted. Previous thirteen-submission failure remains failed with its explic
 Cooperative DVGA full published batch qualification is in progress; native responsiveness proof passed
 all replicas without changing original load duration. No full catalog/fresh acceptance is claimed.
 
+Generator `9a514f8` serializes shared RESTaurant role/crAPI video mutations with bounded per-fixture
+locks, preventing nested actors from racing restoration. Source checks and catalog dependency validation
+pass; installed nested qualification remains pending. Cooperative DVGA published baseline/two/five-operation
+JSON responses passed; ten/mixed remain running. Native ten-operation comparison is retained separately.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
