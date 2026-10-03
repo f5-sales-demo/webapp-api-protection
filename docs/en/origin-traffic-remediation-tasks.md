@@ -109,6 +109,24 @@ Focused CSD/Juice verification, fresh full matrix/manual review and complete cat
 required. Continuous traffic is stopped during origin update and must restart after fixture/readiness checks.
 No failed matrix, timeout or interrupted run establishes acceptance. All task completion gates remain open.
 
+Immutable origin `2990de0` installed successfully. The focused Juice Shop browser run passed all ten
+checks under `private-browser-1791070080988673951/`. CSD HTTP repeats passed all five checks, exact fixture
+restoration and zero browser failures on both domains under `private-csd-reload-1791070079771721250/` and
+`private-csd-reload-1791070097868989406/`. These focused passes qualify the repairs only; the current full
+matrix remains in progress and requires manual screenshot review.
+
+A full-catalog prerequisite failure on generator `3973098` exposed unconditional refresh of unrelated
+application logins before unauthenticated shadow-endpoint probes. Generator `67e9cf9` declares per-scenario
+fixture refresh families and performs no unrelated logins. Source verification passes 163 tests/nine subtests,
+Ruff, Biome, pre-commit and staged PII enforcement. Immutable installation passed. The focused shadow scenario
+observed all 12 intended GETs across six declared negative endpoints with correct declared outcomes,
+zero transport failures and zero cancellations. Private receipt:
+`resume-focused-shadow-fixture-scope/pass-focused-1791070343496603947/receipt.json`.
+Earlier zero-launch prerequisite evidence remains failed. Continuous traffic restart is underway on `67e9cf9`.
+
+Current source/installed origin is `2990de0`; generator is `67e9cf9`. WAAP pins those archive/installer digests.
+Provider remains 13.0.2 with enriched v10.0.0 provenance. All T01–T16 completion gates remain open.
+
 ## Earlier repair-round observations
 
 These earlier observations retain their original source revisions and failed evidence;
