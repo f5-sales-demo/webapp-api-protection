@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source is origin `50e94c0`, generator `baed7cf`, and
+Current source is origin `50e94c0`, generator `7f68b3f`, and
 WAAP `6f6ee5c`. Terraform runtime, root/module/namespace pins and lock files select provider 13.0.2;
 its exact spec provenance matches enriched specs v10.0.0. WAAP required CI is green. Source checks pass
 81 origin tests with 69 subtests, 150 generator tests with nine subtests, and 334 WAAP tests with
@@ -60,6 +60,12 @@ listeners, with zero additions/destroys and the installed schema preserved. Sour
 335 tests/396 subtests with one environment skip. Direct/paced long-query retries are running; earlier
 504 runs remain failures. The latest generator separates native-report verification to repair required
 CI branch-count lint.
+
+WAAP `4eceab2` commits the active-stream timeout; live API confirms `more_option.idle_timeout=600000`.
+Queued expensive work from prior failed probes remained active, so the interrupted retry was preserved
+and only four ownership-verified DVGA containers were restarted without deleting their seeded data.
+Installed generator `7f68b3f` also refuses empty timing samples as efficiency evidence. One strict batch
+sequence is now running against the complete timeout chain. Complete acceptance remains open.
 
 ## Previous continuation evidence
 
