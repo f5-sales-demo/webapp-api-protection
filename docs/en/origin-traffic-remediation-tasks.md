@@ -8,7 +8,38 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 
 ## Current acceptance status
 
-This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
+Origin source/installed candidate is `d6930ea`; generator source/installed candidate is `58570a3`.
+The provider release was checked again against the current release API: v13.0.2 remains latest.
+The installed provider receipt binds its exact binary/source to enriched API specs v10.0.0.
+Terraform replacement plans remain unapplied. No full catalog or clean-rebuild acceptance is claimed.
+
+Generator `58570a3` fixes an unquoted browser navigation wait-state that prevented credential form
+submission on `9a514f8`. Executed browser mocks verify all 15 native form submissions, transient setup
+retry and failure on a missing form. Source checks pass 158 Python tests/nine subtests, 12 Node tests,
+Biome, pre-commit, secrets detection and changed-scope PII enforcement.
+
+The immutable installed build passed the focused credential scenario: 15 intended credential POSTs,
+80 total browser requests, zero transport failures and zero tool cancellations. The valid DVWA account
+reached the application; the other 14 attempts stayed on the login page. Private receipt:
+`resume-focused-credential-final/pass-focused-1791067664607182052/receipt.json`.
+The earlier ReferenceError receipt remains failed. This is focused qualification on one HTTPS domain;
+all required serving-layer and full-catalog gates remain open. Continuous traffic is active/enabled
+on the fixed source; the first observed 4,904 benign requests succeeded. Required generator CI is green.
+
+Origin nginx inspection confirms the 600-second DVGA read timeout and four running replicas with no
+DVGA nginx error entries in the inspected log window. A ten-operation origin-nginx probe is running
+to distinguish the application/nginx path from the published WAAP timeout; no success is inferred.
+
+The latest full rendered matrix remains origin `3a62623`, with 66 browser receipts and 315 screenshots.
+The current origin candidate still needs a new complete matrix and manual review. Complete native stress,
+connection behavior, isolated signup/OTP/video deletion fixtures, broad mutation restoration, two full
+catalog passes, sustained load/control attribution, cleanup/restart/reboot, merged immutable installation,
+one ownership-scoped clean rebuild and unchanged apply/zero-action plan remain required.
+All T01–T16 tasks remain open. CSD remains disabled.
+
+## Earlier repair-round observations
+
+These earlier observations retain their original source revisions and failed evidence;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
 Current source is origin `3a62623`, generator `3583ccf`, and
