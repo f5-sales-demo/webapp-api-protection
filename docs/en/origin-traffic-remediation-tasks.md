@@ -323,3 +323,37 @@ A separate installed baseline completion qualification passed all 200 requests w
 and connection reuse, zero transport failures and zero cancellations. Non-GET bypass qualification passed all nine
 request/response/cache-control requirements with zero transport failures/cancellations. Continuous traffic is restarting
 on `67409fef99dea9635b1cc518f787c4511bc25b90`; complete catalog and final deployment acceptance remain open.
+
+## Current repair round
+
+Generator source `cd8dfcb4c50d21dc5d32529bdf7259d51494230c` passes 93 tests and nine subtests. Previous revision
+`c8d9a00` completed green required CI. All 164 execution contracts remain declared; completion remains gated on installed
+and live actions, response semantics, fixture cleanup and complete application workflows.
+
+The latest full pass reached 23 receipts, twenty passing and three failed CDN workloads: multi-client, sustained monitor
+and nested maximum load. Those failures remain evidence. Source baseline completion passed installed with 200 finished
+requests, measured concurrency/connection reuse and valid app content. Dynamic query/encoding and non-GET bypass
+passed installed. Sustained monitor now has a duration/content/cache/completion adapter with focused installed retry
+pending; multi-client and nested maximum-load repairs remain open.
+
+Origin recovery source `f27c98eb73dc2edb5f9c05983fe4cb28d42898de` passes 41 tests and 68 subtests. Installed recovery
+ownership/readiness passed using pinned running-container labels and exact Compose project/service/working-directory
+identity, instead of inspecting an old image object no longer in the Docker cache. The earlier failed ownership probe is
+retained. Full immutable origin installation and clean rebuild acceptance remain open.
+
+## Sustained completion and recovery receipts
+
+Focused installed sustained-cache qualification at generator revision `cd8dfcb4c50d21dc5d32529bdf7259d51494230c`
+passed 300 requests, declared duration, all six application/cache samples, actual concurrency, connection reuse and
+cleanup, with zero transport failures or cancellations. Earlier wrk cutoff and missing-content runs remain failures.
+Continuous traffic is restarting on this immutable candidate. Source validation passes 93 tests and nine subtests.
+
+Origin recovery query and running-container provenance repair passed installed ownership/readiness. It requires the
+pinned base label, application label, exact container name, Compose project/service and working directory. Unknown
+provenance still fails. Origin source validation passes 41 tests and 68 subtests. Immutable full origin installation,
+complete workflows and clean rebuild acceptance remain open.
+
+The most recent interrupted full pass had 23 receipts, twenty passing and three failed multi-client/sustained/nested
+maximum workloads. Every failed/interrupted pass remains failed. Full two-pass catalog acceptance, scanner semantics,
+fixture restoration, nested attribution, rendered completeness, merged-artifact delivery, clean rebuild, sustained-rate
+and repeat-apply qualification remain outstanding.
