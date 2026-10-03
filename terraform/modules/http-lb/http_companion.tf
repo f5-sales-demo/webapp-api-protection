@@ -46,6 +46,10 @@ resource "xcsh_http_loadbalancer" "http" {
       }
     }
   }
+  dynamic "more_option" {
+    for_each = var.lb_stream_idle_timeout_ms == null ? [] : [1]
+    content { idle_timeout = var.lb_stream_idle_timeout_ms }
+  }
   app_firewall {
     name      = xcsh_app_firewall.this.name
     namespace = var.namespace

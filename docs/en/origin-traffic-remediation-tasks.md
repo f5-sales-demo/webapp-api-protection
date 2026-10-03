@@ -52,6 +52,15 @@ Origin `50e94c0` now requires 900 seconds of sustained unresponsiveness before r
 operations; a synthetic regression verifies grace, eventual recovery and healthy reset. Source tests pass
 81 tests/69 subtests. Immutable install is running; published strict-response qualification remains open.
 
+Direct published DVGA probe returned HTTP 504 stream timeout at 30 seconds independently of the
+generator proxy. Provider13 schema identifies `more_option.idle_timeout` as the active-stream timeout,
+distinct from route deadline and origin-pool idle time. WAAP now exposes `lb_stream_idle_timeout_ms`
+through both owned listeners. The saved ownership-checked provider13 apply updated only those two
+listeners, with zero additions/destroys and the installed schema preserved. Source verification passes
+335 tests/396 subtests with one environment skip. Direct/paced long-query retries are running; earlier
+504 runs remain failures. The latest generator separates native-report verification to repair required
+CI branch-count lint.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
