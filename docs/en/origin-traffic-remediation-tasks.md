@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `87b3855d814ca812d3be0010a5649cf1ff75c34a` preserves all 164 scenarios across 22 suites.
-Current source checks pass 103 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
+Generator source `3edcadd371784d336645de59ed82ad222c6e94de` preserves all 164 scenarios across 22 suites.
+Current source checks pass 105 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
 pass. Required CI remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
 Origin `5706801ed48b19f8433874454a142ce8a7c29204` passed the digest-checked immutable release installer and
@@ -27,6 +27,13 @@ digests matching the installed catalog. Scenario mitigation counts exclude fille
 Evicted nested evidence no longer leaves unbounded owned attribution markers. Rapid browsing declares 360 route actions
 across all fifteen original user-agent identities, with components, content, controls, URL outcomes and private screenshots.
 Intentional negative order, tracking, anonymous authorization and VAmPI GET routes are explicitly distinguished.
+
+Expanded origin `671fbe167ea015363297e3ed9e068934c933cd55` passed immutable installation and required CI.
+Focused BOLA qualification at generator `3edcadd371784d336645de59ed82ad222c6e94de` passed all six dispatch/response
+requirements, all five synthetic profile restorations, zero transport failures and zero cancellations. Private receipt:
+`resume-focused-bola-fixtures/pass-focused-1791011143124566516/receipt.json`. The prior duplicate-phone run remains
+failed: its five application 500s were not accepted. Expanded probes target synthetic privileged accounts. All 33 supported
+native HTTP workflows passed after the immutable reinstall. Full rendered/workflow/catalog acceptance remains open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
