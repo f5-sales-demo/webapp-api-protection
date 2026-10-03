@@ -695,3 +695,11 @@ features, full scenario scope, or final fresh-deployment acceptance.
 The next CSD candidate derives native and published routes and scopes clear-log requests carrying a synthetic fixture
 ID to that run while preserving other entries. Source checks pass 58 tests and type checking; installed browser checks
 are pending. CSD protection remains disabled. All T01-T16 completion gates remain open.
+
+## CSD browser synchronization repair
+
+The CSD immutable verifier passed five checks through origin nginx with fixture restoration. Concurrent native and
+published checks retained fixture-baseline failures, and published checks retained checkout-script cancellation failures.
+The verifier now bounds waits, synchronizes the receiver counter, checks the clear response against real receiver state,
+and finishes checkout resources before navigation. It retains a private fixture identity journal for interrupted recovery.
+Sequential same-source native and published retries remain pending; no failed run was relabeled.
