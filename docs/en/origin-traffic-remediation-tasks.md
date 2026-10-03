@@ -935,3 +935,8 @@ The first actual signup run stalled and was stopped through exact verifier owner
 failed, and the account was removed, but welcome vehicle/mail ownership was not yet identified. Recovery now
 discovers the exact synthetic recipient mail, extracts its VIN, and verifies mail removal, retaining incomplete
 recovery as failure. Bounded signup waits and private recovery requalification are in progress.
+
+MailHog welcome-body discovery required raw MIME decoding: its v2 list content body was empty while raw SMTP
+content retained the quoted-printable VIN. Recovery now parses that raw message and accepts its actual message-ID
+format, with confirmed removal. The second signup run also stalled on browser response completion and remains
+failed. The next verifier bounds response-body reads; installed recovery and signup retry remain pending.
