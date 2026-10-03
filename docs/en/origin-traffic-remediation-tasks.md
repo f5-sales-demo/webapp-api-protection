@@ -22,7 +22,7 @@ The last complete origin matrix (`c74a0bd`) has 66 passing browser receipts and 
 entries, with 315 screenshots manually reviewed. All native Juice Shop replicas and both published domains
 over HTTP/HTTPS passed ten rendered checks after the local font repair. The five landing crawl layers passed
 28 checks each. Origin `9347439` additionally rejects installer source drift during a matrix; its installed
-full matrix is running. Broad fixture restoration and fresh/merged installation acceptance remain incomplete.
+full matrix passed the source-stability gate; screenshot review remains provisional. Broad fixture restoration and fresh/merged installation acceptance remain incomplete.
 
 The installed generator is `b40132d` during focused rapid qualification. API fuzzing passed all 169
 dispatch/response requirements; API denial passed three HTTP 403 responses plus an allowed HTTP 200 control.
@@ -35,8 +35,8 @@ Fixture-export rerun idempotence passed twice with unchanged crAPI/DVWA/RESTaura
 broad attack mutation restoration remains open. Rate evidence includes failed 185.2 RPS and later 197.2–197.3
 RPS windows with 100 percent benign success and zero baseline transport failures. Historical cumulative
 counters include benign HTTP 503 responses. No sustained fresh-deployment rate acceptance is claimed.
-Continuous service was enabled/running, then stopped for exclusive focused boundary ownership; it must
-be restarted after qualification.
+Continuous service is enabled and active on generator `b40132d` after focused qualification; its fresh
+full catalog pass is running.
 
 Remaining gates include scanner/nested/connection scope, all mutation restoration, two accepted full catalog
 passes, final control attribution and sustained load, merged immutable installation, ownership-scoped clean
@@ -1170,3 +1170,8 @@ Installed rapid qualification passed on generator `b40132d`: all 360 actions, 31
 mitigated, zero failed action records, zero transport failures and zero tool cancellations. Private receipt:
 `resume-focused-rapid-fresh/pass-focused-1791050358547096263/receipt.json`. Earlier failed receipts retain
 their original outcomes. Continuous traffic restart is in progress; two full catalog passes remain required.
+
+Source-stability matrix `9347439` passed with all 66 browser receipts and no missing workflow/layer
+entries (`private-browser-matrix-1791050358484229414/matrix-receipt.json`). Continuous traffic is enabled
+and active on `b40132d`; six early catalog receipts pass. Full pass acceptance remains pending, and no
+clean rebuild, broad mutation-restoration acceptance or unchanged repeat apply is claimed.
