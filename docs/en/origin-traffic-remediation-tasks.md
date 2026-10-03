@@ -982,3 +982,25 @@ or fresh-deployment acceptance is claimed.
 ZAP status parsing now rejects malformed/missing numeric status and fails unfinished spider/passive/active phases.
 Partial scan reports remain partial evidence. The status-parser regressions and shell checks pass; immutable scanner
 qualification remains pending. The consolidated application rerun has 41 passing browser receipts so far.
+
+The current matrix rerun has 55 browser receipts with zero browser failures, including repaired native crAPI
+frontend routing. Signup and final source/layer reconciliation remain running. ZAP active scanning now records
+its actual per-application scan IDs and terminal completion separately from spider requests; installed scanner
+and full-catalog acceptance remain pending.
+
+The application matrix has 61 passing browser receipts so far, including completed signup with scoped recovery.
+Active scanner acceptance now requires matching per-application scan IDs and terminal status records; startup or
+spider requests cannot satisfy the active phase. Missing/foreign/incomplete scanner regressions pass.
+
+## Complete declared application matrix
+
+Origin `6551549` completed the consolidated source-bound matrix with no missing declared workflows and 66 passing
+browser receipts across every native replica, origin nginx and both domains over HTTP and HTTPS. Signup recovery,
+CSD shared replica state and native header echoes passed. Private matrix: `private-browser-matrix-1791038863474345797`.
+The matrix retains accepted=false pending screenshot review and comprehensive fixture-recovery/fresh-deployment
+acceptance. Two full accepted catalog passes and the clean Terraform lifecycle remain outstanding.
+
+Manual review of all 315 matrix screenshots found that some Juice Shop score-board captures remained at a loading
+spinner despite passing heading assertions. Rendered acceptance is therefore still open. The verifier now requires
+visible challenge cards and spinner removal, and signup screenshots wait for modal animation. The matrix automated
+pass stays provisional; screenshots were not accepted as complete.
