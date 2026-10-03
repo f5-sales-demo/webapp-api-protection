@@ -96,6 +96,13 @@ qualification failed before mutation: prerequisite/request client cancellations 
 probe time out, so no command launch or restoration acceptance is claimed. Preserve that receipt under
 `resume-focused-crapi-video-restoration/`. Continuous traffic restart is in progress on installed `143dde9`.
 
+Focused native crAPI video mutation retry on `3583ccf` passed all three intended dispatches/response
+checks and exact original-media/name/conversion restoration, with nine requests, zero transport failures
+and zero cancellations. Private receipt: `resume-focused-crapi-video-restoration/`. This qualifies the
+video-command workflow only; admin-video deletion and broader fixtures remain open. Source corrects
+403/429 shell classification to agree with structured mitigation receipts. Earlier reachability failure
+remains failed. Continuous traffic restart is in progress.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
