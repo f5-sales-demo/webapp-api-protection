@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `d26a59b7601dfa8fcdecb48b6f5a2d8bfb25f82f` preserves all 164 scenarios across 22 suites.
+Generator source `0692e0f3f6ec3940860f4f0971ed6e631665d602` preserves all 164 scenarios across 22 suites.
 Current source checks pass 118 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
@@ -104,6 +104,13 @@ rendered no vehicle and Community/Shop returned to dashboard. The failed browser
 Origin `53a54904fb70291c10c1de3636353376bc6a6cc2` adds a narrow seeded-role frontend compatibility adapter and fails
 if the pinned upstream guard changes. Source checks pass 44 tests and 68 subtests; immutable installation and browser
 qualification are in progress. Full workflow acceptance remains open.
+
+Seeded-role crAPI adapter installed successfully. Chromium rendered vehicle details and image, Community posts and
+Shop products; native menu clicks and deep-link refresh worked. The same run remains incomplete because automatic
+chatbot state requests returned 404. Provisioning incorrectly routed chatbot requests to identity and omitted the chatbot
+dependency. Source now declares an immutable native chatbot image and functional uninitialized-state readiness. Origin
+`18fd2a27ce87a6e934af315868f458076e881eb3` passes 45 tests and 69 subtests; installation is pending. Accumulated
+synthetic community posts remain a fixture-cleanup failure. Full crAPI/browser acceptance remains open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
