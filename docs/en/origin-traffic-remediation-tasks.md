@@ -57,3 +57,5 @@ The clean-install review added explicit nginx cache creation, adapter image prov
 The precise method, endpoint and payload contract is currently implemented for the two DVWA payload scenarios. The remaining catalog scenarios require reconciliation before full-catalog acceptance. Source CI and rendered diagnostics do not complete T11, T15 or T16.
 
 No clean rebuild, two accepted complete catalog passes, unchanged repeat apply, reboot recovery or merged-artifact installation has been claimed. All three implementation PRs remain drafts. Current source, candidate installation and failed iterations are retained separately in private receipts.
+
+The current installer rerun passed every native readiness check. The remaining rendered failure was isolated to duplicate crAPI chatbot state requests; a regression now requires both source occurrences to be guarded before login. The updated build and cross-domain rendered verification are still in progress.
