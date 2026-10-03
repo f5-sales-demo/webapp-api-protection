@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `7a07b1324cd1afdffdac9ad6c0d8569ebbde1976` preserves all 164 scenarios across 22 suites.
-Current source checks pass 122 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
+Generator source `a203ef7fa38122f5c1f7043fc8974c82c86dd1fb` preserves all 164 scenarios across 22 suites.
+Current source checks pass 123 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
@@ -163,8 +163,20 @@ Pinned runtime provisioning is an explicit remaining T09/T13 gate.
 
 Origin `a936a2d3b72c25d47ed986aeb3909d2071031422` provisions a digest-pinned Playwright 1.63.0 runtime
 with a matching integrity-locked package and source-installed verifier scripts. Package audit reports zero vulnerabilities;
-46 source tests and 69 subtests pass. Immutable runtime installation is pending. The earlier 1.55.0 candidate was
+46 source tests and 69 subtests pass. Immutable runtime installation passed; Origin-host locked-runtime content verification passed all 28 checks across nine applications and retained 27
+screenshots. Private output: `/opt/origin-server/private-browser-1791017479808857095`. Accepted remains false because
+full authenticated workflow and screenshot acceptance are incomplete; Installed crAPI workflow retry remains failed with five rendered checks passing and two external-map transport
+failures. Private receipt: `/opt/origin-server/private-browser-1791017603361585040/receipt.json`. Origin runtime CI
+is green. This is not complete rendered workflow acceptance.
+Private installer receipt: `remediation-immutable-origin-1791017354705763175/receipt.json`. The earlier 1.55.0 candidate was
 replaced after its package audit identified a fixed browser-download certificate issue; it is not an accepted runtime.
+
+Scenario and nested child receipts now carry immutable source commit and archive digest in addition to entrypoint
+digest. Aggregate reports reject mismatched artifacts/revisions even when a shell entrypoint did not change.
+Source regression rejects adapter revision mismatch; 123 tests and nine subtests, mypy and configured Pylint pass.
+Installed nested provenance qualification passed child dispatch/restoration, matching source commit/archive
+and the aggregate report. Private child receipt:
+`resume-focused-nested/pass-focused-1791017796681530580/nested-restaurant-exploits/restaurant-exploits--02-bola-profile/receipt.json`. Full nested stress and all catalog semantics remain open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
