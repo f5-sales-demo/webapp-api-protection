@@ -876,3 +876,12 @@ Current combined-matrix source passes 69 Python tests, type checking and reposit
 evidence must match the installed verifier file digest as well as source/archive, kind and serving layer. The active
 older-source rapid scenario has 336 persisted actions and 25 failures; it remains failed/incomplete while finishing.
 Next source-pinned matrix installation and run remain pending.
+
+The latest origin CI failed Python type/lint checks after the combined-matrix change despite focused source checks.
+The required CI repair loop is active; no merge or complete acceptance is claimed. Rapid failure resource records
+are now scoped to their own route rather than inherited from previous routes.
+
+Origin CI findings were repaired: renderer complexity was split into its own adapter binding helper and receipt
+test fixtures now have explicit types. All nineteen Python files pass mypy and repository Pylint, 69 tests pass,
+and repository hooks pass. Required CI is pending. The older-source rapid run completed 360 records but retained
+46 failures; it remains failed, including requests interrupted at its deadline.
