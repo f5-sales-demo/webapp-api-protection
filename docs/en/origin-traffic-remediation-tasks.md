@@ -885,3 +885,8 @@ Origin CI findings were repaired: renderer complexity was split into its own ada
 test fixtures now have explicit types. All nineteen Python files pass mypy and repository Pylint, 69 tests pass,
 and repository hooks pass. Required CI is pending. The older-source rapid run completed 360 records but retained
 46 failures; it remains failed, including requests interrupted at its deadline.
+
+The combined application matrix is now running on digest-verified origin `a23d46e`, using freshly exported
+synthetic fixtures and sequential browser checks across native replicas, origin nginx and both HTTP/HTTPS domains.
+Continuous traffic restart is in progress on generator `92b5d26`. Source checks remain separate from matrix acceptance.
+The most recent completed rapid pass retained 46 failed actions and stays failed evidence.
