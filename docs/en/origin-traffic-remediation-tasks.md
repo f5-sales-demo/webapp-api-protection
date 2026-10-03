@@ -922,3 +922,7 @@ The fresh-document rapid catalog run completed all 360 records: 86 rendered, 250
 failed actions. It remains failed acceptance. The next application verifier includes native whoami header echo,
 CSD shared-state mutation/recovery, native crAPI prefix dispatch and journaled synthetic signup/MailHog verification.
 Signup cleanup uses quoted psql variables and exact synthetic account identity; installed qualification is pending.
+
+First installed signup verifier invocation failed before launch because its parser choice was missing. The source
+CLI now declares the signup kind and has a parser regression; 74 tests pass. No account was created by that failed
+invocation. Immutable reinstall and actual signup/recovery qualification remain pending.
