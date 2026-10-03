@@ -978,3 +978,7 @@ Installed origin `6551549` passed signup, request completion, rendered success, 
 recovery on both domains over HTTP and HTTPS. The next consolidated matrix includes native frontend routing,
 whoami supplied-header echo, CSD cross-replica state and recovery-gated signup. It is running; no final matrix
 or fresh-deployment acceptance is claimed.
+
+ZAP status parsing now rejects malformed/missing numeric status and fails unfinished spider/passive/active phases.
+Partial scan reports remain partial evidence. The status-parser regressions and shell checks pass; immutable scanner
+qualification remains pending. The consolidated application rerun has 41 passing browser receipts so far.
