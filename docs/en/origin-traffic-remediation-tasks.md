@@ -1152,3 +1152,10 @@ being reviewed. Generator `be578b6` records explicit navigation/closing phases a
 Socket.IO polling-session cleanup in those phases; asset cancellation and execution-phase failure still fail.
 The previous verifier recorded those deliberate long-poll closures as generic transport errors. Source checks
 pass 139 tests and nine subtests; current installed rapid rerun remains on `e52a996` and is incomplete.
+
+Stable-origin rapid rerun on generator `e52a996` completed all 360 declared actions: 312 rendered and
+48 mitigated, zero failed action records. Its terminal receipt still failed seven Socket.IO cleanup
+cancellations (`resume-focused-rapid-fresh/pass-focused-1791049371449327802/receipt.json`). Generator
+`b40132d` includes scoped navigation/closing cleanup classification and passed required CI; installed
+qualification is pending. The previous receipt remains failed. Local-font matrix `c74a0bd` screenshots
+were manually reviewed and retained with final acceptance false because broader gates remain open.
