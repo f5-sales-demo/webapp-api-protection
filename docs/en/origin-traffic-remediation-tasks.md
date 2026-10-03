@@ -751,3 +751,10 @@ rendered assertions. A source regression also exposed stale 403 evidence incorre
 Generator `96f2fad` rejects that stale success and performs a fresh navigation when the previous document was blocked.
 Seven focused Node tests and repository hooks pass; candidate CI and installed qualification remain pending.
 The active older-source run remains untouched for its terminal receipt.
+
+The older-source rapid browser completed all 360 action records and closed Chromium: 111 rendered, 208 mitigation
+candidates and 41 failed actions. The result remains failed, including stale-mitigation evidence. No complete catalog
+pass is accepted. The next immutable generator has green required CI and rejects stale blocked SPA evidence.
+HTTPBin source now derives native assets, specification and form routes from the request prefix; 61 origin source tests
+and type checking pass. Its browser verifier requires actual form submit and returned synthetic field values.
+Installed qualification is pending after the completed rapid run.
