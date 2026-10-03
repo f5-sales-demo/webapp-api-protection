@@ -134,6 +134,13 @@ gevent cooperative sleep, preventing the deliberately expensive query from block
 requests. Source verification passes 83 tests/69 subtests and hooks. Immutable installation and native
 concurrency proof are running; full expensive batch acceptance remains open. Source pins updated.
 
+Cooperative DVGA native proof passed on all four replicas: expensive systemUpdate retained 20–50-second
+duration and correct JSON while simultaneous __typename returned in 6–8 ms. Private source-bound receipt:
+`private-cooperative-dvga-1791065993259661683/receipt.json`. Origin immutable installation passed on
+`d6930ea`. Published complete batch, final rendered matrix, catalog and fresh rebuild gates remain open.
+Continuous pass retains credential-stuffing failure for thirteen of fifteen actual submissions after
+two login-form setup errors; it cannot establish catalog acceptance.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
