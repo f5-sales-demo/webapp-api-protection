@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source candidates are origin `fa7156d` and generator `70dacf7`. Terraform pins are being refreshed
+Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
 from pushed commits and verified archive/installer digests. Source verification passed 79 origin tests with
 69 subtests and 143 generator tests with nine subtests. Required CI for the latest heads is pending.
 The three application manifests declare nine applications with 33 native serving ports.
@@ -37,7 +37,7 @@ zero transport failures and zero cancellations; prior failures remain failed.
 Generator `a4d6c7d` fixes OTP receipt counters lost in a background subshell and removes unsupported
 full-keyspace feasibility claims. A deterministic shell regression first reproduced the failure, then passed
 with both batches counted. This does not repair registration/OTP fixture isolation or establish full coverage.
-The latest installed generator is `70dacf7`; source and installed provenance were checked independently.
+The latest installed generator is `bc328c6`; source and installed provenance were checked independently.
 
 The interrupted full catalog baseline recorded 76 scenarios, with 62 passing and 14 failing. No complete
 catalog pass is accepted. Earlier rapid, API fuzz, ZAP and Nikto focused successes remain bound to their
@@ -62,7 +62,13 @@ paced SQLMap response deadlines, and removes unsupported video-execution claims.
 errors and thousands of client cancellations; its owned process group was interrupted after preserving
 failure evidence. Corrected retry is running under `resume-focused-kraken-native/`; continuous traffic
 is stopped while that single shared boundary is occupied. Origin `fa7156d` is immutably installed with
-green required CI. Its current matrix has 62 passing browser receipts and signup checks still running.
+green required CI. Its current matrix passed all 66 browser receipts with no missing workflow/layer entries
+(`private-browser-matrix-1791055912416669296/matrix-receipt.json`). All 315 screenshots were
+reviewed as contact sheets, with full-size key pages checked; the private manual review remains
+final_acceptance=false. The second native stress retry remains failed for ApacheBench exit 119 and
+two client cancellations; its owned process group was interrupted with evidence retained. SQLMap
+focused qualification passed all three native invocations and intended endpoint/payload requirements,
+230 requests, zero transport failures and zero cancellations (`resume-focused-sqlmap-retry/`). Continuous traffic restart is in progress on `bc328c6` after releasing the focused boundary.
 WAAP `5eb8ad8` required CI is green; final coverage/rebuild gates remain open.
 
 ## Historical observations
