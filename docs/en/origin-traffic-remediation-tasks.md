@@ -11,34 +11,34 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `506d54244fc788a754486c31ba574f6ece866fa6` preserves all 164 scenarios across 22 suites.
-Its required CI passed. Source checks pass 125 Python tests and nine subtests, repository-configured mypy and Pylint
-across sixty Python files, and focused Node checks. No full catalog pass has yet satisfied acceptance.
+Current source candidates are origin `b30656c` and generator `f980a6e`; Terraform pins bind their exact
+commits, archive digests and installer digests. Source checks pass 76 origin tests with 69 subtests,
+135 generator tests with nine subtests, eight focused Node tests, and 308 WAAP tests with one environment skip.
+Origin and WAAP required CI passed; generator's latest catalog correction is awaiting required CI.
 
-Origin source `a2409bdcc4b6b77d7ada4b32fef22d61fde01306` passes 57 Python tests, type checking and
-changed-file repository hooks. The DVWA redirect repair prevents already-prefixed upstream redirects from acquiring
-a second prefix. Its immutable predecessor `be736289794fdc10d6a7eaf239cd37fd74d9f574` passed four rendered
-checks through origin nginx and both published domains over HTTP and HTTPS. Checks covered authenticated home,
-native security form submission, seeded SQL input and reflected benign input, with no browser errors or failed resources.
-The twenty screenshots were manually reviewed. The native-route verifier at
-`a6d95abbee77e32edfef1864efb36a1f7aef45fc` passed those same four checks on each of all four DVWA replicas.
-Private receipts retain the exact source and archive digests. Full DVWA mutation fixture restoration remains open.
+The last complete origin matrix (`695c07c`) has 66 passing browser receipts and no missing declared workflow/layer
+entries. Manual review caught capture timing gaps; `b30656c` loads visible images before screenshot capture. Its
+full matrix is running. Published HTTP-www crawl passed after the lazy-image fix; other published layers are
+rerunning on the same source. Broad fixture restoration remains incomplete. These receipts remain provisional.
 
-The current DVGA candidate derives template links from the request prefix, preserves native static asset routes,
-and fixes the burn-after-read link that escaped to the shared root. Its browser verifier requires actual native paste
-form submission, subscription delivery, persisted content and scoped synthetic paste removal. Immutable installation
-and installed qualification are in progress; no DVGA workflow acceptance is claimed from source tests.
+The installed generator is `2e30e63` during focused API-fuzz and rapid qualification. API fuzzing dispatched all
+169 requests with zero cancellations or transport failures, but failed three stale CONNECT catalog expectations;
+`f980a6e` repairs those expectations and requires an immutable installed rerun. Rapid qualification is in progress.
+The earlier full-pass rapid run retained 360 actions: 78 rendered, 257 mitigated and 25 failed. It remains failed.
 
-Continuous traffic was verified enabled and active on the generator candidate, with 9,538 of 9,538 benign requests
-successful in that observed window. It was then stopped for the immutable DVGA installation. Interrupted catalog passes
-remain failed evidence. Complete application workflows, fixture restoration, scanner semantics, two full passes,
-merged installation, clean rebuild, final rate/control proof, reboot and zero-change repeat apply remain open.
+Native ZAP baseline and active-message gates passed on `f0bfeaa`; final complete catalog coverage is unproven.
+Rate evidence includes a failed 185.2 RPS window and later 197.3 RPS windows with 100 percent benign success and
+zero baseline transport failures. Cumulative counters include two benign HTTP 503 responses. No sustained final
+rate acceptance is claimed. Continuous service was enabled/running, then stopped for exclusive focused boundary
+ownership. It must be restarted after qualification.
 
-Browser response assertions now remain mandatory even when browser actions pass. Nested reports require child source
-digests matching the installed catalog. Scenario mitigation counts exclude filler, prerequisites and other scenarios.
-Evicted nested evidence no longer leaves unbounded owned attribution markers. Rapid browsing declares 360 route actions
-across all fifteen original user-agent identities, with components, content, controls, URL outcomes and private screenshots.
-Intentional negative order, tracking, anonymous authorization and VAmPI GET routes are explicitly distinguished.
+Remaining gates include scanner/nested/connection semantics, all mutation restoration, two accepted full catalog
+passes, final control attribution and sustained load, merged immutable installation, ownership-scoped clean
+rebuild, stop/restart/reboot recovery, unchanged apply and zero-action plan. All T01–T16 tasks remain open.
+
+## Historical observations
+
+Earlier revisions and measurements below are retained as evidence of their original outcomes.
 
 Expanded origin `671fbe167ea015363297e3ed9e068934c933cd55` passed immutable installation and required CI.
 Focused BOLA qualification at generator `3edcadd371784d336645de59ed82ad222c6e94de` passed all six dispatch/response
