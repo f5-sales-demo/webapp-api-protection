@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `f93796fe0489cf03272fecce7794cf2ec9c91316` preserves all 164 scenarios across 22 suites.
+Generator source `7e7ae5e43bc9eeb71c3cd118900e456fa9f449f4` preserves all 164 scenarios across 22 suites.
 Current source checks pass 124 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
@@ -200,6 +200,11 @@ external-map requests report net::ERR_FAILED in subframes, not ERR_ABORTED navig
 application view checks pass; full rendered acceptance is still false. Private receipt:
 `/opt/origin-server/private-browser-1791019546050759919/receipt.json`. Immutable installer and provenance passed;
 WAAP candidate pins are reconciled with this revision and credential-free tests pass.
+
+The current interrupted full pass reached fourteen receipts, thirteen verified and one failed rapid-browser scenario.
+The retained browser checkpoint had only its first identity and browser_closed=false; a source repair now closes and
+persists evidence in finally on early failure. Seven focused Node tests pass. Installed rapid retry is running on
+`7e7ae5e43bc9eeb71c3cd118900e456fa9f449f4`; the failed pass remains failed.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
