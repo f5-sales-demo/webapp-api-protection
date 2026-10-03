@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `cc3d1a01113327aff9279491ac0fc0205f2fe75b` preserves all 164 scenarios across 22 suites.
-Current source checks pass 113 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
+Generator source `d734113d37e667cc5370f7dfa3a3adaf8a7caaca` preserves all 164 scenarios across 22 suites.
+Current source checks pass 114 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
@@ -65,6 +65,11 @@ scanner loaded its replacer configuration and dispatched the intended access req
 the shared boundary. Private receipt: `resume-focused-zap-marker/pass-focused-1791012924444458872/receipt.json`.
 This proves attribution only; full scanner actions/completion and Nikto attribution remain open. Earlier CI repair
 revision `8838ec2` passed its Super-Linter job, but its workflow was canceled by a newer push; current required CI is pending.
+
+Catalog reconciliation removed 699 blanket HTTP 500 allowances across 64 scenarios. All 164 entries remain.
+Application crashes now fail response acceptance; intentional server-error cases require explicit case-specific evidence.
+Focused historical passes retain their original sources and outcomes. Current source passes 114 tests and nine subtests;
+current installed catalog restart and required CI are pending. Full per-case status/content reconciliation remains open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
