@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `d734113d37e667cc5370f7dfa3a3adaf8a7caaca` preserves all 164 scenarios across 22 suites.
-Current source checks pass 114 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
+Generator source `dc8da02ec45b59c6c21a10c18db7ed15e3238a29` preserves all 164 scenarios across 22 suites.
+Current source checks pass 118 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
@@ -70,6 +70,21 @@ Catalog reconciliation removed 699 blanket HTTP 500 allowances across 64 scenari
 Application crashes now fail response acceptance; intentional server-error cases require explicit case-specific evidence.
 Focused historical passes retain their original sources and outcomes. Current source passes 114 tests and nine subtests;
 current installed catalog restart and required CI are pending. Full per-case status/content reconciliation remains open.
+
+Slow-header evidence now records every write round and explicit peer/tool errors. The first diagnostic run remains
+failed, with 42 successful writes and eighteen TLS EOF errors across twenty bounded connections. Private receipt:
+`resume-focused-slow-evidence/pass-focused-1791013215755636419/receipt.json`. A new verifier distinguishes recorded
+peer closure from timeout/tool failure without attributing a WAAP control. Installed retry passed as a bounded probe with 42 sent headers and eighteen recorded peer-closed connections,
+complete three-round evidence, duration and cleanup. Private receipt:
+`resume-focused-slow-evidence/pass-focused-1791013379582960007/receipt.json`. No WAAP control is attributed; the prior
+failed iteration remains failed. Full connection-scenario scope reconciliation and control attribution remain open.
+
+Positive response verification now requires declared content type and JSON identity while retaining only assertion
+booleans. RESTaurant BOLA requires the actual synthetic target username and changed phone value in every positive
+mutation response. Wrong-content 200 and wrong-actor regressions fail. Installed qualification passed all response identities,
+22 dispatches and profile restoration with zero transport failures/cancellations. Private receipt:
+`resume-focused-bola-fixtures/pass-focused-1791013673736185449/receipt.json`. All 59 Python files pass mypy and
+repository-configured Pylint. Continuous startup is being verified; complete catalog/workflow acceptance remains open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
