@@ -252,6 +252,13 @@ Scoped CSRF also restores its dedicated account on early script exit and retains
 failures/cancellations. Private receipt: `resume-focused-csrf-scoped/pass-focused-1791022987278269891/receipt.json`. Prior accepted normal-flow source remains its own receipt and does
 not qualify interruption behavior. Shared admin and unrelated fixtures remain preserved.
 
+Juice Shop native browser diagnostic passed ten assertions: translated products/images, native login, seeded basket,
+about/contact/recycle/complaint/scoreboard and observed WebSocket frames, with no recorded errors. Source-controlled
+verifier is now included in the locked origin runtime; Origin `bbc2520` immutable installation passed, and locked-runtime verification passed all ten checks with zero
+errors. Its eight screenshots were manually reviewed for product images, labels, supporting pages and seeded basket.
+Private receipt: `/opt/origin-server/private-browser-1791023435742027870/receipt.json`. Published browser layers
+are now running. This does not complete checkout or all serving-layer workflows. Full application acceptance remains open.
+
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
 response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
