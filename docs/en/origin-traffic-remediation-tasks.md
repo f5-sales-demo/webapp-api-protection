@@ -58,6 +58,31 @@ Private receipt: `private-published-ten-1791068470741982694/receipt.json`. The e
 remains failed; the complete paced scenario still requires its baseline, all batches and mixed result.
 Continuous traffic is being restored on installed `695c459` after focused qualification.
 
+Source candidates advanced to origin `f409d5c` and generator `3973098`; installed candidates remain
+origin `d6930ea` and generator `695c459` during their bounded qualification runs. Origin source configures
+Juice Shop native seed accounts with the reserved example.com domain on all replicas. Generator payloads
+and exact-match contracts use those same native account identities. Mixed DVGA response verification now
+requires all ordered result fields and rejects GraphQL errors. Source tests pass 84 origin tests/69 subtests
+and 160 generator tests/nine subtests; candidate checks/hooks are recorded separately from installed acceptance.
+
+PII remediation reduced full-head generator findings from 156 to 91, then 20, then 12. Staged English,
+fixture and executable changes pass enforcement with zero findings; remaining full-head findings are the
+12 existing localized deployment examples, preserved under the fleet English-only/no-locale-refresh policy.
+Full-head gate remains failed. Private receipt: `catalog-pii-final-english-1791069127496844001.log`.
+Earlier failed scan receipts remain failed. No suppression or sourceHash refresh establishes acceptance.
+
+The fresh rendered matrix on installed origin `d6930ea` is under
+`private-browser-matrix-1791068709010064608/`. It has two failed CSD HTTP dashboard transport checks;
+all content/restoration checks in those receipts passed, but cancellation remains failure. The clear button
+reloads the dashboard and the verifier did not await completion before cleanup. Origin `f409d5c` now awaits
+that navigation and records the browser error text; a new immutable live check must prove the repair.
+The in-progress matrix must finish before origin replacement, then the new source needs its own matrix.
+
+The complete paced DVGA retry on installed generator `695c459` has passed baseline, two-operation and
+five-operation JSON checks; ten-operation/mixed checks remain in progress. Continuous service is stopped
+while this single shared boundary is occupied and must be restored afterward. Independent origin-nginx
+and published ten-operation passes remain focused evidence only; earlier paced timeouts remain failed.
+
 ## Earlier repair-round observations
 
 These earlier observations retain their original source revisions and failed evidence;
