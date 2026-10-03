@@ -811,3 +811,9 @@ The immutable frontend adapter now anchors vehicle image URLs under the crAPI ba
 source changes. Source checks pass 63 tests and repository hooks. Installed qualification remains pending.
 The focused rapid retry has fourteen failures among 216 persisted actions; blank HTTP 200 SPA documents remain
 failed despite corrected fresh-versus-stale mitigation handling. The run continues for a terminal receipt.
+
+The focused rapid retry completed 360 records and closed Chromium on generator `808cd6b`, but failed with
+54 action failures, unmatched server failures and six cancellations. It remains failed; controller exit zero did
+not establish scenario acceptance. Private receipt: `resume-focused-rapid-fresh/pass-focused-1791030621163638487/receipt.json`.
+Origin `62d25ed` passed immutable installation and the expanded seven-check crAPI verifier through origin nginx,
+including mechanic form navigation and vehicle image return. Published verification is in progress.
