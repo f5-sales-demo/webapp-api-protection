@@ -134,6 +134,19 @@ Private receipt: `resume-focused-shadow-fixture-scope/pass-focused-1791070532637
 Continuous restart is underway on this exact source. The fresh origin `2990de0` matrix is in progress;
 its first 27 browser receipts passed with no failures. No full acceptance is claimed.
 
+Generator source/installed candidate is `82646ba`. Native timed-worker requests now carry opaque
+worker markers in private dispatch/response/error receipts; benign transport failures record application
+path and elapsed time. Source checks pass 169 tests/nine subtests; native ApacheBench regression is skipped
+on the workstation where the binary is unavailable, but the owned generator loopback probe passed.
+The first worker-marker install failed ApacheBench argument placement and was interrupted after preserving
+its tool-failure receipt. Corrected immutable `82646ba` is running the full ten-minute stress retry.
+Continuous service is stopped while that single shared boundary is occupied and must restart afterward.
+
+The latest 46-second rate slice on `551428e` reached 196.88 aggregate RPS and 99.93 percent benign success,
+but six TimeoutError baseline transport failures fail acceptance. Earlier zero-failure slices do not override
+this receipt. Current origin `2990de0` full matrix has 62 passing browser receipts/no failures so far;
+complete matrix and manual screenshot review remain pending. All final acceptance gates remain open.
+
 ## Earlier repair-round observations
 
 These earlier observations retain their original source revisions and failed evidence;
