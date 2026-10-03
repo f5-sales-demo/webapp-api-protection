@@ -831,3 +831,8 @@ Origin `c55a6ec` passed the expanded seven-check crAPI verifier on both domains 
 canonical mechanic endpoint repair. All views, mechanic form, vehicle image return and deep-link refresh checks passed
 without browser errors or transport failures. Signup, service-request mutation workflows, MailHog rendering and
 comprehensive fixture recovery remain incomplete; this slice does not establish full crAPI acceptance.
+
+Native Juice Shop browser verification failed all four replicas: published frontend API paths returned SPA HTML
+with HTTP 200 instead of product JSON. Source adapter now strips the application prefix before native request and
+WebSocket dispatch while preserving origin nginx routing and framing repairs. Source checks pass 65 tests and hooks;
+immutable installation and native browser retry remain pending. Earlier native failures remain failed evidence.
