@@ -103,6 +103,14 @@ video-command workflow only; admin-video deletion and broader fixtures remain op
 403/429 shell classification to agree with structured mitigation receipts. Earlier reachability failure
 remains failed. Continuous traffic restart is in progress.
 
+Costly GraphQL route now explicitly disables automatic upstream retries, preserving exactly one
+execution of each expensive batch. Provider13 plan tests pass both protected listeners and existing
+header behavior (five cases); WAAP source passes 335 tests/396 subtests with one environment skip.
+Saved ownership-checked live plan changes only the two existing listeners; apply passed with zero additions/destroys.
+Current rendered matrix on origin `3a62623` has 33 passing browser receipts/no failures; full acceptance
+and screenshot review remain pending. Fixture exporter rerun idempotence passed after native video media
+repair. Continuous catalog has thirteen passing receipts/no failures; no full pass is accepted.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
