@@ -118,6 +118,12 @@ pending. Refreshed origin matrix currently has 56 passing browser receipts/no fa
 retry with no upstream retries has passing baseline and two-operation JSON responses; larger batches
 remain running and are not yet acceptance.
 
+Current origin `3a62623` matrix completed with all 66 passing browser receipts and no missing workflow/layer
+entries (`private-browser-matrix-1791063748644233125/matrix-receipt.json`). All 315 screenshots were reviewed
+as contact sheets and key pages; private manual review remains final_acceptance=false with a limitation
+for Juice Shop about/supporting-media loading indicators. The rendered slice is provisional, not fresh
+final delivery. Native fixture exporter reruns remain stable.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
