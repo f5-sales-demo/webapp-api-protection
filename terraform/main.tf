@@ -86,6 +86,7 @@ module "http_lb" {
   origin_endpoint_selection    = var.origin_endpoint_selection
   origin_connection_timeout    = var.origin_connection_timeout
   origin_http_idle_timeout     = var.origin_http_idle_timeout
+  lb_stream_idle_timeout_ms    = var.lb_stream_idle_timeout_ms
   custom_routes                = var.custom_routes
   route_objects                = var.route_objects
   custom_route_ref             = var.custom_route_ref
