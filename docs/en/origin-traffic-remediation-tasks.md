@@ -917,3 +917,8 @@ frontend routing. The next verifier adds actual supplied-header echo on native w
 mutation read through every layer, followed by scoped removal and preservation of unrelated entries. Regression
 checks pass 71 tests and type checking. Native crAPI frontend prefix repair is also source-complete; installed
 qualification remains pending.
+
+The fresh-document rapid catalog run completed all 360 records: 86 rendered, 250 mitigation candidates and 24
+failed actions. It remains failed acceptance. The next application verifier includes native whoami header echo,
+CSD shared-state mutation/recovery, native crAPI prefix dispatch and journaled synthetic signup/MailHog verification.
+Signup cleanup uses quoted psql variables and exact synthetic account identity; installed qualification is pending.
