@@ -425,7 +425,7 @@ resource "xcsh_http_loadbalancer" "this" {
           # deferred to a later slice.
           dynamic "advanced_options" {
             for_each = anytrue([
-              routes.value.use_websocket, routes.value.prefix_rewrite != null, routes.value.disable_location_add,
+              routes.value.use_websocket, routes.value.disable_retries, routes.value.prefix_rewrite != null, routes.value.disable_location_add,
               routes.value.timeout_ms != null, length(routes.value.req_headers_add) > 0,
               length(routes.value.req_headers_remove) > 0, length(routes.value.resp_headers_add) > 0,
               length(routes.value.resp_headers_remove) > 0, length(routes.value.req_cookies_remove) > 0,
@@ -440,6 +440,7 @@ resource "xcsh_http_loadbalancer" "this" {
               priority                   = routes.value.priority
               disable_location_add       = routes.value.disable_location_add
               timeout                    = routes.value.timeout_ms
+              no_retry_policy            = routes.value.disable_retries ? {} : null
               request_headers_to_remove  = length(routes.value.req_headers_remove) > 0 ? routes.value.req_headers_remove : null
               response_headers_to_remove = length(routes.value.resp_headers_remove) > 0 ? routes.value.resp_headers_remove : null
               request_cookies_to_remove  = length(routes.value.req_cookies_remove) > 0 ? routes.value.req_cookies_remove : null

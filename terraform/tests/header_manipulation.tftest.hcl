@@ -74,11 +74,20 @@ run "stream_idle_timeout_renders_on_both_listeners" {
   command = plan
   module { source = "./modules/http-lb" }
   variables {
+    custom_routes                = [{ path_value = "/dvga/graphql", timeout_ms = 600000, disable_retries = true }]
     lb_https_auto_cert           = true
     lb_stream_idle_timeout_ms    = 600000
     api_specification_validation = "all_spec_endpoints"
     api_validation_request_mode  = "block"
     challenge                    = { mode = "enable" }
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.routes[0].simple_route.advanced_options.no_retry_policy != null
+    error_message = "Costly HTTPS route must not retry upstream work"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.http[0].routes[0].simple_route.advanced_options.no_retry_policy != null
+    error_message = "Costly HTTP route must not retry upstream work"
   }
   assert {
     condition     = xcsh_http_loadbalancer.this.more_option.idle_timeout == 600000

@@ -22,7 +22,7 @@ def test_http_companion_keeps_costly_query_route_timeout():
         / "terraform/modules/http-lb/http_companion.tf"
     ).read_text()
     assert "route.timeout_ms != null" in source
-    assert "timeout  = routes.value.timeout_ms" in source
+    assert "timeout = routes.value.timeout_ms" in " ".join(source.split())
 
 
 def test_stream_idle_timeout_reaches_both_owned_listeners():
