@@ -6,6 +6,32 @@ Implementation issues: [origin-server](https://github.com/f5-sales-demo/origin-s
 
 Detailed operational receipts remain in the private lifecycle state directory. Baseline failures are immutable evidence and are not acceptance. Completion requires source, installed, and live checks; all incomplete tasks remain open. Preserve shared DNS, namespace identity, private state, schema fixtures and unrelated worktrees. CSD remains disabled.
 
+## Current acceptance status
+
+This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
+they do not establish current acceptance. All T01–T16 tasks remain incomplete.
+
+Generator source `c30bc927537906222c9cf887cd7a65493f33fec4` preserves all 164 scenarios across 22 suites.
+Current source checks pass 102 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
+pass. Required CI remains pending. The pinned archive is installed; continuous-service restart is being verified.
+
+Browser response assertions now remain mandatory even when browser actions pass. Nested reports require child source
+digests matching the installed catalog. Scenario mitigation counts exclude filler, prerequisites and other scenarios.
+Evicted nested evidence no longer leaves unbounded owned attribution markers. Rapid browsing declares 360 route actions
+across all fifteen original user-agent identities, with components, content, controls, URL outcomes and private screenshots.
+Intentional negative order, tracking, anonymous authorization and VAmPI GET routes are explicitly distinguished.
+
+Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
+`resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
+response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
+main document returns 200. Mitigated navigation is recorded separately from rendered content; blocked assets do not prove
+complete application rendering. No focused iteration is accepted as a full browser or application pass.
+
+Outstanding gates include fixture snapshot/restoration and distinct BOLA actors; complete original workload semantics;
+nested scanner/browser attribution; all rendered authenticated workflows and serving layers; merged immutable installs;
+one ownership-scoped clean rebuild; two accepted full catalog passes; sustained rate/control attribution; restart/reboot;
+and unchanged Terraform apply followed by a zero-action plan. Continuous operation alone cannot satisfy those gates.
+
 | Task | Status | Dependencies | Acceptance criteria | Issue / PR | Source revision | Verification receipt |
 | --- | --- | --- | --- | --- | --- | --- |
 | T01 — Record baseline | In progress | none | Capture routes, replicas, fixtures, rendered failures, catalog, deployed digests, Terraform ownership and shared identities; retain private receipt. | <https://github.com/f5-sales-demo/webapp-api-protection/issues/553>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Pending | Private remediation-baseline/receipt.json; live baseline captured, preservation reconciliation pending |
