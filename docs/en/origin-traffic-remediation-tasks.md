@@ -217,6 +217,12 @@ Generic arrays cannot establish expensive-operation dispatch. Source regression 
 remains open because the native 20–50 second operation and batch duration exceed existing client/upstream timeouts.
 The application delay was preserved. Full catalog/rebuild acceptance remains open.
 
+Origin evidence retention now evicts only completed owned browser runs by age/size and monitors the active cap and
+deadline. Source tests preserve active/unrelated paths and reject unowned eviction. Origin `83beebf` installed
+successfully. Subsequent header-scope correction keeps workflow tracking headers off third-party frames; its diagnostic
+run no longer reported the prior map transport errors but hit a pending-request deadline and remains failed.
+Origin `8f9c5e7` passes 53 tests and 69 subtests; immutable installed retry is pending. No browser failures were suppressed.
+
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
 response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
