@@ -841,3 +841,13 @@ The next Juice Shop native retry still failed because existing processes retaine
 A source configuration digest label now changes the Compose service declaration whenever the preload changes, forcing
 container recreation through immutable provisioning. Source checks pass 66 tests and hooks. Installed recreation
 and native browser acceptance remain pending; staged file presence was not treated as running-source acceptance.
+
+Origin `e536986` passed immutable installation; the prefixed native Juice Shop product API now returns product JSON.
+All four native replicas passed all ten browser checks after adapter-triggered recreation, including products,
+images, login, basket, supporting pages and Socket.IO frames. Published rechecks continue.
+Continuous traffic restart is in progress. No full catalog or clean deployment acceptance is claimed.
+
+Origin `e536986` passed all ten Juice Shop browser checks on all four native replicas and both domains over HTTP
+and HTTPS. Published checks reverified images, login, basket, supporting routes and Socket.IO after container recreation.
+The workflow aggregate now additionally reconciles actual HTTP assertions against every manifest workflow and reports
+missing assertions; supported HTTP slices remain distinct from complete declared-workflow acceptance.
