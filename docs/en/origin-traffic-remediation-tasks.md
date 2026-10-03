@@ -12,16 +12,27 @@ This section is authoritative for the resumed repair round. Historical sections 
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
 Generator source `506d54244fc788a754486c31ba574f6ece866fa6` preserves all 164 scenarios across 22 suites.
-Current source checks pass 125 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
-pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
-repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
+Its required CI passed. Source checks pass 125 Python tests and nine subtests, repository-configured mypy and Pylint
+across sixty Python files, and focused Node checks. No full catalog pass has yet satisfied acceptance.
 
-Origin `5706801ed48b19f8433874454a142ce8a7c29204` passed the digest-checked immutable release installer and
-all native readiness checks. Source checks pass 42 tests and 68 subtests. The private actor-repeat receipt
-`actor-repeat-1791010423810835220.json` verifies distinct attacker/victim identities through all four RESTaurant replicas
-and stable stored IDs, password hashes, roles and phone values after a repeated seed. Generator source binds those actors
-and restores the victim profile on exit, with restoration failure remaining a failed scenario. Full mutation restoration
-and installed BOLA scenario acceptance remain open.
+Origin source `5447d062965aae4cd96d37ec298974c03d98a6e1` passes 56 Python tests, type checking and
+changed-file repository hooks. The DVWA redirect repair prevents already-prefixed upstream redirects from acquiring
+a second prefix. Its immutable predecessor `be736289794fdc10d6a7eaf239cd37fd74d9f574` passed four rendered
+checks through origin nginx and both published domains over HTTP and HTTPS. Checks covered authenticated home,
+native security form submission, seeded SQL input and reflected benign input, with no browser errors or failed resources.
+The twenty screenshots were manually reviewed. The native-route verifier at
+`a6d95abbee77e32edfef1864efb36a1f7aef45fc` passed those same four checks on each of all four DVWA replicas.
+Private receipts retain the exact source and archive digests. Full DVWA mutation fixture restoration remains open.
+
+The current DVGA candidate derives template links from the request prefix, preserves native static asset routes,
+and fixes the burn-after-read link that escaped to the shared root. Its browser verifier requires actual native paste
+form submission, subscription delivery, persisted content and scoped synthetic paste removal. Immutable installation
+and installed qualification are in progress; no DVGA workflow acceptance is claimed from source tests.
+
+Continuous traffic was verified enabled and active on the generator candidate, with 9,538 of 9,538 benign requests
+successful in that observed window. It was then stopped for the immutable DVGA installation. Interrupted catalog passes
+remain failed evidence. Complete application workflows, fixture restoration, scanner semantics, two full passes,
+merged installation, clean rebuild, final rate/control proof, reboot and zero-change repeat apply remain open.
 
 Browser response assertions now remain mandatory even when browser actions pass. Nested reports require child source
 digests matching the installed catalog. Scenario mitigation counts exclude filler, prerequisites and other scenarios.
@@ -277,6 +288,12 @@ Checkov parsing failed the existing multiline FQDN boolean validation. The expre
 on the preceding line, preserving validation semantics; intact scanner retry is running. HTTP WebSocket source repair
 is verified through saved ownership-checked plan/readback and browser checks, but final full Terraform convergence
 remains open. Continuous traffic is enabled and running.
+
+Final same-source Juice Shop browser runs passed ten assertions each on both HTTP and HTTPS domains, including
+product images and WebSocket frames. Private outputs: `private-browser-juice-1791024443400890439`,
+`private-browser-juice-1791024464796403123`, `private-browser-juice-1791024481190821058`, and
+`private-browser-juice-1791024496081781694`. Earlier HTTP image/socket failures remain failed. These workflow checks
+do not complete checkout, mutation cleanup or native replica-browser acceptance.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
