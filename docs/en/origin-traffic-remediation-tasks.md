@@ -366,3 +366,8 @@ synthetic clients, each completing five requests, and checks its own returned co
 WAAP sanitizes client-supplied X-Forwarded-For; request dispatch and received forwarding semantics are distinguished.
 Installed multi-client qualification is pending. Earlier regex, missing-content, worker and cancellation failures remain
 failed evidence. Nested stress attribution and fixture restoration remain open.
+
+Focused installed multi-client qualification passed all 100 requests across twenty clients, each with five identity/cookie
+assertions and closed connections. No transport failures or cancellations occurred. This qualifies the bounded identity
+adapter; broader nested stress, fixture restoration, rendered completeness and final full-catalog acceptance remain open.
+Continuous traffic is restarting on `50d3ce4ff13e1a97fce76d86861085b81a7ba05f`.
