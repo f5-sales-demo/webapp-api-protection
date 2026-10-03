@@ -164,6 +164,12 @@ Native ten-operation comparison passed HTTP 200 in 323 seconds. Direct published
 running; the request path difference must be reconciled before acceptance. Continuous traffic is being
 restored on current immutable generator.
 
+Active continuous candidate `9a514f8` measured 197.13 aggregate HTTP RPS and 177.59 benign RPS in a
+46-second window, with 100 percent benign success, all nine rotated application paths and zero baseline
+transport failures. This is a focused window only, not sustained fresh-deployment acceptance. Current
+full pass has eight passing receipts/no failures. Direct published ten-operation DVGA comparison is still
+pending beyond native completion time; no complete catalog is accepted.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
