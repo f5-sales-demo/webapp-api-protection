@@ -161,6 +161,11 @@ Node/Playwright. Script digest equality is verified; installed browser runtime a
 origin crawl used the operator browser host and cannot substitute for a reproducible installed verifier runtime.
 Pinned runtime provisioning is an explicit remaining T09/T13 gate.
 
+Origin `a936a2d3b72c25d47ed986aeb3909d2071031422` provisions a digest-pinned Playwright 1.63.0 runtime
+with a matching integrity-locked package and source-installed verifier scripts. Package audit reports zero vulnerabilities;
+46 source tests and 69 subtests pass. Immutable runtime installation is pending. The earlier 1.55.0 candidate was
+replaced after its package audit identified a fixed browser-download certificate issue; it is not an accepted runtime.
+
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
 response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
