@@ -559,7 +559,11 @@ class Ownership:
                 message = "continuous catalog inactive or failed; private receipts require repair"
                 raise Blocked(message)
             if len(passes) >= _REQUIRED_CATALOG_PASSES and all(
-                p.get("passed") and p.get("catalog_complete")
+                p.get("passed")
+                and p.get("catalog_complete")
+                and p.get("catalog_accepted")
+                and p.get("source_commit") == status.get("source_commit")
+                and p.get("artifact_sha256") == status.get("artifact_sha256")
                 for p in passes[-_REQUIRED_CATALOG_PASSES:]
             ):
                 self.runtime.phase("two-complete-catalog-passes")
