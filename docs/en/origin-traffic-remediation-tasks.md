@@ -272,3 +272,29 @@ Latest generator source is `1039987738cda33f57cb25d32f616152cddbd4de`. Remaining
 include complete catalog execution, mutation fixture restoration, precise scanner output semantics, nested attribution,
 rendered content/workflow completeness, all serving layers, merged artifact installation, clean rebuild, rate/control
 qualification and unchanged Terraform repeat apply. No task is completed from source contract presence alone.
+
+## Dynamic cache qualification
+
+Generator revision `83a7386cd5cad4a1ea5f01df28e6a32f733b7458` passes 87 tests and nine subtests, mypy, Pylint,
+Ruff and full pre-commit. The query-string and Accept-Encoding scenarios preserve their stable IDs and now verify the
+deployed dynamic-bypass behavior, correct application identity and response type, echoed query isolation, and decoded
+content instead of requiring cache HIT on authenticated dynamic applications.
+
+Installed qualification passed 72 query-isolation requests including every original user/search/version value, twenty
+paired UUID values and alpha/bravo cross-contamination controls. Encoding qualification passed all 24 declared encoding
+and no-header cases. Both receipts had zero transport failures and cancellations. Static cache policy qualification,
+remaining CDN workload semantics and full catalog acceptance remain open. Continuous traffic is being restarted on this
+immutable candidate; no accepted complete pass or final rebuild qualification is claimed.
+
+## Current acceptance receipts
+
+Source tests now pass 89 tests and nine subtests. All 164 scenario execution contracts remain mandatory. Benign traffic
+success additionally requires declared content/type identity, each counted payload requires a terminal response, and
+undeclared unmatched 500/502/503/504 or transport failures fail the response gate. CDN shell assertions now fail their
+process instead of only printing a failure. No failed receipt was relabeled.
+
+The installed dynamic-bypass query and encoding contracts passed 72 and 24 requests respectively, with preserved query
+values, application identity and decoded response content. Native credential-stuffing retry passed all fifteen browser
+form submits with no transport failure or cancellation after waiting for page resources before submission. Continuous
+traffic is enabled and running on the current immutable candidate; the current pass has eight verified scenarios so far.
+CI, full catalog acceptance, complete application workflows and the Terraform rebuild/zero-change gates remain open.
