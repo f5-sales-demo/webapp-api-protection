@@ -906,3 +906,14 @@ receipts. No terminal complete catalog or matrix acceptance is claimed.
 The consolidated matrix reached 51 passing browser receipts with no browser failure so far. Fresh-document rapid
 browsing has one failed action among 48 persisted records; it remains incomplete. Current generator required CI
 is green. No full catalog or matrix acceptance is inferred from this progress.
+
+The consolidated matrix completed with 60 browser runs and failed complete acceptance. Native crAPI had prefixed
+asset 404s; other browser receipts passed. The exact missing workflow list and private source-bound matrix receipt
+remain preserved. A pinned native frontend nginx prefix repair passes 70 source tests and awaits immutable installation.
+The concurrent fresh-document rapid run has six failed actions among 144 persisted records and remains incomplete.
+
+The completed combined matrix explicitly missed native whoami header echo, CSD replica state and crAPI signup/native
+frontend routing. The next verifier adds actual supplied-header echo on native whoami and one tagged CSD receiver
+mutation read through every layer, followed by scoped removal and preservation of unrelated entries. Regression
+checks pass 71 tests and type checking. Native crAPI frontend prefix repair is also source-complete; installed
+qualification remains pending.
