@@ -214,3 +214,25 @@ Outstanding acceptance includes meaningful workload/concurrency receipts, native
 expected responses, scoped fixture restoration, full browser content assertions and all live application layers.
 Immutable full-catalog qualification is starting; no accepted full pass, merged installation, clean Terraform rebuild,
 sustained-rate acceptance or repeat apply is claimed.
+
+## Installed matrix repair loop
+
+The complete source matrix remains 144 HTTP action contracts, eleven CSD browser contracts, seven connection adapters
+and two aggregate reports. Source validation now passes 83 tests and nine subtests; request-response joins, scanner
+binary/completion receipts, workload concurrency/connection checks, and wrong-content 200 regression remain enforced.
+
+Native application workflow rerun passed all 33 checks. Installed scraper dispatch passed after pending request drainage,
+with no transport failures or cancellations. Hydra qualification passed 99 credential payloads on each of DVWA, Juice Shop
+and VAmPI after HTTPS routing and native module-option ordering repair. A measured workload ramp passed 300 requests
+across all nine apps at worker levels 1, 10 and 20, with zero transport failures or cancellations. Later source additionally
+requires correct application identity and actual measured connection/concurrency behavior; installed rerun is pending.
+
+The first full-matrix candidate pass was interrupted for source repairs after fifteen scenarios, with twelve accepted
+launches and three failed browser/Hydra scenarios. It remains an incomplete failed pass. A later pass recorded an
+incorrect response expectation for six intentional shadow endpoints: all actions dispatched, but expected 404s were
+excluded. Source now explicitly declares 401/404 for those exact negative endpoints. The failed receipt remains failed.
+Continuous catalog qualification is running on the next immutable candidate; no complete accepted pass is claimed.
+
+T03/T11 remain in progress because declared contracts do not by themselves prove application workflows, native scanner
+completion, expected outcome semantics, scoped fixture restoration, browser screenshots or final clean-deployment
+acceptance. All clean rebuild, merged installation, sustained 200-RPS, restart/reboot and repeat-apply gates remain open.
