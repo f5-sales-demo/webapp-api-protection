@@ -47,7 +47,12 @@ module "origin_server" {
   # gzip + base64: the rendered cloud-init exceeds Azure's 65535-byte custom_data
   # limit uncompressed. cloud-init detects the gzip magic bytes and decompresses
   # user-data automatically, so the VM receives the same YAML.
-  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {}))
+  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {
+    origin_commit                  = var.origin_commit
+    origin_archive_sha256          = var.origin_archive_sha256
+    origin_installer_sha256        = var.origin_installer_sha256
+    origin_python_installer_sha256 = var.origin_python_installer_sha256
+  }))
 }
 
 # --- F5 XC HTTP load balancer in the persistent namespace-only root's namespace --
