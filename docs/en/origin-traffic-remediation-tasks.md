@@ -1051,3 +1051,23 @@ Generator `f0bfeaa` passed the stronger native active-message gate for all five 
 with 105 baseline and 743 active requests, zero transport failures and zero cancellations. Private receipt:
 `resume-focused-zap-completion/pass-focused-1791042466568314551/receipt.json`. Complete catalog, broad fixture
 restoration, merged installation and fresh deployment gates remain open.
+
+Continuation receipts: origin `695c07c` completed the matrix with 66 browser receipts and no missing
+workflow/layer entries (`private-browser-matrix-1791042851771534564/matrix-receipt.json`). Screenshot review
+confirmed populated DVGA pastes but exposed Juice Shop image capture timing; origin `b30656c` requires visible
+images to load before capture. Lazy-image and wrong-content/broken-image browser regressions passed; origin
+source passed 76 tests and 69 subtests. Origin/API HTTP and both HTTPS published landing crawls passed on the
+previous candidate; HTTP-www retained its lazy-image failure. Same-source final reruns remain required.
+
+Generator `f0bfeaa` completed rapid browsing with 360 records: 78 rendered, 257 mitigated and 25 failed; this is
+a failed scenario. Private security events attribute blocked supporting assets to Malicious User Mitigation.
+The API-fuzz scenario failed with 31 cancellations and a timed-out raw CONNECT, suppressing subsequent method
+launches. Generator `2e30e63` preserves forwarded CONNECT attribution, permits paced client completion, rejects
+duplicate or undeclared action IDs, and binds each user-agent session to its own run-specific actor. Source
+checks passed 135 tests, nine subtests and eight Node tests. Focused installed qualification is pending.
+
+Rate windows preserved both a failed 185.2 RPS measurement and later 197.3 RPS measurements. Benign success
+in those windows was 100 percent with zero baseline transport failures; cumulative benign counters include
+two HTTP 503 responses. These windows do not establish final sustained fresh-deployment acceptance. WAAP
+required CI is green after Python assertion/formatting and Terraform formatting repairs. Full catalog, broad
+fixture restoration, merged artifacts, clean rebuild and repeat apply gates remain open.
