@@ -19,6 +19,9 @@ class ShowcaseFormSchemaTests(unittest.TestCase):
         ensure_equal(form["type"], "object")
         ensure("custname" in form["properties"])
         ensure("comments" in form["properties"])
+        ensure(
+            all(value.get("nullable") is True for value in form["properties"].values())
+        )
 
 
 if __name__ == "__main__":

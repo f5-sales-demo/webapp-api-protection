@@ -41,25 +41,32 @@
                 "type": "object",
                 "properties": {
                   "custname": {
-                    "type": "string"
+                    "type": "string",
+                    "nullable": true
                   },
                   "custtel": {
-                    "type": "string"
+                    "type": "string",
+                    "nullable": true
                   },
                   "custemail": {
-                    "type": "string"
+                    "type": "string",
+                    "nullable": true
                   },
                   "size": {
-                    "type": "string"
+                    "type": "string",
+                    "nullable": true
                   },
                   "topping": {
-                    "type": "string"
+                    "type": "string",
+                    "nullable": true
                   },
                   "delivery": {
-                    "type": "string"
+                    "type": "string",
+                    "nullable": true
                   },
                   "comments": {
-                    "type": "string"
+                    "type": "string",
+                    "nullable": true
                   }
                 },
                 "additionalProperties": false
