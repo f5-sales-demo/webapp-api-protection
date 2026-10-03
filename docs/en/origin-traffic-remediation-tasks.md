@@ -860,3 +860,9 @@ A reusable combined matrix is being added to join source-pinned browser assertio
 native replica, origin nginx and four published layers. Foreign source, layer, failed runtime and missing-replica
 regressions pass. Missing declared workflows remain explicit, and screenshot/manual fixture acceptance remains
 separate. The matrix is not yet installed or accepted.
+
+The combined receipt matrix now requires matching source/archive digests and explicit browser kind/base, successful
+runtime cleanup, no browser errors and every required per-workflow check. It rejects foreign sources, wrong layers
+and missing replicas. The installed browser runtime now records kind and base. Source checks pass 69 tests, mypy,
+Pylint and repository hooks. Whoami proxy checks additionally require actual received forwarding headers; native
+diagnostics remain separate. Immutable combined-matrix installation and execution are pending.
