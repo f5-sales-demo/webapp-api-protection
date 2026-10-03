@@ -718,3 +718,8 @@ Screenshot review exposed repeated CSD readiness receiver entries. The readiness
 clears only that probe in a finally block and requires its absence. A failing regression reproduced the missing cleanup;
 59 source tests and repository hooks now pass. Installed repeated-readiness qualification is pending. Historical
 receiver data stays preserved; complete repeat-install and clean-rebuild acceptance remain open.
+
+Installed origin `ea66d4bddc418a3204f24a6488aa865333092f48` passed two consecutive readiness reruns.
+Both exited zero and retained the receiver count at 227, confirming the scoped probe leaves no new entry.
+The first controller invocation used an unsupported positional argument and remains a failed tool receipt.
+This focused idempotence proof does not complete all fixture reruns or final Terraform convergence.
