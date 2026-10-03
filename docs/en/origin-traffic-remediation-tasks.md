@@ -29,7 +29,7 @@ dispatch/response requirements; API denial passed three HTTP 403 responses plus 
 Native ZAP phase/message qualification and nested Nikto attribution passed their focused receipts. The prior
 stable rapid run completed 360 action records (312 rendered, 48 mitigated) but remained failed for seven
 Socket.IO cleanup cancellations. The installed correction scopes cleanup to dispatched polling sessions
-during navigation or browser closure. Its fresh qualification remains incomplete.
+during navigation or browser closure. Its focused qualification passed all 360 actions with zero failed action records, transport failures or cancellations; full catalog acceptance remains open.
 
 Fixture-export rerun idempotence passed twice with unchanged crAPI/DVWA/RESTaurant counts and identities;
 broad attack mutation restoration remains open. Rate evidence includes failed 185.2 RPS and later 197.2–197.3
@@ -1165,3 +1165,8 @@ cancellations (`resume-focused-rapid-fresh/pass-focused-1791049371449327802/rece
 `b40132d` includes scoped navigation/closing cleanup classification and passed required CI; installed
 qualification is pending. The previous receipt remains failed. Local-font matrix `c74a0bd` screenshots
 were manually reviewed and retained with final acceptance false because broader gates remain open.
+
+Installed rapid qualification passed on generator `b40132d`: all 360 actions, 312 rendered and 48
+mitigated, zero failed action records, zero transport failures and zero tool cancellations. Private receipt:
+`resume-focused-rapid-fresh/pass-focused-1791050358547096263/receipt.json`. Earlier failed receipts retain
+their original outcomes. Continuous traffic restart is in progress; two full catalog passes remain required.
