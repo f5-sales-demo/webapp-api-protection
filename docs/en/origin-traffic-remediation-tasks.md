@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `dc8da02ec45b59c6c21a10c18db7ed15e3238a29` preserves all 164 scenarios across 22 suites.
+Generator source `d26a59b7601dfa8fcdecb48b6f5a2d8bfb25f82f` preserves all 164 scenarios across 22 suites.
 Current source checks pass 118 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
@@ -69,7 +69,8 @@ revision `8838ec2` passed its Super-Linter job, but its workflow was canceled by
 Catalog reconciliation removed 699 blanket HTTP 500 allowances across 64 scenarios. All 164 entries remain.
 Application crashes now fail response acceptance; intentional server-error cases require explicit case-specific evidence.
 Focused historical passes retain their original sources and outcomes. Current source passes 114 tests and nine subtests;
-current installed catalog restart and required CI are pending. Full per-case status/content reconciliation remains open.
+current installed catalog restart and required CI are pending. Generator `dc8da02` completed green required CI.
+Startup readiness now rejects arbitrary HTTP 405 on declared healthy pages. Full per-case status/content reconciliation remains open.
 
 Slow-header evidence now records every write round and explicit peer/tool errors. The first diagnostic run remains
 failed, with 42 successful writes and eighteen TLS EOF errors across twenty bounded connections. Private receipt:
@@ -91,8 +92,18 @@ responses and eight console errors. Private run `private-render-1791013788038158
 clients had an empty forwarding-header affinity key and sessions moved across replicas. Source `b91654a31f5f42e9906f81bae7225c98a8785875`
 adds a remote-address fallback; 43 source tests and 68 subtests pass. Its digest-checked immutable installer passed.
 Focused polling continuity now passes five of five native and five of five nginx sessions; Chromium observes an actual
-WebSocket frame without a socket error. A fresh full origin rendering crawl is running; authenticated workflows and
+WebSocket frame without a socket error. Fresh origin rendering run `private-render-1791014120430315000` passed all 28 content checks across nine
+applications and retained 27 screenshots. Its contact sheet was reviewed; individual rendered workflow review remains
+open. The receipt correctly retains accepted=false because authenticated workflow acceptance is incomplete. Published
+serving-layer acceptance and
 published serving-layer acceptance remain open. The reviewed contact sheet is a preliminary visual review only.
+
+Native crAPI authentication exposed a seeded-role mismatch: the backend returns ROLE_PREDEFINE while the frontend
+user-route guard only recognized ROLE_USER and ROLE_ADMIN. Vehicle API returned its seeded object, but the dashboard
+rendered no vehicle and Community/Shop returned to dashboard. The failed browser workflow remains failed evidence.
+Origin `53a54904fb70291c10c1de3636353376bc6a6cc2` adds a narrow seeded-role frontend compatibility adapter and fails
+if the pinned upstream guard changes. Source checks pass 44 tests and 68 subtests; immutable installation and browser
+qualification are in progress. Full workflow acceptance remains open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
