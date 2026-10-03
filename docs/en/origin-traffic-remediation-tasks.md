@@ -129,6 +129,11 @@ completion; mixed batch was not launched. Baseline/two/five JSON responses passe
 remains timeout with one cancellation. Preserve this failure under `resume-focused-dvga-costly-query/`.
 Latest setup-outcome source is being immutably installed and continuous traffic restarted.
 
+Origin `d6930ea` preserves native simulate_load iteration counts and 0.1-second delays while using
+gevent cooperative sleep, preventing the deliberately expensive query from blocking all replica
+requests. Source verification passes 83 tests/69 subtests and hooks. Immutable installation and native
+concurrency proof are running; full expensive batch acceptance remains open. Source pins updated.
+
 ## Previous continuation evidence
 
 Current source candidates are origin `fa7156d` and generator `bc328c6`. Terraform pins are being refreshed
