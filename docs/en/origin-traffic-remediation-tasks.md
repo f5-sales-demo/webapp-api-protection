@@ -167,3 +167,15 @@ Native browser credential stuffing submitted all fifteen DVWA credential pairs, 
 Registration/contact submitted neither required action in its first corrected run; the native form response wait timed
 out. Source now uses paired response/click waits, dismisses the deployed welcome controls and parses the synthetic
 arithmetic captcha without evaluating JavaScript. Installed retry is in progress. Direct request fallbacks are removed.
+
+## Current source and serving state
+
+Latest generator candidate is `394c7f9fbdc7b81eed470459c5c639122fc5e433`. Its source checks pass 68 Python tests,
+nine subtests, 24 browser unit tests, Ruff format/check, mypy, Pylint and full pre-commit. The AWS-only headed-browser
+unit test is excluded outside its declared AWS runtime; this does not count as live application acceptance. CI is pending.
+
+The latest native form retry still failed registration: both required registration requests were absent, while both
+contact submissions completed with HTTP 201. A cancellation also failed the scenario. Native controls are now used for
+question selection and submission, and the failure remains open. The prior disabled-control and pointer-interception
+receipts remain failures. Continuous traffic is being restored on the immutable candidate after focused qualification.
+No merged-artifact acceptance, clean Terraform rebuild, complete catalog pass or repeat apply has been performed.
