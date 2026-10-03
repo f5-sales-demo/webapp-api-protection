@@ -117,7 +117,9 @@ rendered vehicle, Community and Shop with native navigation and refresh, with th
 The reusable stricter browser verifier at origin `522d0d5` nevertheless fails on external map transport requests.
 Its five application view assertions pass, but both transport-failure runs remain failures. Private receipts:
 `private-crapi-verifier-1791015610823458000/receipt.json` and `private-crapi-verifier-1791015662983845000/receipt.json`.
-Source-controlled verification is installed by the shared origin installer; full rendered completeness remains open.
+Origin `522d0d5b12cbd33ebb4eac558ef2233e1f1f0e62` passed the immutable installer. Installed verifier digest
+matches committed source in `installed-crapi-verifier-digest.json`; strict browser transport failures remain open.
+Full rendered completeness remains open.
 Origin source passes 45 tests and 69 subtests; generator source passes 119 tests and nine subtests.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
