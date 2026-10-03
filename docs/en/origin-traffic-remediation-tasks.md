@@ -1041,3 +1041,13 @@ requests; private receipt: `resume-focused-zap-completion/pass-focused-179104191
 This remains phase qualification only: generator `f0bfeaa` now requires distinct native active-scan message IDs
 per application, and its installed qualification is pending. Source verification passed 132 Python tests and
 9 subtests. The complete application matrix on origin `7b96647` is running; final coverage remains open.
+
+The full workflow matrix on origin `7b96647` completed with no missing workflow/layer entries and 66 browser
+receipts. Private receipt: `private-browser-matrix-1791041664563406805/matrix-receipt.json`. Review of all
+315 screenshots found a DVGA capture-order gap: the initial public-paste screenshot preceded seeded content
+loading, although later persistence and subscription screenshots showed the data. Origin `695c07c` moves the
+seeded-content wait before that capture; installed same-source matrix qualification remains required.
+Generator `f0bfeaa` passed the stronger native active-message gate for all five declared scanner targets,
+with 105 baseline and 743 active requests, zero transport failures and zero cancellations. Private receipt:
+`resume-focused-zap-completion/pass-focused-1791042466568314551/receipt.json`. Complete catalog, broad fixture
+restoration, merged installation and fresh deployment gates remain open.
