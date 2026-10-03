@@ -926,3 +926,12 @@ Signup cleanup uses quoted psql variables and exact synthetic account identity; 
 First installed signup verifier invocation failed before launch because its parser choice was missing. The source
 CLI now declares the signup kind and has a parser regression; 74 tests pass. No account was created by that failed
 invocation. Immutable reinstall and actual signup/recovery qualification remain pending.
+
+Corrected signup CLI immutable installation passed. The expanded crAPI seven-check workflow through origin nginx
+passed again, while actual signup/MailHog/recovery verification remains running. Native frontend routing and
+CSD/whoami gaps need same-source installed requalification before complete acceptance.
+
+The first actual signup run stalled and was stopped through exact verifier ownership. Its runtime receipt remains
+failed, and the account was removed, but welcome vehicle/mail ownership was not yet identified. Recovery now
+discovers the exact synthetic recipient mail, extracts its VIN, and verifies mail removal, retaining incomplete
+recovery as failure. Bounded signup waits and private recovery requalification are in progress.
