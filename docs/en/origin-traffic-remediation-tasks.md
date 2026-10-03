@@ -140,3 +140,30 @@ Its screenshot adapter expected the wrong receipt field. The adapter is correcte
 original receipt remains failed. Seven scenarios also recorded client cancellations, including product assets and
 Socket.IO polling; those require separate remediation. CSD enforcement remains disabled and the browser suite makes
 no detection claim. Corrected installed qualification is in progress; final acceptance remains open.
+
+## Latest installed qualification
+
+Source request contracts cover 36 scenarios; eleven CSD browser contracts and seven bounded connection adapters are
+additional. The catalog remains 164 scenarios across 22 suites. Generator Python validation passes 68 tests and nine
+subtests, Ruff, mypy and Pylint; full pre-commit passes. Required CI Ruff formatting/import/constant defects were repaired
+in `b0587019a8b9bd76f6365260d37d6274a7923258`; current CI remains pending.
+
+VAmPI authentication qualification passed all sixteen declared requirements, and mass assignment passed all eight
+payload contracts at installed revision `f6b3a932653ec6026e4c7b306344a02a57a04b3e`, with no transport failures or
+cancellations. These establish launch evidence, while fixture cleanup and complete application acceptance remain open.
+
+CSD qualification at `2b3af044cde787195db0cc2a24a36453f5b50f63` passed ten scenarios but failed high-volume navigation:
+HTTP 200 did not produce the expected login controls. The 56 screenshots were reviewed privately; its high-volume
+screenshots were blank. Earlier failed adapter and cancellation runs remain failed. Declared browser cleanup now
+separately counts only established Socket.IO polling sessions closed after the cleanup marker; assets and execution
+cancellations still fail. CSD remains display-only with enforcement disabled. Full rendered acceptance remains open.
+
+The installed bounded connection qualification passed six adapters: three port/protocol probes and three TLS matrices,
+including certificate validation and cleanup. Slow-header qualification failed because fewer than sixty header writes
+completed across twenty connections. Its receipt remains failed; the cause and expected peer-close behavior require
+reconciliation before acceptance.
+
+Native browser credential stuffing submitted all fifteen DVWA credential pairs, but failed overall on one cancellation.
+Registration/contact submitted neither required action in its first corrected run; the native form response wait timed
+out. Source now uses paired response/click waits, dismisses the deployed welcome controls and parses the synthetic
+arithmetic captcha without evaluating JavaScript. Installed retry is in progress. Direct request fallbacks are removed.
