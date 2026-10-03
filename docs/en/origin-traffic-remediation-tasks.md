@@ -11,10 +11,10 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Current source is origin `50e94c0`, generator `7f68b3f`, and
+Current source is origin `50e94c0`, generator `02b10b1`, and
 WAAP `6f6ee5c`. Terraform runtime, root/module/namespace pins and lock files select provider 13.0.2;
 its exact spec provenance matches enriched specs v10.0.0. WAAP required CI is green. Source checks pass
-81 origin tests with 69 subtests, 150 generator tests with nine subtests, and 334 WAAP tests with
+81 origin tests with 69 subtests, 153 generator tests with nine subtests, and 334 WAAP tests with
 396 subtests/one environment skip. All nine applications and 33 native ports remain declared.
 
 The latest complete rendered matrix is origin `fa7156d`: 66 passing browser receipts, no missing
@@ -70,6 +70,12 @@ sequence is now running against the complete timeout chain. Complete acceptance 
 The repaired published costly-query retry returned HTTP 200 for the baseline and two-operation batch,
 with every nonempty systemUpdate JSON assertion passing. Recovery logs confirm the busy replica remains
 running. Larger batches/mixed sequence remain in progress and are not yet accepted.
+
+Generator now rejects undeclared server errors even when a dispatch matches; explicit expected HTTP 500
+cases require their status-specific content assertion. Native worker report and deadline regressions pass.
+Source checks pass 153 tests and nine subtests. Terraform plan regressions pass five cases including active
+stream timeout on both protected listeners. The published baseline/two/five-operation DVGA responses passed
+all JSON assertions; ten-operation and mixed checks remain running.
 
 ## Previous continuation evidence
 
