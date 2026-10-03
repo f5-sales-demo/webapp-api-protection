@@ -54,7 +54,9 @@ The clean-install review added explicit nginx cache creation, adapter image prov
 
 ## Outstanding delivery gates
 
-The precise method, endpoint and payload contract is currently implemented for the two DVWA payload scenarios. The remaining catalog scenarios require reconciliation before full-catalog acceptance. Source CI and rendered diagnostics do not complete T11, T15 or T16.
+Source request contracts cover 34 of 164 scenarios, with eleven additional CSD browser contracts and seven connection
+probe adapters. The remaining scenario contracts and installed verification prevent full catalog acceptance. Source CI
+and rendered diagnostics do not complete T11, T15 or T16.
 
 No clean rebuild, two accepted complete catalog passes, unchanged repeat apply, reboot recovery or merged-artifact installation has been claimed. All three implementation PRs remain drafts. Current source, candidate installation and failed iterations are retained separately in private receipts.
 
@@ -120,3 +122,21 @@ The all-nine application workflow verifier passed 33 native checks, plus nine ch
 HTTP/HTTPS endpoint. crAPI source dispatch contracts now cover its 15 scenarios; installed crAPI action qualification
 remains pending. Current source action contracts cover 29 of 164 scenarios, with seven additional connection probe
 scenarios. Complete action coverage and final rebuild acceptance remain open.
+
+A focused immutable crAPI qualification passed five action contracts: 20 unauthenticated mechanic-report probes, mechanic listing, three NoSQL coupon operators, 21 unauthenticated order probes and seven forged-dashboard requests. No transport failures or tool cancellations were recorded. The other ten crAPI scenario contracts still require installed qualification.
+
+Browser/CSD contracts now require the exact manifest step assertions and successful browser cleanup, independent of network request counts. CSD remains display-only and disabled for enforcement. Source execution contracts cover 34 scenarios, plus eleven CSD browser action contracts and seven connection probes; the remaining catalog reconciliation is open.
+
+## Current browser and connection qualification
+
+Generator revision `db23bf793a3f20999a3ce38ca21818b53d1a8c8a` passes 67 tests and nine subtests, targeted mypy,
+Pylint and pre-commit. Browser receipts now require captured screenshots with passed assertion status, exact action
+steps and successful browser cleanup. A request contract cannot be overridden by a browser receipt; interrupted receipt
+files fail closed. Connection verification requires the complete TLS offering matrix and certificate validation, or the
+bounded slow-header writes, duration and connection cleanup for the declared probe.
+
+The first installed eleven-scenario CSD qualification at revision `b36e7878f35f112ce783c309aa1dbbbb5df0737e` failed.
+Its screenshot adapter expected the wrong receipt field. The adapter is corrected in the later source revision, and the
+original receipt remains failed. Seven scenarios also recorded client cancellations, including product assets and
+Socket.IO polling; those require separate remediation. CSD enforcement remains disabled and the browser suite makes
+no detection claim. Corrected installed qualification is in progress; final acceptance remains open.
