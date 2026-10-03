@@ -53,7 +53,9 @@ counts/intents; do not suppress the gate or describe CI alone as complete accept
 
 A new direct origin-nginx ten-operation DVGA probe passed HTTP 200 and all ten nonempty GraphQL values
 in 392.963 seconds. Private receipt: `private-nginx-ten-1791068117606041356/receipt.json`.
-The strict published-route repeat is running; the earlier published timeout remains failed.
+The strict published-route repeat passed HTTP 200 and all ten nonempty results in 312.906 seconds.
+Private receipt: `private-published-ten-1791068470741982694/receipt.json`. The earlier published timeout
+remains failed; the complete paced scenario still requires its baseline, all batches and mixed result.
 Continuous traffic is being restored on installed `695c459` after focused qualification.
 
 ## Earlier repair-round observations
