@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `7e7ae5e43bc9eeb71c3cd118900e456fa9f449f4` preserves all 164 scenarios across 22 suites.
-Current source checks pass 124 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
+Generator source `6dc596ea7d21e9c0b21f63540d57443a4f2cab0c` preserves all 164 scenarios across 22 suites.
+Current source checks pass 125 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
@@ -210,6 +210,12 @@ Latest rapid-browser iteration `resume-focused-rapid-final/pass-focused-17910198
 failed and interrupted before all 360 actions completed. It retains blank 200 screenshots and navigation timeouts;
 mitigated requests are distinct from rendered routes. The terminal scenario receipt recorded zero transport failures
 and zero cancellations. Continuous startup is being verified on the immutable candidate. No failed pass was relabeled.
+
+DVGA batch coverage now requires single systemUpdate, exact 2/5/10 expensive batches and the mixed batch.
+Generic arrays cannot establish expensive-operation dispatch. Source regression rejects wrong operations and sizes;
+125 tests and nine subtests, mypy/Pylint and changed-file checks pass. Installed catalog is updated; live completion
+remains open because the native 20–50 second operation and batch duration exceed existing client/upstream timeouts.
+The application delay was preserved. Full catalog/rebuild acceptance remains open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
