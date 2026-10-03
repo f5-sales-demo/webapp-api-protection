@@ -871,3 +871,8 @@ The active rapid catalog scenario now retains thirteen failed records among 264 
 incomplete. Failure details show a successful SPA document with a blocked supporting product request, so each
 fragment route will now dispatch from a fresh document. Source regression checks pass; installed retry is pending.
 Browser runtime and matrix receipts additionally require an exact verifier digest.
+
+Current combined-matrix source passes 69 Python tests, type checking and repository-configured Pylint. Its browser
+evidence must match the installed verifier file digest as well as source/archive, kind and serving layer. The active
+older-source rapid scenario has 336 persisted actions and 25 failures; it remains failed/incomplete while finishing.
+Next source-pinned matrix installation and run remain pending.
