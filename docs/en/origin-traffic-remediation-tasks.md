@@ -11,9 +11,16 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `c30bc927537906222c9cf887cd7a65493f33fec4` preserves all 164 scenarios across 22 suites.
-Current source checks pass 102 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
+Generator source `87b3855d814ca812d3be0010a5649cf1ff75c34a` preserves all 164 scenarios across 22 suites.
+Current source checks pass 103 Python tests, nine subtests and five focused Node tests. Changed-file pre-commit checks
 pass. Required CI remains pending. The pinned archive is installed; continuous-service restart is being verified.
+
+Origin `5706801ed48b19f8433874454a142ce8a7c29204` passed the digest-checked immutable release installer and
+all native readiness checks. Source checks pass 42 tests and 68 subtests. The private actor-repeat receipt
+`actor-repeat-1791010423810835220.json` verifies distinct attacker/victim identities through all four RESTaurant replicas
+and stable stored IDs, password hashes, roles and phone values after a repeated seed. Generator source binds those actors
+and restores the victim profile on exit, with restoration failure remaining a failed scenario. Full mutation restoration
+and installed BOLA scenario acceptance remain open.
 
 Browser response assertions now remain mandatory even when browser actions pass. Nested reports require child source
 digests matching the installed catalog. Scenario mitigation counts exclude filler, prerequisites and other scenarios.
