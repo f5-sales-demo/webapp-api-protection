@@ -135,6 +135,13 @@ Private receipt: `resume-focused-community-read/pass-focused-1791016261901811208
 files pass mypy and repository-configured Pylint. Full catalog completion, merged
 artifacts, clean rebuild, sustained-rate/control proof and repeated Terraform apply remain open.
 
+Current installed supported HTTP workflows passed nine checks on origin nginx and on both WAAP domains over HTTP
+and HTTPS, using refreshed private fixtures. These are limited supported workflow checks, not complete rendered
+application acceptance. Generator `4aa6a2c` required CI is green; origin `522d0d5` required CI is green. Current
+continuous service is enabled and running on the exact generator source with no failures in its early current pass.
+Full two-pass catalog, rate/control attribution, authenticated rendered workflows, mutation cleanup and Terraform
+convergence remain outstanding. No T01–T16 task is marked complete from these narrower receipts.
+
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
 response/action assertions. Response evidence shows WAAP 403 on product APIs, application scripts and images while the
