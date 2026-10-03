@@ -203,8 +203,13 @@ WAAP candidate pins are reconciled with this revision and credential-free tests 
 
 The current interrupted full pass reached fourteen receipts, thirteen verified and one failed rapid-browser scenario.
 The retained browser checkpoint had only its first identity and browser_closed=false; a source repair now closes and
-persists evidence in finally on early failure. Seven focused Node tests pass. Installed rapid retry is running on
+persists evidence in finally on early failure. Seven focused Node tests pass. Installed rapid retry was interrupted after confirmed blank 200 pages and navigation timeouts on
 `7e7ae5e43bc9eeb71c3cd118900e456fa9f449f4`; the failed pass remains failed.
+
+Latest rapid-browser iteration `resume-focused-rapid-final/pass-focused-1791019820323884692/receipt.json` remains
+failed and interrupted before all 360 actions completed. It retains blank 200 screenshots and navigation timeouts;
+mitigated requests are distinct from rendered routes. The terminal scenario receipt recorded zero transport failures
+and zero cancellations. Continuous startup is being verified on the immutable candidate. No failed pass was relabeled.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
