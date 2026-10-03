@@ -11,8 +11,8 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `8838ec28aeac614c0c90dacb14c61069dfd9262d` preserves all 164 scenarios across 22 suites.
-Current source checks pass 112 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
+Generator source `cc3d1a01113327aff9279491ac0fc0205f2fe75b` preserves all 164 scenarios across 22 suites.
+Current source checks pass 113 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
 
@@ -59,6 +59,12 @@ with 22 attributed child requests, every declared dispatch/response requirement 
 `resume-focused-nested/pass-focused-1791012333150743754/nested-restaurant-exploits/restaurant-exploits--02-bola-profile/receipt.json`.
 Browser children now propagate validated opaque markers; native tool resolution skips owned wrapper chains. Aggregate
 reports reject foreign receipt symlinks. Installed nested scanner/browser and complete parent stress remain open.
+
+Installed ZAP marker qualification passed on `cc3d1a01113327aff9279491ac0fc0205f2fe75b`: the pinned native
+scanner loaded its replacer configuration and dispatched the intended access request to its own child receipt through
+the shared boundary. Private receipt: `resume-focused-zap-marker/pass-focused-1791012924444458872/receipt.json`.
+This proves attribution only; full scanner actions/completion and Nikto attribution remain open. Earlier CI repair
+revision `8838ec2` passed its Super-Linter job, but its workflow was canceled by a newer push; current required CI is pending.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
