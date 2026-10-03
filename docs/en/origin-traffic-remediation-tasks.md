@@ -88,6 +88,27 @@ five-operation JSON checks; ten-operation/mixed checks remain in progress. Conti
 while this single shared boundary is occupied and must be restored afterward. Independent origin-nginx
 and published ten-operation passes remain focused evidence only; earlier paced timeouts remain failed.
 
+The installed `d6930ea` matrix finished with 66 browser receipts and failed completeness on CSD HTTP
+receiver/counter/clear workflows for both domains. Failed evidence remains under
+`private-browser-matrix-1791068709010064608/`. The full paced DVGA retry on generator `695c459` ended
+at its 900-second deadline: baseline/two/five-operation responses passed; ten-operation client timeout
+and mixed cancellation failed. Five intended actions were dispatched, but two cancellations and missing
+JSON prevent acceptance. Private receipt: `resume-focused-dvga-costly-query/pass-focused-1791068573345329692/`.
+
+Immutable origin `f409d5c` installed successfully; every Juice Shop replica proved reserved seed domain
+and native admin login. Generator `3973098` installed and continuous traffic restarted. CSD focused
+repeats still failed; captured error text identifies ERR_ABORTED and one clear-response timeout.
+Source `ceb9c06` replaces timed page reloads with in-page Refresh/Clear and adds execution regressions.
+The next matrix on `f409d5c` exposed obsolete hardcoded Juice Shop verifier accounts. Four native login
+failures were preserved, then only the owned matrix/browser were interrupted. Private evidence:
+`private-browser-matrix-1791069786943134526/interruption-receipt.json`.
+
+Current origin source `2990de0` also discovers the account domain from native application configuration
+for browser login/basket assertions. Its immutable installation is underway. Generator remains `3973098`.
+Focused CSD/Juice verification, fresh full matrix/manual review and complete catalog qualification remain
+required. Continuous traffic is stopped during origin update and must restart after fixture/readiness checks.
+No failed matrix, timeout or interrupted run establishes acceptance. All task completion gates remain open.
+
 ## Earlier repair-round observations
 
 These earlier observations retain their original source revisions and failed evidence;
