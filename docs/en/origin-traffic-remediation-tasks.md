@@ -11,7 +11,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 This section is authoritative for the resumed repair round. Historical sections below preserve earlier observations;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
 
-Generator source `4aa6a2cc653b21a35fd95dac3a6bb52d140dc014` preserves all 164 scenarios across 22 suites.
+Generator source `d9fcf0813702dfab5d41732ac2d97e53791769a7` preserves all 164 scenarios across 22 suites.
 Current source checks pass 118 Python tests, nine subtests and six focused Node tests. Changed-file pre-commit checks
 pass. Earlier CI failed verifier complexity, test typing and module-level naming. Those source findings now pass
 repository-configured Pylint, mypy, Ruff and 112 tests; required CI on the repair remains pending. The pinned archive is installed; continuous-service restart is being verified.
@@ -141,6 +141,13 @@ application acceptance. Generator `4aa6a2c` required CI is green; origin `522d0d
 continuous service is enabled and running on the exact generator source with no failures in its early current pass.
 Full two-pass catalog, rate/control attribution, authenticated rendered workflows, mutation cleanup and Terraform
 convergence remain outstanding. No T01–T16 task is marked complete from these narrower receipts.
+
+A bounded 120-second rate window on generator `4aa6a2c` observed 197.28 aggregate requests/sec, 177.65 benign
+requests/sec, 100 percent completed benign success and zero benign transport failures. Private receipt:
+`rate-window-receipt.json`. This is an observation before clean deployment, not final sustained-rate acceptance.
+Multi-client source now retains its 100 correlated identity echoes and adds twenty clients each rotating through all
+nine application content contracts (280 total requests). Source checks pass 122 tests and nine subtests; focused
+installed qualification is pending. Original randomized deep paths and all workload semantics remain open.
 
 Three focused rapid-browser iterations remain failed or interrupted. The latest retained receipt is
 `resume-focused-rapid-final/pass-focused-1791009776937631086/receipt.json`. It includes two tool cancellations and failed
