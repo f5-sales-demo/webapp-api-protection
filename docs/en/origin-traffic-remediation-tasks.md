@@ -1004,3 +1004,12 @@ Manual review of all 315 matrix screenshots found that some Juice Shop score-boa
 spinner despite passing heading assertions. Rendered acceptance is therefore still open. The verifier now requires
 visible challenge cards and spinner removal, and signup screenshots wait for modal animation. The matrix automated
 pass stays provisional; screenshots were not accepted as complete.
+
+The stricter score-board verifier at origin `7b96647` passed all ten browser checks on every native Juice Shop
+replica and both domains over HTTP and HTTPS, requiring visible challenge cards and no loading spinner.
+Screenshot review of the corrected score-board is in progress. The earlier automated matrix pass remains
+provisional until corrected rendered evidence and comprehensive fixture/fresh-deployment gates pass.
+
+The corrected loaded Juice Shop score-board screenshot was manually reviewed at full size and shows populated
+challenge cards and counters. The active catalog pass has seventeen receipts, sixteen accepted and failed rapid
+browsing. That failure remains; its timeout/cancellation is not mitigation acceptance.
