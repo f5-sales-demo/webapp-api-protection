@@ -255,3 +255,20 @@ Nested worker verification now fails a zero-exit child without observed action r
 fixture mutation restoration, scanner outcome semantics, declared cache behavior, complete rendered navigation and
 all required application workflows remain open. No clean rebuild, accepted complete catalog pass, sustained final rate,
 merged installation, reboot recovery or zero-change repeat apply is claimed.
+
+## Current candidate checks
+
+Source tests pass 86 tests and nine subtests after extending benign success to require application identity and content
+type. Required payload dispatches now need corresponding terminal responses. The latest candidate sources retain the
+complete 164-entry matrix; continuous and focused runs preserve failures independently. CI remains pending.
+
+A stronger installed workload ramp passed all nine application identities and measured concurrency/connection reuse
+at levels 1, 10 and 20 across 300 requests, with no transport failures or cancellations. The corrected six intentional
+shadow endpoint contracts passed their observed 401/404 response expectations. A later full pass failed native browser
+credential stuffing on cancellations despite all fifteen credential submits; source now waits for login page resources
+before submission and focused retry is pending. These failures are not accepted coverage.
+
+Latest generator source is `1039987738cda33f57cb25d32f616152cddbd4de`. Remaining source-to-live delivery gates
+include complete catalog execution, mutation fixture restoration, precise scanner output semantics, nested attribution,
+rendered content/workflow completeness, all serving layers, merged artifact installation, clean rebuild, rate/control
+qualification and unchanged Terraform repeat apply. No task is completed from source contract presence alone.
