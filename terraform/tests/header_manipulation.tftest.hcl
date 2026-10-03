@@ -69,3 +69,23 @@ run "disable_default_error_pages_renders" {
     error_message = "disable_default_error_pages must render inside more_option"
   }
 }
+
+run "stream_idle_timeout_renders_on_both_listeners" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    lb_https_auto_cert           = true
+    lb_stream_idle_timeout_ms    = 600000
+    api_specification_validation = "all_spec_endpoints"
+    api_validation_request_mode  = "block"
+    challenge                    = { mode = "enable" }
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this.more_option.idle_timeout == 600000
+    error_message = "HTTPS stream timeout must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.http[0].more_option.idle_timeout == 600000
+    error_message = "HTTP companion stream timeout must render"
+  }
+}
