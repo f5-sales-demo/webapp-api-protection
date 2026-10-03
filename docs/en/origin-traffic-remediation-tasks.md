@@ -75,3 +75,24 @@ Missing fixtures produce failed private receipts without terminating the rest of
 cannot mark a dispatch verified, and an incomplete contract matrix cannot mark a catalog pass accepted.
 
 Intentional negative endpoints are tested by scenarios, while startup probes declared healthy application pages. Failed browser and installer evidence from earlier iterations remains retained. Full 164-scenario reconciliation and final rebuild acceptance remain open.
+
+Installed dispatch receipts verified all declared schema-violation, shadow-endpoint, configured endpoint-denial and
+configured rate-limit actions. The first DVWA pass dispatched every payload but failed two login redirects. After
+refreshing real origin-authenticated sessions, a separate pass verified all 15 SQLi and 18 reflected-XSS launches with
+no transport failures. The failed pass remains failed evidence.
+
+Eight DVGA scenario contracts were added around valid JSON GraphQL documents, batch size, operations and payload classes. Their installed dispatch verification is still pending. A GraphQL helper transport regression verifies arbitrary query quotes and variables survive JSON construction unchanged.
+
+## Current evidence and remaining failures
+
+The corrected nonmutating crawl produced 58 passing HTTPS content checks across both domains. Its 56 rendered
+screenshots were reviewed; application identity, images, Swagger/ReDoc and navigation were visible. Screenshot review
+also found DVGA's start-over link, which resets application state; it was added to the declared mutation paths and
+excluded from read-only crawling. A final crawl is pending that manifest adjustment.
+
+Installed API-protection dispatch contracts and a refreshed authenticated DVWA payload pass succeeded. All 33 preserved
+DVWA payloads dispatched. The first stale-session pass remains failed. Eight DVGA action contracts are implemented, but
+a focused batch/recursion pass timed out and recorded cancellations; it is failed evidence, not successful application
+rejection. Cancelling tool requests now causes scenario failure.
+
+Generator source tests currently pass 58 tests and nine subtests. Full pre-commit passes. Native application readiness passed at resumption. CI repair, remaining catalog action contracts, every required authenticated workflow, HTTP serving-layer checks, immutable merged installation, clean rebuild, restart/reboot recovery and final repeat apply remain open.
