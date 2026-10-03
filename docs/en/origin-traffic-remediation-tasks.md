@@ -968,3 +968,13 @@ Pinned MailHog help and container arguments prove Jim is disabled: its chaos-mon
 GET /api/v2/jim returns 404 natively. The signup verifier now declares only that exact 404 as the expected disabled
 feature outcome; other MailHog errors still fail. Signup request completion, UI success and recovery already passed
 separately; immutable expected-outcome retry remains pending.
+
+Origin `6551549` passed installed signup verification through origin nginx: native submit, completed request,
+rendered success, welcome MailHog message and confirmed scoped recovery all passed. The exact disabled Jim 404
+was recorded as an expected negative. Published signup checks and the next consolidated matrix are running;
+continuous traffic restart is in progress. No complete application or catalog acceptance is claimed yet.
+
+Installed origin `6551549` passed signup, request completion, rendered success, welcome-MailHog checks and scoped
+recovery on both domains over HTTP and HTTPS. The next consolidated matrix includes native frontend routing,
+whoami supplied-header echo, CSD cross-replica state and recovery-gated signup. It is running; no final matrix
+or fresh-deployment acceptance is claimed.
