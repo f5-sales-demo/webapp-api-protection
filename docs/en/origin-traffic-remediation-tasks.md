@@ -791,3 +791,13 @@ Origin `f4c8d2f` passed all five RESTaurant browser checks on every native repli
 intermittent 403 blocks on documentation assets and login, while the HTTPS www layer passed. These are failed
 serving-layer evidence and require control attribution; the native prefix adapter does not establish published
 acceptance. Continuous traffic restart is in progress.
+
+RESTaurant native replicas and both HTTPS domains passed the five-check workflow after the prefix repair.
+Intermittent HTTP failures remain preserved; a fresh synthetic actor live diagnostic passed the www HTTP workflow.
+The verifier now assigns a unique opaque actor per run for independent attribution. Immutable installed qualification
+for this last verifier change remains pending. No current control attribution was inferred from the transient block.
+
+Generator `808cd6b` adds a second regression distinguishing fresh blocked document probes from stale SPA fragment
+evidence; all eight focused Node checks and repository hooks pass. Origin `2e51126` assigns a fresh synthetic
+RESTaurant actor per verifier run. Both immutable installs and next installed qualifications are in progress.
+All 164 catalog entries remain, and two complete accepted catalog passes are still outstanding.
