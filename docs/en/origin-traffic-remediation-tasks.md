@@ -805,3 +805,9 @@ All 164 catalog entries remain, and two complete accepted catalog passes are sti
 Installed origin `2e51126` passed the fresh-actor RESTaurant five-check browser workflow on both HTTP domains.
 HTTPS rechecks and the focused rapid-browsing retry continue. Required origin CI is green. Complete workflow,
 mutation restoration, scanner scope, fresh deployment and final catalog acceptance remain open.
+
+Expanded crAPI mechanic navigation rendered its service form but exposed a root image URL escape on return.
+The immutable frontend adapter now anchors vehicle image URLs under the crAPI base and fails if its pinned upstream
+source changes. Source checks pass 63 tests and repository hooks. Installed qualification remains pending.
+The focused rapid retry has fourteen failures among 216 persisted actions; blank HTTP 200 SPA documents remain
+failed despite corrected fresh-versus-stale mitigation handling. The run continues for a terminal receipt.
