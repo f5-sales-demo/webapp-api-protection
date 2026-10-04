@@ -178,6 +178,27 @@ Worker markers and timestamps now bind that behavior to completed native reports
 tool_failure; those cancellations are not ignored or relabeled. Continuous traffic restarted on installed
 `b352c64`; final fixture/scenario/load/rebuild gates remain open. All failed evidence is retained.
 
+The stronger Juice Shop About gallery screenshot on installed `ecb553e` was reviewed full-size and
+shows loaded media/feedback without a spinner. Current complete matrix is still in progress on that source.
+A 46-second continuous slice on generator `b352c64` reached 197.15 aggregate RPS, 100 percent benign success
+and zero baseline transport failures across all nine applications. This is short-window evidence only.
+
+Current full catalog reached twelve accepted scenario receipts, then the headless form scenario failed
+with zero native submissions, browser navigation timeouts and seven cancellations. Source request evidence
+shows assets starting 13–25 seconds after navigation. Generator `6345562` uses 60-second bounded navigation
+and request-drain waits; its immutable focused retry is running. Preserve the failed `b352c64` catalog receipt.
+Generator `9b5d9b8` also records whether failed native requests had actually reached upstream, so future
+stress cancellation diagnostics distinguish queued requests from dispatched ones. No acceptance gate ignores
+client cancellation. Current pins are origin `ecb553e` and generator `6345562`; continuous restart follows
+focused qualification. All complete-catalog/rebuild/final gates remain open.
+
+Installed generator `6345562` passed the focused native form retry: two real registration POSTs and two
+real feedback POSTs, HTTP 201, 74 total browser requests, zero transport failures/cancellations. Private
+receipt: `resume-focused-native-form-deadlines/pass-focused-1791072238177746645/receipt.json`. This qualifies
+actual form dispatch only; isolated account/feedback cleanup and repeatability remain required. The failed
+zero-submission catalog run remains failed. Continuous traffic restart is underway on the fixed source.
+Current origin `ecb553e` matrix has 32 passing browser receipts/no failures so far.
+
 ## Earlier repair-round observations
 
 These earlier observations retain their original source revisions and failed evidence;
