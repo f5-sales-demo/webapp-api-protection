@@ -9,7 +9,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 ## Current acceptance status
 
 All T01–T16 tasks remain open. Current source/installed origin is `cb08457`; generator is `b3b4edf`.
-WAAP pins their immutable archives and installers. Provider 13.0.2 remains the latest checked release,
+WAAP pins their immutable archives and installers. Provider 13.0.3 is the latest checked release,
 with exact binary/source provenance tied to enriched API specs v10.0.0. VM replacement plans remain unapplied.
 
 Focused installed/live checks passed credential form submissions (15), native registration/feedback
@@ -1742,3 +1742,15 @@ crAPI source `b8ec277` fixes decimal OTP generation, the invalid mechanic fallba
 classification for coupon probes. Source checks pass 141 tests and nine subtests; installed qualification
 is pending. Registration/OTP fixture semantics, video lifecycle and broad mutation restoration remain open.
 These failed passes remain failed and cannot establish final coverage. Continuous traffic remains running.
+
+Native acceptance continuation: provider v13.0.3 was confirmed against the release API and installed from the
+Registry with signing key 7282C542DC88E217. Both Terraform roots validate. Generator `1f71d00` separates
+catalog dispatch success from native functional acceptance. Only explicitly declared functional contracts can
+qualify; missing contracts fail acceptance. Existing source test doubles are development checks, not live
+acceptance. No full catalog or clean-rebuild acceptance is claimed.
+
+Native community exposure qualified on installed `1f71d00`: the intended GET returned populated native posts
+with synthetic author.email values; upstream dispatch and content assertions passed with zero transport
+failures/cancellations. Private receipt: `resume-focused-native-community/pass-
+focused-1791078117999254011/receipt.json`. This is one scenario contract, not full catalog acceptance. AWS STS
+confirms refreshed credentials usable on the Ubuntu workstation.
