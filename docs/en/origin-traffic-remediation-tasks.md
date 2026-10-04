@@ -8,7 +8,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 
 ## Current acceptance status
 
-All T01–T16 tasks remain open. Current source/installed origin is `ecb553e`; generator is `6345562`.
+All T01–T16 tasks remain open. Current source/installed origin is `ecb553e`; generator is `8fc528e`.
 WAAP pins their immutable archives and installers. Provider 13.0.2 remains the latest checked release,
 with exact binary/source provenance tied to enriched API specs v10.0.0. VM replacement plans remain unapplied.
 
@@ -17,10 +17,12 @@ submissions (two each), crAPI parameter updates plus conversion triggers/restora
 requests (12), CSD HTTP checkout/dashboard/clear restoration on both domains, and strict lazy gallery
 navigation on the HTTPS API domain. These are individual qualifications, not complete catalog acceptance.
 
-The origin `2990de0` automated matrix passed 66 browser receipts with no missing workflow/layer entries;
-315 screenshots were reviewed, but a lazy gallery spinner prevented manual completeness acceptance.
-Origin `ecb553e` adds every-slide checks, passed the focused gallery check, and its current full matrix
-is running. The prior two failed CSD matrices and interrupted obsolete-account matrix remain failed.
+The complete origin `ecb553e` matrix passed all 66 browser receipts with no missing workflow/layer entries
+and zero browser failures. All 315 screenshots were reviewed through eight application contact sheets and
+full-size key pages, including every-layer About media. Manual rendered review passed for this installed
+source. Private matrix: `private-browser-matrix-1791071831447445193/`; review: `manual-render-review-ecb553e.json`.
+Earlier failed matrices and the automated-pass/manual-incomplete `2990de0` round remain original evidence.
+Merged clean-deployment verification is still required before task completion.
 
 Full paced DVGA still fails ten-operation/mixed completion within the scenario deadline, despite separate
 native/nginx/published ten-operation probes passing. Full native stress still fails 20 timed-worker client
@@ -38,6 +40,14 @@ English/source PII remediation passed staged enforcement; full-head enforcement 
 existing localized deployment examples under the fleet no-locale-refresh policy. Continuous service is
 being restored after the short native diagnostic and requires a current active/enabled receipt.
 CSD remains disabled. No failed receipt is relabeled as acceptance.
+
+Generator installed/source `8fc528e` passed the stricter crAPI conversion/restoration slice: twelve total
+requests, all three updates/three triggers, exact media/name/parameters restored and zero transport failures
+or cancellations. All three native JSON HTTP 403 responses match internal-only application rejection and
+are classified expected_application_rejection, without attributing WAAP mitigation. Continuous restart is
+underway on this exact candidate. Source checks pass 170 tests/nine subtests with one workstation native-tool
+skip, plus staged PII and pre-commit. Full catalog, native stress/connection/nested behavior and mutation
+isolation remain incomplete.
 
 ## Earlier repair-round observations
 
