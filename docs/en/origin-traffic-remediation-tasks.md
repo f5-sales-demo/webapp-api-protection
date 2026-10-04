@@ -14,10 +14,10 @@ installers. Provider 13.0.3 is the latest checked release, with installed binary
 to enriched API specs v10.0.0. Both Terraform roots validate; the live saved plan succeeds but proposes
 two VM replacements that remain unapplied.
 
-Prior origin `cb08457` qualification passed the full declared matrix: 66 browser receipts, complete true,
+Current origin `0a2d4aa` qualification passed the full declared matrix: 66 browser receipts, complete true,
 no missing workflow/layer checks or browser failures, and 315 retained screenshots. Eight application
 contact sheets and full dashboard/ReDoc/community views were manually reviewed. Private matrix:
-`private-browser-matrix-1791078210428199853/`; review: `manual-render-review-cb08457.json`.
+`private-browser-matrix-1791080250331268526/`; review: `manual-render-review-0a2d4aa.json`.
 Final verification on the merged clean deployment remains required.
 
 Two explicit native functional contracts are implemented and passed on both WAAP domains: DVWA
@@ -40,7 +40,7 @@ features or final functional acceptance.
 
 Required CI passed on generator `5d589b2` and WAAP `f236ff4`; later WAAP tracking/pin CI remains
 candidate-specific. Full-head PII enforcement remains failed on twelve localized deployment examples
-under the fleet no-locale-refresh policy. Continuous traffic is active/enabled on installed `369d54b`; its required CI passed. The new origin matrix is running.
+under the fleet no-locale-refresh policy. Continuous traffic is active/enabled on installed `369d54b`; its required CI passed. The current origin matrix and manual rendered review passed.
 CSD remains disabled. Historical failed source, browser, matrix, traffic and CI evidence stays failed.
 
 ## Historical candidate evidence
@@ -1826,3 +1826,9 @@ functional/pass-focused-1791080725732053859/receipt.json`. Six functional contra
 unqualified. Native scanner tool semantics and broader mutation recovery remain open.
 
 Installed one-shot SSL suite verification correctly returns exit code 1 with functional_verified false and all three missing native scanner contracts listed. This is an acceptance-gate check, not scanner functional acceptance. Current continuous service is active/enabled on 369d54b with no current failures.
+
+Current origin 0a2d4aa full matrix completed: 66 browser receipts, complete true, no missing checks/failures,
+315 screenshots; eight contact sheets and four full page views manually reviewed. Private matrix `private-
+browser-matrix-1791080250331268526`, review `manual-render-review-0a2d4aa.json`. Short 46-second live window
+on 369d54b measured 197.30 aggregate HTTP RPS, 100 percent benign success and zero baseline transport failures
+across nine applications. Final sustained fresh-deployment acceptance remains open.
