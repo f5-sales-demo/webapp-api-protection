@@ -1900,8 +1900,21 @@ Current 6529de0 continuous service is active/enabled. A 46-second live window me
 Native-tool substitution audit is source-controlled in traffic-generator docs/en/native-tool-remediation.md.
 Five scanner entries now execute actual Nmap/SSLScan/SSLyze/testssl with scoped connect pacing and native
 structured reports; installed f4f30ce completed all five. Seven load and two benchmark paths execute native
-wrk/hey/curl/Vegeta/ab/Lua instead of Python requests; cache/client paths use native curl. Native Subfinder
+wrk/hey/curl/Vegeta/ab/Lua instead of Python requests; cache/client paths use native cURL. Native Subfinder
 returns real provider discoveries. Dummy tokens, fabricated OTP 0000, fallback session IDs, browser response
 substitution and chained privilege substitution are removed. Unfinished native signup/reset recovery and full
 benchmark functional assertions remain explicit gaps. Native OpenSSL slow-header cleanup fixed after real peer
 408/BrokenPipe failure; installed c645c3f rerun pending. Failed evidence remains failed.
+
+
+Native substitution continuation: generator `799e360` passed complete native SSLyze checks on both domains.
+Each run recorded 602 scoped, paced connection attempts, all 18 mandatory plugins completed, zero transport
+failures and no surviving process group. Private receipt:
+`resume-native-scanner-completeness/pass-focused-1791120982851266086/receipt.json`.
+The partial-plugin candidate remains failed evidence. The native crAPI MIME parser passed against 17 actual
+MailHog messages containing welcome VINs and reset OTPs; this is parser verification only, not isolated
+signup/reset scenario acceptance. Generator `312f665` is installed for native benchmark follow-up and now
+requires observed process cleanup for native load workers instead of a hardcoded cleanup assertion.
+Source validation passed 176 tests, nine subtests, lint, type checks and staged PII checks; one workstation
+native-tool test remains environment-skipped and is not live acceptance. Full catalog, benchmark semantics,
+fixture recovery, merged installation and clean rebuild acceptance remain open.
