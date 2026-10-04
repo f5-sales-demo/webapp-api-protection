@@ -1868,3 +1868,9 @@ plus one malicious-user event. Private native-command-control-179108367254822799
 and request window. Native 36-check qualification is separate. The reusable command scenario remains
 unqualified until its contract joins these evidence layers; earlier strict-output and actor-validator failures
 remain failures.
+
+Reusable verify_command_coverage.py passed against real native and control receipts: exact 36 native
+replica/payload inventory, eighteen published blocked requests and eighteen unique attributed WAF events, nine
+per domain. Private native-command-coverage-join.json retains evidence digests. This standalone evidence join
+qualifies the observed behavior/control pair; the generator command scenario still needs runtime integration
+and cannot establish whole-catalog acceptance.
