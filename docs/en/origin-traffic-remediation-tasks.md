@@ -1811,3 +1811,15 @@ zero transport failures/cancellations and verified cleanup/screenshots. Private 
 libraries/pass-focused-1791080407279148227/receipt.json`. Five functional contracts are declared; 159
 scenarios remain unqualified. A current origin matrix is running on 0a2d4aa; prior complete cb08457 evidence
 remains preserved.
+
+Generator 69fdd8f completed all five declared functional contracts through both WAAP domains with zero
+transport/cancellation failures. Credential/community receipt `resume-native-functional-both-domains/pass-
+focused-1791080493447587380/receipt.json` also verifies functional-slice true and whole-catalog accepted
+false. Required CI passed. Current generator 369d54b adds measured native slow-header launch spacing and
+incomplete-header evidence; two-domain installed qualification is running.
+
+Native slow-header contract passed on both domains on 369d54b: twenty TLS connections per domain, measured
+attempt spacing within the configured limit, three partial-header rounds, peer closure observations and all
+sockets closed; zero transport/cancellation failures. Private receipt `resume-native-slow-header-
+functional/pass-focused-1791080725732053859/receipt.json`. Six functional contracts declared, 158 remaining
+unqualified. Native scanner tool semantics and broader mutation recovery remain open.
