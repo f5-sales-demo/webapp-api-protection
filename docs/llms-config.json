@@ -1,21 +1,5 @@
 {
-  "customSets": [
-    {
-      "label": "Demo",
-      "description": "Terraform-driven web app & API protection exercise on F5 Distributed Cloud",
-      "paths": ["demo/**"]
-    },
-    {
-      "label": "Current showcase acceptance",
-      "description": "Current showcase acceptance with revision-specific evidence and incomplete gates",
-      "paths": ["overview*", "demo/**", "origin-traffic-remediation-tasks*"]
-    },
-    {
-      "label": "Historical evidence",
-      "description": "Historical evidence with revision-specific evidence and incomplete gates",
-      "paths": ["archive/**"]
-    }
-  ],
-  "promote": ["index*", "overview*"],
-  "demote": ["references*", "faq*", "archive/**"]
+  "promote": ["index*", "overview*", "demo*", "origin-traffic-remediation-tasks*"],
+  "demote": ["references*", "faq*", "archive/**"],
+  "tieredHierarchy": true
 }

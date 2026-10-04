@@ -40,7 +40,6 @@ complete scan.
 
 | Task | Status | Dependencies | Acceptance criteria | Issue / PR | Source revision | Verification receipt | Remaining work |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Task | Status | Dependencies | Acceptance criteria | Issue / PR | Origin `9dec3a1`; generator `4c2f528`; WAAP `8e13dc5` | Historical candidate receipts linked in archive; current qualification incomplete | Current-source, merged installation and applicable live gate remain open |
 | T01 — Record baseline | In progress | none | Capture routes, replicas, fixtures, rendered failures, catalog, deployed digests, Terraform ownership and shared identities; retain private receipt. | <https://github.com/f5-sales-demo/webapp-api-protection/issues/553>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Origin `9dec3a1`; generator `4c2f528`; WAAP `8e13dc5` | Historical candidate receipts linked in archive; current qualification incomplete | Current-source, merged installation and applicable live gate remain open |
 | T02 — Application manifest | In progress | T01 | Exactly nine applications reconciled across declaration, docs, landing, outputs and traffic. | <https://github.com/f5-sales-demo/origin-server/issues/710>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Origin `9dec3a1`; generator `4c2f528`; WAAP `8e13dc5` | Historical candidate receipts linked in archive; current qualification incomplete | Current-source, merged installation and applicable live gate remain open |
 | T03 — Coverage matrix | In progress | T02 | Native/published routes, replicas, assertions, fixtures and scenarios; no missing/orphan entries. | <https://github.com/f5-sales-demo/traffic-generator/issues/711>; PRs: <https://github.com/f5-sales-demo/origin-server/pull/711>; <https://github.com/f5-sales-demo/traffic-generator/pull/713> | Origin `9dec3a1`; generator `4c2f528`; WAAP `8e13dc5` | Historical candidate receipts linked in archive; current qualification incomplete | Current-source, merged installation and applicable live gate remain open |
@@ -70,3 +69,5 @@ including dated failures and narrower successful candidates. It is evidence hist
 [Demo guide](../demo/) documents lifecycle and preservation; [traffic
 tracker](https://f5-sales-demo.github.io/traffic-generator/en/continuous-catalog-tasks/) records upstream
 outstanding work.
+
+[LLM discovery](../llm-discovery/) links the source-generated text hierarchy.
