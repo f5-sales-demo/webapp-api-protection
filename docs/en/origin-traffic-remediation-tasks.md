@@ -40,7 +40,7 @@ features or final functional acceptance.
 
 Required CI passed on generator `5d589b2` and WAAP `f236ff4`; later WAAP tracking/pin CI remains
 candidate-specific. Full-head PII enforcement remains failed on twelve localized deployment examples
-under the fleet no-locale-refresh policy. Current generator 48d4b62 required CI passed. The dc99bef matrix completed with 66 receipts and no missing checks/failures; current manual review passed and continuous traffic restarted; final current status remains receipt-bound.
+under the fleet no-locale-refresh policy. Prior generator 48d4b62 required CI passed; current 6529de0 CI is pending. The dc99bef matrix completed with 66 receipts and no missing checks/failures; current manual review passed and continuous traffic is confirmed active/enabled on 6529de0.
 CSD remains disabled. Historical failed source, browser, matrix, traffic and CI evidence stays failed.
 
 ## Historical candidate evidence
@@ -1894,3 +1894,5 @@ actual SYN-ACK replies from ports 80/443, measured pacing, binary/native report 
 transport/cancellation failures. Private receipt `resume-native-masscan-functional/pass-
 focused-1791085027630506301/receipt.json`. Seven functional contracts have live qualification; command remains
 separately native/control-qualified pending runtime join.
+
+Current 6529de0 continuous service is active/enabled. A 46-second live window measured 197.08 aggregate HTTP RPS, 100 percent benign success, zero baseline transport failures, and benign requests rotated across all nine applications. This short window is not final sustained fresh-deployment acceptance. Current generator/WAAP CI remains pending.
