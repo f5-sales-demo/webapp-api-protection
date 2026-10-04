@@ -17,10 +17,10 @@ submissions (two each), crAPI parameter updates plus conversion triggers/restora
 requests (12), CSD HTTP checkout/dashboard/clear restoration on both domains, and strict lazy gallery
 navigation on the HTTPS API domain. These are individual qualifications, not complete catalog acceptance.
 
-The complete origin `ecb553e` matrix passed all 66 browser receipts with no missing workflow/layer entries
+The complete origin `bab591a` matrix passed all 66 browser receipts with no missing workflow/layer entries
 and zero browser failures. All 315 screenshots were reviewed through eight application contact sheets and
 full-size key pages, including every-layer About media. Manual rendered review passed for this installed
-source. Private matrix: `private-browser-matrix-1791071831447445193/`; review: `manual-render-review-ecb553e.json`.
+source. Private matrix: `private-browser-matrix-1791074898897738429/`; review: `manual-render-review-bab591a.json`.
 Earlier failed matrices and the automated-pass/manual-incomplete `2990de0` round remain original evidence.
 Merged clean-deployment verification is still required before task completion.
 
@@ -105,6 +105,31 @@ the DVWA session-maintenance repair. Private receipt: `resume-focused-kraken-nat
 `235fb9a`. Earlier iterations with 20 and two cancellations remain failures. This qualifies the current
 contract only; native keepalive reports still show zero reused connections, and full Lua/nested/connection
 semantics remain required for complete coverage. Continuous restart is underway.
+
+A fresh continuous startup window on generator `235fb9a` failed the aggregate rate gate at 172.25 RPS
+(164.51 benign RPS), despite 100 percent benign success and zero transport errors. Preserve it as failed
+rate evidence; a steady-state repeat is running. The current-origin `bab591a` matrix has 63 passing browser
+receipts/no failures so far. Source CI passed on current origin and generator candidates. Full catalog,
+complete native semantics and final clean/repeat-apply gates remain open.
+
+The complete current-origin `bab591a` matrix passed with 66 browser receipts, zero browser failures
+and no missing workflow/layer assertions. Private matrix: `private-browser-matrix-1791074898897738429/`.
+Manual screenshot review is pending. A steady-state repeat on generator `235fb9a` reached 197.07 aggregate
+RPS, 100 percent benign success and zero baseline transport errors; the earlier startup rate failure remains
+failed. Sustained final rate/control/rebuild acceptance is still required.
+
+Manual review of all 315 current `bab591a` screenshots passed through eight contact sheets and four
+full-size key pages. The current source has complete native/origin-nginx/HTTP/HTTPS workflow matrix and
+manual rendered qualification. Private review: `manual-render-review-bab591a.json`. Complete merged clean
+deployment remains required. Scoped costly-DVGA retry on generator `235fb9a` is running; its baseline passed
+JSON identity in 40.785 seconds. Earlier expensive-batch timeouts remain failed. Continuous service is stopped
+while the focused boundary is occupied and must be restored afterward.
+
+Acceptance policy: every showcase feature and scenario requires real installed/live application and
+native-tool behavior. Mocked unit tests, synthetic command shims, replay and dispatch-only receipts cannot
+establish functional acceptance. Current full coverage remains incomplete. Native setup, actual payload
+action, exact outcome, fixture recovery, source provenance and required serving layers are hard gates.
+Any generic connection equivalent remains an explicit gap until its declared native tool behavior is proven.
 
 ## Earlier repair-round observations
 
