@@ -1918,3 +1918,12 @@ requires observed process cleanup for native load workers instead of a hardcoded
 Source validation passed 176 tests, nine subtests, lint, type checks and staged PII checks; one workstation
 native-tool test remains environment-skipped and is not live acceptance. Full catalog, benchmark semantics,
 fixture recovery, merged installation and clean rebuild acceptance remain open.
+
+
+The installed `312f665` native benchmark follow-up completed 17 keepalive workers and 33 VM-comparison
+workers with observed process cleanup and zero transport failures/cancellations. Both remain
+`functional_verified=false`; dispatch and report completion do not establish complete benchmark coverage.
+Private receipt: `resume-native-followups/pass-focused-1791121335656328761/receipt.json`.
+Two crAPI video header placeholders are replaced in generator source with native FFmpeg encoding and
+FFprobe codec/dimension verification. Workstation encode/decode passed; installed application acceptance
+is pending. Clean generator provisioning now installs FFmpeg rather than relying on a guest-only package.
