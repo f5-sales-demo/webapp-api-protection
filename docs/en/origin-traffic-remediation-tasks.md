@@ -1766,3 +1766,19 @@ invalid-valid login sequence passed (`resume-native-auth-failure/pass-
 focused-1791078570276914525/receipt.json`). An overlapping focused boundary failed to start and remains failed
 evidence; reruns must be sequential. Full rendered matrix on current origin is running; full catalog
 acceptance and clean rebuild remain open.
+
+Current origin `cb08457` completed the full declared application/workflow matrix: 66 browser receipts,
+complete true, no missing checks or failed workflows, and 315 screenshots. Matrix `private-browser-
+matrix-1791078210428199853` and private `manual-render-review-cb08457.json` bind source and review. Eight
+application contact sheets plus full dashboard/ReDoc/community views were manually reviewed. This is current
+candidate application qualification; final merged clean deployment remains required.
+
+The a88c94e both-domain run failed: api-domain credential attempts 13 and 14 did not drain within the inherited 15-second helper deadline, leaving only thirteen native POSTs. The run remains failed. Generator `5d589b2` aligns every credential drain/navigation deadline to sixty seconds and records pending resource paths; both-domain installed qualification is running.
+
+Both native functional contracts passed through both WAAP domains on installed `5d589b2`: thirty credential
+POSTs with two valid logins, twenty-eight native rejections and logout cleanup, plus two community exposure
+actions; zero transport failures/cancellations. Private accepted receipt `resume-native-functional-both-
+domains/pass-focused-1791079166467472534/receipt.json`. The previous a88c94e two-domain failure remains
+failed. Only two of 164 scenarios have explicit functional contracts; 162 remain unqualified.
+
+Provider 13.0.3 binary source matches `b1854d740269b420e238aed9e8a556d0bb084164`; binary SHA256 `43898dc1fd9010c925c03ff27d32981d2c27095aee7a3cac1485a22c0683762c`. It retains enriched API v10.0.0 commit and verified pin/bundle digests. Private `ecosystem-provider1303-receipt.json` records installed provenance; the earlier 13.0.2 receipt remains historical evidence.
