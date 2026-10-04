@@ -1935,3 +1935,12 @@ seeded video restoration passed. Private receipt:
 `resume-native-real-video/pass-focused-1791121960307112217/receipt.json`.
 Both remain functionally unqualified: WAAP mitigation and native application rejection were observed,
 and complete conversion/control contracts remain required. No exploit-success claim is inferred.
+
+
+Origin `5d705bf` replaces the seeded MP4 header placeholder with actual native-encoded video bytes.
+Immutable installation passed, and two installed fixture reruns preserved the video row ID and row count
+with identical 1,693-byte media (`b3199164a035856e194b2fe5bf5beec14d608e578a0606c294e988215457ab14`).
+Private receipts: `remediation-immutable-origin-1791122375841996096/receipt.json` and
+`native-video-seed-1791122493176878462/receipt.json`. Native FFmpeg decoded all generated frames;
+source metadata retains the exact generation command and bytes. Source checks passed 86 tests and
+69 subtests. Complete application-matrix acceptance for this new origin revision remains required.
