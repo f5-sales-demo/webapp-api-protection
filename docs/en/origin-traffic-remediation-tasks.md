@@ -9,15 +9,15 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 ## Current acceptance status
 
 All T01–T16 tasks remain open pending their complete source, merged-installation and live acceptance.
-Current source/installed origin is `0a2d4aa`; generator is `369d54b`. WAAP pins immutable archives and
+Current source/installed origin is `dc99bef`; generator is `48d4b62`. WAAP pins immutable archives and
 installers. Provider 13.0.3 is the latest checked release, with installed binary/source provenance tied
 to enriched API specs v10.0.0. Both Terraform roots validate; the live saved plan succeeds but proposes
 two VM replacements that remain unapplied.
 
-Current origin `0a2d4aa` qualification passed the full declared matrix: 66 browser receipts, complete true,
+Current origin `dc99bef` qualification passed the full declared matrix: 66 browser receipts, complete true,
 no missing workflow/layer checks or browser failures, and 315 retained screenshots. Eight application
 contact sheets and full dashboard/ReDoc/community views were manually reviewed. Private matrix:
-`private-browser-matrix-1791080250331268526/`; review: `manual-render-review-0a2d4aa.json`.
+`private-browser-matrix-1791082428479897763/`; review: `manual-render-review-dc99bef.json`.
 Final verification on the merged clean deployment remains required.
 
 Two explicit native functional contracts are implemented and passed on both WAAP domains: DVWA
@@ -40,7 +40,7 @@ features or final functional acceptance.
 
 Required CI passed on generator `5d589b2` and WAAP `f236ff4`; later WAAP tracking/pin CI remains
 candidate-specific. Full-head PII enforcement remains failed on twelve localized deployment examples
-under the fleet no-locale-refresh policy. Continuous traffic is active/enabled on installed `369d54b`; its required CI passed. The current origin matrix and manual rendered review passed.
+under the fleet no-locale-refresh policy. Current generator 48d4b62 required CI passed. The dc99bef matrix completed with 66 receipts and no missing checks/failures; current manual review passed and continuous traffic restarted; final current status remains receipt-bound.
 CSD remains disabled. Historical failed source, browser, matrix, traffic and CI evidence stays failed.
 
 ## Historical candidate evidence
@@ -1854,3 +1854,17 @@ eight command-output payloads and the explicit backtick no-stdout negative. Priv
 replica-1791083233418015195.json`. Published command scenario remains unqualified pending attributed blocked
 outcomes; no command-execution success is inferred from HTTP 403. Continuous startup completed on 48d4b62;
 fresh status and dc99bef full matrix are pending.
+
+The dc99bef current matrix completed successfully with 66 browser receipts, complete true and no missing
+checks/failures (`private-browser-matrix-1791082428479897763`). Screenshots are retained. Command attribution
+probes failed before querying security events because scratch actor names did not match the existing
+synthetic-user validator; those tool failures remain failures. No attributed command mitigation is claimed.
+
+Current dc99bef rendered review passed across eight contact sheets plus detailed DVWA/DVGA and dashboard/ReDoc/community views. Matrix complete true, 66 receipts, no missing checks/failures, 315 retained screenshots. Private manual-render-review-dc99bef.json binds the current revision. This remains candidate application qualification, not final merged rebuild acceptance.
+
+Command mitigation attribution completed with a valid unique waf actor: eighteen published requests returned
+HTTP 403; nineteen telemetry events contain eighteen matching WAF block events for /dvwa/vulnerabilities/exec/
+plus one malicious-user event. Private native-command-control-1791083672548227999.json binds source, origin
+and request window. Native 36-check qualification is separate. The reusable command scenario remains
+unqualified until its contract joins these evidence layers; earlier strict-output and actor-validator failures
+remain failures.
