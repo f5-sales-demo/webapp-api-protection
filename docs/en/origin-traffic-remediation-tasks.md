@@ -1944,3 +1944,8 @@ Private receipts: `remediation-immutable-origin-1791122375841996096/receipt.json
 `native-video-seed-1791122493176878462/receipt.json`. Native FFmpeg decoded all generated frames;
 source metadata retains the exact generation command and bytes. Source checks passed 86 tests and
 69 subtests. Complete application-matrix acceptance for this new origin revision remains required.
+
+
+Generator `d85254c` is installed with the final native full-frame decode check and required CI source
+formatting repairs. Installed FFmpeg encoding and full-frame decode passed. Prior candidate receipts
+remain bound to their own revisions; new full catalog and application/control qualification remains open.
