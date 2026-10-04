@@ -1896,3 +1896,12 @@ focused-1791085027630506301/receipt.json`. Seven functional contracts have live 
 separately native/control-qualified pending runtime join.
 
 Current 6529de0 continuous service is active/enabled. A 46-second live window measured 197.08 aggregate HTTP RPS, 100 percent benign success, zero baseline transport failures, and benign requests rotated across all nine applications. This short window is not final sustained fresh-deployment acceptance. Current generator/WAAP CI remains pending.
+
+Native-tool substitution audit is source-controlled in traffic-generator docs/en/native-tool-remediation.md.
+Five scanner entries now execute actual Nmap/SSLScan/SSLyze/testssl with scoped connect pacing and native
+structured reports; installed f4f30ce completed all five. Seven load and two benchmark paths execute native
+wrk/hey/curl/Vegeta/ab/Lua instead of Python requests; cache/client paths use native curl. Native Subfinder
+returns real provider discoveries. Dummy tokens, fabricated OTP 0000, fallback session IDs, browser response
+substitution and chained privilege substitution are removed. Unfinished native signup/reset recovery and full
+benchmark functional assertions remain explicit gaps. Native OpenSSL slow-header cleanup fixed after real peer
+408/BrokenPipe failure; installed c645c3f rerun pending. Failed evidence remains failed.
