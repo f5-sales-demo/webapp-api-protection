@@ -1805,3 +1805,9 @@ matched their digests, browser cleanup passed, zero transport failures/cancellat
 verifies pinned library versions and Day.js date behavior; installed rerun is in progress. Five of 164
 scenarios now have explicit functional contracts; 159 remain unqualified. CSD remains disabled and no control
 detection is claimed.
+
+The stricter 69fdd8f native library version/behavior contracts passed all six runs across both domains with
+zero transport failures/cancellations and verified cleanup/screenshots. Private receipt `resume-native-csd-
+libraries/pass-focused-1791080407279148227/receipt.json`. Five functional contracts are declared; 159
+scenarios remain unqualified. A current origin matrix is running on 0a2d4aa; prior complete cb08457 evidence
+remains preserved.
