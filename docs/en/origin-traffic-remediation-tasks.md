@@ -8,7 +8,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 
 ## Current acceptance status
 
-All T01–T16 tasks remain open. Current source/installed origin is `bab591a`; generator is `235fb9a`.
+All T01–T16 tasks remain open. Current source/installed origin is `cb08457`; generator is `b3b4edf`.
 WAAP pins their immutable archives and installers. Provider 13.0.2 remains the latest checked release,
 with exact binary/source provenance tied to enriched API specs v10.0.0. VM replacement plans remain unapplied.
 
@@ -130,6 +130,24 @@ native-tool behavior. Mocked unit tests, synthetic command shims, replay and dis
 establish functional acceptance. Current full coverage remains incomplete. Native setup, actual payload
 action, exact outcome, fixture recovery, source provenance and required serving layers are hard gates.
 Any generic connection equivalent remains an explicit gap until its declared native tool behavior is proven.
+
+Current `bab591a` complete matrix/manual review passed all 66 browser receipts and reviewed 315 screenshots.
+Private review: `manual-render-review-bab591a.json`. Generator source `72dd8f0` scopes admin-video deletion
+to four fresh native uploads owned by a dedicated regular actor; no guessed IDs or shared video mutations
+are used. Cleanup requires real native absence checks, including EXIT recovery. Origin `cb08457` seeds the
+isolated actor idempotently; immutable installation/export passed. Installed generator/live deletion and
+interruption recovery are pending. The new uncommitted mock scenario test was removed at the user request;
+acceptance will use the real installed workflow. Existing mock regression checks do not establish acceptance.
+
+Installed native disposable-video run on generator `b3b4edf` passed four fresh uploads/four admin DELETEs
+and the declared negative listing case, with 15 scenario requests, zero script failures, zero transport
+failures/cancellations and native cleanup evidence. Private receipt:
+`resume-focused-disposable-video/pass-focused-1791077206483907610/receipt.json`. Independent native database
+checks confirm zero disposable-actor videos and one shared seeded actor video remains. Interruption recovery
+and blocked-prerequisite followthrough remain pending. Current pins are origin `cb08457` and generator `b3b4edf`.
+The latest scoped costly DVGA run remains timeout with two cancellations despite valid baseline/two/five
+responses. It is retained as failed; native video qualification does not override it. Current origin actor
+seed revision still needs its own complete rendered matrix. Continuous restart is underway.
 
 ## Earlier repair-round observations
 
