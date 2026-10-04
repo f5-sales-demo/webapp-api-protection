@@ -1,0 +1,157 @@
+---
+title: Request validation
+description: "Require a JSON string and attribute report-only and blocking schema results."
+sidebar:
+  order: 1
+---
+
+An API can receive syntactically valid JSON that violates its application contract. A required
+field might be missing, or its type might be wrong. F5 Distributed Cloud request validation
+compares requests with the attached OpenAPI definition. This demonstration changes request
+validation from reporting violations to blocking them while retaining a successful valid request.
+
+HTTPBin echoes the submitted JSON at `/httpbin/post`. It supplies an observable origin response;
+it does not itself enforce this showcase schema. The versioned fixture requires a string named
+`demo_id`. The demonstration therefore separates origin behavior from schema-specific detection
+and enforcement at the load balancer.
+
+## Prerequisites and duration
+
+Use the approved showcase after [preparation](../../demo/) and a passing ownership/readiness
+preflight. Pause continuous traffic before changing configuration. Record installed source
+revisions and complete resource snapshots. Use synthetic identities with the configured
+`X-MUD-User` identification policy. Keep API credentials and receipts private.
+
+**Measured duration:** pending. No complete matched receipt was captured for this article on
+2026-10-04; the lifecycle preflight requires explicit private state/backend migration. Expected
+results below describe the acceptance criteria, not observed output. The harness records elapsed
+time in `receipt.json` when a run completes. Include that duration when rehearsing a presentation.
+
+Verify the attached API definition references the exact showcase fixture. Its JSON media type
+requires `demo_id` as a string and permits additional properties. Only `POST /httpbin/post` is
+schema-enforced; unrelated paths fall through to the origin. The form media type has a different
+contract and is outside this JSON demonstration. Keep response validation unchanged so the
+comparison concerns the request contract alone.
+
+## Launch a request
+
+Set the protected URL and a fresh synthetic identity in the private operator environment.
+Launch a valid JSON request first:
+
+```bash
+curl --silent --show-error --max-time 20   --header 'Content-Type: application/json'   --header "X-MUD-User: $SYNTHETIC_USER"   --data '{"demo_id":"synthetic-walkthrough"}'   "$SHOWCASE_URL/httpbin/post"
+```
+
+Repeat that command with `{}` to test the missing field, then `{"demo_id":7}` to test an
+incorrect value type. Give each request a separate synthetic identity. The walkthrough harness
+runs all three payloads in each configuration phase and retains the actual JSON echoes.
+
+```bash
+python3 scripts/showcase_walkthrough.py schema
+```
+
+## Explain the initial response
+
+In report mode, all three requests should reach HTTPBin. Require HTTP 200 and an exact `json`
+echo for the submitted body, along with the expected method, routed URL and identity. An
+HTML page or different JSON response does not establish success.
+
+For each invalid request, require an `OpenAPI Validation Failure` event joined to the same
+server request ID. It must identify `demo_id`, the request context and the HTTP body property.
+Explain the two errors separately: absence violates the required-field rule; a number violates
+the string type. Reporting should expose the violation without attributing an enforcement block.
+Save this evidence before changing the mode.
+
+## Enable mitigation
+
+Fetch the full replacement form, mutate its request enforcement choice, then use:
+
+```text
+PUT /api/config/namespaces/<NAMESPACE>/http_loadbalancers/<LOAD_BALANCER>
+```
+
+The focused before/after excerpts are explanatory, not complete executable request bodies:
+
+```json
+{
+  "spec": {
+    "api_specification": {
+      "validation_all_spec_endpoints": {
+        "validation_mode": {
+          "validation_mode_active": {
+            "request_validation_properties": [
+              "PROPERTY_HTTP_BODY",
+              "PROPERTY_CONTENT_TYPE"
+            ],
+            "enforcement_report": {}
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "spec": {
+    "api_specification": {
+      "validation_all_spec_endpoints": {
+        "validation_mode": {
+          "validation_mode_active": {
+            "request_validation_properties": [
+              "PROPERTY_HTTP_BODY",
+              "PROPERTY_CONTENT_TYPE"
+            ],
+            "enforcement_block": {}
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Remove `enforcement_report` when selecting `enforcement_block`. Preserve the API definition
+reference, request properties, response-validation choice, fall-through mode and every unrelated
+resource field. The [evidence reference](../../reference/evidence/) describes the complete GET/PUT
+transaction. Equivalent Terraform input: `api_validation_request_mode = "block"`.
+
+The harness isolates behavior detection during this comparison. It does not disable the WAF
+or invent a response. Readback must match the complete submitted resource before replay.
+
+## Replay and verify
+
+Send the same three JSON payloads in block mode using fresh identities. The valid request must
+still produce the correct HTTPBin echo. Both invalid requests must produce an enforcement
+response and a schema-specific event joined to their own request IDs. A WAF signature block,
+a generic 403 or a JSON parser error from the origin does not prove request validation.
+
+| Expected result | Required evidence |
+| --- | --- |
+| Valid string succeeds | HTTP 200 and exact JSON echo |
+| Missing field is reported, then blocked | Required-field violation for the matched request |
+| Wrong type is reported, then blocked | String-type violation for the matched request |
+
+Confirm a separate legitimate request still works after enforcement. Keep the invalid payload
+small so body-size limits cannot obscure the schema result. Explain the boundary: the API
+schema validates structure and declared types; this HTTPBin example does not demonstrate
+business authorization or a vulnerable database.
+
+## Restore and read further
+
+Restore the complete original resource immediately, including after a failed request or
+telemetry timeout. Restore any temporary detection isolation too. Read back the protected
+configuration, verify legitimate requests and pass readiness before restarting continuous
+traffic. A concurrent configuration change rejects automatic restoration; preserve the snapshot
+for coordinated recovery. Failed restoration or missing evidence leaves this demonstration
+incomplete.
+
+The [evidence reference](../../reference/evidence/) defines API transaction bodies, pagination,
+attribution and private receipts. [Implementation status](../../origin-traffic-remediation-tasks/)
+tracks the separate merged-installation, clean-rebuild and full-catalog gates. This category does
+not qualify the entire catalog or resolve repository-wide privacy findings.
+
+The [showcase OpenAPI fixture](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/fixtures/showcase-openapi.json)
+is the exact application contract. See [F5 security-event reference](https://docs.cloud.f5.com/docs-v2/platform/reference/security-events-reference)
+for event fields. Continue with [endpoint restrictions](../endpoint-restrictions/).

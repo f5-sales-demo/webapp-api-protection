@@ -1,0 +1,164 @@
+---
+title: Malicious-user detection and mitigation
+description: "Separate suspicious behavior detection from a later temporary block."
+sidebar:
+  order: 1
+---
+
+A caller may send many suspicious requests before returning to an otherwise legitimate
+endpoint. F5 Distributed Cloud malicious-user detection (MUD) evaluates behavior across
+requests and assigns a threat level to an identified user. The attached mitigation policy
+then applies the configured action. This demonstration requires both fresh detection and a
+later attributed temporary block for the same synthetic identity.
+
+The sequence uses bounded WAF-triggering requests, followed by a benign HTTPBin GET. A WAF
+block on the suspicious payload is useful activity evidence, but it cannot establish MUD
+success. The later benign request and an independent identity show whether behavior mitigation
+has changed access for the scored caller.
+
+## Prerequisites and duration
+
+Use the approved showcase after [preparation](../../demo/) and a passing ownership/readiness
+preflight. Pause continuous traffic before changing configuration. Record installed source
+revisions and complete resource snapshots. Use synthetic identities with the configured
+`X-MUD-User` identification policy. Keep API credentials and receipts private.
+
+**Measured duration:** pending. No complete matched receipt was captured for this article on
+2026-10-04; the lifecycle preflight requires explicit private state/backend migration. Expected
+results below describe the acceptance criteria, not observed output. The harness records elapsed
+time in `receipt.json` when a run completes. Include that duration when rehearsing a presentation.
+
+Verify MUD entitlement, the identification policy and the configured mitigation attachment.
+The showcase identifies users from `X-MUD-User`, retains a blocking WAF and attaches the
+malicious-user mitigation resource through `enable_challenge`. The configured mitigation
+rules use temporary blocking for the relevant threat levels. Read those rules; enabling
+detection without an effective mitigation attachment is insufficient.
+
+Use a new identity for the enabled phase. The disabled phase must use a different identity
+so historical scoring cannot substitute for fresh detection. Keep payloads, count and endpoint
+consistent. Bound the malicious sequence and telemetry wait; do not claim a fixed detection
+latency or repeatedly send attacks while waiting for logs.
+
+## Launch the representative sequence
+
+Send 20 small synthetic WAF-triggering requests with one identity, then a benign GET from that
+same identity:
+
+```bash
+for request in $(seq 1 20); do
+  curl --silent --show-error --max-time 20     --header "X-MUD-User: $SYNTHETIC_USER"     --get --data-urlencode "demo=' OR 1=1--"     "$SHOWCASE_URL/httpbin/get"
+done
+```
+
+```bash
+curl --silent --show-error --max-time 20   --header "X-MUD-User: $SYNTHETIC_USER"   "$SHOWCASE_URL/httpbin/get"
+```
+
+The harness retains the sequence and later request rather than treating all denied traffic
+as one result:
+
+```bash
+python3 scripts/showcase_walkthrough.py mud
+```
+
+## Explain the disabled phase
+
+Disable detection while preserving the identity reference, WAF and mitigation attachment.
+The suspicious requests may still be blocked by the WAF. Require attributed WAF events for
+that activity, and record every response. The later benign request from the same identity
+should reach HTTPBin, with the correct URL and echoed identity. A separate independent identity
+must also succeed.
+
+This initial result establishes the difference between content blocking and behavior mitigation.
+The malicious payload need not reach the origin. The benign request must reach it in the
+detection-disabled phase. An origin error, a prior temporary block or missing legitimate echo
+leaves the comparison incomplete.
+
+## Enable detection and attachment
+
+Fetch the complete replacement form and PUT the load balancer at:
+
+```text
+/api/config/namespaces/<NAMESPACE>/http_loadbalancers/<LOAD_BALANCER>
+```
+
+The focused before/after detection choice is:
+
+```json
+{
+  "spec": {
+    "disable_malicious_user_detection": {}
+  }
+}
+```
+
+```json
+{
+  "spec": {
+    "enable_malicious_user_detection": {},
+    "enable_challenge": {
+      "malicious_user_mitigation": {
+        "name": "<MITIGATION_POLICY>",
+        "namespace": "<NAMESPACE>"
+      }
+    },
+    "user_identification": {
+      "name": "<IDENTIFICATION_POLICY>",
+      "namespace": "<NAMESPACE>"
+    }
+  }
+}
+```
+
+Remove the competing disable field. Preserve the existing identity and challenge/mitigation
+references; do not replace their complete settings with these illustrative references. Read
+back the attached policy at:
+
+```text
+GET /api/config/namespaces/<NAMESPACE>/malicious_user_mitigations/<MITIGATION_POLICY>
+```
+
+Its relevant focused rule uses `mitigation_action: {"block_temporarily":{}}`. Retain the existing
+threat-level rules and challenge choice. Equivalent Terraform inputs are `mud_enabled = true`,
+`mud_user_id = "user_identification"`, and `challenge.attach_malicious_user_mitigation = true`.
+The [transaction reference](../../reference/evidence/) supplies the complete safe update flow.
+
+## Replay and verify
+
+Run the same bounded sequence using a fresh identity. Query complete security and suspicious-user
+log windows. Require a new detection record for that identity, virtual host, namespace and time,
+with the expected threat level and positive WAF activity counters. Join those counters to the
+actual suspicious requests. Historical detection cannot qualify the phase.
+
+After detection, send the later benign request from that identity. Require an attributed
+`Malicious User Mitigation` event with `MUM_BLOCK_TEMPORARILY` and the expected policy attachment.
+Join it to the actual later request ID. A blocked suspicious payload alone proves only content
+filtering. Missing suspicious-user telemetry leaves the demonstration incomplete even if the
+later request is denied.
+
+| Expected result | Required evidence |
+| --- | --- |
+| Detection disabled | Later benign request succeeds |
+| Detection enabled | Fresh suspicious-user record and activity |
+| Temporary mitigation | Later benign request has an attributed block |
+| Independent identity | Correct legitimate origin response |
+
+Confirm the independent identity still works after mitigation. Explain the configured identity
+boundary and temporary action without promising universal timing or an application authentication
+mechanism. The synthetic header makes this controlled lab comparison reproducible.
+
+## Restore and read further
+
+Restore the complete original resource immediately, including after a failed request or
+telemetry timeout. Restore any temporary detection isolation too. Read back the protected
+configuration, verify legitimate requests and pass readiness before restarting continuous
+traffic. A concurrent configuration change rejects automatic restoration; preserve the snapshot
+for coordinated recovery. Failed restoration or missing evidence leaves this demonstration
+incomplete.
+
+The [evidence reference](../../reference/evidence/) defines API transaction bodies, pagination,
+attribution and private receipts. [Implementation status](../../origin-traffic-remediation-tasks/)
+tracks the separate merged-installation, clean-rebuild and full-catalog gates. This category does
+not qualify the entire catalog or resolve repository-wide privacy findings.
+
+See [F5 malicious-user protection](https://docs.cloud.f5.com/docs-v2/web-app-and-api-protection/how-to/adv-security/malicious-users).

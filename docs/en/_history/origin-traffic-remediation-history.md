@@ -1,4 +1,10 @@
-# Historical origin and traffic remediation evidence
+---
+title: Historical remediation evidence
+slug: en/archive/origin-traffic-remediation-history
+sidebar:
+  hidden: true
+---
+
 
 Umbrella: <https://github.com/f5-sales-demo/webapp-api-protection/issues/553>
 

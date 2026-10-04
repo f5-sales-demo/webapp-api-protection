@@ -1,22 +1,44 @@
 ---
-title: WAAP
-description: "Nine-application Azure showcase with shared immutable installers and explicit acceptance gates."
+title: Web application and API protection showcase
+description: "Demonstrate protection with matched synthetic requests and explain each result."
 sidebar:
-  label: Showcase
   order: 1
 ---
 
-The Azure showcase places nine intentionally vulnerable applications behind F5 Distributed Cloud HTTP and HTTPS load balancers and drives the full shared traffic catalog from a second Azure VM. Terraform declares WAF and API controls; their live evidence is assessed separately.
-
-The origin and traffic generator consume shared immutable installers. The origin manifest supplies published prefixes and replica/workflow assertions; the traffic catalog preserves all 164 scenarios across 22 suites. CSD runs are display-only with `csd_enabled=false`.
+F5 Distributed Cloud Web App and API Protection protects applications at the load balancer,
+before requests reach the origin. This showcase gives sales engineers and customers a shared
+way to inspect a request, enable a focused control and explain the resulting security event.
+Terraform prepares the applications and protection resources. The use-case articles explain
+what each protection changes for a caller.
 
 ## Start here
 
-- [Overview](./overview/) explains architecture and shared sources.
-- [Demo guide](./demo/) documents private operator inputs, lifecycle, traffic and preservation rules.
-- [Current remediation tracker](./origin-traffic-remediation-tasks/) records T01–T16, source revisions, focused receipts and remaining acceptance.
-- [Historical remediation archive](./archive/origin-traffic-remediation-history/) preserves original failures and candidate classifications.
+Read the [architecture and applications](./overview/) to choose an application and understand
+the request path. [Prepare the showcase](./demo/) covers prerequisites, Terraform deployment
+and cleanup. Open the demonstration window described in [evidence interpretation](./reference/evidence/)
+before changing a control.
 
-All three implementation PRs remain drafts until their required acceptance completes. Declared contracts, source tests and historical passes do not establish final showcase acceptance.
+## Choose a protection
 
-[LLM discovery](./llm-discovery/) links the generated English operation and acceptance leaves.
+| Use case | Demonstration |
+| --- | --- |
+| [SQL injection and reflected cross-site scripting](./web-application-protection/injection-and-xss/) | Authenticated DVWA requests; monitoring to blocking |
+| [Request validation](./api-protection/request-validation/) | A required JSON string; reporting to blocking |
+| [Endpoint restrictions](./api-protection/endpoint-restrictions/) | Two methods on one path; allow to deny |
+| [Rate limiting](./api-protection/rate-limiting/) | A bounded burst; disabled to 20 requests per minute |
+| [Malicious-user mitigation](./behavior-based-protection/malicious-user-mitigation/) | A suspicious sequence followed by a benign request |
+
+Each article follows the same sequence: risk, prerequisites, request, initial evidence,
+configuration change, replay, legitimate request and restoration. Run categories sequentially.
+HTTPBin illustrates policy behavior; DVWA supplies native synthetic vulnerability behavior.
+Client-Side Defense remains display-only and has no mitigation walkthrough here.
+
+## Check readiness
+
+The articles describe expected outcomes. Fresh matched before/after evidence remains incomplete
+on this revision because the private lifecycle preflight requires state migration. See
+[implementation status](./origin-traffic-remediation-tasks/) for the exact delivery gates.
+Source tests and older enabled-control results do not establish a successful demonstration.
+
+[Traffic operation](./reference/traffic/) explains pause, restart and bounded execution.
+[Machine-readable discovery](./llm-discovery/) links the generated text of these same articles.

@@ -1,0 +1,109 @@
+---
+title: Evidence interpretation
+description: "API transactions, request-bound attribution and restoration for category walkthroughs."
+sidebar:
+  order: 2
+---
+
+A status code describes a response. To explain protection, join that response to the actual
+request and its attributed security event. Keep native application behavior, report-only
+findings, enforcement and legitimate-request success as separate observations.
+
+## Open the demonstration window
+
+Verify approved ownership with the lifecycle preflight and private state. Record installed
+origin/generator source revisions and effective configuration. Pause continuous traffic through
+`tgen-control stop`. Run categories sequentially with fresh synthetic identities. The harness
+uses the same scope, ownership, transport and evidence validators as the lifecycle; it does
+not replace full-catalog acceptance.
+
+```bash
+python3 scripts/showcase_walkthrough.py schema
+```
+
+Use `waf`, `endpoint-denial`, `rate-limit` or `mud` for another category. `--config` and
+`--state-dir` follow lifecycle semantics. `--timeout-seconds` defaults to 300 and bounds
+request/telemetry work. Restoration has a separate 90-second budget. Exit 0 requires complete
+matched evidence, restoration and readiness-gated restart; exit 2 leaves the comparison incomplete.
+Check the private receipt instead of treating a missing result as an expected block.
+
+## Preserve the complete API resource
+
+The category articles show focused JSON excerpts for explanation. They are not complete PUT
+bodies. Fetch the API's writable replacement form first:
+
+```text
+GET /api/config/namespaces/<NAMESPACE>/http_loadbalancers/<LOAD_BALANCER>?response_format=GET_RSP_FORMAT_FOR_REPLACE
+GET /api/config/namespaces/<NAMESPACE>/app_firewalls/<FIREWALL>?response_format=GET_RSP_FORMAT_FOR_REPLACE
+```
+
+The response contains `replace_form`, with complete writable `metadata`, `spec` and
+`resource_version`. Save it privately before changing anything. Mutate only the selected
+leaf; remove competing fields from the same mutually exclusive choice. Preserve annotations,
+labels, references, routing, TLS and unrelated controls. Submit that complete replacement form:
+
+```text
+PUT /api/config/namespaces/<NAMESPACE>/http_loadbalancers/<LOAD_BALANCER>
+PUT /api/config/namespaces/<NAMESPACE>/app_firewalls/<FIREWALL>
+Content-Type: application/json
+Authorization: APIToken <API_TOKEN>
+```
+
+The executable harness uses the server-provided version, re-reads immediately before PUT,
+journals the pending body, and verifies complete readback before requests. An unrelated
+concurrent change rejects replacement and automatic restoration; it must not be overwritten.
+A timed-out PUT has an unknown outcome until readback. Restoration accepts only the original,
+last submitted or last verified resource content, then uses the latest version to restore.
+
+During non-behavior categories, the harness temporarily disables malicious-user detection
+while preserving the identity policy and mitigation attachment. This isolates the presented
+control. It restores that setting too. Do not apply Terraform concurrently with a comparison.
+
+## Join the evidence
+
+Capture send/receive timestamps, method, exact target and path, synthetic identity, payload
+digest, status and relevant application content in both phases. The access-log API requires
+the namespace in its request body:
+
+```text
+POST /api/data/namespaces/<NAMESPACE>/access_logs
+POST /api/data/namespaces/<NAMESPACE>/access_logs/scroll
+POST /api/data/namespaces/<NAMESPACE>/app_security/events
+POST /api/data/namespaces/<NAMESPACE>/app_security/events/scroll
+POST /api/data/namespaces/<NAMESPACE>/app_security/suspicious_user_logs
+```
+
+```json
+{
+  "namespace": "<NAMESPACE>",
+  "query": "{vh_name=\"ves-io-http-loadbalancer-<LOAD_BALANCER>\"}",
+  "start_time": "<WINDOW_START_UNIX_SECONDS>",
+  "end_time": "<WINDOW_END_UNIX_SECONDS>",
+  "limit": 500,
+  "scroll": true
+}
+```
+
+Use complete bounded windows, follow scroll tokens and reconcile `total_hits`. Missing pages,
+repeated pages, changing totals and exhaustion fail the collection. Decode each returned JSON
+log string once. Match namespace, virtual host, domain, method, path, identity, time and response
+status. Require an unambiguous server request ID and unsampled access record; join security
+events through that same request ID. For malicious-user mitigation, additionally require a
+fresh suspicious-user detection record, positive activity counters and the later temporary-block
+event. A WAF block alone does not prove behavior detection.
+
+## Restore and publish an excerpt
+
+Restore immediately after the category, including on error or interruption. Verify protected
+readback and relevant legitimate requests before readiness-gated restart. Configuration conflicts,
+failed restoration, missing telemetry or unexpected application behavior leave the demonstration
+incomplete. Historical enabled-control evidence cannot replace this comparison.
+
+Private receipts contain configuration, sessions and raw logs. Public excerpts must remove
+credentials, sessions, account/tenant/namespace identifiers, operational identities and private
+screenshots. Publish only reviewed synthetic content, capture date, source revision, receipt
+identifier, measured duration and observed counts. Label expected results separately. The current
+articles have no completed matched receipt; their measured duration remains pending.
+
+See [F5 security-event reference](https://docs.cloud.f5.com/docs-v2/platform/reference/security-events-reference)
+and [security monitoring](https://docs.cloud.f5.com/docs-v2/web-app-and-api-protection/how-to/observe/monitor-waap).

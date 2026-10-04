@@ -1,53 +1,26 @@
 ---
-title: Demo
-description: Local Azure showcase lifecycle with explicit live readiness, traffic, security evidence and preservation gates.
+title: Prepare the showcase
+description: "Prerequisites, Terraform deployment and cleanup for a controlled demonstration."
 sidebar:
-  order: 1
-  label: Overview
+  order: 10
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+Terraform prepares the origin, traffic generator and F5 Distributed Cloud protection resources.
+Use the guarded lifecycle commands from the repository root. Keep the same private state
+directory throughout deployment, demonstrations and cleanup.
 
-The showcase uses two Azure VMs (origin and traffic generator) and an F5 Distributed
-Cloud HTTP and HTTPS load balancers. The checked-in profile requests blocking WAF, API discovery,
-schema validation, endpoint denial, rate limiting and synthetic-user MUD. Client-Side
-Defense enforcement is disabled. Shared CSD browser simulations establish activity only. Terraform acceptance does not establish security success.
+## Prerequisites
 
-<Aside type="caution" title="Live acceptance remains blocked">
-Full showcase acceptance is not verified: authoritative live suspicious-user detection
-attribution is unavailable. MUD configuration or denied responses alone cannot establish
-MUD detection. Pending telemetry is a failure to complete acceptance, not a pass.
-</Aside>
+Install Terraform 1.8 or later, Python 3, Azure CLI, SSH, cURL and dig.
+The DVWA walkthrough also requires Node.js, Playwright and its installed Chromium browser
+on the operator host. Its offline marker check disables outbound browser requests. Use an authenticated
+Azure CLI human user in the approved subscription and Microsoft Entra tenant, existing
+F5 Distributed Cloud credentials and an SSH key pair. The namespace must already exist.
+The lifecycle verifies the selected identity, permissions, feature entitlement, quota and DNS.
+It does not create a login workflow or collect credentials.
 
-## Shared installation and current status
-
-Origin provisioning comes from the immutable origin-server installer, application manifest and prefix
-adapters. Traffic provisioning uses the immutable traffic-generator catalog installer. Pins include source
-commit and archive/installer SHA-256 digests; final delivery must replace working-branch pins with merged
-upstream revisions and verify their installation. There are nine published applications and 42 declared
-container services. crAPI is under `/crapi/`; VAmPI returns JSON and RESTaurant Swagger is `/restaurant/` with
-ReDoc at `/restaurant/redoc`.
-
-The [current tracker](../origin-traffic-remediation-tasks/) and [historical
-archive](../archive/origin-traffic-remediation-history/) distinguish source, installed, rendered and final
-acceptance. Current-source application verification, recurring signup integration, remaining functional
-contracts, two accepted catalog passes and clean-rebuild/convergence gates remain open. `csd_enabled=false`;
-CSD activity is display-only.
-
-## Local prerequisites
-
-Supply authentication before invocation: an already-authenticated Azure CLI **user** in
-the configured subscription/Entra tenant, existing F5 Distributed Cloud environment
-credentials and an SSH key pair. There is no account-login, key-collection or service-principal
-creation workflow. Resource-group, compute and networking permissions are required
-for application deployment. Local Terraform state requires no Azure storage or
-blob-data permissions; Azure CLI authentication is still required for the VMs.
-Previously created Azure storage is left untouched and is not a prerequisite or
-cleanup target. The namespace must already exist; tenant features, shared DNS support
-and quota/readiness gates remain required.
-
-Before the first operation, create private `~/.local/state/waap-showcase/operator.json`
-outside the checkout (caller-owned directory **0700**, non-symlink file **0600**) with:
+Create the private operator file outside the checkout. Its directory must have mode 0700;
+the non-symlink file must have mode 0600.
 
 ```json
 {
@@ -57,116 +30,61 @@ outside the checkout (caller-owned directory **0700**, non-symlink file **0600**
 }
 ```
 
-Replace the symbolic IDs and user with the explicitly approved Azure subscription,
-Entra tenant and human user, never inferred from login. Keep real IDs and user data
-out of public files. Missing approval or a different human user blocks live operations.
-An explicit `--config` replaces the default operator file, without merging.
-Chosen-file fields override `DEMO_AZURE_SUBSCRIPTION_ID`, `DEMO_AZURE_TENANT_ID`
-and `DEMO_AZURE_USER`; environment inputs apply only to absent fields.
-Default state remains `~/.local/state/waap-showcase/<approved-subscription-id>/`.
-`--state-dir` selects data location only. Move any old per-subscription operator file
-to the base approval path and add the approved IDs privately; keep state and receipts
-in place. See the Terraform README for setup details.
+The default location is `~/.local/state/waap-showcase/operator.json`. Supply approved values
+privately. State and receipts live under the approved subscription directory. An explicit
+`--config` replaces the default operator file; `--state-dir` chooses data location only.
+See [state and restoration](../reference/state-and-restoration/) for precedence, locking,
+backups and recovery.
 
-Install Terraform 1.8 or later, Python 3, Azure CLI, SSH, cURL and dig. Provider releases
-are pinned to `f5-sales-demo/xcsh` 13.0.3, `hashicorp/azurerm` 5.7.0 and
-`hashicorp/azuread` 3.10.0. Registry locks are checked in; development overrides are excluded.
-The fixed scope is the supplied Azure subscription/tenant, `eastus2`, origin
-`Standard_D16s_v3` and generator `Standard_F16s_v2` (two 16-vCPU VMs), and the configured
-F5 Distributed Cloud namespace/domains. No Customer Edge, AWS or GCP is deployed.
+The profile uses `eastus2`, an origin `Standard_D16s_v3` and a generator `Standard_F16s_v2`.
+It deploys no Customer Edge, AWS or Google Cloud resources. Local Terraform backends require
+no Azure storage account or blob role. Shared DNS, the namespace and the versioned schema
+fixture are preserved. Provider locks pin the reviewed dependencies, including xcsh 13.0.3.
 
-## Four lifecycle commands
+## Deploy
 
-Run individual operations from the repository root using existing authentication:
-
-```sh
-# Approved IDs select the same private per-subscription data directory for each operation.
+```bash
 bash scripts/demo-lifecycle.sh deploy
+```
+
+Deploy verifies scope, initializes private state, reconciles the existing namespace, applies
+a guarded application plan and installs the immutable application and traffic sources.
+Readiness requires application and replica checks. Security acceptance separately requires
+fresh control attribution; a successful Terraform plan cannot prove protection.
+
+## Verify
+
+```bash
 bash scripts/demo-lifecycle.sh verify
-bash scripts/demo-lifecycle.sh rebuild
+```
+
+Verify reads existing state, checks the preserved namespace and requires zero drift. It does
+not import, apply or repair infrastructure. Missing telemetry returns an incomplete result.
+The current article preflight rejected private state/backend metadata requiring explicit
+migration. Do not open a walkthrough window until that preflight passes.
+
+## Present a use case
+
+Pause continuous traffic using [traffic operation](../reference/traffic/). Follow one article,
+using fresh synthetic identities and complete configuration snapshots. The category harness
+uses API GET and PUT operations; it does not apply Terraform during the comparison.
+Restore the original configuration before the next category. Capture date, revision, receipt
+identifier and measured duration belong to the run, not a generic time estimate.
+
+## Clean up
+
+```bash
 bash scripts/demo-lifecycle.sh destroy
 ```
 
-| Command | Contract |
-| --- | --- |
-| `deploy` | Read-only preflight validates exact scope and the existing namespace; import that confirmed namespace into the persistent Terraform root when needed, save/apply its guarded plan, provision applications, pin the schema fixture, run live gates, then require a zero-change application apply. |
-| `verify` | Read existing states and fixture, require a read-only zero-change namespace preservation plan and unchanged UID, run live acceptance and require zero drift; never import, apply or repair infrastructure. |
-| `rebuild` | Delete owned application resources, prove absence and persistent survival, then redeploy. |
-| `destroy` | Delete owned application resources only; retain local state/receipts and preserve the namespace, exact schema fixture and shared DNS zone. |
+Destroy removes only owned application resources. It preserves the namespace, schema fixture,
+shared DNS and existing Azure storage. It retains private state and receipts for recovery.
 
-Rebuild and destroy are deliberate destructive operations, not routine health checks.
-Do not use raw Terraform apply/destroy to bypass ownership and preservation gates.
-All operations have a whole-run monotonic deadline (`--timeout-seconds`, default 1800).
-Missing ownership, drift, unintended replacement, credentials, pending telemetry or expiry
-returns nonzero; partial resources and receipts remain for diagnosis. Traffic stop is
-attempted on failure and cleanup errors do not replace the original failure.
+Use `bash scripts/demo-lifecycle.sh rebuild` only for an authorized clean rebuild: it deletes
+owned applications, proves their absence and redeploys them. Rebuild and destroy are deliberate
+destructive operations. Their ownership gates must complete; do not bypass them with raw
+Terraform apply or destroy commands.
 
-## Preservation and evidence
-
-Private state defaults to
-`~/.local/state/waap-showcase/<approved-subscription-id>/`, outside
-the checkout. `--state-dir` selects data location, not approval. Configuration accepts
-approved Azure IDs, identical public scope values, `ssh_key` and `expected_azure_user`, not a `backend` object. Keep the same directory
-between all four operations. It contains deployed inputs, known-hosts, exact ownership
-manifests and reports. The application root uses the absolute `application.tfstate`
-path and external `application-data` directory. The persistent namespace-only root
-at `terraform/namespace` uses `namespace.tfstate` and its separate `namespace-data`
-directory. Both use local backends; neither provisions Azure backend storage or RBAC.
-Namespace import and saved-plan application are part of `deploy`, not another manual step.
-
-The lifecycle uses `umask 077`, directory mode 0700, state/backup/receipt mode 0600,
-one operation lock and Terraform native local file locking. Never disable locking.
-This is single-machine state: these locks do not coordinate other machines or copied
-directories. State and saved plans can contain secrets; never commit them. Secure,
-recoverable backups of state and receipts are the operator's responsibility. Retain
-`application.tfstate.backup` and `namespace.tfstate.backup` when present, but also
-keep independently protected backups. Local state has no Azure versioning, remote
-lease or cloud recovery service. State and saved plans must never be public artifacts.
-
-Initialized remote backends, a different local state path, unknown state or
-incompatible receipts block operation for explicit migration/recovery. There is no
-automatic state migration, force-copy, state forgetting or backend fallback. Stale
-empty generated configuration is rewritten only when no initialized backend or
-state exists. Manual initialization must supply an absolute external local path;
-Terraform does not expand `~` in HCL. Keep credentials out of tracked files; see the
-operator guide for the exact initialization command.
-
-Preflight captures the existing exact namespace UID read-only; it never imports or
-applies. Deployment imports only that confirmed namespace after checking the UID
-against session/receipt evidence. There is no unknown-namespace auto-create API path.
-The namespace resource has `prevent_destroy = true` and is absent from application
-state. Verify and destroy require its existing state, a read-only zero-change
-preservation plan and unchanged live UID, without applying the plan. Application
-destroy never includes namespace state. The exact versioned Swagger fixture is
-also checked read-only; existing Azure storage remains outside the lifecycle.
-
-Readiness requires cloud-init completion on both VMs, native origin service/replica
-checks and expected routed application responses through both domains, not just `/health`.
-The perpetual shared catalog offers 200 aggregate HTTP requests/second: 180 benign
-requests/second split equally across both domains and a shared 20 requests/second attack
-budget. Browser/scanner requests share the pacing boundary; TLS/slow-connection probes
-record separate limits. Acceptance requires two complete meaningful catalog passes,
-measured rates within five percent, at least 99% benign success, no baseline transport
-failures and fresh supervised-service health. Focused-suite passes cannot satisfy full
-catalog completion. Detailed private evidence is limited to seven days or 10 GiB. Use `sudo tgen-control
-status`, `stop`, `start` and `run-once` on the owned generator; stop continuous execution before one-shot
-qualification. Start is readiness-gated. [Catalog
-operation](https://f5-sales-demo.github.io/traffic-generator/en/06-runner/) describes native outcomes, fixture
-recovery and process cleanup. All 164 entries must pass functional acceptance on the exact installed sources.
-Missing contracts fail acceptance; filler and focused receipts do not count as complete passes.
-Security acceptance requires correlated live policy/mitigation events plus API discovery
-and traffic evidence. Response checks alone are not security proof.
-
-Inspect private `operation-receipt.json`, `run-manifest.json`, `persistent.json`,
-`swagger-receipt.json` and phase reports (`readiness-report.json`,
-`acceptance-report.json`, `absence-report.json`). The standalone verifier uses
-0 verified, 2 failure and 3 pending; the lifecycle treats pending as blocked.
-Telemetry polls default to ten seconds within the remaining run deadline, without
-repeating attacks. Do not claim security success without a verified live acceptance report.
-
-See the [Terraform operator guide](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)
-for exact metrics, preservation and failure contracts. CI and the executable local hook
-run focused Python tests and credential-free Terraform gates only. CI initializes
-both roots with backends disabled and read-only registry locks, format-checks and
-validates them; it never runs namespace import/apply or a live Azure lifecycle.
-Static or mocked test results are not live security acceptance.
+See [implementation status](../origin-traffic-remediation-tasks/) for publication requirements
+and the [Terraform operator guide](https://github.com/f5-sales-demo/webapp-api-protection/blob/main/terraform/README.md)
+for the detailed lifecycle contract.

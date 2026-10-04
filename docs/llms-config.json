@@ -1,5 +1,13 @@
 {
-  "promote": ["index*", "overview*", "demo*", "origin-traffic-remediation-tasks*"],
-  "demote": ["references*", "faq*", "archive/**"],
+  "promote": [
+    "index*",
+    "_linked/overview*",
+    "start-here/**",
+    "demo*",
+    "web-application-protection/**",
+    "api-protection/**",
+    "behavior-based-protection/**"
+  ],
+  "demote": ["reference/**", "origin-traffic-remediation-tasks*", "llm-discovery*", "_history/**", "_linked/status*"],
   "tieredHierarchy": true
 }

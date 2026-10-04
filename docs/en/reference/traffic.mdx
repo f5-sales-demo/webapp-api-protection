@@ -1,0 +1,62 @@
+---
+title: Traffic operation
+description: "Pause, inspect and restart the owned supervised generator."
+sidebar:
+  order: 1
+---
+
+The shared traffic generator rotates the catalog across both protected domains. Its aggregate
+HTTP boundary is 200 requests per second: 180 benign and 20 scenario requests per second.
+Browser, scanner and nested-worker HTTP requests share that boundary. Connection attempts
+and held slow connections have separate caps. Native stress-tool defaults are not walkthrough
+settings.
+
+## Pause for a comparison
+
+Run these commands on the ownership-verified generator, using its dedicated SSH key and
+known-hosts file. Inspect status first, then stop continuous execution.
+
+```bash
+sudo -n tgen-control status
+```
+
+```bash
+sudo -n tgen-control stop
+```
+
+Confirm the supervised process is stopped before a category changes configuration. Record the
+installed source receipt and effective controls. Use fresh identities, run one category at a
+time and retain private request and telemetry receipts. The walkthrough harness performs the
+same ownership-routed stop. A second process on another machine requires operator coordination;
+a local lock cannot reserve the cloud configuration globally.
+
+## Restore and restart
+
+Restore each category's original full resource. Verify effective protected configuration and
+legitimate application responses. Require readiness before restarting traffic.
+
+```bash
+sudo -n tgen-control start
+```
+
+Start is readiness-gated. The lifecycle also restores the synthetic fixture export before
+starting traffic. Failed restoration or readiness leaves traffic stopped and the comparison
+incomplete. Retain recovery snapshots; never declare success because cleanup was attempted.
+
+## Run one catalog pass
+
+After stopping continuous traffic, an operator can launch one bounded catalog pass:
+
+```bash
+sudo -n tgen-control run-once
+```
+
+This is catalog qualification, not the category walkthrough. Do not repurpose exhaustive
+Terraform matrix scripts to present a protection comparison. Two complete accepted passes,
+current-source functional contracts, rates, benign success, transport health and restart/reboot
+checks remain separate implementation gates. A focused article cannot qualify all 164 scenarios.
+
+Private continuous evidence is bounded by seven days or 10 GiB. Keep operational identities,
+raw logs and screenshots out of documentation. See the [generator operation guide](https://f5-sales-demo.github.io/traffic-generator/en/06-runner/)
+for pacing, process cleanup and fixture recovery, and [evidence interpretation](../evidence/)
+for request attribution.
