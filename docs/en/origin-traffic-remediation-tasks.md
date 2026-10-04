@@ -1880,3 +1880,5 @@ records installed origin dc99bef and all 36 native checks; matching control rece
 WAF block events across both domains. Private native-command-coverage-join-bound.json records input digests
 and all checks true. The older join without native source binding is retained as superseded, not final
 acceptance. Runtime command contract integration remains required.
+
+Generator 804c06f tightens native hostname output matching to the actual container hostname format. Source checks passed 173 tests/nine subtests. Immutable artifact installed; continuous startup is in progress. The published command scenario remains unqualified despite standalone native/control evidence, pending runtime join integration.
