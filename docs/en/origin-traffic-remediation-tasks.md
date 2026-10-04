@@ -8,38 +8,41 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 
 ## Current acceptance status
 
-All T01–T16 tasks remain open. Current source/installed origin is `cb08457`; generator is `b3b4edf`.
-WAAP pins their immutable archives and installers. Provider 13.0.3 is the latest checked release,
-with exact binary/source provenance tied to enriched API specs v10.0.0. VM replacement plans remain unapplied.
+All T01–T16 tasks remain open pending their complete source, merged-installation and live acceptance.
+Current source/installed origin is `cb08457`; generator is `5d589b2`. WAAP pins immutable archives and
+installers. Provider 13.0.3 is the latest checked release, with installed binary/source provenance tied
+to enriched API specs v10.0.0. Both Terraform roots validate; the live saved plan succeeds but proposes
+two VM replacements that remain unapplied.
 
-Focused installed/live checks passed credential form submissions (15), native registration/feedback
-submissions (two each), crAPI parameter updates plus conversion triggers/restoration, shadow-endpoint
-requests (12), CSD HTTP checkout/dashboard/clear restoration on both domains, and strict lazy gallery
-navigation on the HTTPS API domain. These are individual qualifications, not complete catalog acceptance.
+Current origin qualification passed the full declared matrix: 66 browser receipts, complete true,
+no missing workflow/layer checks or browser failures, and 315 retained screenshots. Eight application
+contact sheets and full dashboard/ReDoc/community views were manually reviewed. Private matrix:
+`private-browser-matrix-1791078210428199853/`; review: `manual-render-review-cb08457.json`.
+Final verification on the merged clean deployment remains required.
 
-The complete origin `bab591a` matrix passed all 66 browser receipts with no missing workflow/layer entries
-and zero browser failures. All 315 screenshots were reviewed through eight application contact sheets and
-full-size key pages, including every-layer About media. Manual rendered review passed for this installed
-source. Private matrix: `private-browser-matrix-1791074898897738429/`; review: `manual-render-review-bab591a.json`.
-Earlier failed matrices and the automated-pass/manual-incomplete `2990de0` round remain original evidence.
-Merged clean-deployment verification is still required before task completion.
+Two explicit native functional contracts are implemented and passed on both WAAP domains: DVWA
+credential stuffing verifies one seeded login, fourteen native rejections and logout cleanup per domain;
+crAPI community exposure verifies populated native objects and synthetic author.email values. The accepted
+private receipt is `resume-native-functional-both-domains/pass-focused-1791079166467472534/receipt.json`.
+All thirty credential POSTs and both community actions were observed with zero transport failures or
+cancellations. Failed authentication renewal now raises a prerequisite failure instead of silently
+reusing an old token; native valid-invalid-valid crAPI authentication passed. Existing source tests contain
+test doubles and are development checks only. Catalog acceptance cannot use dispatch-only receipts.
 
-Full paced DVGA still fails ten-operation/mixed completion within the scenario deadline, despite separate
-native/nginx/published ten-operation probes passing. Full native stress still fails 20 timed-worker client
-cancellations. A short diagnostic confirms wrk cancellations were dispatched upstream; they cannot be
-ignored as queued-only cleanup. Private diagnostic: `private-native-stage-1791072400204935173/`.
-Current source records worker identity and dispatch stage to support remediation.
+The remaining 162 scenarios lack explicit complete functional contracts. Seven connection scenarios
+still use bounded Python probes instead of their named native tools. Costly paced DVGA completion,
+broad mutation isolation/restoration and interruption recovery, nested worker semantics, two complete
+accepted catalog passes, sustained load/control attribution, merged installation, clean rebuild,
+restart/reboot/stop cleanup and unchanged apply/zero-action plan remain open. The full ten-minute native
+stress dispatch/report contract passed on the earlier candidate; that does not prove all native stress
+features or final functional acceptance.
 
-The latest short continuous slice reached 197.15 aggregate RPS, 100 percent benign success and zero
-baseline transport failures across nine applications. An earlier slice with six TimeoutError failures
-remains failed. Sustained final load, control attribution, two full accepted catalog passes, fixture
-isolation/restoration, complete native scanner/connection/nested behavior, merged installation, clean
-rebuild, restart/reboot/stop cleanup and unchanged apply/zero-action plan remain required.
+Required CI passed on generator `5d589b2` and WAAP `f236ff4`; later WAAP tracking/pin CI remains
+candidate-specific. Full-head PII enforcement remains failed on twelve localized deployment examples
+under the fleet no-locale-refresh policy. Continuous traffic was restarted on installed `5d589b2`.
+CSD remains disabled. Historical failed source, browser, matrix, traffic and CI evidence stays failed.
 
-English/source PII remediation passed staged enforcement; full-head enforcement remains failed on twelve
-existing localized deployment examples under the fleet no-locale-refresh policy. Continuous service is
-being restored after the short native diagnostic and requires a current active/enabled receipt.
-CSD remains disabled. No failed receipt is relabeled as acceptance.
+## Historical candidate evidence
 
 Generator installed/source `8fc528e` passed the stricter crAPI conversion/restoration slice: twelve total
 requests, all three updates/three triggers, exact media/name/parameters restored and zero transport failures
