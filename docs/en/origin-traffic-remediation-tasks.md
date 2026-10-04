@@ -1754,3 +1754,15 @@ with synthetic author.email values; upstream dispatch and content assertions pas
 failures/cancellations. Private receipt: `resume-focused-native-community/pass-
 focused-1791078117999254011/receipt.json`. This is one scenario contract, not full catalog acceptance. AWS STS
 confirms refreshed credentials usable on the Ubuntu workstation.
+
+Native credential outcomes qualified on installed `f121f61`: fifteen POSTs, one authenticated native DVWA
+page, fourteen explicit login rejections, logout cleanup, fifteen screenshots, zero
+browser/transport/cancellation errors. Private receipt `resume-focused-native-credential-outcomes/pass-
+focused-1791078365167682691/receipt.json`; representative success/rejection screenshots manually reviewed,
+remaining rejection digests identical.
+
+Generator `bdbba8b` rejects failed authentication renewal instead of reusing stale tokens. Native crAPI valid-
+invalid-valid login sequence passed (`resume-native-auth-failure/pass-
+focused-1791078570276914525/receipt.json`). An overlapping focused boundary failed to start and remains failed
+evidence; reruns must be sequential. Full rendered matrix on current origin is running; full catalog
+acceptance and clean rebuild remain open.
