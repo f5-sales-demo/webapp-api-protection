@@ -98,6 +98,14 @@ Finite ApacheBench workers completed native reports with no client cancellations
 duration and terminal cleanup remain in progress. Current-origin matrix has seventeen passing browser
 receipts/no failures so far. Final all-layer/new-source qualification remains pending.
 
+The full ten-minute native stress retry on installed generator `235fb9a` passed its declared dispatch
+and native-report contracts: 11,877 scenario requests, all required actions, zero scenario transport failures
+and zero client cancellations. Concurrent benign request evidence has zero current transport errors after
+the DVWA session-maintenance repair. Private receipt: `resume-focused-kraken-native/` latest pass on
+`235fb9a`. Earlier iterations with 20 and two cancellations remain failures. This qualifies the current
+contract only; native keepalive reports still show zero reused connections, and full Lua/nested/connection
+semantics remain required for complete coverage. Continuous restart is underway.
+
 ## Earlier repair-round observations
 
 Origin source/installed candidate is `d6930ea`; generator source/installed candidate is `695c459`.
