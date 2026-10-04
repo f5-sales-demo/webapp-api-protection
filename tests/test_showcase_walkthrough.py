@@ -87,12 +87,14 @@ class Transactions(unittest.TestCase):
             self.client.form = copy.deepcopy(form)
             self.client.form["spec"]["routing"] = {"unexpected": True}
 
-        with patch.object(self.config, "put", side_effect=mutate):
-            with self.assertRaises(EvidenceError):
-                self.config.update(
-                    "/api/config/synthetic",
-                    focused(self.client.form, "waf", False, firewall=True),
-                )
+        with (
+            patch.object(self.config, "put", side_effect=mutate),
+            self.assertRaises(EvidenceError),
+        ):
+            self.config.update(
+                "/api/config/synthetic",
+                focused(self.client.form, "waf", False, firewall=True),
+            )
         self.assertFalse(self.config.restore())
 
     def test_restore_failure_is_incomplete(self):
