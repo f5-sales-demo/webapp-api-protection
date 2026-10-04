@@ -1,47 +1,49 @@
 ---
 title: Overview
-description: How the F5 Distributed Cloud web app & API protection use case is built — an xcsh-provider Terraform plan that provisions an HTTP load balancer and origin pool, with state in Azure Blob Storage and GitHub Actions CI.
+description: "Shared nine-application Azure origin and continuous traffic architecture."
 sidebar:
   order: 1
-  label: Overview
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+The showcase manages an Azure origin VM, an Azure traffic VM and F5 Distributed Cloud HTTP/HTTPS load balancers with WAF/API policies. The existing namespace, shared DNS and schema fixture have preservation checks. Private local state stays outside Git.
 
-This use case builds up a **secured web application delivery path on F5 Distributed Cloud** with
-Terraform, one control at a time. Iteration 1 stands up the foundation: an HTTP load balancer with
-an origin pool, keeps its state in **Azure Blob Storage**, and runs plan-on-pull-request /
-apply-on-merge through **GitHub Actions**. Subsequent iterations layer on a web application firewall
-and API protection.
+```mermaid
+graph LR
+    T[Traffic VM: shared 200 HTTP requests/sec boundary] --> X[F5 Distributed Cloud HTTP and HTTPS load balancers]
+    B[Browser review] --> X
+    X --> O[Origin VM: nginx port 80]
+    O --> A[Nine application prefixes: 42 container services]
+```
 
-## What it manages (iteration 1)
+## Shared application inventory
 
-- An `xcsh_origin_pool` forwarding to the public [httpbin](https://httpbin.org) service.
-- An `xcsh_http_loadbalancer` that advertises on the F5 XC public VIP and routes to that pool.
-- Remote Terraform state in Azure, so runs are shareable between an operator's machine and CI.
+| Application | Published prefix | Replicas | Native loopback ports | Content and workflows |
+| --- | --- | --- | --- | --- |
+| Juice Shop | `/juice-shop/` | 4 | 3001–3004 | translated-labels, products-and-images, login, basket, supporting-pages, socket-io-affinity |
+| DVWA | `/dvwa/` | 4 | 8101–8104 | authenticated-navigation, styles-and-forms, security-settings, seeded-vulnerability-pages |
+| VAmPI | `/vampi/` | 4 | 5101–5104 | api-definition, authentication, users, seeded-books |
+| HTTPBin | `/httpbin/` | 4 | 8201–8204 | local-swagger-assets, specification, links-and-forms |
+| whoami | `/whoami/` | 4 | 8082–8085 | diagnostic-content, proxy-headers |
+| CSD Demo | `/csd-demo/` | 4 | 5001–5004 | dashboard, checkout, receiver, counter, clear-log, replica-state |
+| DVGA | `/dvga/` | 4 | 5201–5204 | styles-scripts-images, navigation-and-forms, GraphQL, subscriptions, seeded-pastes |
+| RESTaurant | `/restaurant/` | 4 | 8301–8304 | swagger, redoc, local-assets, authentication, seeded-roles |
+| crAPI | `/crapi/` | 1 | 18888 | login, signup, seeded-vehicle, community, workshop, deep-link-refresh, mailhog |
 
-## Architecture
+The authoritative inventory is origin-server `provisioning/applications.json`; nginx/Compose, prefix adapters,
+synthetic seeding and JWT repair come from its shared provisioner. WAAP cloud-init verifies installer/archive
+digests instead of maintaining a second bootstrap. crAPI uses `/crapi/` through nginx. VAmPI returns JSON;
+RESTaurant Swagger is its root and ReDoc is `/restaurant/redoc`.
 
-| Layer | Choice | Why |
-| --- | --- | --- |
-| Provider | `f5-sales-demo/xcsh` (Terraform registry) | Generated from the F5 XC OpenAPI; already ships `xcsh_http_loadbalancer`, `xcsh_origin_pool`, `xcsh_app_firewall` (WAF) and `xcsh_api_definition` (API protection). Authenticates with an API token (`Authorization: APIToken <token>`). |
-| State backend | `azurerm` (Azure Blob Storage), access-key auth | Durable, shared state. Reuses the account bootstrapped for the DNS use case with a distinct state key. |
-| Automation | GitHub Actions | Plan on every pull request, apply on merge to `main`. Backend coordinates and inputs come from repository **variables**; credentials from **secrets**. |
+The generator's immutable installer promotes the shared catalog/runtime. All HTTP scanner, browser, nested
+worker and load traffic crosses one pacing boundary: 180 benign plus 20 scenario requests/sec in aggregate.
+Connection attempts and held slow connections have separate caps. Fourteen functional contracts are declared
+on the reviewed source; installed qualification remains revision-specific and incomplete.
 
-<Aside type="note">
-Iteration 1 targets the **staging tenant** (`https://nferreira.staging.volterra.us`), which is
-VPN-accessible only. During prototyping, Terraform is run locally over the VPN; CI plan/apply against
-this tenant requires a self-hosted runner on the VPN.
-</Aside>
+## Controls, state and evidence
 
-## Roadmap
+The provider pin is `f5-sales-demo/xcsh` 13.0.3 in both roots and the HTTP load-balancer module. The profile requests blocking WAF, API discovery/schema checks, endpoint denial, rate limiting and synthetic-user MUD. CSD enforcement is disabled (`csd_enabled=false`); browser activity proves display execution/cleanup only. Response denial requires independent control attribution.
 
-- **Iteration 1 (this):** HTTP load balancer + origin pool → httpbin.
-- **Next:** attach a web application firewall (`xcsh_app_firewall`).
-- **Then:** add API protection (`xcsh_api_definition`, API discovery).
-- **Later:** promote from staging to a pre-production environment.
-
-## Where to start
-
-The [Demo](/webapp-api-protection/demo/) walks through deploying and validating the load balancer
-end-to-end with Terraform.
+The [Demo guide](../demo/) uses `deploy`, `verify`, `rebuild` and `destroy` with private local backends and
+ownership checks. Current pins and receipts are in the [dated tracker](../origin-traffic-remediation-tasks/).
+Upstream merged installation must precede the ownership-checked clean rebuild and final
+zero-change/convergence gates. Source tests, a saved plan or old browser matrix do not complete those gates.

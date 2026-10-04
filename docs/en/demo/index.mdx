@@ -19,6 +19,21 @@ attribution is unavailable. MUD configuration or denied responses alone cannot e
 MUD detection. Pending telemetry is a failure to complete acceptance, not a pass.
 </Aside>
 
+## Shared installation and current status
+
+Origin provisioning comes from the immutable origin-server installer, application manifest and prefix
+adapters. Traffic provisioning uses the immutable traffic-generator catalog installer. Pins include source
+commit and archive/installer SHA-256 digests; final delivery must replace working-branch pins with merged
+upstream revisions and verify their installation. There are nine published applications and 42 declared
+container services. crAPI is under `/crapi/`; VAmPI returns JSON and RESTaurant Swagger is `/restaurant/` with
+ReDoc at `/restaurant/redoc`.
+
+The [current tracker](../../origin-traffic-remediation-tasks/) and [historical
+archive](../../archive/origin-traffic-remediation-history/) distinguish source, installed, rendered and final
+acceptance. Current-source application verification, recurring signup integration, remaining functional
+contracts, two accepted catalog passes and clean-rebuild/convergence gates remain open. `csd_enabled=false`;
+CSD activity is display-only.
+
 ## Local prerequisites
 
 Supply authentication before invocation: an already-authenticated Azure CLI **user** in
@@ -36,13 +51,13 @@ outside the checkout (caller-owned directory **0700**, non-symlink file **0600**
 
 ```json
 {
-  "subscription_id": "00000000-0000-0000-0000-000000000000",
-  "tenant_id": "11111111-1111-1111-1111-111111111111",
-  "expected_azure_user": "operator@example.test"
+  "subscription_id": "<APPROVED_SUBSCRIPTION_ID>",
+  "tenant_id": "<APPROVED_TENANT_ID>",
+  "expected_azure_user": "<APPROVED_AZURE_USER>"
 }
 ```
 
-Replace the synthetic UUIDs and UPN with the explicitly approved Azure subscription,
+Replace the symbolic IDs and user with the explicitly approved Azure subscription,
 Entra tenant and human user, never inferred from login. Keep real IDs and user data
 out of public files. Missing approval or a different human user blocks live operations.
 An explicit `--config` replaces the default operator file, without merging.
@@ -54,7 +69,7 @@ to the base approval path and add the approved IDs privately; keep state and rec
 in place. See the Terraform README for setup details.
 
 Install Terraform 1.8 or later, Python 3, Azure CLI, SSH, cURL and dig. Provider releases
-are pinned to `f5-sales-demo/xcsh` 12.0.2, `hashicorp/azurerm` 5.7.0 and
+are pinned to `f5-sales-demo/xcsh` 13.0.3, `hashicorp/azurerm` 5.7.0 and
 `hashicorp/azuread` 3.10.0. Registry locks are checked in; development overrides are excluded.
 The fixed scope is the supplied Azure subscription/tenant, `eastus2`, origin
 `Standard_D16s_v3` and generator `Standard_F16s_v2` (two 16-vCPU VMs), and the configured
@@ -133,7 +148,12 @@ budget. Browser/scanner requests share the pacing boundary; TLS/slow-connection 
 record separate limits. Acceptance requires two complete meaningful catalog passes,
 measured rates within five percent, at least 99% benign success, no baseline transport
 failures and fresh supervised-service health. Focused-suite passes cannot satisfy full
-catalog completion. Detailed private evidence is limited to seven days or 10 GiB.
+catalog completion. Detailed private evidence is limited to seven days or 10 GiB. Use `sudo tgen-control
+status`, `stop`, `start` and `run-once` on the owned generator; stop continuous execution before one-shot
+qualification. Start is readiness-gated. [Catalog
+operation](https://f5-sales-demo.github.io/traffic-generator/en/06-runner/) describes native outcomes, fixture
+recovery and process cleanup. All 164 entries must pass functional acceptance on the exact installed sources.
+Missing contracts fail acceptance; filler and focused receipts do not count as complete passes.
 Security acceptance requires correlated live policy/mitigation events plus API discovery
 and traffic evidence. Response checks alone are not security proof.
 
