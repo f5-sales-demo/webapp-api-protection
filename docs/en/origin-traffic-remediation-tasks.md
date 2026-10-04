@@ -8,6 +8,39 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 
 ## Current acceptance status
 
+All T01–T16 tasks remain open. Current source/installed origin is `ecb553e`; generator is `6345562`.
+WAAP pins their immutable archives and installers. Provider 13.0.2 remains the latest checked release,
+with exact binary/source provenance tied to enriched API specs v10.0.0. VM replacement plans remain unapplied.
+
+Focused installed/live checks passed credential form submissions (15), native registration/feedback
+submissions (two each), crAPI parameter updates plus conversion triggers/restoration, shadow-endpoint
+requests (12), CSD HTTP checkout/dashboard/clear restoration on both domains, and strict lazy gallery
+navigation on the HTTPS API domain. These are individual qualifications, not complete catalog acceptance.
+
+The origin `2990de0` automated matrix passed 66 browser receipts with no missing workflow/layer entries;
+315 screenshots were reviewed, but a lazy gallery spinner prevented manual completeness acceptance.
+Origin `ecb553e` adds every-slide checks, passed the focused gallery check, and its current full matrix
+is running. The prior two failed CSD matrices and interrupted obsolete-account matrix remain failed.
+
+Full paced DVGA still fails ten-operation/mixed completion within the scenario deadline, despite separate
+native/nginx/published ten-operation probes passing. Full native stress still fails 20 timed-worker client
+cancellations. A short diagnostic confirms wrk cancellations were dispatched upstream; they cannot be
+ignored as queued-only cleanup. Private diagnostic: `private-native-stage-1791072400204935173/`.
+Current source records worker identity and dispatch stage to support remediation.
+
+The latest short continuous slice reached 197.15 aggregate RPS, 100 percent benign success and zero
+baseline transport failures across nine applications. An earlier slice with six TimeoutError failures
+remains failed. Sustained final load, control attribution, two full accepted catalog passes, fixture
+isolation/restoration, complete native scanner/connection/nested behavior, merged installation, clean
+rebuild, restart/reboot/stop cleanup and unchanged apply/zero-action plan remain required.
+
+English/source PII remediation passed staged enforcement; full-head enforcement remains failed on twelve
+existing localized deployment examples under the fleet no-locale-refresh policy. Continuous service is
+being restored after the short native diagnostic and requires a current active/enabled receipt.
+CSD remains disabled. No failed receipt is relabeled as acceptance.
+
+## Earlier repair-round observations
+
 Origin source/installed candidate is `d6930ea`; generator source/installed candidate is `695c459`.
 The provider release was checked again against the current release API: v13.0.2 remains latest.
 The installed provider receipt binds its exact binary/source to enriched API specs v10.0.0.
@@ -198,8 +231,6 @@ receipt: `resume-focused-native-form-deadlines/pass-focused-1791072238177746645/
 actual form dispatch only; isolated account/feedback cleanup and repeatability remain required. The failed
 zero-submission catalog run remains failed. Continuous traffic restart is underway on the fixed source.
 Current origin `ecb553e` matrix has 32 passing browser receipts/no failures so far.
-
-## Earlier repair-round observations
 
 These earlier observations retain their original source revisions and failed evidence;
 they do not establish current acceptance. All T01–T16 tasks remain incomplete.
