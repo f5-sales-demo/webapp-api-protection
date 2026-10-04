@@ -1848,3 +1848,9 @@ explicitly. Exact-script native diagnostic failed with HTTP 302 because publishe
 applied to native routes; that diagnostic remains failed, and correct native-route checks are running.
 Published command coverage remains unqualified: prior requests returned 403, with no attributed control
 evidence yet.
+
+Correct native-route command verification passed all 36 checks across four repaired DVWA replicas, including
+eight command-output payloads and the explicit backtick no-stdout negative. Private receipt `native-command-
+replica-1791083233418015195.json`. Published command scenario remains unqualified pending attributed blocked
+outcomes; no command-execution success is inferred from HTTP 403. Continuous startup completed on 48d4b62;
+fresh status and dc99bef full matrix are pending.
