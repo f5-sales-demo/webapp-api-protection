@@ -91,6 +91,13 @@ native stress and current-origin matrix are running. The prior complete/manual-r
 remains source-specific evidence; the new origin must pass its own complete/visual matrix. Continuous traffic
 restart follows the single-boundary stress run. All final task gates remain open.
 
+Installed DVWA PHP-FPM checks confirm session.gc_probability=0 and session.gc_maxlifetime=604800
+on all four replicas; the cleanup timer is enabled. The concurrent native stress retry has zero current
+baseline-error receipts through five minutes, versus repeated login timeouts before this source repair.
+Finite ApacheBench workers completed native reports with no client cancellations; wrk/hey/Vegeta full
+duration and terminal cleanup remain in progress. Current-origin matrix has seventeen passing browser
+receipts/no failures so far. Final all-layer/new-source qualification remains pending.
+
 ## Earlier repair-round observations
 
 Origin source/installed candidate is `d6930ea`; generator source/installed candidate is `695c459`.
