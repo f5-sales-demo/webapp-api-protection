@@ -9,12 +9,12 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 ## Current acceptance status
 
 All T01–T16 tasks remain open pending their complete source, merged-installation and live acceptance.
-Current source/installed origin is `cb08457`; generator is `5d589b2`. WAAP pins immutable archives and
+Current source/installed origin is `0a2d4aa`; generator is `369d54b`. WAAP pins immutable archives and
 installers. Provider 13.0.3 is the latest checked release, with installed binary/source provenance tied
 to enriched API specs v10.0.0. Both Terraform roots validate; the live saved plan succeeds but proposes
 two VM replacements that remain unapplied.
 
-Current origin qualification passed the full declared matrix: 66 browser receipts, complete true,
+Prior origin `cb08457` qualification passed the full declared matrix: 66 browser receipts, complete true,
 no missing workflow/layer checks or browser failures, and 315 retained screenshots. Eight application
 contact sheets and full dashboard/ReDoc/community views were manually reviewed. Private matrix:
 `private-browser-matrix-1791078210428199853/`; review: `manual-render-review-cb08457.json`.
@@ -29,7 +29,8 @@ cancellations. Failed authentication renewal now raises a prerequisite failure i
 reusing an old token; native valid-invalid-valid crAPI authentication passed. Existing source tests contain
 test doubles and are development checks only. Catalog acceptance cannot use dispatch-only receipts.
 
-The remaining 162 scenarios lack explicit complete functional contracts. Seven connection scenarios
+Six functional contracts are declared, including three native CSD library execution/cleanup contracts and
+measured native slow-header behavior. The remaining 158 scenarios lack explicit complete functional contracts. Six connection scanner scenarios
 still use bounded Python probes instead of their named native tools. Costly paced DVGA completion,
 broad mutation isolation/restoration and interruption recovery, nested worker semantics, two complete
 accepted catalog passes, sustained load/control attribution, merged installation, clean rebuild,
@@ -39,7 +40,7 @@ features or final functional acceptance.
 
 Required CI passed on generator `5d589b2` and WAAP `f236ff4`; later WAAP tracking/pin CI remains
 candidate-specific. Full-head PII enforcement remains failed on twelve localized deployment examples
-under the fleet no-locale-refresh policy. Continuous traffic was restarted on installed `5d589b2`.
+under the fleet no-locale-refresh policy. Continuous traffic is active/enabled on installed `369d54b`; its required CI passed. The new origin matrix is running.
 CSD remains disabled. Historical failed source, browser, matrix, traffic and CI evidence stays failed.
 
 ## Historical candidate evidence
@@ -1823,3 +1824,5 @@ attempt spacing within the configured limit, three partial-header rounds, peer c
 sockets closed; zero transport/cancellation failures. Private receipt `resume-native-slow-header-
 functional/pass-focused-1791080725732053859/receipt.json`. Six functional contracts declared, 158 remaining
 unqualified. Native scanner tool semantics and broader mutation recovery remain open.
+
+Installed one-shot SSL suite verification correctly returns exit code 1 with functional_verified false and all three missing native scanner contracts listed. This is an acceptance-gate check, not scanner functional acceptance. Current continuous service is active/enabled on 369d54b with no current failures.
