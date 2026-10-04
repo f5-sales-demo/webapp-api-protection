@@ -32,9 +32,10 @@ transport, browser and CI receipts remain failed. Native application rejection d
 
 The checked-in showcase profile/pins must be inspected together with private deployed receipts; variable
 defaults alone are not installed provenance. CSD remains disabled (`csd_enabled=false`), with display-only
-activity. Keep credentials, cloud IDs, state, mail, raw reports and screenshots private. Historical full-head
-localized PII findings are still recorded as unresolved; English reconciliation does not qualify a later
-complete scan.
+activity. Keep credentials, cloud IDs, state, mail, raw reports and screenshots private. Fresh full-head PII enforcement on the documentation candidate reported 86 findings outside docs: 43 Terraform,
+35 test and eight script findings (61 identifier, 23 email and two home-path categories). Changed-document
+enforcement/audit scans are clean. Full repository privacy qualification remains open; older findings and
+failed scans remain preserved.
 
 ## T01–T16 acceptance table
 
