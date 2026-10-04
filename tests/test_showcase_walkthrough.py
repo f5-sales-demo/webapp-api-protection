@@ -21,7 +21,7 @@ from tests.demo_verify_fixtures import event, probe
 class FakeClient:
     def __init__(self):
         self.deadline = 0
-        self.form = {
+        self.form: dict = {
             "metadata": {"name": "synthetic", "annotations": {"preserve": "yes"}},
             "spec": {"blocking": {}, "routing": {"preserve": "yes"}},
             "resource_version": "1",
@@ -40,7 +40,9 @@ class Transactions(unittest.TestCase):
         self.client = FakeClient()
         self.config = Configuration(self.client, Path(self.temporary.name))
         self.config.capture("/api/config/synthetic")
-        self.config.put = self.put
+        patcher = patch.object(self.config, "put", side_effect=self.put)
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def put(self, _path, form):
         self.client.form = copy.deepcopy(form)
@@ -85,12 +87,12 @@ class Transactions(unittest.TestCase):
             self.client.form = copy.deepcopy(form)
             self.client.form["spec"]["routing"] = {"unexpected": True}
 
-        self.config.put = mutate
-        with self.assertRaises(EvidenceError):
-            self.config.update(
-                "/api/config/synthetic",
-                focused(self.client.form, "waf", False, firewall=True),
-            )
+        with patch.object(self.config, "put", side_effect=mutate):
+            with self.assertRaises(EvidenceError):
+                self.config.update(
+                    "/api/config/synthetic",
+                    focused(self.client.form, "waf", False, firewall=True),
+                )
         self.assertFalse(self.config.restore())
 
     def test_restore_failure_is_incomplete(self):
@@ -98,10 +100,10 @@ class Transactions(unittest.TestCase):
             "/api/config/synthetic",
             focused(self.client.form, "waf", False, firewall=True),
         )
-        self.config.put = lambda *_: (_ for _ in ()).throw(
-            EvidenceError("restore failed")
-        )
-        self.assertFalse(self.config.restore())
+        with patch.object(
+            self.config, "put", side_effect=EvidenceError("restore failed")
+        ):
+            self.assertFalse(self.config.restore())
 
 
 class LogPages(unittest.TestCase):
