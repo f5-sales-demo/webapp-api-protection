@@ -1927,3 +1927,11 @@ Private receipt: `resume-native-followups/pass-focused-1791121335656328761/recei
 Two crAPI video header placeholders are replaced in generator source with native FFmpeg encoding and
 FFprobe codec/dimension verification. Workstation encode/decode passed; installed application acceptance
 is pending. Clean generator provisioning now installs FFmpeg rather than relying on a guest-only package.
+
+
+Generator `3e8ba7b` is installed with native FFmpeg/FFprobe. Both real-media scenarios dispatched their
+required actions with zero transport failures and zero cancellations; exact disposable video cleanup and
+seeded video restoration passed. Private receipt:
+`resume-native-real-video/pass-focused-1791121960307112217/receipt.json`.
+Both remain functionally unqualified: WAAP mitigation and native application rejection were observed,
+and complete conversion/control contracts remain required. No exploit-success claim is inferred.
