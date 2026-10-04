@@ -1785,3 +1785,23 @@ domains/pass-focused-1791079166467472534/receipt.json`. The previous a88c94e two
 failed. Only two of 164 scenarios have explicit functional contracts; 162 remain unqualified.
 
 Provider 13.0.3 binary source matches `b1854d740269b420e238aed9e8a556d0bb084164`; binary SHA256 `43898dc1fd9010c925c03ff27d32981d2c27095aee7a3cac1485a22c0683762c`. It retains enriched API v10.0.0 commit and verified pin/bundle digests. Private `ecosystem-provider1303-receipt.json` records installed provenance; the earlier 13.0.2 receipt remains historical evidence.
+
+Generator `469d821` passed both implemented native contracts on both domains and proved a functional slice cannot establish whole-catalog acceptance (`resume-native-functional-both-domains/pass-focused-1791079630254357954/receipt.json`). Required CI passed. One-shot execution now fails incomplete functional acceptance and receipts list unqualified scenario IDs.
+
+Origin `0a2d4aa` and generator `aec137d` replace fabricated CSD no-op JavaScript with five pinned native
+libraries served on the owned origin; browser loader completion requires the native exported function. Origin
+immutable provisioning completed successfully; installed asset/browser qualification is pending. Prior cb08457
+full matrix remains qualified historical evidence; the new source requires current verification.
+
+All 45 native library asset checks passed: four CSD replicas, origin nginx, and both domains over HTTP/HTTPS
+returned the pinned JavaScript bytes/content type. Generator aec137d completed three real library browser
+actions with cleanup, zero transport failures/cancellations and native function exports present. Generator
+8a48eea adds explicit functional contracts requiring finished library states plus source-bound
+screenshot/cleanup evidence; two-domain qualification is running. Required origin CI passed.
+
+Three native CSD library contracts passed on both domains on 8a48eea: all libraries finished, screenshots
+matched their digests, browser cleanup passed, zero transport failures/cancellations. Private accepted receipt
+`resume-native-csd-libraries/pass-focused-1791080268058194884/receipt.json`. Generator 69fdd8f additionally
+verifies pinned library versions and Day.js date behavior; installed rerun is in progress. Five of 164
+scenarios now have explicit functional contracts; 159 remain unqualified. CSD remains disabled and no control
+detection is claimed.
