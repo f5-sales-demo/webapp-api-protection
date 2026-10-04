@@ -1874,3 +1874,9 @@ replica/payload inventory, eighteen published blocked requests and eighteen uniq
 per domain. Private native-command-coverage-join.json retains evidence digests. This standalone evidence join
 qualifies the observed behavior/control pair; the generator command scenario still needs runtime integration
 and cannot establish whole-catalog acceptance.
+
+Source-bound command evidence join passed: native receipt native-command-replica-1791084141577599479.json
+records installed origin dc99bef and all 36 native checks; matching control receipt supplies eighteen unique
+WAF block events across both domains. Private native-command-coverage-join-bound.json records input digests
+and all checks true. The older join without native source binding is retained as superseded, not final
+acceptance. Runtime command contract integration remains required.
