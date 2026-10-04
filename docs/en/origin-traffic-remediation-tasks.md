@@ -55,6 +55,15 @@ rejections and two separate mitigation candidates on parameter-update requests. 
 responses are excluded from mitigation totals. Continuous restart is underway on the exact current candidate.
 Full catalog/fixture isolation/native stress/final rebuild gates remain open.
 
+Generator source `e8fdee3` repaired required regression mypy typing; complete source mypy passed 74 files
+and required CI passed. A source-native wrk repair is now installed through immutable generator `9b1bb1a`: pinned
+upstream commit/archive, source-owned drain adapter and binary digests are recorded. It preserves duration,
+workers and Lua requests, stops new launches at the deadline and drains dispatched responses within the native
+timeout. The delayed native loopback test completed six requests with zero disconnects; full source tests
+pass 173 tests/nine subtests with one workstation native-tool skip. Corrupted archive, changed source anchors
+and repeat installation have regression gates. Installed paced diagnostic/full stress remain required.
+Current origin remains `ecb553e` with complete matrix and manual review; prior native failures stay failed.
+
 ## Earlier repair-round observations
 
 Origin source/installed candidate is `d6930ea`; generator source/installed candidate is `695c459`.
