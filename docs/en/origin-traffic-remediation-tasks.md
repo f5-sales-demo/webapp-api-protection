@@ -1960,3 +1960,14 @@ The earlier `c476e25` six-layer receipts pass API workflow and cleanup but prema
 screenshots remain failed rendered evidence; final `e492b9f` now requires the owned recipient in the
 rendered inbox and is undergoing six-layer qualification. Traffic catalog signup/reset integration and
 complete application/catalog/rebuild acceptance remain open.
+
+
+Installed origin `e492b9f` passed all six isolated signup/reset layers: native crAPI, origin nginx,
+and both WAAP domains over HTTP and HTTPS. Each layer passed signup, exact welcome-mail ownership,
+actor-bound login, native reset-mail OTP, new-password login, old-password rejection, rendered owned
+inbox rows and exact recovery. Private receipt:
+`private-browser-reset-layers-1791123790012229844/receipt.json`.
+All twelve final signup and MailHog screenshots were manually reviewed; private review receipt:
+`native-reset-render-review-e492b9f.json`. Earlier premature-render evidence remains failed.
+This qualifies the added application workflow only; traffic catalog signup/OTP scenario ownership,
+full current-source application matrix, full catalog passes and rebuild acceptance remain open.
