@@ -1840,3 +1840,11 @@ The 8cf4d62 command qualification failed: all eighteen published attempts return
 returned expected command data, while && hostname and backtick behavior could not complete. These runs remain
 failed. Origin dc99bef adds required iputils-ping to the immutable DVWA image; rebuild is running. Command
 verifier CI formatting is repaired in e3dbf0c. Native behavior and control attribution remain separate gates.
+
+Immutable origin dc99bef provisioned successfully and required CI passed; native ping is installed on every
+DVWA replica. Native command checks now return expected output for eight payloads; the preserved backtick case
+returns successful ping output with no command stdout. Generator 48d4b62 declares that observed negative
+explicitly. Exact-script native diagnostic failed with HTTP 302 because published path/cookie scope was
+applied to native routes; that diagnostic remains failed, and correct native-route checks are running.
+Published command coverage remains unqualified: prior requests returned 403, with no attributed control
+evidence yet.
