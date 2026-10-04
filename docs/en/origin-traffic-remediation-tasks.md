@@ -1832,3 +1832,11 @@ Current origin 0a2d4aa full matrix completed: 66 browser receipts, complete true
 browser-matrix-1791080250331268526`, review `manual-render-review-0a2d4aa.json`. Short 46-second live window
 on 369d54b measured 197.30 aggregate HTTP RPS, 100 percent benign success and zero baseline transport failures
 across nine applications. Final sustained fresh-deployment acceptance remains open.
+
+Generator 8cf4d62 adds explicit native DVWA command output contracts for all nine preserved payloads, including specific backtick failure behavior. Source checks passed 173 tests/nine subtests plus shell/Ruff/mypy/Pylint; these remain development checks. Immutable installed two-domain qualification is running; six earlier functional contracts remain qualified on their recorded revisions.
+
+The 8cf4d62 command qualification failed: all eighteen published attempts returned mitigation-candidate HTTP
+403 and no native output. Direct native checks on all four DVWA replicas exposed missing ping: seven payloads
+returned expected command data, while && hostname and backtick behavior could not complete. These runs remain
+failed. Origin dc99bef adds required iputils-ping to the immutable DVWA image; rebuild is running. Command
+verifier CI formatting is repaired in e3dbf0c. Native behavior and control attribution remain separate gates.
