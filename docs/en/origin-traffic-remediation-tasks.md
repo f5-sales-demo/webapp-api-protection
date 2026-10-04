@@ -9,7 +9,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 ## Current acceptance status
 
 All T01–T16 tasks remain open pending their complete source, merged-installation and live acceptance.
-Current source/installed origin is `dc99bef`; generator is `48d4b62`. WAAP pins immutable archives and
+Current source/installed origin is `dc99bef`; generator is `6529de0`. WAAP pins immutable archives and
 installers. Provider 13.0.3 is the latest checked release, with installed binary/source provenance tied
 to enriched API specs v10.0.0. Both Terraform roots validate; the live saved plan succeeds but proposes
 two VM replacements that remain unapplied.
@@ -29,8 +29,8 @@ cancellations. Failed authentication renewal now raises a prerequisite failure i
 reusing an old token; native valid-invalid-valid crAPI authentication passed. Existing source tests contain
 test doubles and are development checks only. Catalog acceptance cannot use dispatch-only receipts.
 
-Six functional contracts are declared, including three native CSD library execution/cleanup contracts and
-measured native slow-header behavior. The remaining 158 scenarios lack explicit complete functional contracts. Six connection scanner scenarios
+Eight functional contracts are declared, including three native CSD library execution/cleanup contracts and
+measured native slow-header behavior. Seven contracts have live qualification; the command runtime contract remains unqualified. The remaining 156 scenarios lack explicit functional contracts. Five connection scanner scenarios
 still use bounded Python probes instead of their named native tools. Costly paced DVGA completion,
 broad mutation isolation/restoration and interruption recovery, nested worker semantics, two complete
 accepted catalog passes, sustained load/control attribution, merged installation, clean rebuild,
@@ -1882,3 +1882,15 @@ and all checks true. The older join without native source binding is retained as
 acceptance. Runtime command contract integration remains required.
 
 Generator 804c06f tightens native hostname output matching to the actual container hostname format. Source checks passed 173 tests/nine subtests. Immutable artifact installed; continuous startup is in progress. The published command scenario remains unqualified despite standalone native/control evidence, pending runtime join integration.
+
+Native Masscan diagnostic completed actual SYN/SYN-ACK probes to owned application ports 80 and 443 at one
+packet/sec with packet trace. Generator 6529de0 replaces the generic TLS substitute for that catalog entry
+with the native Masscan binary, exact ports, packet-level launch/reply and pacing assertions, plus
+binary/report/source digests. Source tests/Ruff/mypy/Pylint passed; immutable installed two-domain
+qualification is running. The diagnostic alone is not catalog acceptance. Required WAAP CI passed on aacd269.
+
+Installed native Masscan contract passed on both domains on 6529de0: two intended SYN probes per domain,
+actual SYN-ACK replies from ports 80/443, measured pacing, binary/native report digests and zero
+transport/cancellation failures. Private receipt `resume-native-masscan-functional/pass-
+focused-1791085027630506301/receipt.json`. Seven functional contracts have live qualification; command remains
+separately native/control-qualified pending runtime join.
