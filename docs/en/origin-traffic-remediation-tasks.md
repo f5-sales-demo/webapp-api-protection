@@ -1987,3 +1987,21 @@ All twelve final signup and MailHog screenshots were reviewed; private review:
 `native-reset-render-review-94cc186.json`. Source checks passed 86 tests and 69 subtests.
 This is bounded application workflow acceptance; recurring catalog signup/OTP ownership integration,
 full application matrix, complete catalog, merged sources and clean rebuild remain open.
+
+
+Origin `9dec3a1` provisions a distinct synthetic OTP mutation actor. Native validation changed its
+password with the actual emailed OTP, authenticated with that changed password, then restored the
+original password and removed only new owned mail. Generator `df6995d` launched both sampled OTP
+batches (30 guesses/domain) on both domains with password/mail restoration and zero transport failures,
+but remained functionally unqualified. Generator `88010ad` now requires actual reset-mail prerequisites
+and every native guess response before functional acceptance; installed both-domain verification is
+running. Failed source/CI/live receipts remain preserved; recurring signup catalog integration and final
+complete catalog/rebuild remain open.
+
+
+Installed generator `88010ad` passed the isolated native OTP functional contract on both domains:
+actual reset-mail prerequisite, all 30 guesses per domain with native OTP response assertions,
+password/mail restoration, zero transport failures and zero cancellations.
+Private receipt: `resume-isolated-native-otp/pass-focused-1791125103668191469/receipt.json`.
+This is bounded sampled OTP coverage, not full-keyspace feasibility or WAAP control attribution.
+Recurring signup catalog integration and the complete catalog/rebuild gates remain open.
