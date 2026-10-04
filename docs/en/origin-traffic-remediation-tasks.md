@@ -1971,3 +1971,10 @@ All twelve final signup and MailHog screenshots were manually reviewed; private 
 `native-reset-render-review-e492b9f.json`. Earlier premature-render evidence remains failed.
 This qualifies the added application workflow only; traffic catalog signup/OTP scenario ownership,
 full current-source application matrix, full catalog passes and rebuild acceptance remain open.
+
+
+Origin `94cc186` extends the isolated signup workflow to register the actual welcome vehicle using
+its native emailed VIN and pincode, confirm exactly that VIN under the same authenticated actor,
+and recover only the journaled vehicle owned by that account. Staged native execution passed all
+seven workflow checks and recovery; immutable installation passed. Seven-check serving-layer
+qualification is running. The prior `e492b9f` reset/render receipts retain their narrower scope.
