@@ -1949,3 +1949,14 @@ source metadata retains the exact generation command and bytes. Source checks pa
 Generator `d85254c` is installed with the final native full-frame decode check and required CI source
 formatting repairs. Installed FFmpeg encoding and full-frame decode passed. Prior candidate receipts
 remain bound to their own revisions; new full catalog and application/control qualification remains open.
+
+
+Origin `e492b9f` adds isolated signup login and an actual emailed OTP password-reset workflow, including
+new-password login, rejection of the old password and exact account/OTP/welcome-vehicle/mail cleanup.
+The workflow exposed upstream `jwt_token varchar(500)` rejecting valid long synthetic email identities;
+source provisioning now widens that column to text and clears identity prepared plans only after a schema
+change. Two staged native runs passed all six checks and recovery. Immutable installation passed.
+The earlier `c476e25` six-layer receipts pass API workflow and cleanup but premature public MailHog
+screenshots remain failed rendered evidence; final `e492b9f` now requires the owned recipient in the
+rendered inbox and is undergoing six-layer qualification. Traffic catalog signup/reset integration and
+complete application/catalog/rebuild acceptance remain open.
