@@ -8,7 +8,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 
 ## Current acceptance status
 
-All T01–T16 tasks remain open. Current source/installed origin is `ecb553e`; generator is `8fc528e`.
+All T01–T16 tasks remain open. Current source/installed origin is `ecb553e`; generator is `25a0000`.
 WAAP pins their immutable archives and installers. Provider 13.0.2 remains the latest checked release,
 with exact binary/source provenance tied to enriched API specs v10.0.0. VM replacement plans remain unapplied.
 
@@ -48,6 +48,12 @@ are classified expected_application_rejection, without attributing WAAP mitigati
 underway on this exact candidate. Source checks pass 170 tests/nine subtests with one workstation native-tool
 skip, plus staged PII and pre-commit. Full catalog, native stress/connection/nested behavior and mutation
 isolation remain incomplete.
+
+Installed generator `25a0000` repeats complete conversion/restoration successfully: twelve requests,
+zero transport failures/cancellations, exact video restoration, three explicitly identified native application
+rejections and two separate mitigation candidates on parameter-update requests. Native 403 conversion
+responses are excluded from mitigation totals. Continuous restart is underway on the exact current candidate.
+Full catalog/fixture isolation/native stress/final rebuild gates remain open.
 
 ## Earlier repair-round observations
 
