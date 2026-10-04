@@ -8,7 +8,7 @@ Detailed operational receipts remain in the private lifecycle state directory. B
 
 ## Current acceptance status
 
-All T01–T16 tasks remain open. Current source/installed origin is `ecb553e`; generator is `25a0000`.
+All T01–T16 tasks remain open. Current source/installed origin is `bab591a`; generator is `235fb9a`.
 WAAP pins their immutable archives and installers. Provider 13.0.2 remains the latest checked release,
 with exact binary/source provenance tied to enriched API specs v10.0.0. VM replacement plans remain unapplied.
 
@@ -63,6 +63,33 @@ timeout. The delayed native loopback test completed six requests with zero disco
 pass 173 tests/nine subtests with one workstation native-tool skip. Corrupted archive, changed source anchors
 and repeat installation have regression gates. Installed paced diagnostic/full stress remain required.
 Current origin remains `ecb553e` with complete matrix and manual review; prior native failures stay failed.
+
+Installed drain-enabled native wrk diagnostic on generator `9b1bb1a` finished with zero dispatched
+request cancellations, compared with two on the prior native binary. It remains diagnostic-only and recorded
+three baseline TimeoutError failures, all DVWA login requests. Private evidence:
+`private-native-stage-1791074089980240868/`. Full ten-minute stress is running on the exact installed source
+with zero scenario transport failures/cancellations through its third minute; final native completion and
+baseline load gates remain pending. DVWA PHP/session behavior is under investigation. Continuous restart
+follows the single-boundary stress run. Earlier failed results remain failed.
+
+Origin source `bab591a` moves probabilistic DVWA session expiry out of PHP request workers into a
+supervised hourly cleanup of only expired sess_* files after seven days. Native evidence found 591,052
+shared session files, intermittent login timeouts and no blocked database queries. Source checks pass
+85 tests/69 subtests and staged PII/pre-commit. Installed/live qualification is pending after the active
+stress run; preserve sessions and source-specific matrix receipts during update.
+
+Native wrk drain `9b1bb1a` remains clean through nine minutes. ApacheBench duration exit also abandons
+in-flight requests; the next source uses native finite request-count baseline workers while full wrk/hey/
+Vegeta stress remains ten minutes. All native tool completion/keepalive/response gates remain required.
+Earlier cancellation failures are retained; no outcome filter hides dispatched requests.
+
+Full native stress `9b1bb1a` removed all 18 wrk deadline cancellations but remained failed for two
+ApacheBench deadline cancellations. Native reports/worker evidence retain that failure. Immutable origin
+`bab591a` and generator `235fb9a` are installed: PHP session expiry is supervised outside requests and
+ApacheBench baseline uses finite native counts while full stress duration remains ten minutes. Current full
+native stress and current-origin matrix are running. The prior complete/manual-reviewed `ecb553e` matrix
+remains source-specific evidence; the new origin must pass its own complete/visual matrix. Continuous traffic
+restart follows the single-boundary stress run. All final task gates remain open.
 
 ## Earlier repair-round observations
 
