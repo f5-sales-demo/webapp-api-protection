@@ -287,3 +287,37 @@ class MinimumLogWindowTests(unittest.TestCase):
         access_pages(client, "synthetic", "synthetic", 100.1, 100.3)
         query = client.api.call_args.args[1]
         self.assertGreaterEqual(int(query["end_time"]) - int(query["start_time"]), 10)
+
+
+class RetainedScrollTokenTests(unittest.TestCase):
+    def test_same_token_with_distinct_pages_completes(self):
+        client = Mock()
+        client.api.side_effect = [
+            (
+                200,
+                {
+                    "logs": ['{"req_id":"a"}'],
+                    "total_hits": "3",
+                    "scroll_id": "retained",
+                },
+            ),
+            (
+                200,
+                {
+                    "logs": ['{"req_id":"b"}'],
+                    "total_hits": "3",
+                    "scroll_id": "retained",
+                },
+            ),
+            (
+                200,
+                {
+                    "logs": ['{"req_id":"c"}'],
+                    "total_hits": "3",
+                    "scroll_id": "retained",
+                },
+            ),
+        ]
+        self.assertEqual(
+            len(access_pages(client, "synthetic", "synthetic", 100, 120)), 3
+        )

@@ -20,7 +20,7 @@ from demo_verify_evidence import (
     virtual_host,
 )
 from demo_verify_types import EvidenceError, Probe
-from showcase_walkthrough_config import fail
+from showcase_walkthrough_config import fail, save
 
 
 def access_pages(
@@ -48,12 +48,11 @@ def access_pages(
         result.extend(decode_event(item) for item in batch)
         if len(result) == total:
             return result
-        if len(result) > total or not token or not batch or token in seen:
+        if len(result) > total or not token or not batch:
             fail("incomplete access-log pagination")
         fingerprint = json.dumps(batch, sort_keys=True)
         if fingerprint in seen:
             fail("access-log pagination made no progress")
-        seen.add(token)
         seen.add(fingerprint)
         code, page = client.api(
             path + "/scroll", {"namespace": namespace, "scroll_id": token}
@@ -137,7 +136,9 @@ def collect(
     end = max(p["received_at"] for p in probes) + 1
     while True:
         records = access_pages(client, namespace, lb, start, end)
+        save(client.walkthrough_directory / "access-log-window.json", records)
         events = client.pages(namespace, lb, start, end)
+        save(client.walkthrough_directory / "security-log-window.json", events)
         if all(matched(records, p, namespace, lb) for p in probes):
             return records, events
         client.remaining()
