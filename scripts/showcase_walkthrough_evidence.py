@@ -122,7 +122,10 @@ def schema_report(events: list[dict], access: dict, label: str) -> bool:
             and (
                 (
                     label == "missing"
-                    and "required" in str(v.get("description", "")).lower()
+                    and any(
+                        word in str(v.get("description", "")).lower()
+                        for word in ("required", "missing")
+                    )
                 )
                 or (
                     label == "type"
@@ -137,6 +140,7 @@ def schema_report(events: list[dict], access: dict, label: str) -> bool:
 
 
 LOG_INGESTION_MARGIN = 10
+FORBIDDEN, RATE_DENIAL = 403, 429
 
 
 def collect(
@@ -153,7 +157,26 @@ def collect(
         save(client.walkthrough_directory / "access-log-window.json", records)
         events = client.pages(namespace, lb, start, end)
         save(client.walkthrough_directory / "security-log-window.json", events)
-        if all(matched(records, p, namespace, lb) for p in probes):
-            return records, events
+        access_complete = all(matched(records, p, namespace, lb) for p in probes)
+        if access_complete:
+            required = [
+                p
+                for p in probes
+                if p.get("control")
+                and (p["control"] != "rate-limit" or p["status"] == RATE_DENIAL)
+            ]
+            ready = all(
+                blocked(
+                    events, matched(records, p, namespace, lb) or {}, p, namespace, lb
+                )
+                if p["status"] in (FORBIDDEN, RATE_DENIAL)
+                else p["control"] == "schema"
+                and schema_report(
+                    events, matched(records, p, namespace, lb) or {}, p["label"]
+                )
+                for p in required
+            )
+            if ready:
+                return records, events
         client.remaining()
         time.sleep(min(5, client.remaining()))

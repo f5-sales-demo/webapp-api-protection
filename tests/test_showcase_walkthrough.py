@@ -343,3 +343,23 @@ class CalibratedClockTests(unittest.TestCase):
         p.pop("clock_offset_min")
         p.pop("clock_offset_max")
         self.assertIsNone(matched([e], p, namespace, lb))
+
+
+class ObservedSchemaTextTests(unittest.TestCase):
+    def test_missing_message_is_required_field_evidence(self):
+        event = {
+            "req_id": "synthetic",
+            "sec_event_name": "OpenAPI Validation Failure",
+            "oas_req_status": "OpenAPIViolation",
+            "action": "allow",
+            "violations": [
+                {
+                    "field": "demo_id",
+                    "context": "Request",
+                    "property": "HTTP Body",
+                    "description": 'property "demo_id" is missing',
+                }
+            ],
+        }
+        self.assertTrue(schema_report([event], {"req_id": "synthetic"}, "missing"))
+        self.assertFalse(schema_report([event], {"req_id": "synthetic"}, "type"))
