@@ -60,8 +60,9 @@ bash scripts/demo-lifecycle.sh verify
 
 Verify reads existing state, checks the preserved namespace and requires zero drift. It does
 not import, apply or repair infrastructure. Missing telemetry returns an incomplete result.
-The current article preflight rejected private state/backend metadata requiring explicit
-migration. Do not open a walkthrough window until that preflight passes.
+The follow-up reconciled historical snapshots and the exact deployed schema receipt;
+backend, ownership and fixture preflight now pass. Open a walkthrough window only after
+current installed readiness also passes.
 
 ## Present a use case
 

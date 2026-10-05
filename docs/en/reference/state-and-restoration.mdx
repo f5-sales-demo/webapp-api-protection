@@ -9,8 +9,11 @@ This reference preserves the detailed operator contracts behind [deployment](../
 Use it when preparing a demonstration window or recovering an interrupted operation.
 The lifecycle rejected the existing private state during the 2026-10-04 article preflight:
 `unexpected persistent state/backend metadata requires explicit migration`.
-Resolve that failure before a walkthrough changes configuration. No matched control run
-or measured demonstration duration was captured for this documentation revision.
+The 2026-10-05 follow-up traced the rejection to historical baseline state copies inside the
+active state directory. The complete baseline bundle was relocated to a private sibling archive
+with verified hashes; active state bytes stayed unchanged. The exact deployed schema fixture
+receipt was also reconciled after content verification, preserving the prior receipt. Backend,
+approved-scope, ownership and fixture preflight now pass.
 
 The showcase uses two Azure VMs (origin and traffic generator) and an F5 Distributed
 Cloud HTTP and HTTPS load balancers. The checked-in profile requests blocking WAF, API discovery,

@@ -22,10 +22,14 @@ preflight. Pause continuous traffic before changing configuration. Record instal
 revisions and complete resource snapshots. Use synthetic identities with the configured
 `X-MUD-User` identification policy. Keep API credentials and receipts private.
 
-**Measured duration:** pending. No complete matched receipt was captured for this article on
-2026-10-04; the lifecycle preflight requires explicit private state/backend migration. Expected
-results below describe the acceptance criteria, not observed output. The harness records elapsed
-time in `receipt.json` when a run completes. Include that duration when rehearsing a presentation.
+**Measured duration:** 88.3 seconds for matched configuration/request phases,
+excluding window preparation and final traffic restart. Captured 2026-10-05 UTC on WAAP
+`37327d3`, origin `9dec3a1`, generator `4c2f528`. Private receipt:
+`e1e964bf13494154891640263a7ea441/endpoint-denial`. Both phases verified and configuration
+restored. The shared window's protected readiness and restart result is recorded separately.
+
+POST and DELETE both returned 200 with the allow rule, then 403 with request-bound
+`API Protection Rule` deny events. The unrelated GET returned 200 in both phases.
 
 Read the exact existing endpoint rule before starting. Require one rule matching the complete
 path and the two methods. Preserve its domain and client matchers, metadata and list position.

@@ -22,10 +22,22 @@ preflight. Pause continuous traffic before changing configuration. Record instal
 revisions and complete resource snapshots. Use synthetic identities with the configured
 `X-MUD-User` identification policy. Keep API credentials and receipts private.
 
-**Measured duration:** pending. No complete matched receipt was captured for this article on
-2026-10-04; the lifecycle preflight requires explicit private state/backend migration. Expected
-results below describe the acceptance criteria, not observed output. The harness records elapsed
-time in `receipt.json` when a run completes. Include that duration when rehearsing a presentation.
+**Measured duration:** 63.3 seconds for the matched request/configuration phases, excluding
+window preparation and final traffic restart. Captured 2026-10-05 UTC on WAAP source
+`2d8980b`, origin `9dec3a1` and generator `4c2f528`. Private receipt:
+`c5e52e4ad6494bed9f6d90033229f64b/schema`. Both phases verified, configuration restored,
+protected readiness passed and continuous traffic restarted. Expected criteria below are
+separate from these observed counts.
+
+| Observed phase | Valid JSON | Missing field | Wrong type | Legitimate GET |
+| --- | --- | --- | --- | --- |
+| Report | 200 | 200 | 200 | 200 |
+| Block | 200 | 403 | 403 | 200 |
+
+The missing-field event reported `property "demo_id" is missing`; the wrong-type event reported
+`value must be a string`. Each event joined to the corresponding access record's request ID,
+identity, domain, method, path and calibrated time bounds. The original configuration was
+restored before the next category.
 
 Verify the attached API definition references the exact showcase fixture. Its JSON media type
 requires `demo_id` as a string and permits additional properties. Only `POST /httpbin/post` is

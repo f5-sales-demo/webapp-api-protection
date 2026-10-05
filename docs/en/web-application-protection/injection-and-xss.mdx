@@ -23,10 +23,16 @@ preflight. Pause continuous traffic before changing configuration. Record instal
 revisions and complete resource snapshots. Use synthetic identities with the configured
 `X-MUD-User` identification policy. Keep API credentials and receipts private.
 
-**Measured duration:** pending. No complete matched receipt was captured for this article on
-2026-10-04; the lifecycle preflight requires explicit private state/backend migration. Expected
-results below describe the acceptance criteria, not observed output. The harness records elapsed
-time in `receipt.json` when a run completes. Include that duration when rehearsing a presentation.
+**Measured duration:** 78.9 seconds for matched configuration/request phases,
+excluding window preparation and final traffic restart. Captured 2026-10-05 UTC on WAAP
+`37327d3`, origin `9dec3a1`, generator `4c2f528`. Private receipt:
+`e1e964bf13494154891640263a7ea441/waf`. Both phases verified and configuration
+restored. The shared window's protected readiness and restart result is recorded separately.
+
+Monitoring returned native authenticated DVWA SQL rows and executed the harmless title marker.
+Blocking returned 403 for both payloads with request-bound WAF events: SQL signatures
+`200002883`/`200002835` and XSS signatures `200000098`/`200001475`. Both legitimate
+inputs returned 200 in both phases; the blocked response did not execute the marker.
 
 Use the existing origin-authenticated DVWA session fixture for the selected protected domain.
 Do not create an unrelated account or infer authentication from a 200 login page. The session

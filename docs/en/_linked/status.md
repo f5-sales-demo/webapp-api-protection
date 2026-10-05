@@ -45,15 +45,23 @@ failed scans remain preserved.
 
 ## Article comparison status
 
-On 2026-10-04, authenticated API readback confirmed effective protected controls and both
-protected domains returned HTTPBin 200 echoes. The ownership lifecycle then rejected existing
-private state with `unexpected persistent state/backend metadata requires explicit migration`.
-No control was changed and continuous traffic was not paused. Fresh matched category receipts
-and measured durations remain pending; this readback does not qualify any before/after article.
+On 2026-10-05 UTC, historical baseline snapshots were relocated outside the active state
+with verified hashes. Active Terraform state was unchanged. The exact deployed versioned
+schema receipt was reconciled after source-byte and live-content verification, preserving
+its predecessor. Backend, approved-scope, ownership and fixture preflight now pass.
 
-The category harness, API transactions and new reading journey require their own exact-head
-checks and rendered review. Observed excerpts will be added only from completed request-bound
-receipts. Keep this PR draft while existing installation and clean-rebuild gates remain open.
+The first controlled window completed request validation in 63.3 seconds: report mode returned
+four 200s; block mode returned two 200s and two request-bound schema 403s. Both missing-field
+and wrong-type events were verified, original configuration restored, protected readiness
+passed and traffic restarted. Receipt `c5e52e4ad6494bed9f6d90033229f64b/schema` binds WAAP
+`2d8980b`, origin `9dec3a1` and generator `4c2f528`.
+
+Endpoint, rate, WAF and malicious-user receipts from that window remain incomplete. Their
+configuration restoration passed. Pagination, envelope version, prefix echo, clock calibration,
+event ingestion and sequential-request attribution defects in the walkthrough harness were
+reproduced and fixed with regression tests. Fresh retries use those fixes. No other category
+is qualified by the schema result. Keep the implementation PR draft while all existing
+installation, rebuild and final acceptance gates remain open.
 
 ## Implementation tasks
 
