@@ -519,6 +519,7 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
                 lb, focused(configuration.original[lb], args.category, enabled)
             )
             phase = "after" if enabled else "before"
+            save(directory / (phase + "-configuration.json"), configuration.current)
             prefix = "showcase-" + run_id + "-" + phase
             if args.category == "waf":
                 configuration.update(
@@ -527,6 +528,7 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
                         configuration.original[firewall], "waf", enabled, firewall=True
                     ),
                 )
+                save(directory / (phase + "-configuration.json"), configuration.current)
                 probes = dvwa.requests(
                     client, out["domains"][0], prefix, session, enabled
                 )
