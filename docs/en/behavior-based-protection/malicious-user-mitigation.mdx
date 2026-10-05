@@ -23,10 +23,17 @@ preflight. Pause continuous traffic before changing configuration. Record instal
 revisions and complete resource snapshots. Use synthetic identities with the configured
 `X-MUD-User` identification policy. Keep API credentials and receipts private.
 
-**Measured duration:** pending. No complete matched receipt was captured for this article on
-2026-10-04; the lifecycle preflight requires explicit private state/backend migration. Expected
-results below describe the acceptance criteria, not observed output. The harness records elapsed
-time in `receipt.json` when a run completes. Include that duration when rehearsing a presentation.
+**Measured duration:** 116.9 seconds for matched configuration/request phases,
+excluding window preparation and final traffic restart. Captured 2026-10-05 UTC on WAAP
+`11f1cf8`, origin `9dec3a1` and generator `4c2f528`. Private receipt:
+`a9fda1b5469a4afd906edabd3ab64fd2/mud`. Both phases verified and configuration restored.
+
+With detection disabled, the 20 suspicious requests received WAF 403 responses; the later benign
+request, independent identity and legitimate control each returned 200. With detection enabled,
+a fresh suspicious-user detection receipt preceded the later benign request. That request
+received 403 with an attributed `Malicious User Mitigation` temporary-block event. Independent
+identity and legitimate control remained at 200. All 23 requests in each phase joined to actual
+access records; detection counters and mitigation policy hits were verified separately.
 
 Verify MUD entitlement, the identification policy and the configured mitigation attachment.
 The showcase identifies users from `X-MUD-User`, retains a blocking WAF and attaches the

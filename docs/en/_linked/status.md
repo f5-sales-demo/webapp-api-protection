@@ -63,11 +63,14 @@ passed and traffic restarted. The rate burst produced 23 origin 200 responses an
 attributed 429s, with independent identity and unrelated path both successful. These results
 bind WAAP `37327d3`, origin `9dec3a1` and generator `4c2f528`.
 
-Malicious-user mitigation remains incomplete. The retained failed category timed out before
-fresh detection plus later benign-request mitigation attribution completed; its configuration
-restored. A focused retry uses the corrected sequential-request matcher and conservative
-clock bounds. Historical failures remain failed, including earlier endpoint/rate/WAF attempts.
-Full-catalog, merged-installation, clean-rebuild and final acceptance gates remain open.
+The focused malicious-user retry `a9fda1b5469a4afd906edabd3ab64fd2/mud` completed in
+116.9 seconds on WAAP `11f1cf8`, origin `9dec3a1` and generator `4c2f528`. It verified fresh
+suspicious-user detection before a later benign-request temporary block, with an independent
+identity successful. Each of 23 requests per phase joined to an actual access record.
+Configuration restored; final window readiness and traffic restart are recorded separately.
+All five representative categories now have matched configuration/request evidence. Earlier
+incomplete receipts remain failed; these results do not qualify the full catalog or bypass
+merged-installation, clean-rebuild, privacy and final acceptance gates.
 
 ## Implementation tasks
 
