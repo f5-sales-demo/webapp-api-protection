@@ -17,6 +17,7 @@ from typing import cast
 import showcase_walkthrough_dvwa as dvwa
 from demo_lifecycle import Lifecycle
 from demo_lifecycle_state import Blocked, secure_artifact
+from demo_verify import readiness
 from demo_verify_client import Client
 from demo_verify_evidence import detection_ready, rate_origin
 from demo_verify_scope import effective, outputs
@@ -238,6 +239,7 @@ def requests(  # pylint: disable=too-many-branches
             if (
                 category == "schema"
                 and probe["status"] == SUCCESS
+                and probe["path"] == "/httpbin/post"
                 and (
                     not isinstance(probe["body"], dict)
                     or probe["body"].get("json")
@@ -394,8 +396,10 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
     lifecycle.context.state.outputs = out
     args.ssh_key = str(lifecycle.context.paths.key)
     args.known_hosts = str(lifecycle.context.paths.known_hosts)
+    args.poll_seconds = 5
     client = Client(time.monotonic() + args.timeout_seconds)
     effective(client, out)
+    ready = readiness(client, out, args)
     installed = {}
     for role, path in [
         ("origin", "/opt/origin-server/install-receipt.json"),
@@ -419,13 +423,19 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
         "complete": False,
         "restored": False,
         "installed": installed,
+        "readiness_before": ready,
         "source_revision": client.command(["git", "rev-parse", "HEAD"]).strip(),
     }
     stopped = False
     try:
         session, firewall = prepare_category(client, args, out, configuration, base, lb)
-        lifecycle.ownership.traffic("stop")
         stopped = True
+        lifecycle.ownership.traffic("stop")
+        status = json.loads(
+            client.ssh(out["generator"], args, "sudo -n tgen-control status")
+        )
+        if status.get("service_active") is not False:
+            fail("continuous traffic did not stop")
         for enabled in (False, True):
             configuration.update(
                 lb, focused(configuration.original[lb], args.category, enabled)
@@ -490,7 +500,7 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
                         probe["path"],
                         probe["user"],
                     )
-                lifecycle.context.state.deadline = time.monotonic() + 180
+                lifecycle.context.state.deadline = time.monotonic() + 600
                 lifecycle.ownership.verify_phase("readiness")
                 lifecycle.ownership.traffic("start")
                 report["traffic_restarted"] = True

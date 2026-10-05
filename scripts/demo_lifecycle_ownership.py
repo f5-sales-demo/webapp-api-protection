@@ -348,7 +348,8 @@ def _fixture_receipt(context: Context) -> dict[str, Any]:
     if (
         saved.get("api_url") != scope["xc_url"]
         or saved.get("namespace") != scope["namespace"]
-        or saved.get("name") != "showcase"
+        or not isinstance(saved.get("name"), str)
+        or not re.fullmatch(r"[a-z](?:[-a-z0-9]*[a-z0-9])?", saved["name"])
         or pinned != [saved.get("path")]
         or not isinstance(saved.get("content"), str)
     ):
@@ -768,7 +769,9 @@ class Ownership:
             expected = (
                 "/api/object_store/namespaces/"
                 + scope["namespace"]
-                + "/stored_objects/swagger/showcase/"
+                + "/stored_objects/swagger/"
+                + helper.label(saved["name"])
+                + "/"
                 + version
             )
             if expected != saved.get("path"):
@@ -777,7 +780,7 @@ class Ownership:
             helper.verify(
                 _ReadOnlyClient(self.runtime, expected, scope["xc_url"]),
                 expected,
-                "showcase",
+                saved["name"],
                 scope["namespace"],
                 version,
                 saved["content"],

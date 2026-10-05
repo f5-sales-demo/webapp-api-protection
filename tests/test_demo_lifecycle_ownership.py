@@ -564,6 +564,47 @@ class ManifestOwnership(unittest.TestCase):
             with expect_error(state_module.Blocked, "content/version"):
                 fixture.ownership.verify_fixture()
 
+    def test_fixture_preservation_accepts_exact_deployed_name_and_rejects_mismatch(
+        self,
+    ):
+        fixture = self.fixture
+        fixture.context.paths = replace(fixture.context.paths, root=ROOT)
+        pinned = "/api/object_store/namespaces/webapp-api-protection/stored_objects/swagger/synthetic-form/v2"
+        receipt = {
+            "api_url": state_module.FIXED["xc_url"],
+            "namespace": state_module.FIXED["namespace"],
+            "name": "synthetic-form",
+            "path": pinned,
+            "version": "v2",
+            "content": '{"openapi":"3.0.3"}',
+        }
+        state_module.save_json(
+            fixture.context.paths.state / "swagger-receipt.json", receipt
+        )
+        state_module.save_json(
+            fixture.context.paths.vars, {"api_definition_swagger_specs": [pinned]}
+        )
+        with patch.object(
+            fixture.runtime,
+            "xc",
+            return_value={
+                "metadata": {
+                    "name": "synthetic-form",
+                    "namespace": state_module.FIXED["namespace"],
+                    "version": "v2",
+                },
+                "string_value": receipt["content"],
+            },
+        ) as xc:
+            fixture.ownership.verify_fixture()
+            xc.assert_called_once_with(pinned)
+            receipt["name"] = "different-object"
+            state_module.save_json(
+                fixture.context.paths.state / "swagger-receipt.json", receipt
+            )
+            with expect_error(state_module.Blocked, "path mismatch"):
+                fixture.ownership.verify_fixture()
+
     def test_missing_fixture_receipt_never_uploads(self):
         with (
             patch.object(self.fixture.runtime, "xc") as xc,

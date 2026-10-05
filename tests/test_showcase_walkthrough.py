@@ -228,3 +228,26 @@ class RequestFailures(unittest.TestCase):
                 [{**base, "action": "block"}], {"req_id": "synthetic"}, "type"
             )
         )
+
+
+class PhaseScopeTests(unittest.TestCase):
+    def test_schema_legitimate_get_is_not_checked_as_json_post(self):
+        client = Mock()
+
+        def reply(host, path, method, user, body=None):
+            return 200, {
+                "url": "http://" + host + path.removeprefix("/httpbin"),
+                "headers": {"X-Mud-User": user},
+                "json": body,
+            }
+
+        client.request.side_effect = reply
+        result = runner.requests(
+            client,
+            "www.example.test",
+            "schema",
+            "showcase-" + "a" * 32 + "-before",
+            False,
+        )
+        self.assertEqual(result[-1]["path"], "/httpbin/get")
+        self.assertEqual(len(result), 4)
