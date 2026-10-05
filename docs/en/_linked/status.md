@@ -6,7 +6,7 @@ sidebar:
 ---
 
 
-## Current snapshot: 2026-10-04
+## Current snapshot: 2026-10-05
 
 Umbrella: <https://github.com/f5-sales-demo/webapp-api-protection/issues/553>. Implementation: [origin issue
  #710](https://github.com/f5-sales-demo/origin-server/issues/710), [origin PR
@@ -16,18 +16,22 @@ Umbrella: <https://github.com/f5-sales-demo/webapp-api-protection/issues/553>. I
  #554](https://github.com/f5-sales-demo/webapp-api-protection/pull/554). All PRs are drafts and all T01–T16
 tasks remain incomplete.
 
-This snapshot records the implementation revisions inspected before documentation reconciliation: origin `9dec3a1e0b18b35e13ceb0d9c71801152f34ae03`, generator `4c2f5287f52d01284418bc5c497d0eea058ead2c`, WAAP `8e13dc52d718fcce5c70bbdf888e375180b78ec3`. Documentation successors require their own CI/rendered build evidence. Full exact-head application and catalog qualification remains open.
+Current origin `77340fd7efd45c02e0b8c3af7ed434286f236815` completed the 78-check application matrix
+across native, nginx and published layers. Agent visual review covers 315 screenshots; human
+acceptance remains separate. Generator `0ff51e93d9dd7f7345d1532352883c0b91df5793` is installed from
+its verified archive. Source CI and the governed documentation build pass. The five article
+comparisons qualify their recorded candidates, while complete current catalog qualification remains
+open.
 
 The manifest declares nine prefixes and Compose declares 42 container services. The catalog retains 164
-scenarios across 22 suites, including the stable 15 SQLi/18 XSS DVWA mappings. **Fourteen functional contracts
-are declared; 150 scenarios have no declared functional contract. This count is not live qualification.** All
+scenarios across 22 suites, including the stable 15 SQLi/18 XSS DVWA mappings. **131 functional contracts are declared; 33 scenarios lack a contract, and 36 mutation declarations remain failed pending no-change or restoration proof. Declaration is not live qualification.** All
 entries have execution contracts, which are separate from native functional acceptance.
 
 | Evidence layer | Remaining gate |
 | --- | --- |
-| Source implementation | Recurring signup actor ownership, remaining complete functional contracts and interrupted mutation recovery |
-| Installed verification | Complete exact-source nine-app matrix and all catalog functional contracts; benchmark/video remain unqualified |
-| Rendered review | Complete final-source navigation/assets/forms/actors on every native and published serving layer |
+| Source implementation | Remaining complete functional contracts and interrupted mutation recovery |
+| Installed verification | All catalog functional contracts and merged-source application installation; benchmark/video remain unqualified |
+| Rendered review | Agent-reviewed origin matrix complete; human acceptance and merged-source verification pending |
 | Final showcase | Merged upstream archives and installation, preservation reconciliation, clean rebuild, two accepted full passes, attributed controls, restart/reboot and zero-change repeat apply |
 
 Private receipt identifiers include `private-browser-matrix-1791082428479897763`,
@@ -209,3 +213,20 @@ tracker](https://f5-sales-demo.github.io/traffic-generator/en/continuous-catalog
 outstanding work.
 
 [LLM discovery](../llm-discovery/) links the source-generated text hierarchy.
+
+## Delivery follow-up
+
+Fresh native signup/reset on generator `6aa8bbc` passed with exact account, vehicle and mail
+cleanup. Passive discovery on `8b2bcac` returned four scoped native provider results with observed
+cleanup. Rapid browsing on `0ff51e9` completed 360 actions/screenshots and closed the browser with
+zero transport failures: 312 routes rendered and 48 bot-user-agent requests received 403 candidates.
+Functional acceptance remains false until the denials have actual request-bound security
+attribution. Full catalog acceptance remains incomplete.
+
+Privacy containment [#558](https://github.com/f5-sales-demo/webapp-api-protection/pull/558) replaced
+an operational backend example. The owner-approved narrow history rewrite sanitized public branches
+and clean local task refs without changing deployed state or the unrelated worktree; branch
+protection was restored. Three retained GitHub PR refs remain residual exposure in
+[#557](https://github.com/f5-sales-demo/webapp-api-protection/issues/557). The user declined a
+Support purge request. Broader privacy findings remain under review and are not accepted by this
+containment change.
