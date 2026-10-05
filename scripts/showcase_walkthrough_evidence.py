@@ -136,12 +136,18 @@ def schema_report(events: list[dict], access: dict, label: str) -> bool:
     )
 
 
+LOG_INGESTION_MARGIN = 10
+
+
 def collect(
     client: Client, namespace: str, lb: str, probes: list[dict]
 ) -> tuple[list[dict], list[dict]]:
     """Poll logs only; never repeat attack requests while waiting for ingestion."""
     start = min(p["sent_at"] + p.get("clock_offset_min", 0) for p in probes)
-    end = max(p["received_at"] + p.get("clock_offset_max", 0) for p in probes) + 1
+    end = (
+        max(p["received_at"] + p.get("clock_offset_max", 0) for p in probes)
+        + LOG_INGESTION_MARGIN
+    )
     while True:
         records = access_pages(client, namespace, lb, start, end)
         save(client.walkthrough_directory / "access-log-window.json", records)
