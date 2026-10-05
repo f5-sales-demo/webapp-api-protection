@@ -7,6 +7,7 @@ import argparse
 import fcntl
 import hashlib
 import json
+import math
 import os
 import signal
 import time
@@ -408,7 +409,10 @@ def calibrate_clock(client: Client, out: dict, prefix: str) -> None:
                     (moment - probe["received_at"], moment - probe["sent_at"])
                 )
         if len(clocks) == len(probes):
-            low, high = min(c[0] for c in clocks), max(c[1] for c in clocks)
+            low, high = (
+                math.floor(min(c[0] for c in clocks)),
+                math.ceil(max(c[1] for c in clocks)),
+            )
             if not -MAX_CLOCK_OFFSET <= low <= high <= MAX_CLOCK_OFFSET:
                 fail("log clock calibration exceeds five-second bound")
             client.clock_bounds = (low, high)
