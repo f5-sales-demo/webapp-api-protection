@@ -87,7 +87,7 @@ POST /api/data/namespaces/<NAMESPACE>/app_security/suspicious_user_logs
 Use complete bounded windows, follow scroll tokens and reconcile `total_hits`. Missing pages,
 repeated pages, changing totals and exhaustion fail the collection. Decode each returned JSON
 log string once. Match namespace, virtual host, domain, method, path, identity, time and response
-status. Require an unambiguous server request ID and unsampled access record; join security
+status. Require an actual access record for every request and an unambiguous server request ID; join security
 events through that same request ID. For malicious-user mitigation, additionally require a
 fresh suspicious-user detection record, positive activity counters and the later temporary-block
 event. A WAF block alone does not prove behavior detection.

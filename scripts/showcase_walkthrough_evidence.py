@@ -62,7 +62,7 @@ def access_pages(
 
 
 def request_join(event: dict, probe: dict, namespace: str, lb: str) -> bool:
-    """Match every request field and reject sampled evidence."""
+    """Match every actual request; never infer missing records from sampling rates."""
     try:
         return (
             probe["sent_at"] + probe.get("clock_offset_min", 0)
@@ -75,7 +75,6 @@ def request_join(event: dict, probe: dict, namespace: str, lb: str) -> bool:
             and event.get("method") == probe["method"]
             and event.get("user") == identified_user(probe["user"])
             and str(event.get("rsp_code")) == str(probe["status"])
-            and event.get("sample_rate") == 1
         )
     except (EvidenceError, KeyError, TypeError, ValueError):
         return False

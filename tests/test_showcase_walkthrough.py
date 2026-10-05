@@ -166,7 +166,6 @@ class Attribution(unittest.TestCase):
             ("user", "different"),
             ("domain", "example.com"),
             ("req_path", "/different"),
-            ("sample_rate", 0.5),
             ("rsp_code", "200"),
         ]:
             bad = {**e, key: value}
