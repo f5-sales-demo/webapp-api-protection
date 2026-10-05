@@ -410,8 +410,8 @@ def calibrate_clock(client: Client, out: dict, prefix: str) -> None:
                 )
         if len(clocks) == len(probes):
             low, high = (
-                math.floor(min(c[0] for c in clocks)),
-                math.ceil(max(c[1] for c in clocks)),
+                math.floor(min(c[0] for c in clocks)) - 1,
+                math.ceil(max(c[1] for c in clocks)) + 1,
             )
             if not -MAX_CLOCK_OFFSET <= low <= high <= MAX_CLOCK_OFFSET:
                 fail("log clock calibration exceeds five-second bound")
