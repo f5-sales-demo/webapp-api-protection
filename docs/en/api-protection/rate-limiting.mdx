@@ -1,0 +1,163 @@
+---
+title: Rate limiting
+description: "Measure a bounded burst against a per-user 20-per-minute endpoint limit."
+sidebar:
+  order: 3
+---
+
+An API caller can consume disproportionate capacity by repeatedly requesting one endpoint.
+F5 Distributed Cloud API rate limiting bounds request frequency for the configured user
+identity. This demonstration compares a disabled limiter with a configured threshold of
+20 requests per minute for `GET /httpbin/anything/rate-limit`.
+
+HTTPBin supplies a successful origin echo when a request is allowed. The demonstration reports
+actual response counts and joins rate-limit denials to the request that received them. It also
+checks an independent identity and an unrelated path. Do not promise a denial on request 21:
+bucket capacity and replenishment during the burst affect the observed sequence.
+
+## Prerequisites and duration
+
+Use the approved showcase after [preparation](../../demo/) and a passing ownership/readiness
+preflight. Pause continuous traffic before changing configuration. Record installed source
+revisions and complete resource snapshots. Use synthetic identities with the configured
+`X-MUD-User` identification policy. Keep API credentials and receipts private.
+
+**Measured duration:** 111.7 seconds for matched configuration/request phases,
+excluding window preparation and final traffic restart. Captured 2026-10-05 UTC on WAAP
+`37327d3`, origin `9dec3a1`, generator `4c2f528`. Private receipt:
+`e1e964bf13494154891640263a7ea441/rate-limit`. Both phases verified and configuration
+restored. The shared window passed protected readiness and restarted continuous traffic.
+
+The disabled phase returned 32 successful responses: 30 burst requests, one independent
+identity and one unrelated path. The configured burst returned 23 responses with status 200
+and seven attributed 429s. The independent identity and unrelated path both returned 200.
+
+Read the existing endpoint limiter. It must match GET, the exact rate-limit path and the
+captured domain/client scope. Require an inline threshold of 20, unit `MINUTE`, and
+`use_http_lb_user_id`. Verify the attached user-identification policy reads `X-MUD-User`.
+Keep its reference in place while disabling the limiter; otherwise the identity comparison
+could silently become an IP-based comparison.
+
+Use a fresh burst identity in each phase. Never reuse an identity from continuous traffic or
+another rehearsal. The harness sends at most 30 burst requests per phase within its deadline.
+It does not run a native load benchmark or retry an attack while polling telemetry.
+
+## Launch a bounded burst
+
+Set the protected URL and fresh synthetic identity privately. Run 30 GET requests, recording
+the actual response status for each:
+
+```bash
+for request in $(seq 1 30); do
+  curl --silent --show-error --max-time 20     --header "X-MUD-User: $SYNTHETIC_USER"     --output /dev/null --write-out '%{http_code}
+'     "$SHOWCASE_URL/httpbin/anything/rate-limit"
+done
+```
+
+The complete harness also retains allowed origin bodies, timestamps and joined telemetry:
+
+```bash
+python3 scripts/showcase_walkthrough.py rate-limit
+```
+
+## Explain the initial evidence
+
+With limiting disabled, every burst request should return the expected HTTPBin response.
+Require HTTP 200, the exact routed URL and the echoed identity; a 200 HTML page does not
+qualify. Record status counts, elapsed burst time and each request timestamp. Missing responses
+or transport errors are failures, not rate-limit denials.
+
+Check a different fresh identity on the same path and a legitimate GET on `/httpbin/get`.
+These controls establish the comparison boundary. Access records must identify the actual
+requests; complete pagination does not compensate for a missing sampled record. Keep raw
+headers, logs and operational identities private.
+
+## Enable mitigation
+
+Use the complete replacement-form GET/PUT transaction on:
+
+```text
+/api/config/namespaces/<NAMESPACE>/http_loadbalancers/<LOAD_BALANCER>
+```
+
+The focused configuration comparison is:
+
+```json
+{
+  "spec": {
+    "disable_rate_limit": {}
+  }
+}
+```
+
+```json
+{
+  "spec": {
+    "api_rate_limit": {
+      "no_ip_allowed_list": {},
+      "api_endpoint_rules": [
+        {
+          "any_domain": {},
+          "api_endpoint_path": "/httpbin/anything/rate-limit",
+          "api_endpoint_method": {
+            "methods": [
+              "GET"
+            ],
+            "invert_matcher": false
+          },
+          "inline_rate_limiter": {
+            "threshold": 20,
+            "unit": "MINUTE",
+            "use_http_lb_user_id": {}
+          }
+        }
+      ],
+      "server_url_rules": []
+    }
+  }
+}
+```
+
+Remove `disable_rate_limit` and competing `rate_limit` when selecting `api_rate_limit`. Restore
+the captured complete limiter structure, including unrelated endpoint and server URL rules;
+do not submit this excerpt as the whole resource. The [evidence reference](../../reference/evidence/)
+describes preservation, resource versions and readback. Equivalent Terraform inputs are
+`rate_limit_choice = "api_rate_limit"` and the existing endpoint rule's `inline_threshold = 20`.
+
+## Replay and verify
+
+Replay a bounded burst with a fresh identity after configured readback. Count every actual
+200 and 429, and report other responses separately. Require at least one attributed 429 for
+a complete demonstration. The event must be `API Rate Limiting`, with `rate_limiter_action`
+`fail`, `rate_limiter_drop`, the identified user and the expected endpoint policy/rule. Join it
+to the same access-log request ID and response status.
+
+| Expected result | Required evidence |
+| --- | --- |
+| Disabled limiter allows the burst | Actual successful counts and origin echoes |
+| Enabled limiter produces attributed 429 | Actual denial count and request-bound limiter events |
+| Independent identity succeeds | New identity on the same path |
+| Unrelated path succeeds | Legitimate `/httpbin/get` response |
+
+A 429 from another component cannot satisfy this gate. If the bounded burst produces no
+attributed denial, record an incomplete result and investigate configuration or pacing; do not
+invent a count or extend the burst without bounds. Explain that this is a per-identified-user
+policy on one endpoint, not a guaranteed ordinal cutoff or a catalog performance benchmark.
+
+## Restore and read further
+
+Restore the complete original resource immediately, including after a failed request or
+telemetry timeout. Restore any temporary detection isolation too. Read back the protected
+configuration, verify legitimate requests and pass readiness before restarting continuous
+traffic. A concurrent configuration change rejects automatic restoration; preserve the snapshot
+for coordinated recovery. Failed restoration or missing evidence leaves this demonstration
+incomplete.
+
+The [evidence reference](../../reference/evidence/) defines API transaction bodies, pagination,
+attribution and private receipts. [Implementation status](../../origin-traffic-remediation-tasks/)
+tracks the separate merged-installation, clean-rebuild and full-catalog gates. This category does
+not qualify the entire catalog or resolve repository-wide privacy findings.
+
+See [F5 bucket behavior](https://my.f5.com/manage/s/article/K000161473) and
+[security-event reference](https://docs.cloud.f5.com/docs-v2/platform/reference/security-events-reference).
+Continue with [malicious-user mitigation](../../behavior-based-protection/malicious-user-mitigation/).

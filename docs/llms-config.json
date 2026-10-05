@@ -1,11 +1,13 @@
 {
-  "customSets": [
-    {
-      "label": "Demo",
-      "description": "Terraform-driven web app & API protection exercise on F5 Distributed Cloud",
-      "paths": ["demo/**"]
-    }
+  "promote": [
+    "index*",
+    "_linked/overview*",
+    "start-here/**",
+    "demo*",
+    "web-application-protection/**",
+    "api-protection/**",
+    "behavior-based-protection/**"
   ],
-  "promote": ["index*", "overview*"],
-  "demote": ["references*", "faq*"]
+  "demote": ["reference/**", "origin-traffic-remediation-tasks*", "llm-discovery*", "_history/**", "_linked/status*"],
+  "tieredHierarchy": true
 }

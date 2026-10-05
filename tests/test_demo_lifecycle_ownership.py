@@ -564,6 +564,47 @@ class ManifestOwnership(unittest.TestCase):
             with expect_error(state_module.Blocked, "content/version"):
                 fixture.ownership.verify_fixture()
 
+    def test_fixture_preservation_accepts_exact_deployed_name_and_rejects_mismatch(
+        self,
+    ):
+        fixture = self.fixture
+        fixture.context.paths = replace(fixture.context.paths, root=ROOT)
+        pinned = "/api/object_store/namespaces/webapp-api-protection/stored_objects/swagger/synthetic-form/v2"
+        receipt = {
+            "api_url": state_module.FIXED["xc_url"],
+            "namespace": state_module.FIXED["namespace"],
+            "name": "synthetic-form",
+            "path": pinned,
+            "version": "v2",
+            "content": '{"openapi":"3.0.3"}',
+        }
+        state_module.save_json(
+            fixture.context.paths.state / "swagger-receipt.json", receipt
+        )
+        state_module.save_json(
+            fixture.context.paths.vars, {"api_definition_swagger_specs": [pinned]}
+        )
+        with patch.object(
+            fixture.runtime,
+            "xc",
+            return_value={
+                "metadata": {
+                    "name": "synthetic-form",
+                    "namespace": state_module.FIXED["namespace"],
+                    "version": "v2",
+                },
+                "string_value": receipt["content"],
+            },
+        ) as xc:
+            fixture.ownership.verify_fixture()
+            xc.assert_called_once_with(pinned)
+            receipt["name"] = "different-object"
+            state_module.save_json(
+                fixture.context.paths.state / "swagger-receipt.json", receipt
+            )
+            with expect_error(state_module.Blocked, "path mismatch"):
+                fixture.ownership.verify_fixture()
+
     def test_missing_fixture_receipt_never_uploads(self):
         with (
             patch.object(self.fixture.runtime, "xc") as xc,
@@ -573,6 +614,50 @@ class ManifestOwnership(unittest.TestCase):
                 self.fixture.ownership.verify_fixture()
             xc.assert_not_called()
             run.assert_not_called()
+
+
+class SignupRecoveryEnrollmentTests(unittest.TestCase):
+    def test_fixture_enrollment_uses_owned_forced_command_destinations(self):
+        fixture = make_fixture(self)
+        fixture.context.state.outputs = {
+            "origin": {"public_ip": "192.0.2.1"},
+            "generator": {"public_ip": "192.0.2.2"},
+        }
+        fixture.context.state.resources = []
+        state = fixture.context.paths.state
+        (state / "signup-recovery-key").write_text("PRIVATE-SYNTHETIC-KEY")
+        (state / "signup-recovery-key.pub").write_text("ssh-ed25519 " + "A" * 68)
+        fixture.context.paths.known_hosts.write_text("192.0.2.1 ssh-ed25519 AAAA")
+        fixtures = {
+            "fixture_type": "seeded-synthetic-origin-accounts",
+            "crapi_tokens": ["one", "two"],
+        }
+        with (
+            patch.object(
+                fixture.ownership,
+                "owned_guest",
+                side_effect=lambda _r, _role, candidate: candidate,
+            ),
+            patch.object(fixture.ownership, "ssh_argv", return_value=["ssh", "owned"]),
+            patch.object(
+                fixture.runtime,
+                "run",
+                side_effect=lambda argv, **_kwargs: (
+                    ("192.0.2.1 ssh-ed25519 AAAA\n", 0)
+                    if argv[0] == "ssh-keygen"
+                    else (json.dumps(fixtures), 0)
+                ),
+            ) as run,
+        ):
+            fixture.ownership.catalog_fixtures()
+        commands = [list(call.args[0]) for call in run.call_args_list]
+        ensure(any("/usr/local/bin/enroll-signup-recovery" in cmd for cmd in commands))
+        saved = json.loads((state / "catalog-fixtures.json").read_text())
+        ensure_equal(saved["signup_recovery"]["host"], "192.0.2.1")
+        ensure_equal(
+            saved["signup_recovery"]["key"],
+            "/opt/traffic-generator/signup-recovery-key",
+        )
 
 
 class ReviewedOwnershipDefects(unittest.TestCase):

@@ -1,0 +1,157 @@
+---
+title: Endpoint restrictions
+description: "Restrict POST and DELETE on one synthetic administrative path."
+sidebar:
+  order: 2
+---
+
+An application may expose a sensitive method on an endpoint that should be restricted at its
+public boundary. F5 Distributed Cloud API protection rules can deny requests that match a
+method and path while leaving unrelated requests usable. This demonstration compares an
+allow rule with a deny rule for `POST` and `DELETE` on `/httpbin/anything/admin`.
+
+HTTPBin echoes both methods. The path name `admin` identifies the policy demonstration;
+HTTPBin does not implement a privileged administrative operation there. The result demonstrates
+endpoint policy enforcement, not broken object authorization or an application database exploit.
+Use that distinction when explaining the protection to a customer.
+
+## Prerequisites and duration
+
+Use the approved showcase after [preparation](../../demo/) and a passing ownership/readiness
+preflight. Pause continuous traffic before changing configuration. Record installed source
+revisions and complete resource snapshots. Use synthetic identities with the configured
+`X-MUD-User` identification policy. Keep API credentials and receipts private.
+
+**Measured duration:** 88.3 seconds for matched configuration/request phases,
+excluding window preparation and final traffic restart. Captured 2026-10-05 UTC on WAAP
+`37327d3`, origin `9dec3a1`, generator `4c2f528`. Private receipt:
+`e1e964bf13494154891640263a7ea441/endpoint-denial`. Both phases verified and configuration
+restored. The shared window passed protected readiness and restarted continuous traffic.
+
+POST and DELETE both returned 200 with the allow rule, then 403 with request-bound
+`API Protection Rule` deny events. The unrelated GET returned 200 in both phases.
+
+Read the exact existing endpoint rule before starting. Require one rule matching the complete
+path and the two methods. Preserve its domain and client matchers, metadata and list position.
+An earlier rule, a trusted-client bypass or an unrelated policy can change the result; capture
+the effective configuration rather than relying on Terraform defaults. The demonstration uses
+small synthetic JSON bodies and fresh identities to avoid schema and behavior interference.
+
+## Launch a request
+
+With the matching rule set to allow, send a POST through the protected domain:
+
+```bash
+curl --silent --show-error --max-time 20   --request POST   --header 'Content-Type: application/json'   --header "X-MUD-User: $SYNTHETIC_USER"   --data '{"demo_id":"synthetic-walkthrough"}'   "$SHOWCASE_URL/httpbin/anything/admin"
+```
+
+Repeat the request with `--request DELETE` and a separate fresh identity. Keep the payload and
+path identical when replaying each method in the blocking phase. The harness launches both
+methods and an unrelated legitimate GET in each phase:
+
+```bash
+python3 scripts/showcase_walkthrough.py endpoint-denial
+```
+
+## Explain the initial evidence
+
+Both methods must reach HTTPBin and return HTTP 200 with the expected origin echo. Inspect the
+method, routed URL, submitted JSON and `X-MUD-User` header. Join the access record to the request
+identity, domain and send/receive window. A direct-origin request can help diagnose routing but
+cannot replace the protected allow-phase request.
+
+Capture a separate GET to `/httpbin/get`. Its response establishes that an unrelated path
+works before enforcement. Keep that same check for the after phase so an overly broad rule
+cannot appear to be a successful focused restriction. Missing application content or an
+unexpected response leaves the comparison incomplete before the deny rule is applied.
+
+## Enable mitigation
+
+Fetch the load balancer's complete replacement form. Change only the matched endpoint rule's
+action, then submit the full resource using:
+
+```text
+PUT /api/config/namespaces/<NAMESPACE>/http_loadbalancers/<LOAD_BALANCER>
+```
+
+The focused excerpts show the relevant rule shape. Preserve all existing siblings and fields
+when constructing the executable body:
+
+```json
+{
+  "api_endpoint_path": "/httpbin/anything/admin",
+  "api_endpoint_method": {
+    "methods": [
+      "POST",
+      "DELETE"
+    ],
+    "invert_matcher": false
+  },
+  "any_domain": {},
+  "action": {
+    "allow": {}
+  }
+}
+```
+
+```json
+{
+  "api_endpoint_path": "/httpbin/anything/admin",
+  "api_endpoint_method": {
+    "methods": [
+      "POST",
+      "DELETE"
+    ],
+    "invert_matcher": false
+  },
+  "any_domain": {},
+  "action": {
+    "deny": {}
+  }
+}
+```
+
+Select `deny` and remove the mutually exclusive `allow` field. Do not append a second rule or
+replace the entire rule list with this excerpt. The [API transaction](../../reference/evidence/)
+retains the resource version and checks for concurrent changes. Equivalent Terraform input:
+set the existing `api_protection_rules` entry's `action` to `"deny"`.
+
+The harness temporarily disables malicious-user detection while preserving identification. This
+keeps the demonstration about the endpoint rule; it restores that temporary change afterward.
+Read back the complete resource before replaying either method.
+
+## Replay and verify
+
+Repeat POST and DELETE against the same path using fresh synthetic identities. Require a
+changed response and an `API Protection Rule` security event for each request. Attribution must
+identify the expected policy, rule and namespace, a deny result, and the same server request ID
+as the access record. A generic denial without that rule attribution is incomplete.
+
+| Expected result | Required evidence |
+| --- | --- |
+| Allow reaches the origin | Correct method, URL and body echo |
+| Deny stops POST and DELETE | Matched API protection rule events |
+| Unrelated GET succeeds | HTTP 200 and legitimate origin echo |
+
+Explain the matching scope precisely. This rule targets two methods on one path and the
+captured domain/client scope. It does not establish a complete access-control model for other
+methods, path variants or authenticated business actions. Check those separately when designing
+an application policy. The comparison succeeds only when both intended denials and the
+unrelated legitimate response are present.
+
+## Restore and read further
+
+Restore the complete original resource immediately, including after a failed request or
+telemetry timeout. Restore any temporary detection isolation too. Read back the protected
+configuration, verify legitimate requests and pass readiness before restarting continuous
+traffic. A concurrent configuration change rejects automatic restoration; preserve the snapshot
+for coordinated recovery. Failed restoration or missing evidence leaves this demonstration
+incomplete.
+
+The [evidence reference](../../reference/evidence/) defines API transaction bodies, pagination,
+attribution and private receipts. [Implementation status](../../origin-traffic-remediation-tasks/)
+tracks the separate merged-installation, clean-rebuild and full-catalog gates. This category does
+not qualify the entire catalog or resolve repository-wide privacy findings.
+
+See [F5 security-event reference](https://docs.cloud.f5.com/docs-v2/platform/reference/security-events-reference)
+for policy-hit interpretation. Continue with [rate limiting](../rate-limiting/).

@@ -1,0 +1,136 @@
+---
+title: SQL injection and reflected cross-site scripting
+description: "Compare authenticated DVWA behavior with web application firewall enforcement."
+sidebar:
+  order: 1
+---
+
+SQL injection changes how an application interprets database input. Reflected cross-site
+scripting (XSS) returns attacker-controlled script content to a browser. This demonstration
+uses the Damn Vulnerable Web Application (DVWA) with seeded synthetic data and an authenticated
+low-security session. F5 Distributed Cloud's web application firewall (WAF) first monitors the
+requests, then blocks the same requests before they reach DVWA.
+
+The initial proof comes from DVWA's behavior: multiple synthetic rows for the injection and a
+harmless browser title marker for the reflected script. An HTTPBin echo would not demonstrate
+either vulnerability. The final proof combines the changed response with an attributed WAF
+security event and successful legitimate inputs.
+
+## Prerequisites and duration
+
+Use the approved showcase after [preparation](../../demo/) and a passing ownership/readiness
+preflight. Pause continuous traffic before changing configuration. Record installed source
+revisions and complete resource snapshots. Use synthetic identities with the configured
+`X-MUD-User` identification policy. Keep API credentials and receipts private.
+
+**Measured duration:** 78.9 seconds for matched configuration/request phases,
+excluding window preparation and final traffic restart. Captured 2026-10-05 UTC on WAAP
+`37327d3`, origin `9dec3a1`, generator `4c2f528`. Private receipt:
+`e1e964bf13494154891640263a7ea441/waf`. Both phases verified and configuration
+restored. The shared window passed protected readiness and restarted continuous traffic.
+
+Monitoring returned native authenticated DVWA SQL rows and executed the harmless title marker.
+Blocking returned 403 for both payloads with request-bound WAF events: SQL signatures
+`200002883`/`200002835` and XSS signatures `200000098`/`200001475`. Both legitimate
+inputs returned 200 in both phases; the blocked response did not execute the marker.
+
+Use the existing origin-authenticated DVWA session fixture for the selected protected domain.
+Do not create an unrelated account or infer authentication from a 200 login page. The session
+must select DVWA's low security level. Session cookies stay in a private cookie file and never
+appear in a published receipt. The browser check executes the captured response with network
+requests disabled; its only marker changes the page title.
+
+## Launch representative requests
+
+Run each request against the same protected domain. Set `SHOWCASE_URL`, `SYNTHETIC_USER` and
+`PRIVATE_DVWA_COOKIES` from the private operator environment. Use a different fresh identity
+for each request while retaining the same payload in both phases.
+
+```bash
+curl --silent --show-error --max-time 20   --cookie "$PRIVATE_DVWA_COOKIES"   --header "X-MUD-User: $SYNTHETIC_USER"   --get --data-urlencode "id=1' OR '1'='1"   --data-urlencode 'Submit=Submit'   "$SHOWCASE_URL/dvwa/vulnerabilities/sqli/"
+```
+
+```bash
+curl --silent --show-error --max-time 20   --cookie "$PRIVATE_DVWA_COOKIES"   --header "X-MUD-User: $SYNTHETIC_USER"   --get --data-urlencode "name=<script>document.title='waap-synthetic-marker'</script>"   "$SHOWCASE_URL/dvwa/vulnerabilities/xss_r/"
+```
+
+## Explain the initial evidence
+
+In monitoring mode, require native authenticated content. The injection must return more than
+one synthetic user row; the legitimate `id=1` query must return one row. The reflected response
+must contain the harmless script unchanged, and the isolated browser must report
+`waap-synthetic-marker` as its title. Merely finding an encoded script string does not prove
+execution. The marker collects no cookies and sends no data to another destination.
+
+Retain send/receive times, path, query-payload digest, response status and relevant HTML.
+Join each access record to the actual request identity and domain. A redirect to login, an
+unexpected page or absent application content leaves the initial phase incomplete. Keep the
+raw HTML and sessions private; publish only reviewed synthetic excerpts from a successful run.
+
+## Enable mitigation
+
+Use `GET` with `GET_RSP_FORMAT_FOR_REPLACE` followed by `PUT` on:
+
+```text
+/api/config/namespaces/<NAMESPACE>/app_firewalls/<FIREWALL>
+```
+
+Change the enforcement choice in the complete replacement form. These focused excerpts explain
+the change; submit the complete body preserved by the [transaction harness](../../reference/evidence/).
+
+```json
+{
+  "spec": {
+    "monitoring": {}
+  }
+}
+```
+
+```json
+{
+  "spec": {
+    "blocking": {}
+  }
+}
+```
+
+Remove `monitoring` when selecting `blocking`. Preserve signature selection, detection settings,
+blocking-page configuration and the load balancer attachment. Equivalent Terraform input:
+`waf_mode = "blocking"`. Temporarily disable behavior detection for this comparison while
+retaining its identity policy; restore it afterward. This prevents a previously scored identity
+from making a later response look like a WAF content block.
+
+## Replay and verify
+
+Replay the same payloads with fresh synthetic identities after complete configuration readback.
+Require the configured blocking response and a WAF event joined by request ID, domain, path,
+method, identity and time. Verify the firewall name and enabled signature evidence. Another
+control's denial or an origin error cannot satisfy the WAF gate.
+
+| Expected result | Required evidence |
+| --- | --- |
+| Monitoring reaches DVWA | Synthetic rows and executed harmless marker |
+| Blocking denies the same payload | Request-bound WAF event and changed response |
+| Legitimate inputs still work | One row for `id=1`; greeting for a plain name |
+
+Confirm the blocked reflected response does not execute the marker. Explain that WAF filtering
+reduces exposure while application parameter handling and output encoding remain relevant
+application fixes. This article demonstrates the configured showcase control, not every possible
+SQL injection or XSS variant.
+
+## Restore and read further
+
+Restore the complete original resource immediately, including after a failed request or
+telemetry timeout. Restore any temporary detection isolation too. Read back the protected
+configuration, verify legitimate requests and pass readiness before restarting continuous
+traffic. A concurrent configuration change rejects automatic restoration; preserve the snapshot
+for coordinated recovery. Failed restoration or missing evidence leaves this demonstration
+incomplete.
+
+The [evidence reference](../../reference/evidence/) defines API transaction bodies, pagination,
+attribution and private receipts. [Implementation status](../../origin-traffic-remediation-tasks/)
+tracks the separate merged-installation, clean-rebuild and full-catalog gates. This category does
+not qualify the entire catalog or resolve repository-wide privacy findings.
+
+See [F5 security monitoring](https://docs.cloud.f5.com/docs-v2/web-app-and-api-protection/how-to/observe/monitor-waap)
+for interpreting WAF findings. Continue with [request validation](../../api-protection/request-validation/).

@@ -19,6 +19,38 @@ resource "xcsh_http_loadbalancer" "http" {
     weight   = 1
     priority = 1
   }
+  dynamic "routes" {
+    for_each = [for route in var.custom_routes : route if route.type == "simple" && (route.use_websocket || route.timeout_ms != null || route.disable_retries)]
+    content {
+      simple_route {
+        http_method = routes.value.http_method
+        path {
+          prefix = routes.value.path_mode == "prefix" ? routes.value.path_value : null
+          path   = routes.value.path_mode == "exact" ? routes.value.path_value : null
+          regex  = routes.value.path_mode == "regex" ? routes.value.path_value : null
+        }
+        origin_pools {
+          pool {
+            name      = xcsh_origin_pool.origin.name
+            namespace = var.namespace
+          }
+        }
+        advanced_options {
+          priority        = routes.value.priority
+          timeout         = routes.value.timeout_ms
+          no_retry_policy = routes.value.disable_retries ? {} : null
+          dynamic "web_socket_config" {
+            for_each = routes.value.use_websocket ? [1] : []
+            content { use_websocket = true }
+          }
+        }
+      }
+    }
+  }
+  dynamic "more_option" {
+    for_each = var.lb_stream_idle_timeout_ms == null ? [] : [1]
+    content { idle_timeout = var.lb_stream_idle_timeout_ms }
+  }
   app_firewall {
     name      = xcsh_app_firewall.this.name
     namespace = var.namespace

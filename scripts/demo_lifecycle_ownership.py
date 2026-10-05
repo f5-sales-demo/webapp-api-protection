@@ -345,10 +345,15 @@ def _fixture_receipt(context: Context) -> dict[str, Any]:
     if not isinstance(saved, dict):
         message = "fixture preservation identity mismatch"
         raise Blocked(message)
+    name = saved.get("name")
+    if not isinstance(name, str) or not re.fullmatch(
+        r"[a-z](?:[-a-z0-9]*[a-z0-9])?", name
+    ):
+        message = "fixture preservation identity mismatch"
+        raise Blocked(message)
     if (
         saved.get("api_url") != scope["xc_url"]
         or saved.get("namespace") != scope["namespace"]
-        or saved.get("name") != "showcase"
         or pinned != [saved.get("path")]
         or not isinstance(saved.get("content"), str)
     ):
@@ -480,6 +485,75 @@ class Ownership:
             ]
         )[0]
         fixtures = json.loads(payload)
+        # Enroll one purpose-specific forced-command key; no general root access.
+        key_path = self.context.paths.state / "signup-recovery-key"
+        if not key_path.exists():
+            self.runtime.run(
+                [
+                    "ssh-keygen",
+                    "-q",
+                    "-t",
+                    "ed25519",
+                    "-N",
+                    "",
+                    "-C",
+                    "waap-catalog-signup-recovery",
+                    "-f",
+                    key_path,
+                ]
+            )
+        public = key_path.with_suffix(".pub").read_text().strip()
+        self.runtime.run(
+            [
+                *self.ssh_argv(origin, "yes"),
+                "sudo",
+                "-n",
+                "/usr/local/bin/enroll-signup-recovery",
+            ],
+            input_text=public,
+        )
+        recovery = {
+            "host": origin["public_ip"],
+            "key": "/opt/traffic-generator/signup-recovery-key",
+            "known_hosts": "/opt/traffic-generator/signup-recovery-known_hosts",
+        }
+        # Same SSH host key already enrolled on this ownership-verified route.
+        known = self.runtime.run(
+            [
+                "ssh-keygen",
+                "-F",
+                origin["public_ip"],
+                "-f",
+                self.context.paths.known_hosts,
+            ]
+        )[0]
+        # Export the already-enrolled host's verified key in portable plain-host form.
+        rows = [
+            line.split()
+            for line in known.splitlines()
+            if line and not line.startswith("#")
+        ]
+        known = (
+            "\n".join(origin["public_ip"] + " " + " ".join(row[1:3]) for row in rows)
+            + "\n"
+        )
+        if not rows:
+            message = "owned recovery SSH host key unavailable"
+            raise Blocked(message)
+        package = {"key": key_path.read_text(), "known_hosts": known}
+        install = "import json,sys,pathlib,os; os.umask(0o077); p=json.load(sys.stdin); root=pathlib.Path('/opt/traffic-generator'); [(root/('signup-recovery-'+n)).write_text(p[n]) for n in ['key','known_hosts']]; [(root/('signup-recovery-'+n)).chmod(0o600) for n in ['key','known_hosts']]"
+        self.runtime.run(
+            [
+                *self.ssh_argv(generator, "yes"),
+                "sudo",
+                "-n",
+                "python3",
+                "-c",
+                __import__("shlex").quote(install),
+            ],
+            input_text=json.dumps(package),
+        )
+        fixtures["signup_recovery"] = recovery
         if fixtures.get(
             "fixture_type"
         ) != "seeded-synthetic-origin-accounts" or not fixtures.get("crapi_tokens"):
@@ -559,7 +633,11 @@ class Ownership:
                 message = "continuous catalog inactive or failed; private receipts require repair"
                 raise Blocked(message)
             if len(passes) >= _REQUIRED_CATALOG_PASSES and all(
-                p.get("passed") and p.get("catalog_complete")
+                p.get("passed")
+                and p.get("catalog_complete")
+                and p.get("catalog_accepted")
+                and p.get("source_commit") == status.get("source_commit")
+                and p.get("artifact_sha256") == status.get("artifact_sha256")
                 for p in passes[-_REQUIRED_CATALOG_PASSES:]
             ):
                 self.runtime.phase("two-complete-catalog-passes")
@@ -764,7 +842,9 @@ class Ownership:
             expected = (
                 "/api/object_store/namespaces/"
                 + scope["namespace"]
-                + "/stored_objects/swagger/showcase/"
+                + "/stored_objects/swagger/"
+                + helper.label(saved["name"])
+                + "/"
                 + version
             )
             if expected != saved.get("path"):
@@ -773,7 +853,7 @@ class Ownership:
             helper.verify(
                 _ReadOnlyClient(self.runtime, expected, scope["xc_url"]),
                 expected,
-                "showcase",
+                saved["name"],
                 scope["namespace"],
                 version,
                 saved["content"],
