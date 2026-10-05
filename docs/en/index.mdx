@@ -1,39 +1,21 @@
 ---
-title: Web Application & API Protection (WAAP)
+title: Web App & API Protection
 description: Declarative end-to-end multi-threat protection demo with HTTP Load Balancer, WAF, Bot Defense, and Client-Side Defense.
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, Steps } from '@astrojs/starlight/components';
 
 The **Web Application & API Protection (WAAP)** demonstration illustrates how to secure modern web applications and APIs against multi-vector threats using F5 Distributed Cloud and Terraform automation.
 
 ## Architecture
 
-```text
-+-------------------------------------------------------------------------+
-|                   F5 Distributed Cloud WAAP Architecture                |
-|                                                                         |
-|  Client Traffic                                                         |
-|        |                                                                |
-|        v                                                                |
-|  +-------------------------------------------------------------------+  |
-|  | F5 Distributed Cloud HTTP Load Balancer (Public VIP)              |  |
-|  +---------------------------------+---------------------------------+  |
-|                                    |                                    |
-|         +--------------------------+--------------------------+         |
-|         | Layer 7 Inspection Pipeline                         |         |
-|         v                                                     v         |
-|  +-----------------------------+               +---------------------+  |
-|  | Web Application Firewall    |               | Bot Defense & CSD   |  |
-|  | (Signatures, Staging Staged)|               | (Client Telemetry)  |  |
-|  +-----------------------------+               +---------------------+  |
-|                                    |                                    |
-|                                    v                                    |
-|  +-------------------------------------------------------------------+  |
-|  | Origin Pool: Backend Microservices & API Endpoints                |  |
-|  +-------------------------------------------------------------------+  |
-+-------------------------------------------------------------------------+
-```
+<Steps>
+
+1. **Client traffic** enters the public VIP of the F5 Distributed Cloud HTTP load balancer.
+2. **Layer 7 inspection** applies Web Application Firewall signatures and staged enforcement. Bot Defense and Client-Side Defense provide their respective detection and client telemetry.
+3. **Origin pool** forwards traffic to backend microservices and API endpoints.
+
+</Steps>
 
 ## Key Capabilities
 
