@@ -5,7 +5,13 @@ from __future__ import annotations
 import json
 import time
 
-from demo_verify_client import MAX_PAGES, PAGE_LIMIT, Client, _page_batch
+from demo_verify_client import (
+    MAX_PAGES,
+    MIN_TELEMETRY_WINDOW,
+    PAGE_LIMIT,
+    Client,
+    _page_batch,
+)
 from demo_verify_evidence import (
     attributed,
     decode_event,
@@ -25,7 +31,7 @@ def access_pages(
     payload = {
         "namespace": namespace,
         "query": "{vh_name=" + json.dumps(virtual_host(lb)) + "}",
-        "start_time": str(int(start)),
+        "start_time": str(min(int(start), int(end) - MIN_TELEMETRY_WINDOW)),
         "end_time": str(int(end) + 1),
         "limit": PAGE_LIMIT,
         "scroll": True,

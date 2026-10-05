@@ -275,3 +275,15 @@ class ReplacementEnvelopeTests(unittest.TestCase):
             client.api.return_value[1]["resource_version"] = ""
             with self.assertRaises(EvidenceError):
                 config.read("/api/config/synthetic")
+
+
+class MinimumLogWindowTests(unittest.TestCase):
+    def test_short_phase_queries_minimum_window_without_widening_request_join(self):
+        client = Mock()
+        client.api.return_value = (
+            200,
+            {"logs": [], "total_hits": "0", "scroll_id": ""},
+        )
+        access_pages(client, "synthetic", "synthetic", 100.1, 100.3)
+        query = client.api.call_args.args[1]
+        self.assertGreaterEqual(int(query["end_time"]) - int(query["start_time"]), 10)
