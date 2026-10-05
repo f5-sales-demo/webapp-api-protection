@@ -345,11 +345,15 @@ def _fixture_receipt(context: Context) -> dict[str, Any]:
     if not isinstance(saved, dict):
         message = "fixture preservation identity mismatch"
         raise Blocked(message)
+    name = saved.get("name")
+    if not isinstance(name, str) or not re.fullmatch(
+        r"[a-z](?:[-a-z0-9]*[a-z0-9])?", name
+    ):
+        message = "fixture preservation identity mismatch"
+        raise Blocked(message)
     if (
         saved.get("api_url") != scope["xc_url"]
         or saved.get("namespace") != scope["namespace"]
-        or not isinstance(saved.get("name"), str)
-        or not re.fullmatch(r"[a-z](?:[-a-z0-9]*[a-z0-9])?", saved["name"])
         or pinned != [saved.get("path")]
         or not isinstance(saved.get("content"), str)
     ):

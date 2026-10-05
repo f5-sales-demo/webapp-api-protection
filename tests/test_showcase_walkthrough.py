@@ -232,7 +232,7 @@ class RequestFailures(unittest.TestCase):
 
 class PhaseScopeTests(unittest.TestCase):
     def test_schema_legitimate_get_is_not_checked_as_json_post(self):
-        client = Mock()
+        client = Mock(spec=["request"])
 
         def reply(host, path, method, user, body=None):
             return 200, {
