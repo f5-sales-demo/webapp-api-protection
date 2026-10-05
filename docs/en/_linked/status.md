@@ -56,12 +56,18 @@ and wrong-type events were verified, original configuration restored, protected 
 passed and traffic restarted. Receipt `c5e52e4ad6494bed9f6d90033229f64b/schema` binds WAAP
 `2d8980b`, origin `9dec3a1` and generator `4c2f528`.
 
-Endpoint, rate, WAF and malicious-user receipts from that window remain incomplete. Their
-configuration restoration passed. Pagination, envelope version, prefix echo, clock calibration,
-event ingestion and sequential-request attribution defects in the walkthrough harness were
-reproduced and fixed with regression tests. Fresh retries use those fixes. No other category
-is qualified by the schema result. Keep the implementation PR draft while all existing
-installation, rebuild and final acceptance gates remain open.
+The retry window `e1e964bf13494154891640263a7ea441` verified endpoint restrictions (88.3 seconds),
+rate limiting (111.7 seconds) and authenticated DVWA SQL injection/reflected scripting
+(78.9 seconds). Each category restored its original configuration; final protected readiness
+passed and traffic restarted. The rate burst produced 23 origin 200 responses and seven
+attributed 429s, with independent identity and unrelated path both successful. These results
+bind WAAP `37327d3`, origin `9dec3a1` and generator `4c2f528`.
+
+Malicious-user mitigation remains incomplete. The retained failed category timed out before
+fresh detection plus later benign-request mitigation attribution completed; its configuration
+restored. A focused retry uses the corrected sequential-request matcher and conservative
+clock bounds. Historical failures remain failed, including earlier endpoint/rate/WAF attempts.
+Full-catalog, merged-installation, clean-rebuild and final acceptance gates remain open.
 
 ## Implementation tasks
 

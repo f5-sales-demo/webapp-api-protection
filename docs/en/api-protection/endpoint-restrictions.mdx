@@ -26,7 +26,7 @@ revisions and complete resource snapshots. Use synthetic identities with the con
 excluding window preparation and final traffic restart. Captured 2026-10-05 UTC on WAAP
 `37327d3`, origin `9dec3a1`, generator `4c2f528`. Private receipt:
 `e1e964bf13494154891640263a7ea441/endpoint-denial`. Both phases verified and configuration
-restored. The shared window's protected readiness and restart result is recorded separately.
+restored. The shared window passed protected readiness and restarted continuous traffic.
 
 POST and DELETE both returned 200 with the allow rule, then 403 with request-bound
 `API Protection Rule` deny events. The unrelated GET returned 200 in both phases.
