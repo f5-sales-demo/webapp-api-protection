@@ -706,7 +706,7 @@ def _origin_route(route: urllib.parse.SplitResult, host: str, path: str) -> bool
     return (
         route.scheme == "http"
         and route.hostname == host
-        and route.path == path.removeprefix("/httpbin")
+        and route.path == path
         and not (route.query or route.fragment or route.username)
         and route.port in (None, HTTP_PORT)
     )

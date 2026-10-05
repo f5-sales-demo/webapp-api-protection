@@ -197,7 +197,9 @@ def continuous_status(status):
     }
 
 
-def readiness_client(cloud_status="done", returned_host=None, returned_path="/get"):
+def readiness_client(
+    cloud_status="done", returned_host=None, returned_path="/httpbin/get"
+):
     client = Mock()
     client.ssh.side_effect = [
         json.dumps({"status": cloud_status, "errors": [], "recoverable_errors": {}}),
@@ -371,7 +373,7 @@ def rate_client(statuses):
     def respond(host, path, method, user):
         code = next(codes)
         return code, {
-            "url": "http://" + host + path.removeprefix("/httpbin"),
+            "url": "http://" + host + path,
             "headers": {"X-Mud-User": user},
         } if code == 200 else None
 

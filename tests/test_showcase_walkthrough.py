@@ -236,7 +236,7 @@ class PhaseScopeTests(unittest.TestCase):
 
         def reply(host, path, method, user, body=None):
             return 200, {
-                "url": "http://" + host + path.removeprefix("/httpbin"),
+                "url": "http://" + host + path,
                 "headers": {"X-Mud-User": user},
                 "json": body,
             }
