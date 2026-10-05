@@ -616,6 +616,44 @@ class ManifestOwnership(unittest.TestCase):
             run.assert_not_called()
 
 
+class SignupRecoveryEnrollmentTests(unittest.TestCase):
+    def test_fixture_enrollment_uses_owned_forced_command_destinations(self):
+        fixture = make_fixture(self)
+        fixture.context.state.outputs = {
+            "origin": {"public_ip": "192.0.2.1"},
+            "generator": {"public_ip": "192.0.2.2"},
+        }
+        fixture.context.state.resources = []
+        state = fixture.context.paths.state
+        (state / "signup-recovery-key").write_text("PRIVATE-SYNTHETIC-KEY")
+        (state / "signup-recovery-key.pub").write_text("ssh-ed25519 " + "A" * 68)
+        fixture.context.paths.known_hosts.write_text("synthetic known host")
+        fixtures = {
+            "fixture_type": "seeded-synthetic-origin-accounts",
+            "crapi_tokens": ["one", "two"],
+        }
+        with (
+            patch.object(
+                fixture.ownership,
+                "owned_guest",
+                side_effect=lambda _r, _role, candidate: candidate,
+            ),
+            patch.object(fixture.ownership, "ssh_argv", return_value=["ssh", "owned"]),
+            patch.object(
+                fixture.runtime, "run", return_value=(json.dumps(fixtures), 0)
+            ) as run,
+        ):
+            fixture.ownership.catalog_fixtures()
+        commands = [list(call.args[0]) for call in run.call_args_list]
+        ensure(any("/usr/local/bin/enroll-signup-recovery" in cmd for cmd in commands))
+        saved = json.loads((state / "catalog-fixtures.json").read_text())
+        ensure_equal(saved["signup_recovery"]["host"], "192.0.2.1")
+        ensure_equal(
+            saved["signup_recovery"]["key"],
+            "/opt/traffic-generator/signup-recovery-key",
+        )
+
+
 class ReviewedOwnershipDefects(unittest.TestCase):
     def setUp(self):
         self.fixture = make_fixture(self)

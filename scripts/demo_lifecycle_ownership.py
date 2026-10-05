@@ -485,6 +485,54 @@ class Ownership:
             ]
         )[0]
         fixtures = json.loads(payload)
+        # Enroll one purpose-specific forced-command key; no general root access.
+        key_path = self.context.paths.state / "signup-recovery-key"
+        if not key_path.exists():
+            self.runtime.run(
+                [
+                    "ssh-keygen",
+                    "-q",
+                    "-t",
+                    "ed25519",
+                    "-N",
+                    "",
+                    "-C",
+                    "waap-catalog-signup-recovery",
+                    "-f",
+                    key_path,
+                ]
+            )
+        public = key_path.with_suffix(".pub").read_text().strip()
+        self.runtime.run(
+            [
+                *self.ssh_argv(origin, "yes"),
+                "sudo",
+                "-n",
+                "/usr/local/bin/enroll-signup-recovery",
+            ],
+            input_text=public,
+        )
+        recovery = {
+            "host": origin["public_ip"],
+            "key": "/opt/traffic-generator/signup-recovery-key",
+            "known_hosts": "/opt/traffic-generator/signup-recovery-known-hosts",
+        }
+        # Same SSH host key already enrolled on this ownership-verified route.
+        known = self.context.paths.known_hosts.read_text()
+        package = {"key": key_path.read_text(), "known_hosts": known}
+        install = "import json,sys,pathlib,os; os.umask(0o077); p=json.load(sys.stdin); root=pathlib.Path('/opt/traffic-generator'); [(root/('signup-recovery-'+n)).write_text(p[n]) for n in ['key','known_hosts']]; [(root/('signup-recovery-'+n)).chmod(0o600) for n in ['key','known_hosts']]"
+        self.runtime.run(
+            [
+                *self.ssh_argv(generator, "yes"),
+                "sudo",
+                "-n",
+                "python3",
+                "-c",
+                __import__("shlex").quote(install),
+            ],
+            input_text=json.dumps(package),
+        )
+        fixtures["signup_recovery"] = recovery
         if fixtures.get(
             "fixture_type"
         ) != "seeded-synthetic-origin-accounts" or not fixtures.get("crapi_tokens"):
