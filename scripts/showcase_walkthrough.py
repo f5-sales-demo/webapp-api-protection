@@ -387,7 +387,7 @@ def calibrate_clock(client: Client, out: dict, prefix: str) -> None:
             out["namespace"],
             out["loadbalancer_name"],
             probes[0]["sent_at"] - 5,
-            probes[-1]["received_at"] + 5,
+            probes[-1]["received_at"] + 10,
         )
         clocks = []
         for probe in probes:
@@ -401,7 +401,6 @@ def calibrate_clock(client: Client, out: dict, prefix: str) -> None:
                 and r.get("vh_name") == virtual_host(out["loadbalancer_name"])
                 and r.get("method") == "GET"
                 and r.get("rsp_code") == "200"
-                and r.get("sample_rate") == 1
             ]
             if len(hits) == 1:
                 moment = stamp(hits[0]["time"])
