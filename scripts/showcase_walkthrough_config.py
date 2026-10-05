@@ -114,6 +114,8 @@ class Configuration:
             path + "?response_format=GET_RSP_FORMAT_FOR_REPLACE"
         )
         form = obj.get("replace_form") if isinstance(obj, dict) else None
+        if isinstance(form, dict) and not form.get("resource_version"):
+            form = {**form, "resource_version": obj.get("resource_version")}
         if (
             code != SUCCESS
             or not isinstance(form, dict)

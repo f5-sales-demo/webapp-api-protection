@@ -251,3 +251,27 @@ class PhaseScopeTests(unittest.TestCase):
         )
         self.assertEqual(result[-1]["path"], "/httpbin/get")
         self.assertEqual(len(result), 4)
+
+
+class ReplacementEnvelopeTests(unittest.TestCase):
+    def test_outer_version_used_when_replacement_version_is_empty(self):
+        with tempfile.TemporaryDirectory() as directory:
+            client = Mock()
+            client.api.return_value = (
+                200,
+                {
+                    "resource_version": "27",
+                    "replace_form": {
+                        "metadata": {"name": "synthetic"},
+                        "spec": {"blocking": {}},
+                        "resource_version": "",
+                    },
+                },
+            )
+            config = Configuration(client, Path(directory))
+            self.assertEqual(
+                config.read("/api/config/synthetic")["resource_version"], "27"
+            )
+            client.api.return_value[1]["resource_version"] = ""
+            with self.assertRaises(EvidenceError):
+                config.read("/api/config/synthetic")
