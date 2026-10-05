@@ -65,7 +65,9 @@ def request_join(event: dict, probe: dict, namespace: str, lb: str) -> bool:
     """Match every request field and reject sampled evidence."""
     try:
         return (
-            probe["sent_at"] <= stamp(event["time"]) <= probe["received_at"]
+            probe["sent_at"] + probe.get("clock_offset_min", 0)
+            <= stamp(event["time"])
+            <= probe["received_at"] + probe.get("clock_offset_max", 0)
             and event.get("namespace") == namespace
             and event.get("vh_name") == virtual_host(lb)
             and event.get("domain") == probe["host"]
@@ -95,7 +97,13 @@ def blocked(
     """Bind control attribution to the actual server-side request ID."""
     return any(
         e.get("req_id") == access["req_id"]
-        and attributed(e, probe, namespace, lb, probe["received_at"])
+        and attributed(
+            e,
+            {**probe, "sent_at": probe["sent_at"] + probe.get("clock_offset_min", 0)},
+            namespace,
+            lb,
+            probe["received_at"] + probe.get("clock_offset_max", 0),
+        )
         for e in events
     )
 
@@ -132,8 +140,8 @@ def collect(
     client: Client, namespace: str, lb: str, probes: list[dict]
 ) -> tuple[list[dict], list[dict]]:
     """Poll logs only; never repeat attack requests while waiting for ingestion."""
-    start = min(p["sent_at"] for p in probes)
-    end = max(p["received_at"] for p in probes) + 1
+    start = min(p["sent_at"] + p.get("clock_offset_min", 0) for p in probes)
+    end = max(p["received_at"] + p.get("clock_offset_max", 0) for p in probes) + 1
     while True:
         records = access_pages(client, namespace, lb, start, end)
         save(client.walkthrough_directory / "access-log-window.json", records)

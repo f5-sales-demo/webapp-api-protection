@@ -60,6 +60,8 @@ def probe(
         "label": label,
     }
 
+    if hasattr(client, "clock_bounds"):
+        record["clock_offset_min"], record["clock_offset_max"] = client.clock_bounds
     if hasattr(client, "walkthrough_directory"):
         with (client.walkthrough_directory / "requests.jsonl").open("a") as stream:
             stream.write(json.dumps(record) + "\n")

@@ -19,14 +19,27 @@ from demo_lifecycle import Lifecycle
 from demo_lifecycle_state import Blocked, secure_artifact
 from demo_verify import readiness
 from demo_verify_client import Client
-from demo_verify_evidence import detection_ready, rate_origin
+from demo_verify_evidence import (
+    detection_ready,
+    identified_user,
+    rate_origin,
+    stamp,
+    virtual_host,
+)
 from demo_verify_scope import effective, outputs
 from demo_verify_types import EvidenceError
 from showcase_walkthrough_config import Configuration, fail, focused, save
-from showcase_walkthrough_evidence import blocked, collect, matched, schema_report
+from showcase_walkthrough_evidence import (
+    access_pages,
+    blocked,
+    collect,
+    matched,
+    schema_report,
+)
 
 SUCCESS, FORBIDDEN, RATE_DENIAL = 200, 403, 429
 MIN_TIMEOUT, MAX_TIMEOUT = 60, 1800
+MAX_CLOCK_OFFSET = 5
 CATEGORIES = ("waf", "schema", "endpoint-denial", "rate-limit", "mud")
 
 
@@ -65,6 +78,8 @@ def send(  # pylint: disable=too-many-arguments
         "control": control,
         "label": label,
     }
+    if hasattr(client, "clock_bounds"):
+        record["clock_offset_min"], record["clock_offset_max"] = client.clock_bounds
     if hasattr(client, "walkthrough_directory"):
         journal = client.walkthrough_directory / "requests.jsonl"
         with journal.open("a") as stream:
@@ -350,6 +365,68 @@ def evaluate(
     return {"access_logs": records, "security_events": events}
 
 
+def calibrate_clock(client: Client, out: dict, prefix: str) -> None:
+    """Measure bounded server-log offset using three fresh benign identities."""
+    probes = [
+        send(
+            client,
+            out["domains"][0],
+            "/httpbin/get",
+            "GET",
+            prefix + "-clock-" + str(i),
+        )
+        for i in range(3)
+    ]
+    for probe in probes:
+        rate_origin(
+            probe["status"], probe["body"], probe["host"], probe["path"], probe["user"]
+        )
+    while True:
+        records = access_pages(
+            client,
+            out["namespace"],
+            out["loadbalancer_name"],
+            probes[0]["sent_at"] - 5,
+            probes[-1]["received_at"] + 5,
+        )
+        clocks = []
+        for probe in probes:
+            hits = [
+                r
+                for r in records
+                if r.get("user") == identified_user(probe["user"])
+                and r.get("domain") == probe["host"]
+                and r.get("req_path") == probe["path"]
+                and r.get("namespace") == out["namespace"]
+                and r.get("vh_name") == virtual_host(out["loadbalancer_name"])
+                and r.get("method") == "GET"
+                and r.get("rsp_code") == "200"
+                and r.get("sample_rate") == 1
+            ]
+            if len(hits) == 1:
+                moment = stamp(hits[0]["time"])
+                clocks.append(
+                    (moment - probe["received_at"], moment - probe["sent_at"])
+                )
+        if len(clocks) == len(probes):
+            low, high = min(c[0] for c in clocks), max(c[1] for c in clocks)
+            if not -MAX_CLOCK_OFFSET <= low <= high <= MAX_CLOCK_OFFSET:
+                fail("log clock calibration exceeds five-second bound")
+            client.clock_bounds = (low, high)
+            save(
+                client.walkthrough_directory / "clock-calibration.json",
+                {
+                    "probes": probes,
+                    "access_logs": records,
+                    "offset_min": low,
+                    "offset_max": high,
+                },
+            )
+            return
+        client.remaining()
+        time.sleep(min(5, client.remaining()))
+
+
 def prepare_category(
     client: Client,
     args: argparse.Namespace,
@@ -436,6 +513,7 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
         )
         if status.get("service_active") is not False:
             fail("continuous traffic did not stop")
+        calibrate_clock(client, out, "showcase-" + run_id)
         for enabled in (False, True):
             configuration.update(
                 lb, focused(configuration.original[lb], args.category, enabled)

@@ -179,7 +179,7 @@ class RequestFailures(unittest.TestCase):
     def test_request_timeout_preserves_completed_request_journal(self):
 
         with tempfile.TemporaryDirectory() as directory:
-            client = Mock()
+            client = Mock(spec=["request", "walkthrough_directory"])
             client.walkthrough_directory = Path(directory)
             client.request.side_effect = [
                 (200, {"synthetic": True}),
@@ -321,3 +321,25 @@ class RetainedScrollTokenTests(unittest.TestCase):
         self.assertEqual(
             len(access_pages(client, "synthetic", "synthetic", 100, 120)), 3
         )
+
+
+class CalibratedClockTests(unittest.TestCase):
+    def test_measured_bounds_required_and_stale_time_rejected(self):
+        p = probe()
+        p.update(
+            status=403, received_at=100.2, clock_offset_min=0.8, clock_offset_max=1.2
+        )
+        e = event()
+        e.update(req_id="synthetic-clock", rsp_code="403", sample_rate=1)
+        namespace, lb = (
+            e["namespace"],
+            e["vh_name"].removeprefix("ves-io-http-loadbalancer-"),
+        )
+        self.assertIsNotNone(matched([e], p, namespace, lb))
+        self.assertTrue(blocked([e], e, p, namespace, lb))
+        self.assertIsNone(
+            matched([{**e, "time": "1970-01-01T00:01:45Z"}], p, namespace, lb)
+        )
+        p.pop("clock_offset_min")
+        p.pop("clock_offset_max")
+        self.assertIsNone(matched([e], p, namespace, lb))
