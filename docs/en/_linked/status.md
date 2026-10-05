@@ -64,10 +64,10 @@ attributed 429s, with independent identity and unrelated path both successful. T
 bind WAAP `37327d3`, origin `9dec3a1` and generator `4c2f528`.
 
 The focused malicious-user retry `a9fda1b5469a4afd906edabd3ab64fd2/mud` completed in
-116.9 seconds on WAAP `11f1cf8`, origin `9dec3a1` and generator `4c2f528`. It verified fresh
+116.9 seconds on WAAP `cac5a46`, origin `9dec3a1` and generator `4c2f528`. It verified fresh
 suspicious-user detection before a later benign-request temporary block, with an independent
 identity successful. Each of 23 requests per phase joined to an actual access record.
-Configuration restored; final window readiness and traffic restart are recorded separately.
+Configuration restored, protected readiness passed and continuous traffic restarted.
 All five representative categories now have matched configuration/request evidence. Earlier
 incomplete receipts remain failed; these results do not qualify the full catalog or bypass
 merged-installation, clean-rebuild, privacy and final acceptance gates.
