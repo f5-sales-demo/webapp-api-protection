@@ -163,7 +163,9 @@ def collect(
                 p
                 for p in probes
                 if p.get("control")
-                and (p["control"] != "rate-limit" or p["status"] == RATE_DENIAL)
+                and (
+                    p["status"] in (FORBIDDEN, RATE_DENIAL) or p["control"] == "schema"
+                )
             ]
             ready = all(
                 blocked(
