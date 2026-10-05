@@ -627,7 +627,7 @@ class SignupRecoveryEnrollmentTests(unittest.TestCase):
         state = fixture.context.paths.state
         (state / "signup-recovery-key").write_text("PRIVATE-SYNTHETIC-KEY")
         (state / "signup-recovery-key.pub").write_text("ssh-ed25519 " + "A" * 68)
-        fixture.context.paths.known_hosts.write_text("synthetic known host")
+        fixture.context.paths.known_hosts.write_text("192.0.2.1 ssh-ed25519 AAAA")
         fixtures = {
             "fixture_type": "seeded-synthetic-origin-accounts",
             "crapi_tokens": ["one", "two"],
@@ -640,7 +640,13 @@ class SignupRecoveryEnrollmentTests(unittest.TestCase):
             ),
             patch.object(fixture.ownership, "ssh_argv", return_value=["ssh", "owned"]),
             patch.object(
-                fixture.runtime, "run", return_value=(json.dumps(fixtures), 0)
+                fixture.runtime,
+                "run",
+                side_effect=lambda argv, **_kwargs: (
+                    ("192.0.2.1 ssh-ed25519 AAAA\n", 0)
+                    if argv[0] == "ssh-keygen"
+                    else (json.dumps(fixtures), 0)
+                ),
             ) as run,
         ):
             fixture.ownership.catalog_fixtures()

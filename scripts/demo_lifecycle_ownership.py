@@ -515,10 +515,31 @@ class Ownership:
         recovery = {
             "host": origin["public_ip"],
             "key": "/opt/traffic-generator/signup-recovery-key",
-            "known_hosts": "/opt/traffic-generator/signup-recovery-known-hosts",
+            "known_hosts": "/opt/traffic-generator/signup-recovery-known_hosts",
         }
         # Same SSH host key already enrolled on this ownership-verified route.
-        known = self.context.paths.known_hosts.read_text()
+        known = self.runtime.run(
+            [
+                "ssh-keygen",
+                "-F",
+                origin["public_ip"],
+                "-f",
+                self.context.paths.known_hosts,
+            ]
+        )[0]
+        # Export the already-enrolled host's verified key in portable plain-host form.
+        rows = [
+            line.split()
+            for line in known.splitlines()
+            if line and not line.startswith("#")
+        ]
+        known = (
+            "\n".join(origin["public_ip"] + " " + " ".join(row[1:3]) for row in rows)
+            + "\n"
+        )
+        if not rows:
+            message = "owned recovery SSH host key unavailable"
+            raise Blocked(message)
         package = {"key": key_path.read_text(), "known_hosts": known}
         install = "import json,sys,pathlib,os; os.umask(0o077); p=json.load(sys.stdin); root=pathlib.Path('/opt/traffic-generator'); [(root/('signup-recovery-'+n)).write_text(p[n]) for n in ['key','known_hosts']]; [(root/('signup-recovery-'+n)).chmod(0o600) for n in ['key','known_hosts']]"
         self.runtime.run(
