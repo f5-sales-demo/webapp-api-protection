@@ -387,3 +387,24 @@ class OrderedBurstTests(unittest.TestCase):
         ]
         bind_ordered_requests([first], missing, ns, lb)
         self.assertTrue(all("server_request_id" not in r for r in missing))
+
+
+class XssAttributionTests(unittest.TestCase):
+    def test_xss_signature_is_distinct_from_sql_signature(self):
+        p = probe()
+        p.update(label="xss", received_at=102, status=403)
+        e = event()
+        e.update(
+            req_id="synthetic-xss", signatures=[{"id": "200000098", "state": "Enabled"}]
+        )
+        ns, lb = e["namespace"], e["vh_name"].removeprefix("ves-io-http-loadbalancer-")
+        self.assertTrue(blocked([e], e, p, ns, lb))
+        self.assertFalse(
+            blocked(
+                [{**e, "signatures": [{"id": "200002883", "state": "Enabled"}]}],
+                e,
+                p,
+                ns,
+                lb,
+            )
+        )

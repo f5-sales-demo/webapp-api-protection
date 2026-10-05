@@ -13,6 +13,7 @@ from demo_verify_client import (
     _page_batch,
 )
 from demo_verify_evidence import (
+    _event_join,
     attributed,
     decode_event,
     identified_user,
@@ -134,6 +135,29 @@ def blocked(
     events: list[dict], access: dict, probe: Probe, namespace: str, lb: str
 ) -> bool:
     """Bind control attribution to the actual server-side request ID."""
+    if probe.get("control") == "waf" and probe.get("label") == "xss":
+        return any(
+            e.get("req_id") == access["req_id"]
+            and _event_join(
+                e,
+                {
+                    **probe,
+                    "sent_at": probe["sent_at"] + probe.get("clock_offset_min", 0),
+                },
+                namespace,
+                lb,
+                probe["received_at"] + probe.get("clock_offset_max", 0),
+            )
+            and e.get("sec_event_type") == "waf_sec_event"
+            and e.get("sec_event_name") == "WAF"
+            and e.get("app_firewall_name") == lb + "-waf"
+            and any(
+                str(sig.get("id")) in {"200000098", "200001475", "200015119"}
+                and sig.get("state") == "Enabled"
+                for sig in e.get("signatures", [])
+            )
+            for e in events
+        )
     return any(
         e.get("req_id") == access["req_id"]
         and attributed(
