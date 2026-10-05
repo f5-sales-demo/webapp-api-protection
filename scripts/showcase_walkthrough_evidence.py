@@ -85,9 +85,49 @@ def matched(records: list[dict], probe: dict, namespace: str, lb: str) -> dict |
     matches = {
         r.get("req_id"): r
         for r in records
-        if r.get("req_id") and request_join(r, probe, namespace, lb)
+        if r.get("req_id")
+        and (
+            not probe.get("server_request_id")
+            or r["req_id"] == probe["server_request_id"]
+        )
+        and request_join(r, probe, namespace, lb)
     }
     return next(iter(matches.values())) if len(matches) == 1 else None
+
+
+def bind_ordered_requests(
+    records: list[dict], probes: list[dict], namespace: str, lb: str
+) -> None:
+    """Bind a fresh sequential identity only when every request has one log record."""
+    keys = {(p["host"], p["path"], p["method"], p["user"]) for p in probes}
+    for key in keys:
+        group = sorted(
+            (
+                p
+                for p in probes
+                if (p["host"], p["path"], p["method"], p["user"]) == key
+            ),
+            key=lambda p: p["sent_at"],
+        )
+        logs = [
+            r
+            for r in records
+            if (r.get("domain"), r.get("req_path"), r.get("method"), r.get("user"))
+            == (*key[:3], identified_user(key[3]))
+            and r.get("namespace") == namespace
+            and r.get("vh_name") == virtual_host(lb)
+        ]
+        logs = sorted(
+            {r["req_id"]: r for r in logs if r.get("req_id")}.values(),
+            key=lambda r: stamp(r["time"]),
+        )
+        if len(logs) != len(group):
+            continue
+        if all(
+            request_join(r, p, namespace, lb) for r, p in zip(logs, group, strict=True)
+        ):
+            for record, probe in zip(logs, group, strict=True):
+                probe["server_request_id"] = record["req_id"]
 
 
 def blocked(
@@ -156,6 +196,7 @@ def collect(
         save(client.walkthrough_directory / "access-log-window.json", records)
         events = client.pages(namespace, lb, start, end)
         save(client.walkthrough_directory / "security-log-window.json", events)
+        bind_ordered_requests(records, probes, namespace, lb)
         access_complete = all(matched(records, p, namespace, lb) for p in probes)
         if access_complete:
             required = [

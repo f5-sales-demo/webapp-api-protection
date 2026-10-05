@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 import showcase_walkthrough as runner
 from demo_verify_types import EvidenceError
 from showcase_walkthrough_config import fail
-from showcase_walkthrough_evidence import schema_report
+from showcase_walkthrough_evidence import bind_ordered_requests, schema_report
 
 from scripts.showcase_walkthrough_config import Configuration, focused
 from scripts.showcase_walkthrough_evidence import access_pages, blocked, matched
@@ -362,3 +362,28 @@ class ObservedSchemaTextTests(unittest.TestCase):
         }
         self.assertTrue(schema_report([event], {"req_id": "synthetic"}, "missing"))
         self.assertFalse(schema_report([event], {"req_id": "synthetic"}, "type"))
+
+
+class OrderedBurstTests(unittest.TestCase):
+    def test_full_sequential_group_binds_distinct_server_ids(self):
+        p = probe()
+        p.update(status=403, received_at=101, clock_offset_min=0, clock_offset_max=2)
+        second = {**p, "sent_at": 100.5, "received_at": 101.5}
+        first = event()
+        first.update(req_id="first", rsp_code="403", sample_rate=1)
+        last = {**first, "req_id": "second", "time": "1970-01-01T00:01:42Z"}
+        ns, lb = (
+            first["namespace"],
+            first["vh_name"].removeprefix("ves-io-http-loadbalancer-"),
+        )
+        requests = [p, second]
+        bind_ordered_requests([first, last], requests, ns, lb)
+        self.assertEqual(
+            [r["server_request_id"] for r in requests], ["first", "second"]
+        )
+        self.assertEqual((matched([first, last], p, ns, lb) or {})["req_id"], "first")
+        missing = [
+            {k: v for k, v in r.items() if k != "server_request_id"} for r in requests
+        ]
+        bind_ordered_requests([first], missing, ns, lb)
+        self.assertTrue(all("server_request_id" not in r for r in missing))
