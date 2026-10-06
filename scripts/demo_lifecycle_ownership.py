@@ -684,6 +684,7 @@ class Ownership:
                 and p.get("scenario_count") == _CATALOG_ENTRIES
                 and p.get("catalog_complete")
                 and p.get("catalog_accepted")
+                and p.get("traffic", {}).get("verified") is True
                 and p.get("source_commit") == status.get("source_commit")
                 and p.get("artifact_sha256") == status.get("artifact_sha256")
                 for p in passes[-_REQUIRED_CATALOG_PASSES:]
