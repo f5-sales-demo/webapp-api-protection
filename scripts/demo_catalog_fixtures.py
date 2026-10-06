@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Export real synthetic crAPI fixtures from the ownership-verified demo origin."""
 
+import argparse
 import json
 import os
 import subprocess
@@ -30,7 +31,7 @@ COMMIT;
 """
 
 
-def seeded_ids() -> dict:
+def seeded_ids(seed: bool = False) -> dict:
     """Create absent bounded synthetic fixtures and return actual database identities."""
     result = subprocess.run(
         [
@@ -47,7 +48,9 @@ def seeded_ids() -> dict:
             "-v",
             "ON_ERROR_STOP=1",
         ],
-        input=SQL,
+        input=SQL
+        if seed
+        else SQL[SQL.index("SELECT json_build_object(") : SQL.index("COMMIT;")],
         text=True,
         capture_output=True,
         check=True,
@@ -71,15 +74,16 @@ def login(email: str, password: str) -> str:
     return token
 
 
-def restaurant_fixtures() -> dict:
+def restaurant_fixtures(seed: bool = False) -> dict:
     """Seed bounded customer/Chef accounts through the demo application's own model."""
     code = "from db.session import SessionLocal; from db.models import UserRole; from apis.auth.utils import create_user_if_not_exists, update_user_password; db=SessionLocal(); create_user_if_not_exists(db,'tgen_customer','password','Synthetic','Customer','5550100001',UserRole.CUSTOMER); create_user_if_not_exists(db,'tgen_chef','password','Synthetic','Chef','5550100002',UserRole.CHEF); update_user_password(db,'tgen_customer','password'); update_user_password(db,'tgen_chef','password'); db.close()"
-    subprocess.run(  # noqa: S603 - fixed owned container and synthetic seed code
-        ["/usr/bin/docker", "exec", "restaurant-1", "python", "-c", code],
-        check=True,
-        capture_output=True,
-        timeout=20,
-    )
+    if seed:
+        subprocess.run(  # noqa: S603 - fixed owned container and synthetic seed code
+            ["/usr/bin/docker", "exec", "restaurant-1", "python", "-c", code],
+            check=True,
+            capture_output=True,
+            timeout=20,
+        )
     result = {}
     for role in ("customer", "chef"):
         request = Request(
@@ -116,4 +120,12 @@ def collect() -> dict:
 
 if __name__ == "__main__":
     os.umask(0o077)
-    print(json.dumps(collect()))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--seed", action="store_true")
+    args = parser.parse_args()
+    if args.seed:
+        seeded_ids(seed=True)
+        restaurant_fixtures(seed=True)
+        print(json.dumps({"seeded": True}))
+    else:
+        print(json.dumps(collect()))

@@ -72,14 +72,9 @@ output "origin_server_ssh" {
 }
 
 output "origin_server_urls" {
-  description = "Direct URLs on the origin server (bypassing the load balancer)."
+  description = "Published URLs generated from the shared origin application manifest."
   value = {
-    health     = "http://${module.origin_server.public_ip}/health"
-    httpbin    = "http://${module.origin_server.public_ip}/httpbin/"
-    juice_shop = "http://${module.origin_server.public_ip}/juice-shop/"
-    dvwa       = "http://${module.origin_server.public_ip}/dvwa/"
-    vampi      = "http://${module.origin_server.public_ip}/vampi/"
-    crapi      = "http://${module.origin_server.public_ip}:8888"
+    for app in local.origin_applications : app.id => "http://${module.origin_server.public_ip}${app.prefix}"
   }
 }
 

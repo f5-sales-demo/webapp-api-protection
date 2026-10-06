@@ -81,12 +81,10 @@ class TerraformWiring(unittest.TestCase):
         rendered = modules["traffic_generator"]["custom_data"]
         ensure(
             'templatefile("${path.module}/cloud-init/traffic-generator.yaml"'
-            in rendered
+            in str(rendered)
         )
-        ensure('"target_domains": "${jsonencode(var.lb_domains)}"' in rendered)
-        ensure(
-            '"mud_bad_traffic": "${var.mud_enabled && var.mud_bad_traffic}"' in rendered
-        )
+        ensure("jsonencode(var.lb_domains)" in str(rendered))
+        ensure("var.mud_enabled && var.mud_bad_traffic" in str(rendered))
         declaration = (
             'variable "mud_bad_traffic" {'
             + (ROOT / "terraform/variables.tf")
@@ -97,7 +95,7 @@ class TerraformWiring(unittest.TestCase):
         )
         variables = hcl2.loads(declaration)
         defaults = {
-            name: value.get("default")
+            name: expression(value, "default")
             for block in variables["variable"]
             for name, value in block.items()
         }
@@ -187,7 +185,7 @@ class LocalBackend(unittest.TestCase):
         self.fixture.terraform.namespace_prepare()
         ensure_equal(
             self.fixture.context.state.persistent,
-            {"namespace": "system/" + state_module.FIXED["namespace"]},
+            state_module.foundation_identity(state_module.FIXED["namespace"]),
         )
         ensure_equal(self.fixture.context.state.namespace_uid, "namespace-uid")
         ensure_equal(
@@ -213,7 +211,7 @@ class LocalBackend(unittest.TestCase):
             (
                 "persistent.json",
                 {
-                    "namespace": "system/" + state_module.FIXED["namespace"],
+                    "namespace": f"system/{state_module.FIXED['namespace']}",
                     "storage_account": "old",
                 },
             ),
@@ -759,7 +757,7 @@ class NamespaceTerraform(unittest.TestCase):
             'backend "local" {}',
             'provider "xcsh" {}',
             "f5-sales-demo/xcsh",
-            '"= 12.0.2"',
+            '"= 15.3.0"',
             'resource "xcsh_namespace" "this"',
             "prevent_destroy = true",
         ):

@@ -1,7 +1,7 @@
 # Configuration rendering only: live readiness/acceptance must prove each responsible
 # XC control and benign availability; this plan test is not security proof.
 variables {
-  namespace                         = jsondecode(file("showcase.tfvars.json")).namespace
+  namespace                         = "example"
   lb_domains                        = jsondecode(file("showcase.tfvars.json")).lb_domains
   origin_ip                         = "203.0.113.10"
   csd_enabled                       = jsondecode(file("showcase.tfvars.json")).csd_enabled
@@ -40,14 +40,14 @@ run "showcase_effective_controls" {
 
   assert {
     condition = (
-      xcsh_http_loadbalancer.this.https_auto_cert.port == 443 &&
-      xcsh_http_loadbalancer.this.https_auto_cert.http_redirect == false &&
-      toset(xcsh_http_loadbalancer.this.domains) == toset(["www.f5-sales-demo.com", "api.f5-sales-demo.com"]) &&
-      xcsh_http_loadbalancer.this.client_side_defense == null &&
+      xcsh_http_loadbalancer.this["primary"].https_auto_cert.port == 443 &&
+      xcsh_http_loadbalancer.this["primary"].https_auto_cert.http_redirect == false &&
+      toset(xcsh_http_loadbalancer.this["primary"].domains) == toset(["www.f5-sales-demo.com", "api.f5-sales-demo.com"]) &&
+      xcsh_http_loadbalancer.this["primary"].client_side_defense == null &&
       xcsh_app_firewall.this.blocking != null &&
       var.waf_mode == "blocking" &&
-      xcsh_http_loadbalancer.this.app_firewall.name == xcsh_app_firewall.this.name &&
-      xcsh_http_loadbalancer.this.enable_api_discovery != null
+      xcsh_http_loadbalancer.this["primary"].app_firewall.name == xcsh_app_firewall.this.name &&
+      xcsh_http_loadbalancer.this["primary"].enable_api_discovery != null
     )
     error_message = "Effective LB must offer auto-certificate HTTPS and retain HTTP, serve both domains, attach blocking WAF, enable discovery, and omit CSD."
   }
@@ -73,13 +73,13 @@ run "showcase_effective_controls" {
 
   assert {
     condition = (
-      xcsh_http_loadbalancer.this.enable_malicious_user_detection != null &&
-      xcsh_http_loadbalancer.this.user_identification.name == xcsh_user_identification.mud[0].name &&
+      xcsh_http_loadbalancer.this["primary"].enable_malicious_user_detection != null &&
+      xcsh_http_loadbalancer.this["primary"].user_identification.name == xcsh_user_identification.mud[0].name &&
       xcsh_user_identification.mud[0].rules[0].http_header_name == "X-MUD-User" &&
-      xcsh_http_loadbalancer.this.enable_challenge.malicious_user_mitigation.name == xcsh_malicious_user_mitigation.mud[0].name &&
-      xcsh_http_loadbalancer.this.js_challenge == null &&
-      xcsh_http_loadbalancer.this.captcha_challenge == null &&
-      xcsh_http_loadbalancer.this.policy_based_challenge == null &&
+      xcsh_http_loadbalancer.this["primary"].enable_challenge.malicious_user_mitigation.name == xcsh_malicious_user_mitigation.mud[0].name &&
+      xcsh_http_loadbalancer.this["primary"].js_challenge == null &&
+      xcsh_http_loadbalancer.this["primary"].captcha_challenge == null &&
+      xcsh_http_loadbalancer.this["primary"].policy_based_challenge == null &&
       alltrue([for r in xcsh_malicious_user_mitigation.mud[0].mitigation_type.rules : r.mitigation_action.block_temporarily != null])
     )
     error_message = "MUD must identify X-MUD-User and attach risk-based mitigation, never universally challenge benign identities."
@@ -88,40 +88,40 @@ run "showcase_effective_controls" {
   assert {
     condition = (
       toset(xcsh_api_definition.this[0].swagger_specs) == toset(var.api_definition_swagger_specs) &&
-      xcsh_http_loadbalancer.this.api_specification.api_definition.name == xcsh_api_definition.this[0].name &&
-      xcsh_http_loadbalancer.this.api_specification.validation_all_spec_endpoints.validation_mode.validation_mode_active.enforcement_block != null &&
-      toset(xcsh_http_loadbalancer.this.api_specification.validation_all_spec_endpoints.validation_mode.validation_mode_active.request_validation_properties) == toset(["PROPERTY_HTTP_BODY", "PROPERTY_CONTENT_TYPE"]) &&
-      xcsh_http_loadbalancer.this.api_specification.validation_all_spec_endpoints.validation_mode.response_validation_mode_active == null &&
-      xcsh_http_loadbalancer.this.api_specification.validation_all_spec_endpoints.validation_mode.skip_response_validation == null &&
-      xcsh_http_loadbalancer.this.api_specification.validation_all_spec_endpoints.fall_through_mode.fall_through_mode_allow != null
+      xcsh_http_loadbalancer.this["primary"].api_specification.api_definition.name == xcsh_api_definition.this[0].name &&
+      xcsh_http_loadbalancer.this["primary"].api_specification.validation_all_spec_endpoints.validation_mode.validation_mode_active.enforcement_block != null &&
+      toset(xcsh_http_loadbalancer.this["primary"].api_specification.validation_all_spec_endpoints.validation_mode.validation_mode_active.request_validation_properties) == toset(["PROPERTY_HTTP_BODY", "PROPERTY_CONTENT_TYPE"]) &&
+      xcsh_http_loadbalancer.this["primary"].api_specification.validation_all_spec_endpoints.validation_mode.response_validation_mode_active == null &&
+      xcsh_http_loadbalancer.this["primary"].api_specification.validation_all_spec_endpoints.validation_mode.skip_response_validation == null &&
+      xcsh_http_loadbalancer.this["primary"].api_specification.validation_all_spec_endpoints.fall_through_mode.fall_through_mode_allow != null
     )
     error_message = "Schema enforcement must block invalid requests only; response enforcement must be omitted and unrelated endpoints allowed."
   }
 
   assert {
     condition = (
-      length(xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules) == 1 &&
-      xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].api_endpoint_path == "/httpbin/anything/admin" &&
-      toset(xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].api_endpoint_method.methods) == toset(["POST", "DELETE"]) &&
-      xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].api_endpoint_method.invert_matcher == false &&
-      xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].action.deny != null &&
-      length(xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules) == 0
+      length(xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules) == 1 &&
+      xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].api_endpoint_path == "/httpbin/anything/admin" &&
+      toset(xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].api_endpoint_method.methods) == toset(["POST", "DELETE"]) &&
+      xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].api_endpoint_method.invert_matcher == false &&
+      xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].action.deny != null &&
+      length(xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_groups_rules) == 0
     )
     error_message = "Deny must be exact admin POST/DELETE only, not GET or an unrelated endpoint/group."
   }
 
   assert {
     condition = (
-      xcsh_http_loadbalancer.this.rate_limit == null &&
-      length(xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules) == 1 &&
-      length(xcsh_http_loadbalancer.this.api_rate_limit.server_url_rules) == 0 &&
-      xcsh_http_loadbalancer.this.api_rate_limit.bypass_rate_limiting_rules == null &&
-      xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].api_endpoint_path == "/httpbin/anything/rate-limit" &&
-      toset(xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].api_endpoint_method.methods) == toset(["GET"]) &&
-      xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].api_endpoint_method.invert_matcher == false &&
-      xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.threshold == 20 &&
-      xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.unit == "MINUTE" &&
-      xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.use_http_lb_user_id != null
+      xcsh_http_loadbalancer.this["primary"].rate_limit == null &&
+      length(xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules) == 1 &&
+      length(xcsh_http_loadbalancer.this["primary"].api_rate_limit.server_url_rules) == 0 &&
+      xcsh_http_loadbalancer.this["primary"].api_rate_limit.bypass_rate_limiting_rules == null &&
+      xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].api_endpoint_path == "/httpbin/anything/rate-limit" &&
+      toset(xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].api_endpoint_method.methods) == toset(["GET"]) &&
+      xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].api_endpoint_method.invert_matcher == false &&
+      xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.threshold == 20 &&
+      xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.unit == "MINUTE" &&
+      xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.use_http_lb_user_id != null
     )
     error_message = "Only GET /httpbin/anything/rate-limit may be limited to 20/min per LB header identity; no global limiter."
   }
@@ -154,7 +154,7 @@ run "explicit_monitoring_choice_renders" {
     condition = (
       xcsh_app_firewall.this.monitoring != null &&
       xcsh_app_firewall.this.blocking == null &&
-      xcsh_http_loadbalancer.this.app_firewall.name == xcsh_app_firewall.this.name
+      xcsh_http_loadbalancer.this["primary"].app_firewall.name == xcsh_app_firewall.this.name
     )
     error_message = "Explicit monitoring must render the monitoring marker and omit blocking on the attached WAF."
   }

@@ -1,11 +1,11 @@
 output "loadbalancer_name" {
   description = "Name of the HTTP load balancer."
-  value       = xcsh_http_loadbalancer.this.name
+  value       = xcsh_http_loadbalancer.this["primary"].name
 }
 
 output "loadbalancer_id" {
   description = "F5 XC identifier of the HTTP load balancer."
-  value       = xcsh_http_loadbalancer.this.id
+  value       = xcsh_http_loadbalancer.this["primary"].id
 }
 
 output "origin_pool_name" {
@@ -20,7 +20,7 @@ output "healthcheck_name" {
 
 output "domains" {
   description = "Domains served by the load balancer."
-  value       = xcsh_http_loadbalancer.this.domains
+  value       = xcsh_http_loadbalancer.this["primary"].domains
 }
 
 output "app_firewall_name" {

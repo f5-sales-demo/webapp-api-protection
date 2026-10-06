@@ -1,5 +1,6 @@
 """Repeatable seeded fixture export is private and fails on missing origin prerequisites."""
 
+import json
 import unittest
 from unittest.mock import patch
 
@@ -27,6 +28,14 @@ class FixtureExportTests(unittest.TestCase):
         assert result["crapi_tokens"] == ["token-a", "token-b"]
         assert result["crapi_order_id"] == 7
         assert result["fixture_type"] == "seeded-synthetic-origin-accounts"
+
+    def test_default_fixture_read_does_not_seed_database(self):
+        with patch.object(fixtures.subprocess, "run") as command:
+            command.return_value.stdout = json.dumps({"crapi_order_id": 1})
+            fixtures.seeded_ids()
+        statement = command.call_args.kwargs["input"]
+        assert "INSERT" not in statement
+        assert "BEGIN" not in statement
 
     def test_missing_fixture_cannot_be_exported_as_ready(self):
         with (

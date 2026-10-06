@@ -2,7 +2,7 @@
 # api_definition_choice / api_specification oneof, xcsh_api_definition, and the
 # api_discovery_from_code_scan wiring. Targets ./modules/http-lb, dummy origin.
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80

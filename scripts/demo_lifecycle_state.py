@@ -13,9 +13,10 @@ from typing import TYPE_CHECKING, Any, Literal, NotRequired, Protocol, TypedDict
 if TYPE_CHECKING:
     from collections.abc import Collection, Iterator, Mapping
 
+DEMO_NAMESPACE = "webapp-api-protection"
 FIXED: dict[str, Any] = {
     "xc_url": "https://f5-sales-demo.console.ves.volterra.io",
-    "namespace": "webapp-api-protection",
+    "namespace": DEMO_NAMESPACE,
     "domains": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
 }
 AZURE_TYPES = {
@@ -37,6 +38,7 @@ XC_TYPES = {
     "xcsh_api_discovery",
     "xcsh_http_loadbalancer",
     "xcsh_api_definition",
+    "xcsh_swagger_object",
     "xcsh_service_policy",
     "xcsh_rate_limiter",
     "xcsh_rate_limiter_policy",
@@ -107,7 +109,13 @@ class LifecycleOptions(Protocol):
     config: Path | None
     state_dir: Path | None
     timeout_seconds: int
-    operation: Literal["deploy", "verify", "rebuild", "destroy"]
+    operation: Literal["deploy", "plan", "adopt", "verify", "rebuild", "destroy"]
+
+
+def foundation_identity(namespace: str) -> dict[str, str]:
+    """Build the protected namespace ledger identity from approved scope."""
+    identity = f"system/{namespace}"
+    return {"namespace": identity}
 
 
 def quota_count(value: object) -> int:
@@ -273,6 +281,9 @@ def _guard_change(
     persistent: Collection[str],
 ) -> None:
     actions = item["change"]["actions"]
+    if item["change"].get("importing"):
+        message = "normal deployment cannot silently adopt objects"
+        raise Blocked(message)
     kind = item.get("type", "")
     if kind == "xcsh_namespace":
         message = (
@@ -285,6 +296,9 @@ def _guard_change(
     before = item["change"].get("before") or {}
     if before.get("id") in persistent and actions != ["no-op"]:
         message = "persistent resource in application plan"
+        raise Blocked(message)
+    if mode == "deploy" and "delete" in actions:
+        message = "deployment deletion or replacement requires a reviewed rebuild plan"
         raise Blocked(message)
     if mode == "noop" and actions != ["no-op"]:
         message = "nonzero drift; verify never repairs infrastructure"
@@ -392,7 +406,7 @@ class Settings:
 
     config: Config
     scope: Scope
-    operation: Literal["deploy", "verify", "rebuild", "destroy"]
+    operation: Literal["deploy", "plan", "adopt", "verify", "rebuild", "destroy"]
 
 
 @dataclass

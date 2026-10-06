@@ -7,11 +7,13 @@ import os
 import re
 from typing import TYPE_CHECKING, Any, Literal
 
+from demo_lifecycle_plan import require_current, seal
 from demo_lifecycle_state import (
     AZURE_TYPES,
     XC_COLLECTIONS,
     XC_TYPES,
     Blocked,
+    foundation_identity,
     guard_plan,
     managed_resources,
     private_json,
@@ -343,7 +345,7 @@ class Terraform:
         """Read live UID and persist preservation evidence without tenant mutation."""
         self.local_backend_check()
         namespace = self.context.settings.scope["namespace"]
-        persistent = {"namespace": "system/" + namespace}
+        persistent = foundation_identity(namespace)
         previous = _previous_foundation(self.context, persistent)
         live = self.runtime.xc("/api/web/namespaces/" + namespace, allow_absent=True)
         identity = _live_identity(live, namespace)
@@ -446,7 +448,7 @@ class Terraform:
         """Join receipts, exact provider state and live UID without writing a ledger."""
         self.local_backend_check()
         namespace = self.context.settings.scope["namespace"]
-        persistent = {"namespace": "system/" + namespace}
+        persistent = foundation_identity(namespace)
         state = self.context.paths.state
         identity = private_json(state / "namespace-receipt.json")
         raw = _raw_state(
@@ -480,6 +482,28 @@ class Terraform:
                         "out-of-state Azure resource-group conflict or unknown name"
                     )
                     raise Blocked(message)
+            if item["type"] == "xcsh_swagger_object":
+                namespace, name = after.get("namespace"), after.get("name")
+                if namespace != self.context.settings.scope["namespace"] or not name:
+                    message = "unknown Swagger creation identity"
+                    raise Blocked(message)
+                query = (
+                    "?name="
+                    + name
+                    + "&query_type=EXACT_MATCH&latest_version_only=false"
+                )
+                listing = self.runtime.xc(
+                    "/api/object_store/namespaces/"
+                    + namespace
+                    + "/stored_objects/swagger"
+                    + query
+                )
+                if listing is None or listing.get("items") != []:
+                    message = (
+                        "out-of-state Swagger conflict; reviewed adoption required"
+                    )
+                    raise Blocked(message)
+                continue
             if item["type"] in XC_TYPES:
                 collection = XC_COLLECTIONS.get(item["type"])
                 name, namespace = after.get("name"), after.get("namespace")
@@ -558,14 +582,21 @@ class Terraform:
             json.loads(self.tf(paths.app, "show", "-json", path)[0]),
             "application plan unavailable",
         )
-        guard_plan(parsed, mode, owned, self.context.state.persistent.values())
-        if mode == "deploy":
+        if name != "review":
+            guard_plan(parsed, mode, owned, self.context.state.persistent.values())
+        if mode == "deploy" and name != "review":
             self.guard_conflicts(parsed)
         if mode == "noop" and code != 0:
             message = "nonzero detailed-exitcode drift"
             raise Blocked(message)
+        seal(self.context, path, parsed)
         self.runtime.phase(name + "-guarded-plan")
         return path
+
+    def apply(self, plan: Path) -> None:
+        """Apply only the freshly bound application plan under the lifecycle lock."""
+        require_current(self.context, plan)
+        self.tf(self.context.paths.app, "apply", "-input=false", str(plan))
 
     def get_outputs(self) -> None:
         """Validate showcase output scope before saving private provider output."""
@@ -582,5 +613,37 @@ class Terraform:
         ) != sorted(scope["domains"]):
             message = "outputs scope mismatch"
             raise Blocked(message)
+        pairs = _object(outputs.get("use_cases"), "use-case outputs missing")
+        value["use_cases"] = _object(pairs.get("value"), "use-case outputs missing")
+        snapshot = _object(
+            json.loads(self.tf(self.context.paths.app, "show", "-json")[0]),
+            "application state unavailable",
+        )
+        objects = [
+            row
+            for row in managed_resources(
+                snapshot.get("values", {}).get("root_module", {})
+            )
+            if row.get("address") == "xcsh_swagger_object.showcase"
+        ]
+        if len(objects) != 1:
+            message = "Terraform-owned Swagger fixture missing"
+            raise Blocked(message)
+        fixture = objects[0]["values"]
+        save_json(
+            self.context.paths.state / "swagger-receipt.json",
+            {
+                "name": fixture["name"],
+                "namespace": fixture["namespace"],
+                "version": fixture["version"],
+                "path": fixture["path"],
+                "sha256": fixture["sha256"],
+                "content": fixture["content"],
+                "api_url": scope["xc_url"],
+            },
+        )
+        inputs = private_json(self.context.paths.vars)
+        inputs["api_definition_swagger_specs"] = [fixture["path"]]
+        save_json(self.context.paths.vars, inputs)
         self.context.state.outputs = value
         save_json(self.context.paths.state / "outputs.json", outputs)

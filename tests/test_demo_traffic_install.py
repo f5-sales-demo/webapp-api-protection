@@ -112,7 +112,7 @@ class CloudInitTests(unittest.TestCase):
         source = phase(data, "installing security binaries").replace(
             ". /usr/local/lib/cloud-init-helpers.sh", ""
         )
-        stubs = 'log_phase() { :; }; dpkg() { echo amd64; }; ghlatest() { echo 1.2.3; }; fetch_url() { echo "fetch:$1"; }; unzip() { return 18; };\n'
+        stubs = 'log_phase() { :; }; dpkg() { echo amd64; }; ghlatest() { echo 1.2.3; }; fetch_url() { echo "fetch:$1"; }; sha256sum() { cat >/dev/null; }; unzip() { return 18; };\n'
         result = shell(data["runcmd"][0] + stubs + source)
         ensure_equal(result.returncode, 18)
         ensure("Phase 3 complete" not in result.stdout)
@@ -125,11 +125,11 @@ class CloudInitTests(unittest.TestCase):
                 'echo "Installing feroxbuster'
             )
         ]
-        stubs = 'set -eu\nDPKG_ARCH=amd64\nghlatest() { echo 1.2.3; }; uname() { echo x86_64; }; fetch_url() { echo "fetch:$1"; }; tar() { :; };\n'
+        stubs = 'set -eu\nDPKG_ARCH=amd64\nghlatest() { echo 1.2.3; }; uname() { echo x86_64; }; fetch_url() { echo "fetch:$1"; }; tar() { :; }; sha256sum() { cat >/dev/null; };\n'
         result = shell(stubs + source)
         ensure_equal(result.returncode, 0)
-        ensure("/v1.2.3/ffuf_1.2.3_linux_amd64.tar.gz" in result.stdout)
-        ensure("/v1.2.3/gobuster_Linux_x86_64.tar.gz" in result.stdout)
+        ensure("/v2.3.0/ffuf_2.3.0_linux_amd64.tar.gz" in result.stdout)
+        ensure("/v3.8.2/gobuster_Linux_x86_64.tar.gz" in result.stdout)
 
     def test_every_catalog_requires_zap_and_java(self):
         stubs = 'set -eu\nlog_phase() { :; }; command() { case "$2" in zap|msfconsole|java) return 1 ;; *) return 0 ;; esac; };\n'
