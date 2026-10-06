@@ -10,7 +10,7 @@ from dataclasses import dataclass, replace
 from typing import Any
 from unittest.mock import Mock, patch
 
-from demo_catalog_acceptance import catalog_metrics
+from demo_catalog_acceptance import catalog_metrics, coverage_failures
 from demo_lifecycle_fixtures import (
     ROOT,
     TEST_SCOPE,
@@ -955,3 +955,23 @@ class CatalogMetricsTests(unittest.TestCase):
         ):
             changed = {"rates": {**status["rates"], key: value}}
             ensure(not catalog_metrics(changed))
+
+
+class CatalogCoverageTests(unittest.TestCase):
+    def test_missing_behavior_and_recovery_fail_acceptance(self):
+        entries = [
+            {
+                "id": f"example/{index}",
+                "verifier": "native",
+                "positive_test": "observed native behavior",
+                "mutation_policy": "read-only",
+            }
+            for index in range(164)
+        ]
+        ensure_equal(coverage_failures({"entries": entries}), [])
+        entries[0]["mutation_policy"] = "requires-no-change-or-restoration-proof"
+        ensure_equal(coverage_failures({"entries": entries}), ["example/0"])
+        entries[0]["mutation_policy"] = "journaled-restoration"
+        ensure_equal(coverage_failures({"entries": entries}), ["example/0"])
+        entries[0]["restoration_fields"] = ["fixture_restoration"]
+        ensure_equal(coverage_failures({"entries": entries}), [])

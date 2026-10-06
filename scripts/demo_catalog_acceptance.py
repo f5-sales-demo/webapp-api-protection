@@ -8,6 +8,7 @@ from typing import Any
 _MIN_HTTP_RATE = 190
 _MAX_HTTP_RATE = 210
 _MIN_BENIGN_SUCCESS = 0.99
+_CATALOG_ENTRIES = 164
 
 
 def catalog_metrics(status: dict[str, Any]) -> bool:
@@ -42,3 +43,24 @@ def catalog_metrics(status: dict[str, Any]) -> bool:
         and metrics["benign_transport_failures"] == 0
         and metrics["attack_transport_failures"] == 0
     )
+
+
+def coverage_failures(manifest: dict) -> list[str]:
+    """Reject incomplete positive, negative and recovery coverage."""
+    entries = manifest.get("entries", [])
+    if not isinstance(entries, list) or len(entries) != _CATALOG_ENTRIES:
+        return ["catalog entry count"]
+    identities = [entry.get("id") for entry in entries]
+    if len(set(identities)) != len(identities):
+        return ["duplicate catalog identity"]
+    return [
+        entry["id"]
+        for entry in entries
+        if not entry.get("verifier")
+        or not entry.get("positive_test")
+        or entry.get("mutation_policy") not in ("read-only", "journaled-restoration")
+        or (
+            entry.get("mutation_policy") == "journaled-restoration"
+            and not entry.get("restoration_fields")
+        )
+    ]

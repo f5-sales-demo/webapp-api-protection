@@ -11,7 +11,7 @@ import shlex
 import time
 from typing import TYPE_CHECKING, Any, Literal
 
-from demo_catalog_acceptance import catalog_metrics
+from demo_catalog_acceptance import catalog_metrics, coverage_failures
 from demo_lifecycle_state import (
     AZURE_TYPES,
     XC_COLLECTIONS,
@@ -654,6 +654,14 @@ class Ownership:
         outputs = self.context.state.outputs
         if not outputs:
             message = "catalog acceptance output unavailable"
+            raise Blocked(message)
+        gaps = coverage_failures(
+            json.loads((self.context.paths.app / "coverage/catalog.json").read_text())
+        )
+        if gaps:
+            message = (
+                "catalog coverage has unsupported behavior or restoration contracts"
+            )
             raise Blocked(message)
         guest = self.owned_guest(
             _resources(self.context), "generator", outputs["generator"]
