@@ -959,7 +959,7 @@ class CatalogMetricsTests(unittest.TestCase):
 
 class CatalogCoverageTests(unittest.TestCase):
     def test_missing_behavior_and_recovery_fail_acceptance(self):
-        entries = [
+        entries: list[dict[str, Any]] = [
             {
                 "id": f"example/{index}",
                 "verifier": "native",
