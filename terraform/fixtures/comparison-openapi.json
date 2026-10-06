@@ -23,9 +23,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "demo_id"
-                ],
+                "required": ["demo_id"],
                 "properties": {
                   "demo_id": {
                     "type": "string",

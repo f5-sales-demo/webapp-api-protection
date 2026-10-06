@@ -1,17 +1,7 @@
 {
   "schema_version": 1,
   "publication_gate": "live acceptance required",
-  "applications": [
-    "httpbin",
-    "juice-shop",
-    "dvwa",
-    "vampi",
-    "whoami",
-    "dvga",
-    "restaurant",
-    "crapi",
-    "csd"
-  ],
+  "applications": ["httpbin", "juice-shop", "dvwa", "vampi", "whoami", "dvga", "restaurant", "crapi", "csd"],
   "catalog": {
     "expected_entries": 164,
     "passes": 2,
