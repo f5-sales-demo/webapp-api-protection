@@ -58,6 +58,28 @@ def adopt(context: Context, terraform: Terraform, mapping: Path) -> None:
     if hashlib.sha256(state.read_bytes()).hexdigest() != document.get("state_sha256"):
         message = "adoption state changed since inventory review"
         raise Blocked(message)
+    exact = (
+        "/api/object_store/namespaces/"
+        + context.settings.scope["namespace"]
+        + "/stored_objects/swagger/showcase-form-native/"
+        + entry["version"]
+    )
+    live = terraform.runtime.xc(exact)
+    if not isinstance(live, dict):
+        message = "adoption exact-version readback unavailable"
+        raise Blocked(message)
+    content = live.get("string_value")
+    configured = (context.paths.app / "fixtures/showcase-openapi.json").read_text()
+    if (
+        content != configured
+        or hashlib.sha256(configured.encode()).hexdigest() != entry.get("sha256")
+        or live.get("metadata", {}).get("version") != entry["version"]
+        or live.get("metadata", {}).get("namespace")
+        != context.settings.scope["namespace"]
+        or live.get("metadata", {}).get("name") != "showcase-form-native"
+    ):
+        message = "adoption exact-version content or metadata differs"
+        raise Blocked(message)
     backup = context.paths.state.parent / ("adoption-backup-" + str(time.time_ns()))
     backup.mkdir(mode=0o700)
     for name in (
