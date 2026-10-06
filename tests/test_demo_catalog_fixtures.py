@@ -23,6 +23,13 @@ class FixtureExportTests(unittest.TestCase):
             ),
             patch.object(fixtures, "login", side_effect=["token-a", "token-b"]),
             patch.object(fixtures, "restaurant_fixtures", return_value={}),
+            patch.object(fixtures.Path, "is_file", return_value=True),
+            patch.object(
+                fixtures.Path,
+                "stat",
+                return_value=__import__("types").SimpleNamespace(st_mode=0o600),
+            ),
+            patch.object(fixtures.Path, "read_text", return_value="{}"),
         ):
             result = fixtures.collect()
         assert result["crapi_tokens"] == ["token-a", "token-b"]

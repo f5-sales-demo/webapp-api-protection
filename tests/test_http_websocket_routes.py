@@ -7,8 +7,7 @@ from pathlib import Path
 class HttpWebSocketRoutes(unittest.TestCase):
     def test_companion_emits_declared_websocket_paths(self):
         source = (
-            Path(__file__).resolve().parents[1]
-            / "terraform/modules/http-lb/main.tf"
+            Path(__file__).resolve().parents[1] / "terraform/modules/http-lb/main.tf"
         ).read_text()
         assert "routes.value.use_websocket" in source
         assert "content { use_websocket = true }" in source
@@ -18,8 +17,7 @@ class HttpWebSocketRoutes(unittest.TestCase):
 
 def test_http_companion_keeps_costly_query_route_timeout():
     source = (
-        Path(__file__).resolve().parents[1]
-        / "terraform/modules/http-lb/main.tf"
+        Path(__file__).resolve().parents[1] / "terraform/modules/http-lb/main.tf"
     ).read_text()
     assert "routes.value.timeout_ms" in source
     assert "timeout = routes.value.timeout_ms" in " ".join(source.split())

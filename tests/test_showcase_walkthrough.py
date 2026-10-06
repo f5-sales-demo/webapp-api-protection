@@ -53,7 +53,9 @@ class Transactions(unittest.TestCase):
         self.assertEqual(self.client.form["spec"]["routing"]["preserve"], "concurrent")
 
     def test_failed_read_is_incomplete(self):
-        with patch.object(self.config, "read", side_effect=EvidenceError("read failed")):
+        with patch.object(
+            self.config, "read", side_effect=EvidenceError("read failed")
+        ):
             self.assertFalse(self.config.restore())
 
 

@@ -2,11 +2,14 @@
 """Export real synthetic crAPI fixtures from the ownership-verified demo origin."""
 
 import argparse
+import http.cookiejar
 import json
 import os
+import re
 import subprocess
+from pathlib import Path
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from urllib.request import HTTPCookieProcessor, Request, build_opener, urlopen
 
 RESTAURANT_SYNTHETIC_PASSWORD = "password"  # noqa: S105 - published synthetic lab account
 ACCOUNTS = (
@@ -100,6 +103,53 @@ def restaurant_fixtures(seed: bool = False) -> dict:
     return result
 
 
+def seed_dvwa_sessions() -> dict:
+    """Authenticate actual synthetic sessions on all four declared DVWA replicas."""
+    sessions = {}
+    domains = (
+        "www.f5-sales-demo.com",
+        "api.f5-sales-demo.com",
+        "waf-before.f5-sales-demo.com",
+        "waf-after.f5-sales-demo.com",
+    )
+    for domain in domains:
+        jar = http.cookiejar.CookieJar()
+        opener = build_opener(HTTPCookieProcessor(jar))
+        for port in (8101, 8102, 8103, 8104):
+            base = f"http://127.0.0.1:{port}"
+            with opener.open(base + "/login.php", timeout=10) as response:
+                page = response.read().decode()
+            token = re.search(
+                r"name=['\"]user_token['\"][^>]*value=['\"]([^'\"]+)", page
+            )
+            if token is None:
+                message = "native DVWA login token missing"
+                raise ValueError(message)
+            request = Request(  # noqa: S310 - declared loopback replica
+                base + "/login.php",
+                data=urlencode(
+                    {
+                        "username": "admin",
+                        "password": "password",
+                        "Login": "Login",
+                        "user_token": token.group(1),
+                    }
+                ).encode(),
+            )
+            with opener.open(request, timeout=10) as response:
+                if "Logout" not in response.read().decode():
+                    message = "native DVWA synthetic login failed"
+                    raise ValueError(message)
+        cookie = next(
+            (cookie.value for cookie in jar if cookie.name == "PHPSESSID"), None
+        )
+        if not isinstance(cookie, str) or not cookie:
+            message = "origin-issued DVWA session missing"
+            raise ValueError(message)
+        sessions[domain] = cookie
+    return sessions
+
+
 def collect() -> dict:
     """Fail closed rather than exporting an absent prerequisite."""
     result = seeded_ids()
@@ -111,6 +161,11 @@ def collect() -> dict:
         message = "seeded origin fixture identity missing"
         raise ValueError(message)
     result.update(restaurant_fixtures())
+    seed_receipt = Path("/opt/origin-server/catalog-seed-sessions.json")
+    if not seed_receipt.is_file() or seed_receipt.stat().st_mode & 0o077:
+        message = "declared private DVWA seed receipt missing"
+        raise ValueError(message)
+    result["dvwa_sessions"] = json.loads(seed_receipt.read_text())
     result.update(
         fixture_type="seeded-synthetic-origin-accounts",
         crapi_tokens=[login(email, password) for email, password in ACCOUNTS],
@@ -126,6 +181,9 @@ if __name__ == "__main__":
     if args.seed:
         seeded_ids(seed=True)
         restaurant_fixtures(seed=True)
+        receipt = Path("/opt/origin-server/catalog-seed-sessions.json")
+        receipt.write_text(json.dumps(seed_dvwa_sessions()))
+        receipt.chmod(0o600)
         print(json.dumps({"seeded": True}))
     else:
         print(json.dumps(collect()))

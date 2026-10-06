@@ -46,7 +46,7 @@ run "blindfold_secret_selects_blindfold_arm" {
     error_message = "blindfold method must select the blindfold arm"
   }
   assert {
-    condition     = output.api_crawler_password_method == "blindfold"
+    condition     = contains(["blindfold"], output.api_crawler_password_method)
     error_message = "effective method must be blindfold"
   }
 }

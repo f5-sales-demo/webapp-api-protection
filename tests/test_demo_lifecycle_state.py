@@ -141,9 +141,7 @@ class OperatorConfiguration(unittest.TestCase):
     def test_default_private_operator_file(self):
         path = config_file(self.files)
         obj = bind_fixture(self.files).context
-        ensure_equal(
-            obj.settings.config["expected_azure_user"], "operator@example.com"
-        )
+        ensure_equal(obj.settings.config["expected_azure_user"], "operator@example.com")
         ensure_equal(path.stat().st_mode & 0o777, 0o600)
         ensure_equal(obj.paths.state.stat().st_mode & 0o777, 0o700)
         ensure("expected_azure_user" not in obj.state.receipt["scope"])
@@ -155,9 +153,7 @@ class OperatorConfiguration(unittest.TestCase):
         )
         self.files.args.config = config_file(self.files, "explicit.json")
         obj = bind_fixture(self.files).context
-        ensure_equal(
-            obj.settings.config["expected_azure_user"], "operator@example.com"
-        )
+        ensure_equal(obj.settings.config["expected_azure_user"], "operator@example.com")
         ensure(str(obj.paths.key) != "/unused")
 
     def test_config_overrides_environment(self):
@@ -431,9 +427,7 @@ class OperatorConfiguration(unittest.TestCase):
         with patch.object(Path, "home", return_value=home):
             obj = bind_fixture(self.files).context
         ensure_equal(obj.paths.state, state)
-        ensure_equal(
-            obj.settings.config["expected_azure_user"], "operator@example.com"
-        )
+        ensure_equal(obj.settings.config["expected_azure_user"], "operator@example.com")
 
     def test_operator_config_preserves_fixed_scope_restrictions(self):
         for key in state_module.FIXED:
