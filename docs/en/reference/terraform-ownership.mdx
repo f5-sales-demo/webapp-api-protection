@@ -17,9 +17,16 @@ Each comparison has its own firewall and user identity. Origin pools and health 
 
 ## Plan and adoption
 
-Run `scripts/demo-lifecycle.sh plan` on Ubuntu with the approved private operator configuration and XC environment. The command saves `review.plan`, `review.binding.json`, and `review.summary.json` beside the private application state. Review proposed replacements before deployment. Bindings reject changed source, inputs, provider locks, state, or plan bytes.
+Run `scripts/demo-lifecycle.sh plan` on Ubuntu with the approved private operator configuration and
+XC environment. The command saves `review.plan`, `review.binding.json`, and `review.summary.json`
+beside the private application state. Review proposed replacements before deployment. Bindings
+reject changed source, inputs, provider locks, state, or plan bytes.
 
-Normal deployment rejects out-of-state objects. Review the private inventory and place the exact Swagger adoption mapping in `adoption-review.json`; run `scripts/demo-lifecycle.sh adopt` only after the review plan is current. The mapping binds the approved scope, state digest, exact namespace/name/version, verified content digest, and ownership review. Adoption backs up state and receipts before import.
+Normal deployment rejects out-of-state objects. Review the private inventory and place the exact
+Swagger adoption mapping in `adoption-review.json`; run `scripts/demo-lifecycle.sh adopt` only after
+the review plan is current. The mapping binds the approved scope, state digest, exact
+namespace/name/version, verified content digest, and ownership review. Adoption backs up state and
+receipts before import.
 
 The namespace remains in its separate protected state. DNS and tenant subscriptions retain their owning plans. Never move these shared prerequisites into application state.
 
@@ -27,10 +34,18 @@ The namespace remains in its separate protected state. DNS and tenant subscripti
 
 `xcsh_swagger_object` owns one content-verified version. API definitions consume its immutable path. Import uses namespace/name/version. Content changes require replacement of the owned version; the resource never selects latest or deletes every version.
 
-Origin and generator source revisions and hashes are declared in the showcase profile. Changing Azure custom data requires VM replacement, so review that change explicitly. Runtime checks compare source receipts and every declared guest file against the verified artifact. The guest manifest also records the service/control files. Tool versions, release hashes, browser packages and tool repository commits are declared in `terraform/tool-pins.json`. Direct file changes fail verification.
+Origin and generator source revisions and hashes are declared in the showcase profile. Changing
+Azure custom data requires VM replacement, so review that change explicitly. Runtime checks compare
+source receipts and every declared guest file against the verified artifact. The guest manifest also
+records the service/control files. Tool versions, release hashes, browser packages and tool
+repository commits are declared in `terraform/tool-pins.json`. Direct file changes fail
+verification.
 
 ## Acceptance
 
-The coverage manifest is `terraform/coverage/demo.json`. Publication requires all five attributed comparisons, successful legitimate requests, nine applications across native/proxy/published routes, two complete 164-entry catalog passes at 200 aggregate HTTP requests/second within 5%, at least 99% benign success, and zero baseline transport failures.
+The coverage manifest is `terraform/coverage/demo.json`. Publication requires all five attributed
+comparisons, successful legitimate requests, nine applications across native/proxy/published routes,
+two complete 164-entry catalog passes at 200 aggregate HTTP requests/second within 5%, at least 99%
+benign success, and zero baseline transport failures.
 
 Verify restart and reboot recovery. Require a second unchanged apply and a refreshed plan with zero resource and output actions after walkthroughs, catalog passes, and reboot. Source tests and candidate provider checks do not satisfy live deployment acceptance.
