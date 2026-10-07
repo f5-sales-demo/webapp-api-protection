@@ -43,7 +43,7 @@ SUCCESS, FORBIDDEN, RATE_DENIAL = 200, 403, 429
 MIN_TIMEOUT, MAX_TIMEOUT = 60, 1800
 MAX_CLOCK_OFFSET = 5
 RATE_BURST_REQUESTS = 90
-RATE_BURST_SPACING = 2
+RATE_BURST_SPACING = 1.5
 CATEGORIES = ("waf", "schema", "endpoint-denial", "rate-limit", "mud")
 
 
@@ -65,7 +65,10 @@ def send(  # pylint: disable=too-many-arguments
 ) -> dict:
     """Record actual request timestamps, payload digest and application JSON."""
     start = time.time()
-    code, response = client.request(host, path, method, user, body)
+    if control == "rate-limit" and hasattr(client, "keepalive_request"):
+        code, response = client.keepalive_request(host, path, method, user)
+    else:
+        code, response = client.request(host, path, method, user, body)
     record = {
         "host": host,
         "path": path.split("?", 1)[0],
@@ -596,6 +599,7 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
             str(exc) if isinstance(exc, EvidenceError) else "private execution failure"
         )
     finally:
+        client.close_rate_connections()
         client.deadline = time.monotonic() + 90
         report["restored"] = configuration.restore() if configuration.original else True
         report["finished"] = time.time()
