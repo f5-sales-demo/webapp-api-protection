@@ -574,7 +574,7 @@ def _failed_operation(lifecycle: Lifecycle, failure: BaseException | None) -> No
         ):
             _cleanup_traffic(lifecycle)
     # pylint: disable-next=broad-exception-caught
-    except BaseException:  # noqa: BLE001 - cleanup must preserve the original failure
+    except BaseException:
         receipt["cleanup"] = (
             "traffic stop failed or unreachable; original failure retained"
         )
