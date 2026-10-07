@@ -127,7 +127,6 @@ class Attribution(unittest.TestCase):
 
 class RequestFailures(unittest.TestCase):
     def test_request_timeout_preserves_completed_request_journal(self):
-
         with tempfile.TemporaryDirectory() as directory:
             client = Mock(spec=["request", "walkthrough_directory"])
             client.walkthrough_directory = Path(directory)
@@ -151,12 +150,10 @@ class RequestFailures(unittest.TestCase):
             )
 
     def test_signal_enters_failure_path(self):
-
         with self.assertRaises(EvidenceError):
             runner.interrupted(15, None)
 
     def test_schema_missing_and_type_are_distinct(self):
-
         base = {
             "req_id": "synthetic",
             "sec_event_name": "OpenAPI Validation Failure",

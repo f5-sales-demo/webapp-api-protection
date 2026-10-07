@@ -98,5 +98,7 @@ class UniqueCatalogJoins(unittest.TestCase):
         out, pending, event, client = data()
         second = {**event, "req_id": "other"}
         client.pages.return_value = [event, second]
-        with patch("demo_catalog_evidence.access_by_user", return_value=[event, second]):
+        with patch(
+            "demo_catalog_evidence.access_by_user", return_value=[event, second]
+        ):
             ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
