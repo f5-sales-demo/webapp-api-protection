@@ -945,7 +945,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_native_identity.py": {
-      "sha256": "6f0993b8b0b85848df671d4c28a80c1790ae2ad0ee01bf5e58518bd04444c75e",
+      "sha256": "ab6bf59c118d241cac131a663019d61a7a2a7a3d133c30056787a146d967ca9f",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
@@ -985,7 +985,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
-      "sha256": "24d43128670a6fc00eb73abeaf8351d12c47c3af0136bcaa77b3318f12e218da",
+      "sha256": "0a59cb81e7ab85b7456e99598dd08f1d1f23fdd2a1b58879c6e1577a168b4904",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_tool.py": {
@@ -1968,6 +1968,10 @@
       "sha256": "53f80f51860dc0283b9085d80ffb6ee2f3d9e1847b2e14ef392886344d43d64f",
       "mode": "0444"
     },
+    "/opt/traffic-generator/current/tests/test_endpoint_attribution.py": {
+      "sha256": "3a2143939be04baa0a40ce538356e8ca5c16e50746c8a08e3783fb188eaeb978",
+      "mode": "0444"
+    },
     "/opt/traffic-generator/current/tests/test_family_functional.py": {
       "sha256": "3ac8186a12b98a07f7465d36e01b0de943703b89a486a1f6b19c89da8008e20c",
       "mode": "0444"
@@ -1997,7 +2001,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_response_identity.py": {
-      "sha256": "049b8dde76949cb2476f45bd22e9e4e38adf40022ba25bd544adb50afedcfef1",
+      "sha256": "270d451dbad4d5c0fcec6bfbdc612b0860138ccfea01389309f99cba288d2961",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_scanner_process.py": {
