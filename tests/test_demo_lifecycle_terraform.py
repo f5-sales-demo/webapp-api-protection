@@ -72,6 +72,46 @@ class ReviewedRebuild(unittest.TestCase):
             fixture.terraform.reviewed_rebuild({})
         tf.assert_not_called()
 
+    def test_current_owned_review_backs_up_actual_inputs_and_states(self):
+        fixture = make_fixture(self)
+        state = fixture.context.paths.state
+        fixture.context.paths.vars.write_text("private synthetic inputs")
+        (state / "application.tfstate").write_text("synthetic state")
+        (state / "review.plan").write_text("synthetic plan")
+        plan = {
+            "resource_changes": [
+                {
+                    "address": "vm",
+                    "type": "azurerm_linux_virtual_machine",
+                    "change": {
+                        "actions": ["delete", "create"],
+                        "before": {"id": "owned"},
+                    },
+                }
+            ]
+        }
+        with (
+            patch.object(terraform_module, "require_current"),
+            patch.object(fixture.terraform, "tf", return_value=(json.dumps(plan), 0)),
+            patch.object(fixture.terraform, "guard_conflicts"),
+        ):
+            ensure_equal(
+                fixture.terraform.reviewed_rebuild({"vm": "owned"}),
+                state / "review.plan",
+            )
+        backups = list(state.glob("rebuild-backup-*"))
+        ensure_equal(len(backups), 1)
+        ensure_equal(
+            (backups[0] / fixture.context.paths.vars.name).read_text(),
+            "private synthetic inputs",
+        )
+        ensure_equal(
+            (backups[0] / "application.tfstate").read_text(), "synthetic state"
+        )
+        ensure_equal(
+            (backups[0] / fixture.context.paths.vars.name).stat().st_mode & 0o777, 0o600
+        )
+
     def test_reviewed_unowned_deletion_rejected(self):
         fixture = make_fixture(self)
         plan = {

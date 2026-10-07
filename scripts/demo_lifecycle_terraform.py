@@ -610,7 +610,7 @@ class Terraform:
         for name in (
             "application.tfstate",
             "namespace.tfstate",
-            "showcase.tfvars.json",
+            self.context.paths.vars.name,
             "swagger-receipt.json",
             "run-manifest.json",
             "outputs.json",
