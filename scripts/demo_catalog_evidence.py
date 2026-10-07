@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 from demo_verify_client import Client, _page_batch
 from demo_verify_evidence import decode_event, identified_user, virtual_host
 from demo_verify_types import EvidenceError
-from showcase_walkthrough_evidence import bind_ordered_requests, matched
+from showcase_walkthrough_evidence import matched
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -84,16 +84,38 @@ def request_checks(
         }
         for row in rows
     ]
-    bind_ordered_requests(records, probes, namespace, lb)
     checks = []
+    used: set[str] = set()
     for row, probe in zip(rows, probes, strict=True):
-        record = matched(records, probe, namespace, lb)
-        if record is None:
+        candidates = []
+        for event in events:
+            request_id = event.get("req_id")
+            if not request_id or request_id in used:
+                continue
+            if matched([event], probe, namespace, lb) is None:
+                continue
+            access = [
+                record for record in records if record.get("req_id") == request_id
+            ]
+            record = matched(
+                access, {**probe, "server_request_id": request_id}, namespace, lb
+            )
+            if record is not None:
+                candidates.append((request_id, record))
+        unique = dict(candidates)
+        if len(unique) != 1:
             return None
-        hits = [event for event in events if event.get("req_id") == record["req_id"]]
-        if not hits:
-            return None
-        checks.append({"response": row, "access": record, "events": hits})
+        request_id = next(iter(unique))
+        used.add(request_id)
+        checks.append(
+            {
+                "response": row,
+                "access": unique[request_id],
+                "events": [
+                    event for event in events if event.get("req_id") == request_id
+                ],
+            }
+        )
     return checks
 
 

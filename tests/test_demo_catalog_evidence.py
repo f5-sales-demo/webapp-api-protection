@@ -85,3 +85,18 @@ class CatalogEvidenceTests(unittest.TestCase):
 
     def test_scope_and_absence(self):
         test_foreign_request_or_absent_access_never_produces_bundle()
+
+
+class UniqueCatalogJoins(unittest.TestCase):
+    def test_one_server_id_cannot_satisfy_two_requests(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"] *= 2
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+    def test_ambiguous_security_time_join_is_rejected(self):
+        out, pending, event, client = data()
+        second = {**event, "req_id": "other"}
+        client.pages.return_value = [event, second]
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event, second]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
