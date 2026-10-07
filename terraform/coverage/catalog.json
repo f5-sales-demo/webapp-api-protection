@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "expected_entries": 164,
-  "generator_source": "248dd11a906c7b29fc8fab593cc006f6c30454ed",
+  "generator_source": "0d942650b3ee368a6685257105da185b89e390f8",
   "entries": [
     {
       "id": "api-attacks/01-vampi-owasp-top10",
@@ -267,9 +267,9 @@
         "/vampi/users/v1/register"
       ],
       "fixture_refresh": [],
-      "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
+      "positive_test": "Malformed registration and empty signup bodies are rejected by native validation; unsupported login media and invalid book IDs have exact protocol outcomes, with request-bound protection attribution when blocked",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -822,9 +822,9 @@
         "/crapi/mailhog/api/v2/messages"
       ],
       "fixture_refresh": ["crapi"],
-      "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
+      "positive_test": "Native coupon lookup returns concrete coupon code and amount for each operator and seeded positive control; missing-code HTTP 500 is accepted only with its exact empty JSON body and cannot satisfy the positive control",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -866,10 +866,15 @@
     {
       "id": "crapi-exploits/14-unauth-order-access",
       "entrypoint": "suites/crapi-exploits/14-unauth-order-access.sh",
-      "application_paths": ["/crapi/health", "/crapi/identity/api/auth/login", "/crapi/mailhog/api/v2/messages"],
+      "application_paths": [
+        "/crapi/health",
+        "/crapi/identity/api/auth/login",
+        "/crapi/mailhog/api/v2/messages",
+        "/crapi/workshop/api/shop/orders/1"
+      ],
       "fixture_refresh": [],
-      "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
-      "verifier": "composed-native",
+      "positive_test": "At least one real native order exposes concrete user and product data without authentication; all twenty order probes and invalid credentials return exact native objects, native missing-object error pages, or attributed protection",
+      "verifier": "native-crapi-orders",
       "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
@@ -1125,9 +1130,9 @@
       "entrypoint": "suites/dvga-exploits/07-jwt-forgery-me.sh",
       "application_paths": ["/dvga/graphql"],
       "fixture_refresh": [],
-      "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
+      "positive_test": "The native me query returns a concrete GraphQL data or error envelope for every forged and malformed token; request-bound WAF evidence is required for protection responses",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -1269,9 +1274,9 @@
       "entrypoint": "suites/dvwa-exploits/11-csp-bypass.sh",
       "application_paths": ["/dvwa/login.php", "/dvwa/vulnerabilities/csp/"],
       "fixture_refresh": [],
-      "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
+      "positive_test": "Every include probe returns authenticated native DVWA CSP content or attributed WAF protection; the shell submits URL strings and does not execute remote scripts",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2402,10 +2407,10 @@
         "/vampi/users/v1/login"
       ],
       "fixture_refresh": ["vampi", "crapi", "juice", "restaurant"],
-      "positive_test": null,
-      "verifier": null,
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "positive_test": "Both preserved child suites complete every exact source-bound scenario with independent native behavior and fixture recovery; the parent requires no transport or tool cancellation",
+      "verifier": "native-nested-suites",
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["nested_actions"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -2882,9 +2887,9 @@
         "/restaurant/v2"
       ],
       "fixture_refresh": ["restaurant"],
-      "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
+      "positive_test": "OpenAPI, documentation, unknown routes and root method discovery return native RESTaurant protocol identities; no item mutation endpoint or body is submitted",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
