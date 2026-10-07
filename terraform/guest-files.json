@@ -73,15 +73,15 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/workflows/antigravity-review.yml": {
-      "sha256": "3709bebdf8e5e0eeead641115d8414afbb69c2c6d31e3648dcd8e56a7de90e80",
+      "sha256": "c2233f660e2835c6a28197d7fd5d50c1178f041ae0adc3be8d77b6560a82d875",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/workflows/auto-merge.yml": {
-      "sha256": "e0fc40728dbf0eb15bb59381edba4ca8499115d21be4b158dc0b556a8e47401e",
+      "sha256": "7d7107cd91e8793c1640cfc19ca513d5992c7ea3d991f188d71e7be1f6d4615f",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/workflows/github-pages-deploy.yml": {
-      "sha256": "46ed04c0e308115e6b620f0b3cb9150f5984eae93ef46a823051d6a33f0e3887",
+      "sha256": "2b1fa6d511a49e8279f8c031eaa3ec19d1e1611c25d9372c991579124678b18a",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/workflows/require-linked-issue.yml": {
@@ -93,7 +93,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/workflows/super-linter.yml": {
-      "sha256": "2c0c71b9680ee8bdec4bfd666b0b7bcd9bae020d905bfd4fcc8e69dd12688b3e",
+      "sha256": "eee53eeb2c2b664cef1efc463c450bf7ead0c84a594ffe2c7436445a10c5ca64",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/workflows/translation-audit.yml": {
@@ -173,15 +173,15 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/AGENTS.md": {
-      "sha256": "aaeaf6c5de45df0d3f8f1aaa4b51a4cceee307239fa3773626ebef1142f96979",
+      "sha256": "08b3e972cf6e96b02120c373ed8bd0268697008fb098a37a639582e8d1e4c107",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/CLAUDE.md": {
-      "sha256": "d23e1a163a75f55103717d94635670e36f2b42ae1fab928f244d0509e69e8333",
+      "sha256": "e7a6de1c75ff8c8f508723d9e2a4737f534edf58f3786877eb591915f33f142d",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/CONTRIBUTING.md": {
-      "sha256": "c283d56e15fdb750c3c385d17a725e49aad7e24ed4a1928629c0b69fc0039890",
+      "sha256": "8c84fb852d4a6c1bf99fe2d29da44cb0aa4ca7a913ffc663d320fbb539beb405",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/LICENSE": {
@@ -193,7 +193,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/STYLE_GUIDE.md": {
-      "sha256": "161c6ce4e634c0979d67bfc07993848f80629a4bb76194bfa38ef8961f3a9028",
+      "sha256": "7cc6920231e4cadc16c94aecf7e0ee5191d458afe919c7de86913a4cb1794224",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/benchmarks/2026-04-26-cdn-f16s-v2-results.md": {
@@ -289,15 +289,15 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/en/01-architecture.mdx": {
-      "sha256": "0af61d099e8ab347cddc0ef1b76a068d6edec3c13ce7402220634675dabae080",
+      "sha256": "ae5bff4e3468cfe341ec310a0863e801b81316ac848e7d01a2aa6614b7778ecb",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/en/02-prerequisites.mdx": {
-      "sha256": "8f15020bb712cab3ae8eab75a45838696933cb0f0495e912a82e026bc939cf37",
+      "sha256": "ee891f7d313869a3ec1a66bfd22504190e21f99e89c67f0e12ea0d0f5a20f16f",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/en/03-deploy.mdx": {
-      "sha256": "56ebeb7d2950eced6ed43993dd9f20e7bf7951302250742efcfb7c31f4c87924",
+      "sha256": "abbaf89fe6bfae6c98774990e47ed16d1a43dd7bca66926e5cdbc65bf1461b63",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/en/04-tool-catalog.mdx": {
@@ -309,11 +309,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/en/06-runner.mdx": {
-      "sha256": "64f42de7be4d3c4175f1b7d0f11fc079fa1cd6948560f5d74b82d8619379f1ac",
+      "sha256": "5ea8327b33811a55e8785b7c91f326b5c5f91ca602740a433b81c0e43ebb99f6",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/en/07-integrate.mdx": {
-      "sha256": "09ee8b9ad7aead0c5cc29722c5cfe5c59b4fbce805264ef2ca7da773b8258464",
+      "sha256": "eb8e33c01623fcb14513d4fb8694c128a34e123141bea6f396a3fb401dd5aac2",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/en/08-teardown.mdx": {
@@ -553,7 +553,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/placeholders.json": {
-      "sha256": "817d35097acf507d98e20d5a05c3a23429efbfd30a2ef6b42480b5b1fb814a6e",
+      "sha256": "40898e46964c912fdc2cf922ba0a1ab47f8acce57c24eac51187116e961a7843",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/pt-br/01-architecture.mdx": {
@@ -709,7 +709,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/catalog_evidence.py": {
-      "sha256": "5ca4d770669109332aa04e8eb169e8c5bfc900f629c50fd364cad3030188b1ee",
+      "sha256": "372ab8973cd32900641faab78d2c35d990c491bcd150b7d16cd482f372da8111",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/catalog_pass_receipt.py": {
@@ -729,7 +729,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/check_pii.py": {
-      "sha256": "0fd03b0f6d21e9697440a972bc771ba970b0ed79beb9e9d78d831a1ef9c52b44",
+      "sha256": "a20fd3e695a6d9f6e1233962e47789819cc1bc4093f09d116134d55bae778389",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/cleanup_network.py": {
@@ -1237,7 +1237,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/csd-violations/run.mjs": {
-      "sha256": "26763cccc389479b3f2ae8937aab3e8496029c864c7a0640f642fd18122e8636",
+      "sha256": "23308be0125a8e12c12faa984b371ba6c83b53b1b78efa696f40a02ee775bb5b",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/csd-violations/run.sh": {
@@ -1821,7 +1821,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/csd-header-circulation.integration.mjs": {
-      "sha256": "2aa34a3ed357f84f16f6d74b74b760787d3414c353e3ed44b6bb04f99c951486",
+      "sha256": "e8871dd25b12989930dc81044dcc31a8ff1d0ca815e6d9e0e0e86e9346096420",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/csd-header-circulation.integration.sh": {
@@ -1833,7 +1833,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/csd-violations.test.mjs": {
-      "sha256": "3a3d90a4d827077637b61c13cd286464e7b1f35cd829e3971d0570b927c4f3b7",
+      "sha256": "80caf52818dbdb7317182eadb8beb4c2aceb3366d9ac005650daade3227db1e8",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/native-browser-actions.test.cjs": {
@@ -1849,7 +1849,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/tests/test-check-pii.sh": {
-      "sha256": "86f413c80c48c03e602f772dfd022c2b99f684c2a31bc634eceae45e54b7c0a2",
+      "sha256": "6a900440c7d115ecd8c07e7926c0d6f2f140cbc8fdfb366d1212a28de3bdf0bc",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/tests/test-check-repo-hygiene.sh": {
@@ -1893,7 +1893,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_catalog_evidence.py": {
-      "sha256": "c815f5385606276d9719a572dd184ce24b90e167b628e018f55f1a7deb5f6e6f",
+      "sha256": "94ccadb38bfa158d0285561ce6b46f7a261237fff93431ac2ee4bbb9322fe43b",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_catalog_pass_receipt.py": {
@@ -2132,13 +2132,13 @@
       "sha256": "8fa225c645fc3aa0e1736c1396a72c1e81686dc1c3b5a91d3ca96cfd5cb4a448",
       "mode": "0644"
     },
-    "/etc/apt/apt.conf.d/80-demo-acquire": {
-      "sha256": "cac8d44f109998badd392ec7e8e9c2839aff7a08fb168e1f16dd309f3cc81b99",
-      "mode": "0644"
-    },
     "/usr/bin/node": {
       "sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
       "mode": "0755"
+    },
+    "/etc/apt/apt.conf.d/80-demo-acquire": {
+      "sha256": "cac8d44f109998badd392ec7e8e9c2839aff7a08fb168e1f16dd309f3cc81b99",
+      "mode": "0644"
     },
     "/etc/apt/sources.list.d/ubuntu.sources": {
       "sha256": "23637a23e791e18e05c95516ca76dac8b0d4eb918bc8d662812b434eba8d6319",
