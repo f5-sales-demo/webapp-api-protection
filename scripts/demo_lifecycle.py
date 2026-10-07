@@ -23,6 +23,7 @@ from demo_lifecycle_state import (
     Blocked,
     create_context,
     managed_resources,
+    private_json,
     quota_count,
     save_json,
     secure_artifact,
@@ -493,6 +494,14 @@ def _upload_profile(context: Context, runtime: Runtime) -> None:
         lb_domains=scope["domains"],
         ssh_public_key_path=str(paths.key) + ".pub",
     )
+    receipt = paths.state / "swagger-receipt.json"
+    if receipt.is_file():
+        saved = private_json(receipt)
+        if (
+            saved.get("namespace") == scope["namespace"]
+            and saved.get("api_url") == scope["xc_url"]
+        ):
+            profile["api_definition_swagger_specs"] = [saved["path"]]
     save_json(paths.vars, profile)
     runtime.phase("declared-profile-prepared")
 
