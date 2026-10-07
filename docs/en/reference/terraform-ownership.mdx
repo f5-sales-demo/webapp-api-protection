@@ -41,6 +41,14 @@ records the service/control files. Tool versions, release hashes, browser packag
 repository commits are declared in `terraform/tool-pins.json`. Direct file changes fail
 verification.
 
+## Session retention
+
+Terraform declares a five-minute DVWA cleanup timer and a 24-hour anonymous-session retention
+window. The cleanup verifies the named demo volume, preserves authenticated and recent sessions, and
+leaves unrelated files untouched. Benign generator workers reuse an anonymous session per domain, so
+login-page probes do not create a new file for every request. Guest-file verification checks the
+cleanup program and timer against their declared hashes.
+
 ## Acceptance
 
 The coverage manifest is `terraform/coverage/demo.json`. Publication requires all five attributed
