@@ -741,7 +741,7 @@ class Ownership:
                 "expected=json.load(sys.stdin); failures=[]; "
                 "\nfor name,record in expected.items():"
                 "\n p=pathlib.Path(name)"
-                "\n if not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest()!=record['sha256']: failures.append(name)"
+                "\n if p.is_symlink() or not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest()!=record['sha256'] or ('mode' in record and (p.stat().st_mode & 0o777) != int(record['mode'], 8)): failures.append(name)"
                 "\nprint(json.dumps({'verified':not failures,'checked':len(expected),'failures':failures}))"
             )
             # Fixed Python checker receives exact manifest JSON via stdin, never shell interpolation.
