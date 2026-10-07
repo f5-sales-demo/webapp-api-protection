@@ -246,6 +246,31 @@ def collect() -> dict:
     result["crapi_video_actor_token"] = login(
         "tgen-video@example.com", "SyntheticVideo!123"
     )
+    result["crapi_order_actor_token"] = login(
+        "tgen-order@example.com", "SyntheticOrder!123"
+    )
+    order = subprocess.run(
+        [
+            "/usr/bin/docker",
+            "exec",
+            "crapi-postgres",
+            "psql",
+            "-U",
+            "admin",
+            "-d",
+            "crapi",
+            "-qAt",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-c",
+            "SELECT id FROM \"order\" WHERE user_id=(SELECT id FROM user_login WHERE email='tgen-order@example.com') ORDER BY id LIMIT 1",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=20,
+    )
+    result["crapi_dedicated_order_id"] = int(order.stdout.strip())
     result["crapi_otp_email"] = "tgen-otp@example.com"
     result["crapi_otp_password"] = "SyntheticOTP!123"  # noqa: S105 - synthetic lab fixture
     result["crapi_otp_actor_token"] = login(

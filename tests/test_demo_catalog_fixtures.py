@@ -22,7 +22,9 @@ class FixtureExportTests(unittest.TestCase):
                 },
             ),
             patch.object(
-                fixtures, "login", side_effect=["video", "otp", "token-a", "token-b"]
+                fixtures,
+                "login",
+                side_effect=["video", "order", "otp", "token-a", "token-b"],
             ),
             patch.object(fixtures, "restaurant_fixtures", return_value={}),
             patch.object(fixtures.Path, "is_file", return_value=True),
@@ -37,11 +39,15 @@ class FixtureExportTests(unittest.TestCase):
                 return_value='{"dvwa_sessions":{},"dvwa_csrf_sessions":{}}',
             ),
             patch.object(fixtures, "urlopen") as opened,
+            patch.object(fixtures.subprocess, "run") as order_query,
         ):
             opened.return_value.__enter__.return_value.read.return_value = b'{"auth_token":"synthetic","config":{"application":{"domain":"example.test"}}}'
+            order_query.return_value.stdout = "10"
             result = fixtures.collect()
         assert result["crapi_tokens"] == ["token-a", "token-b"]
         assert result["crapi_order_id"] == 7
+        assert result["crapi_dedicated_order_id"] == 10
+        assert result["crapi_order_actor_token"] == "order"  # noqa: S105 - synthetic mock token
         assert result["fixture_type"] == "seeded-synthetic-origin-accounts"
 
     def test_default_fixture_read_does_not_seed_database(self):
