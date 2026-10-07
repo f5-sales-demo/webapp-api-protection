@@ -102,14 +102,18 @@ class ReviewedRebuild(unittest.TestCase):
         backups = list(state.glob("rebuild-backup-*"))
         ensure_equal(len(backups), 1)
         ensure_equal(
-            (backups[0] / fixture.context.paths.vars.name).read_text(),
+            (backups[0] / (fixture.context.paths.vars.name + ".snapshot")).read_text(),
             "private synthetic inputs",
         )
         ensure_equal(
-            (backups[0] / "application.tfstate").read_text(), "synthetic state"
+            (backups[0] / "application.tfstate.snapshot").read_text(), "synthetic state"
         )
         ensure_equal(
-            (backups[0] / fixture.context.paths.vars.name).stat().st_mode & 0o777, 0o600
+            (backups[0] / (fixture.context.paths.vars.name + ".snapshot"))
+            .stat()
+            .st_mode
+            & 0o777,
+            0o600,
         )
 
     def test_reviewed_unowned_deletion_rejected(self):

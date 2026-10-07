@@ -621,8 +621,9 @@ class Terraform:
             source = self.context.paths.state / name
             secure_artifact(source)
             if source.is_file():
-                shutil.copyfile(source, backup / name)
-                (backup / name).chmod(0o600)
+                snapshot = backup / (name + ".snapshot")
+                shutil.copyfile(source, snapshot)
+                snapshot.chmod(0o600)
         self.runtime.phase("reviewed-rebuild-guarded-plan")
         return path
 
