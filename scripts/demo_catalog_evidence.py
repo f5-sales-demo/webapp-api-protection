@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
 from demo_verify_client import Client, _page_batch
@@ -151,6 +152,26 @@ def request_checks(
     return checks
 
 
+def identity_records(
+    client: Client, namespace: str, lb: str, users: list[str], start: float, end: float
+) -> tuple[list[dict], list[dict]]:
+    """Bound concurrent exact-user reads; every failed read rejects the bundle."""
+
+    def read_user(user: str) -> tuple[list[dict], list[dict]]:
+        return (
+            access_by_user(client, namespace, lb, user, start, end),
+            client.pages(namespace, lb, start, end, user=user),
+        )
+
+    records: list[dict] = []
+    events: list[dict] = []
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for access, security in pool.map(read_user, users):
+            records.extend(access)
+            events.extend(security)
+    return records, events
+
+
 def evidence_bundle(
     client: Client, pending: dict, out: dict, bounds: Sequence[float]
 ) -> dict | None:
@@ -168,11 +189,14 @@ def evidence_bundle(
     low, high = bounds
     start = min(row["sent_at"] for row in rows) + low
     end = max(row["received_at"] for row in rows) + high + INGESTION_MARGIN
-    records = []
-    events = []
-    for user in sorted({row["synthetic_identity"] for row in rows}):
-        records.extend(access_by_user(client, namespace, lb, user, start, end))
-        events.extend(client.pages(namespace, lb, start, end, user=user))
+    records, events = identity_records(
+        client,
+        namespace,
+        lb,
+        sorted({row["synthetic_identity"] for row in rows}),
+        start,
+        end,
+    )
     checks = request_checks(records, events, rows, namespace, lb, bounds)
     if checks is None:
         return None

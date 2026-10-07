@@ -9,7 +9,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from demo_catalog_clock import calibrate_clock
-from demo_catalog_evidence import evidence_bundle
+from demo_catalog_evidence import evidence_bundle, identity_records
 from demo_lifecycle_fixtures import TEST_SCOPE
 from demo_test_support import ensure, ensure_equal, expect_error
 from demo_verify_evidence import identified_user, virtual_host
@@ -162,3 +162,51 @@ class ClockQueryScope(unittest.TestCase):
             calibrate_clock(client, out, "showcase-test")
         ensure_equal(calls, [p["user"] for p in probes])
         ensure_equal(client.clock_bounds, (-1, 2))
+
+
+class ParallelIdentityCollection(unittest.TestCase):
+    def test_every_identity_keeps_both_exact_query_results(self):
+        client = Mock()
+        client.pages.side_effect = lambda _namespace, _lb, _start, _end, user: [
+            {"user": user, "security": True}
+        ]
+        with patch(
+            "demo_catalog_evidence.access_by_user",
+            side_effect=lambda _client, _namespace, _lb, user, _start, _end: [
+                {"user": user, "access": True}
+            ],
+        ):
+            records, events = identity_records(
+                client,
+                TEST_SCOPE["namespace"],
+                "synthetic-lb",
+                ["first", "second"],
+                100,
+                110,
+            )
+        ensure_equal(
+            records,
+            [{"user": "first", "access": True}, {"user": "second", "access": True}],
+        )
+        ensure_equal(
+            events,
+            [{"user": "first", "security": True}, {"user": "second", "security": True}],
+        )
+
+    def test_failed_exact_query_cannot_return_partial_evidence(self):
+        client = Mock()
+        with (
+            patch(
+                "demo_catalog_evidence.access_by_user",
+                side_effect=EvidenceError("failed exact query"),
+            ),
+            expect_error(EvidenceError, "failed exact query"),
+        ):
+            identity_records(
+                client,
+                TEST_SCOPE["namespace"],
+                "synthetic-lb",
+                ["first", "second"],
+                100,
+                110,
+            )
