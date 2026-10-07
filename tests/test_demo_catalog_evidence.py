@@ -79,7 +79,12 @@ def test_bundle_requires_exact_access_record_and_preserves_provenance():
 def test_foreign_request_or_absent_access_never_produces_bundle():
     out, pending, _event, client = data()
     with patch("demo_catalog_evidence.access_by_user", return_value=[]):
-        ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+        result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure(result["evidence"]["checks"][0]["access"] is None)
+        ensure_equal(
+            result["evidence"]["checks"][0]["security_request_id"], _event["req_id"]
+        )
     pending["request"]["requests"][0]["domain"] = "foreign.example.test"
     with expect_error(EvidenceError, "outside declared scope"):
         evidence_bundle(client, pending, out, [-1, 1])
@@ -270,4 +275,19 @@ class EncodedRequestPath(unittest.TestCase):
         ensure_equal(access["req_path"], "/httpbin/%61nything/%27")
         event["req_path"] = "/httpbin/anything/foreign"
         with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class SampledAccessSecurityAnchor(unittest.TestCase):
+    def test_missing_access_requires_exact_unambiguous_security_record(self):
+        out, pending, event, client = data()
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure(result["evidence"]["checks"][0]["access"] is None)
+        client.pages.return_value = [event, {**event, "req_id": "foreign"}]
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+        client.pages.return_value = [{**event, "req_path": "/foreign"}]
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
             ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)

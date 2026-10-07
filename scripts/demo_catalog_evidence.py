@@ -189,12 +189,16 @@ def request_checks(
             namespace,
             lb,
         )
-        if record is None:
+        if record is None and any(
+            candidate.get("user") == identified_user(probe["user"])
+            for candidate in records
+        ):
             return None
         checks.append(
             {
                 "response": row,
                 "access": record,
+                "security_request_id": request_id,
                 "events": [
                     event for event in events if event.get("req_id") == request_id
                 ],
