@@ -7,7 +7,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from demo_verify_client import Client, _page_batch
-from demo_verify_evidence import decode_event, identified_user, virtual_host
+from demo_verify_evidence import decode_event, identified_user, stamp, virtual_host
 from demo_verify_types import EvidenceError
 from showcase_walkthrough_evidence import matched
 
@@ -60,6 +60,43 @@ def access_by_user(
     raise EvidenceError(message)
 
 
+def security_bindings(
+    probes: list[dict], events: list[dict], namespace: str, lb: str
+) -> dict[int, str] | None:
+    """Assign complete ordered security records without reusing a server request."""
+    keys = {(p["host"], p["path"], p["method"], p["user"]) for p in probes}
+    bindings = {}
+    for host, path, method, user in keys:
+        group = sorted(
+            [
+                probe
+                for probe in probes
+                if (probe["host"], probe["path"], probe["method"], probe["user"])
+                == (host, path, method, user)
+            ],
+            key=lambda probe: probe["sent_at"],
+        )
+        candidates = {
+            event["req_id"]: event
+            for event in events
+            if event.get("req_id")
+            and event.get("domain") == host
+            and event.get("req_path") == path
+            and event.get("method") == method
+            and event.get("user") == identified_user(user)
+            and event.get("namespace") == namespace
+            and event.get("vh_name") == virtual_host(lb)
+        }
+        ordered = sorted(candidates.values(), key=lambda event: stamp(event["time"]))
+        if len(group) != len(ordered):
+            return None
+        for probe, event in zip(group, ordered, strict=True):
+            if matched([event], probe, namespace, lb) is None:
+                return None
+            bindings[id(probe)] = event["req_id"]
+    return bindings
+
+
 def request_checks(
     records: list[dict],
     events: list[dict],
@@ -84,33 +121,28 @@ def request_checks(
         }
         for row in rows
     ]
+    bindings = security_bindings(probes, events, namespace, lb)
+    if bindings is None:
+        return None
     checks = []
     used: set[str] = set()
     for row, probe in zip(rows, probes, strict=True):
-        candidates = []
-        for event in events:
-            request_id = event.get("req_id")
-            if not request_id or request_id in used:
-                continue
-            if matched([event], probe, namespace, lb) is None:
-                continue
-            access = [
-                record for record in records if record.get("req_id") == request_id
-            ]
-            record = matched(
-                access, {**probe, "server_request_id": request_id}, namespace, lb
-            )
-            if record is not None:
-                candidates.append((request_id, record))
-        unique = dict(candidates)
-        if len(unique) != 1:
+        request_id = bindings[id(probe)]
+        if request_id in used:
             return None
-        request_id = next(iter(unique))
         used.add(request_id)
+        record = matched(
+            [record for record in records if record.get("req_id") == request_id],
+            {**probe, "server_request_id": request_id},
+            namespace,
+            lb,
+        )
+        if record is None:
+            return None
         checks.append(
             {
                 "response": row,
-                "access": unique[request_id],
+                "access": record,
                 "events": [
                     event for event in events if event.get("req_id") == request_id
                 ],
