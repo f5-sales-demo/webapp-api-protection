@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -9,7 +10,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from demo_catalog_clock import calibrate_clock
-from demo_catalog_evidence import evidence_bundle, identity_records
+from demo_catalog_evidence import evidence_bundle, grouped_records, identity_records
 from demo_lifecycle_fixtures import TEST_SCOPE
 from demo_test_support import ensure, ensure_equal, expect_error
 from demo_verify_evidence import identified_user, virtual_host
@@ -210,3 +211,29 @@ class ParallelIdentityCollection(unittest.TestCase):
                 100,
                 110,
             )
+
+
+class GroupedIdentityCollection(unittest.TestCase):
+    def test_complete_group_filters_prefix_collisions_and_preserves_ids(self):
+        users = [
+            "showcase-" + "a" * 32 + "-request",
+            "showcase-" + "b" * 32 + "-request",
+        ]
+        events = [
+            {"user": identified_user(user), "req_id": str(i)}
+            for i, user in enumerate(users)
+        ]
+        events.append(
+            {"user": identified_user(users[0]) + "-foreign", "req_id": "foreign"}
+        )
+        client = Mock()
+        client.api.return_value = (
+            200,
+            {"logs": [json.dumps(row) for row in events], "total_hits": 3},
+        )
+        result = grouped_records(
+            client, TEST_SCOPE["namespace"], "synthetic-lb", users, 100, 110, False
+        )
+        ensure_equal(result, events[:2])
+        query = client.api.call_args.args[1]["query"]
+        ensure("user=~" in query and "^" not in query and "$" not in query)

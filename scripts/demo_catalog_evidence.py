@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import time
-from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
 from demo_verify_client import Client, _page_batch
@@ -20,6 +19,8 @@ OK = 200
 PAGE_LIMIT = 500
 MAX_PAGES = 20
 INGESTION_MARGIN = 60
+SMALL_IDENTITY_GROUP = 2
+IDENTITY_GROUP_LIMIT = 40
 
 
 def access_by_user(
@@ -152,23 +153,73 @@ def request_checks(
     return checks
 
 
+def grouped_records(
+    client: Client,
+    namespace: str,
+    lb: str,
+    users: list[str],
+    start: float,
+    end: float,
+    security: bool,
+) -> list[dict]:
+    """Collect every page for bounded synthetic identities, then reject prefix collisions."""
+    identities = {identified_user(user) for user in users}
+    kind, key = (
+        ("app_security/events", "events") if security else ("access_logs", "logs")
+    )
+    path = "/api/data/namespaces/" + namespace + "/" + kind
+    payload = {
+        "namespace": namespace,
+        "query": "{vh_name="
+        + json.dumps(virtual_host(lb))
+        + ",user=~"
+        + json.dumps("|".join(sorted(identities)))
+        + "}",
+        "start_time": str(int(start)),
+        "end_time": str(int(end) + 1),
+        "limit": PAGE_LIMIT,
+        "scroll": True,
+    }
+    code, page = client.api(path, payload)
+    records: list[dict] = []
+    total = None
+    seen = set()
+    for _ in range(MAX_PAGES):
+        batch, count, token = _page_batch(code, page, key)
+        if total is not None and count != total:
+            message = "grouped telemetry pagination changed"
+            raise EvidenceError(message)
+        total = count
+        records.extend(decode_event(item) for item in batch)
+        if len(records) == total:
+            return [row for row in records if row.get("user") in identities]
+        fingerprint = json.dumps(batch, sort_keys=True)
+        if len(records) > total or not token or not batch or fingerprint in seen:
+            message = "grouped telemetry pagination incomplete"
+            raise EvidenceError(message)
+        seen.add(fingerprint)
+        code, page = client.api(
+            path + "/scroll", {"namespace": namespace, "scroll_id": token}
+        )
+    message = "grouped telemetry pagination exceeded bound"
+    raise EvidenceError(message)
+
+
 def identity_records(
     client: Client, namespace: str, lb: str, users: list[str], start: float, end: float
 ) -> tuple[list[dict], list[dict]]:
-    """Bound concurrent exact-user reads; every failed read rejects the bundle."""
-
-    def read_user(user: str) -> tuple[list[dict], list[dict]]:
-        return (
-            access_by_user(client, namespace, lb, user, start, end),
-            client.pages(namespace, lb, start, end, user=user),
-        )
-
+    """Read complete bounded identity groups; every failed read rejects the bundle."""
     records: list[dict] = []
     events: list[dict] = []
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        for access, security in pool.map(read_user, users):
-            records.extend(access)
-            events.extend(security)
+    if len(users) <= SMALL_IDENTITY_GROUP:
+        for user in users:
+            records.extend(access_by_user(client, namespace, lb, user, start, end))
+            events.extend(client.pages(namespace, lb, start, end, user=user))
+        return records, events
+    for offset in range(0, len(users), IDENTITY_GROUP_LIMIT):
+        group = users[offset : offset + IDENTITY_GROUP_LIMIT]
+        records.extend(grouped_records(client, namespace, lb, group, start, end, False))
+        events.extend(grouped_records(client, namespace, lb, group, start, end, True))
     return records, events
 
 
