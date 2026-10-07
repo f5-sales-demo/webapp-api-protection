@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "expected_entries": 164,
-  "generator_source": "d468fcfe0fe1d1d1c5525d2a39ed961e98336bc2",
+  "generator_source": "e2a56da15dce2208021fde5105a6e21084ae8192",
   "entries": [
     {
       "id": "api-attacks/01-vampi-owasp-top10",
@@ -770,11 +770,11 @@
       "id": "crapi-exploits/08-mass-assignment-orders",
       "entrypoint": "suites/crapi-exploits/08-mass-assignment-orders.sh",
       "application_paths": ["/crapi/health", "/crapi/identity/api/auth/login", "/crapi/mailhog/api/v2/messages"],
-      "fixture_refresh": ["crapi"],
-      "positive_test": null,
-      "verifier": null,
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "fixture_refresh": [],
+      "positive_test": "Three preserved native order mutation payloads act only on the dedicated synthetic actor/order; native response and fresh readback prove changed fields, then the host journal restores exact original order and account credit",
+      "verifier": "native-order-mutation",
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["order_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -1690,9 +1690,9 @@
         "/vampi/"
       ],
       "fixture_refresh": [],
-      "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
+      "positive_test": "All identity-tagged wrong-password login attempts return native authentication protocol responses or attributed protection; the submitted credentials cannot create records or change passwords",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -3266,9 +3266,9 @@
         "/vampi/users/v1/register"
       ],
       "fixture_refresh": [],
-      "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
+      "positive_test": "All ten preserved XML payloads are echoed by HTTPBin or rejected by native VAmPI/DVWA protocol handlers, with exact attribution for protection; no executable valid registration JSON or item mutation is submitted",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"

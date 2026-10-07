@@ -744,6 +744,10 @@
       "sha256": "b7b01160b151b12ab7674a26802782c79716cefaf69ff3169e271c66f5166c14",
       "mode": "0444"
     },
+    "/opt/traffic-generator/current/scripts/crapi_order_fixture.py": {
+      "sha256": "dd1644589f4bc495a78486010b48d187b7333f76bef37b56c0f8397e04e66c93",
+      "mode": "0444"
+    },
     "/opt/traffic-generator/current/scripts/crapi_otp_fixture.py": {
       "sha256": "44cf001a435448752c349e56c2ec7a80a0bf6a1afeb503970dcdb3b345695ce1",
       "mode": "0444"
@@ -857,7 +861,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/stress_reports.py": {
-      "sha256": "7841e6e0fe63216978e72e3f0cc678478e1a64ddc10dc03da93bf65c390292d5",
+      "sha256": "e479aa7ccf70809b46e0e112a4fe3cb6adee1e4eeb66ed3ba7d40175c359c726",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/synthetic_arithmetic.cjs": {
@@ -889,7 +893,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_command.py": {
-      "sha256": "460fd7c48887fd7e76fa16b59f72fe2de171dddde11b04a015adf653b59958b9",
+      "sha256": "873f368ad4e3d9867837eb64768b9b3a97c6a7b4aa33078112c72bcc2519df8d",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_common.py": {
@@ -913,7 +917,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_functional.py": {
-      "sha256": "1c0409e2a4ee43a8a440af80afceb85febae6d5c4f46f614207c2d2313bd6fd6",
+      "sha256": "291cb9cea56214a525723dfa7ee5bca89b9ab0047150eaf7db62b4397267df61",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_multiclient.py": {
@@ -925,7 +929,15 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
-      "sha256": "4fc0b9ac46502bdcbafef7487ff2711d9e8f4842d330809a671ba4bbfc3012bb",
+      "sha256": "884ebaacb195f28b937ee85e52323408f323d9a6f82edf604e8cf4739251eae1",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/scripts/traffic_order_functional.py": {
+      "sha256": "0f6ac9fdd110489f1d95fd4d6b40fff0cb1cf85ff79c4f8186d8ea585b50b725",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/scripts/traffic_order_host.py": {
+      "sha256": "a12b09d32684d64b3c88319f2e37f97471ddbe2276b714f3ddeb5bdcd428c25e",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_pass.py": {
@@ -945,7 +957,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_runtime.py": {
-      "sha256": "294520597873e84f86a60247c835f0b360260b9529a64f8f8e949ef542d0a705",
+      "sha256": "708ec9e6323b996f1671433b7910408566bc1fb4fafe55553b972c5c84c48d72",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
@@ -1045,7 +1057,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "5c8a2b178954f1e18f420b051d9f9476d6ff45407fb17f16cff5dfbffc1dbfd8",
+      "sha256": "93d4dc6105d85d62ae195f7094f85b7eef9833486c4d7720c24aeabe67dc4856",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
@@ -1201,7 +1213,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/csd-violations/run.mjs": {
-      "sha256": "8f73f2a3b7bf7d29f6b869e3f5939f826ab1398400df04a16b77490d06b327d2",
+      "sha256": "8aeb6cac2ed4aebf17b1e34cc27fa56f9c6ef3ca64eea6b7738f5573a65aebe2",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/csd-violations/run.sh": {
@@ -1789,7 +1801,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/csd-violations.test.mjs": {
-      "sha256": "632f47aca0d31b0b873a162c9388a2d382be94c71d9a337122aa71ae05dbefcc",
+      "sha256": "761982b2ee418f6cc48c7f81574e44d6861a98256598c7f1a06cb9d4bdeffe8a",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/native-browser-actions.test.cjs": {
@@ -1941,7 +1953,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_functional_contracts.py": {
-      "sha256": "733502ef5311726c7857045928a01334af13a0623a2fe89964fcab803d8bbd99",
+      "sha256": "e85421ace733935e68619101724026b99a844c96acca7d70c1a416982bffe853",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/tests/test_native_order_functional.py": {
+      "sha256": "70f74f6373e4b2962345d414237714cfbe8942a41faae1452270b118aca096cc",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_response_identity.py": {
@@ -2070,277 +2086,285 @@
     }
   },
   "origin": {
-    "/etc/logrotate.d/nginx-origin": {
-      "mode": "644",
-      "sha256": "35c48bc621a26f96fe60a18bc69989e6ff6966615039b2b181e5213bf8ebd96d"
+    "/etc/sysctl.d/99-origin-server.conf": {
+      "sha256": "4779845edfa6077e33e426138ec0e040c2ced76c34da16ddbddc2139903b58fe",
+      "mode": "0644"
     },
     "/etc/nginx/nginx.conf": {
-      "mode": "644",
-      "sha256": "8520f3b8c86c0e765db127f0b3d3650c7104c4ec709bb621eef3cc05d0cd357f"
+      "sha256": "8520f3b8c86c0e765db127f0b3d3650c7104c4ec709bb621eef3cc05d0cd357f",
+      "mode": "0644"
+    },
+    "/etc/logrotate.d/nginx-origin": {
+      "sha256": "35c48bc621a26f96fe60a18bc69989e6ff6966615039b2b181e5213bf8ebd96d",
+      "mode": "0644"
     },
     "/etc/nginx/sites-available/origin-server": {
-      "mode": "644",
-      "sha256": "fa5085903274277ff2fe29e3d1f8314902c5b396871249c76ff9fe178c2ba57a"
-    },
-    "/etc/sysctl.d/99-origin-server.conf": {
-      "mode": "644",
-      "sha256": "4779845edfa6077e33e426138ec0e040c2ced76c34da16ddbddc2139903b58fe"
+      "sha256": "fa5085903274277ff2fe29e3d1f8314902c5b396871249c76ff9fe178c2ba57a",
+      "mode": "0644"
     },
     "/etc/systemd/journald.conf.d/origin-server.conf": {
-      "mode": "644",
-      "sha256": "ca67b0535be2daeb16d27205eac8aa5598ce67748f197adc8dee1ba87dd35af0"
-    },
-    "/etc/systemd/system/demo-dvga-recovery.service": {
-      "mode": "644",
-      "sha256": "606d898cd6456a90ae2da406060bc19b1b9c8cfec0c11c3769437f1f4e0ce68e"
-    },
-    "/etc/systemd/system/demo-dvga-recovery.timer": {
-      "mode": "644",
-      "sha256": "b4eb3a93b9151ad8b563a9af464c3ab9d43b4c545ee9f70a03b272131df0b204"
+      "sha256": "ca67b0535be2daeb16d27205eac8aa5598ce67748f197adc8dee1ba87dd35af0",
+      "mode": "0644"
     },
     "/etc/systemd/system/demo-dvwa-session-cleanup.service": {
-      "mode": "644",
-      "sha256": "3e6ddea7958b4a6f2cf82ed4dfe06c8317a2286a9f61721b0fa708ef004203f7"
+      "sha256": "3e6ddea7958b4a6f2cf82ed4dfe06c8317a2286a9f61721b0fa708ef004203f7",
+      "mode": "0644"
     },
     "/etc/systemd/system/demo-dvwa-session-cleanup.timer": {
-      "mode": "644",
-      "sha256": "0fa44ac6340e8892f5cc44bee32509ec1d77c22647ccc2b85c83b6aea57ee3a0"
+      "sha256": "0fa44ac6340e8892f5cc44bee32509ec1d77c22647ccc2b85c83b6aea57ee3a0",
+      "mode": "0644"
+    },
+    "/etc/systemd/system/demo-dvga-recovery.timer": {
+      "sha256": "b4eb3a93b9151ad8b563a9af464c3ab9d43b4c545ee9f70a03b272131df0b204",
+      "mode": "0644"
+    },
+    "/etc/systemd/system/demo-dvga-recovery.service": {
+      "sha256": "606d898cd6456a90ae2da406060bc19b1b9c8cfec0c11c3769437f1f4e0ce68e",
+      "mode": "0644"
     },
     "/etc/systemd/system/nginx.service.d/limits.conf": {
-      "mode": "644",
-      "sha256": "7b000cd6803988aeb393c37d97a177f8721d5d3a4041f9cf0e101da0279f9c67"
-    },
-    "/opt/origin-server/adapt-restaurant.py": {
-      "mode": "644",
-      "sha256": "148f9ba6aef2ab7f6c2367504213ab4ada6c36050d7b20ddd3dbda0e926e1e25"
-    },
-    "/opt/origin-server/applications.json": {
-      "mode": "644",
-      "sha256": "97049de9a3b32530facf44ab3938142602bfcda1e63f8d18e5421ac321cb6082"
-    },
-    "/opt/origin-server/browser-runtime/Dockerfile": {
-      "mode": "644",
-      "sha256": "66b29a26713562864fc15a0225c9ee72b435166048c81e2260047fce007475dc"
-    },
-    "/opt/origin-server/browser-runtime/package-lock.json": {
-      "mode": "644",
-      "sha256": "04950afd412401094b5149f37580905cb46049d2de58445f34627d737ab89498"
-    },
-    "/opt/origin-server/browser-runtime/package.json": {
-      "mode": "644",
-      "sha256": "307f53f8104d0e481a1af5ac0db016101d677f3545c649ed64d56c6df9f8d756"
-    },
-    "/opt/origin-server/browser-runtime/verify_content.mjs": {
-      "mode": "644",
-      "sha256": "aebb04fb8f1fcf3863f05e48904fdf7b30e6dca12f547c25ffc79add04050efc"
-    },
-    "/opt/origin-server/browser-runtime/verify_crapi_browser.mjs": {
-      "mode": "644",
-      "sha256": "00fc51ef5660b766fbf2bfa656035da7277b9403a6f8ff7ff67460358f4a7c51"
-    },
-    "/opt/origin-server/browser-runtime/verify_crapi_signup.mjs": {
-      "mode": "644",
-      "sha256": "706fcf6d57a104d0e63dd97e7ad7dee0989eabaff22cd55f39c81bf656e57f15"
-    },
-    "/opt/origin-server/browser-runtime/verify_csd_browser.mjs": {
-      "mode": "644",
-      "sha256": "6429f5a623b5b33a09e2fd14b3fb9cbb31665161f74263786b53c3922e59f12b"
-    },
-    "/opt/origin-server/browser-runtime/verify_dvga_browser.mjs": {
-      "mode": "644",
-      "sha256": "fa4d63a4522655669f673a0e72ca89111a979313630d5963fc787c1054e74d45"
-    },
-    "/opt/origin-server/browser-runtime/verify_dvwa_browser.mjs": {
-      "mode": "644",
-      "sha256": "6f92f2b25813d6c00648f8ed6d8b1c8e8c1245015c4115e32125abec414a3aa2"
-    },
-    "/opt/origin-server/browser-runtime/verify_httpbin_browser.mjs": {
-      "mode": "644",
-      "sha256": "682353e0dcf4844c50eeacac11afd354c4c6bdc83b055c11cbeb5400a9142c82"
-    },
-    "/opt/origin-server/browser-runtime/verify_juice_browser.mjs": {
-      "mode": "644",
-      "sha256": "3a807f8fee9da8825a7291d8d5c6a8aae4c8fe14edc0bd502b876f843159a8fd"
-    },
-    "/opt/origin-server/browser-runtime/verify_restaurant_browser.mjs": {
-      "mode": "644",
-      "sha256": "618226f54137fd1614bb2b2dddcd89add6dd7ba53f1bda0770d6afa49bc5dd8b"
-    },
-    "/opt/origin-server/crapi-frontend/Dockerfile": {
-      "mode": "644",
-      "sha256": "394f4a57436f20ae35a1a0544d771a4eb0031b8d9b71cde4017f236e097eac13"
-    },
-    "/opt/origin-server/crapi-frontend/adapt.mjs": {
-      "mode": "644",
-      "sha256": "8637a3e830022cbf2d80699b3cfdf06e1bafb82ee01ff44df7917a32109bf0c0"
-    },
-    "/opt/origin-server/csd-demo/Dockerfile": {
-      "mode": "644",
-      "sha256": "f4326ce88689bddbffcfecc4cf0edf33a2d60ad580b9085dd4806a1f0b7a72ba"
-    },
-    "/opt/origin-server/csd-demo/app.py": {
-      "mode": "644",
-      "sha256": "7a30dd96903235737d39a7a1421273e7cbbe659f0333c1029287b9b8cd083ccc"
-    },
-    "/opt/origin-server/csd-demo/requirements.txt": {
-      "mode": "644",
-      "sha256": "7a81f17b5c9f7533fcffe2c663385cf2e11e6f206a369d300adabf18a9fed7e8"
-    },
-    "/opt/origin-server/csd-demo/static/vendor/chart.umd.min.js": {
-      "mode": "644",
-      "sha256": "b38076762f7363bc9e912b68b8e034826798db5df26bb61f000ec2e7a3137bc7"
-    },
-    "/opt/origin-server/csd-demo/static/vendor/dayjs.min.js": {
-      "mode": "644",
-      "sha256": "9cfdb93f38afcf2d076abecd66d32bfd3383cdf1967654ebc26a26605daf4173"
-    },
-    "/opt/origin-server/csd-demo/static/vendor/lodash.min.js": {
-      "mode": "644",
-      "sha256": "a9705dfc47c0763380d851ab1801be6f76019f6b67e40e9b873f8b4a0603f7a9"
-    },
-    "/opt/origin-server/csd-demo/static/vendor/moment.js": {
-      "mode": "644",
-      "sha256": "7dc0a51c32dae143f2eade235145dfd6a7756388c0f0bf409fa373dd6c233629"
-    },
-    "/opt/origin-server/csd-demo/static/vendor/underscore-min.js": {
-      "mode": "644",
-      "sha256": "c12dae551a8773812f3c6b682e8e66ecf71c729bf7e83f295747c0773e76cabb"
-    },
-    "/opt/origin-server/csd-demo/templates/checkout.html": {
-      "mode": "644",
-      "sha256": "f8a4ee0d61e6a80ba62642bb4e273b96553d422a70ace2edd0cece414f03af3c"
-    },
-    "/opt/origin-server/csd-demo/templates/checkout.js": {
-      "mode": "644",
-      "sha256": "a9f9dca0f760f6fc6e38ba2ffc511c0ada17d12e8525246c93c1839d2c88ec3e"
-    },
-    "/opt/origin-server/csd-demo/templates/dashboard.html": {
-      "mode": "644",
-      "sha256": "0a4ca6c37ce2215679c43909cc6d6763e18e5b1c4d25b50b58d47a2a71557836"
-    },
-    "/opt/origin-server/docker-compose.yml": {
-      "mode": "644",
-      "sha256": "1eccaa35a9f92b9f54ada51af26662891e77ed817a5e0c6735741fdbfbd6ac53"
-    },
-    "/opt/origin-server/dvga-adapter/Dockerfile": {
-      "mode": "644",
-      "sha256": "3b5f916a10a2971b52be2ea259b5f7aea1a0c52117607a395e1eb18f1f28bd8f"
-    },
-    "/opt/origin-server/dvga-adapter/adapt.py": {
-      "mode": "644",
-      "sha256": "9cf963a421ac91bda09d04d1d0d73f50ad8726a551cafec512df5bc68d616bc6"
-    },
-    "/opt/origin-server/dvwa-fpm/Dockerfile": {
-      "mode": "644",
-      "sha256": "ea273d68ab36b931c016783930962dde2aca99384de5b09c9888ef18c7845418"
-    },
-    "/opt/origin-server/dvwa-fpm/entrypoint.sh": {
-      "mode": "755",
-      "sha256": "207b798220c63238e08652e7def22f93809ba77b03613c6563f4281ac1f254a9"
-    },
-    "/opt/origin-server/dvwa-fpm/nginx.conf": {
-      "mode": "644",
-      "sha256": "c61108c7f37504dd82d05b3332f0864dd291f28f965e582db4fd822a998a9b0e"
-    },
-    "/opt/origin-server/dvwa-fpm/www.conf": {
-      "mode": "644",
-      "sha256": "f1c915376630746c4e3f93bf7cedb37e2d23ccc7d0fab9bd9c42fca916fac322"
-    },
-    "/opt/origin-server/httpbin-adapter/Dockerfile": {
-      "mode": "644",
-      "sha256": "f500d464ed447e8ffe572a8d211653004df16e72a6b3c4bcfef548c57f4b7723"
-    },
-    "/opt/origin-server/httpbin-adapter/adapt.py": {
-      "mode": "644",
-      "sha256": "1484dded7c84ee5e007f9eb675047ceb1eb12bd89fea0e1a9f1b4c532f1a7d88"
-    },
-    "/opt/origin-server/juice-shop-framing/preload.cjs": {
-      "mode": "644",
-      "sha256": "4b62710f7ca0500028dc2cd71e3f6a11075efb23412916cbde137eb48e9606d4"
-    },
-    "/opt/origin-server/vampi-gunicorn.sh": {
-      "mode": "755",
-      "sha256": "d0b1ea900139496814655afd35c3271888cb94a951d2c40b63034106d6babef9"
-    },
-    "/opt/origin-server/vampi/Dockerfile": {
-      "mode": "644",
-      "sha256": "4c1b109b83f92f63fca46ed84b1613bd1ea7a045000908c3cb8b510dadb3ed9e"
-    },
-    "/usr/local/bin/application_receipts.py": {
-      "mode": "644",
-      "sha256": "473a1fb1966622420815f4c341661079bb6ae583267723abed96c74d7f9cce91"
-    },
-    "/usr/local/bin/catalog-signup-recovery": {
-      "mode": "755",
-      "sha256": "1aa4a631d1605eabf2cffeea2b08a3b8a122e8365396f970280727b6c72f9509"
-    },
-    "/usr/local/bin/crapi_signup_cleanup.py": {
-      "mode": "644",
-      "sha256": "6564a57282fe7cafa356e9bc74a290f73f2784b2e2f2515c0345869c8b7232f4"
-    },
-    "/usr/local/bin/demo-catalog-fixtures": {
-      "mode": "755",
-      "sha256": "02969c857c75a507f4291a9038fce6f95898bdf28662ee8562a5278e644c749c"
-    },
-    "/usr/local/bin/demo-dvga-recovery": {
-      "mode": "755",
-      "sha256": "c18ce9f33a54874d767c550ff3d7a1ac034a500186a01ee000f898fae4de2d43"
-    },
-    "/usr/local/bin/demo-dvwa-session-cleanup": {
-      "mode": "755",
-      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
-    },
-    "/usr/local/bin/demo-origin-provision": {
-      "mode": "755",
-      "sha256": "41179ccca124ea062c6cdb9ab4857778f90f128da833a92ba7278f38fd9715a8"
-    },
-    "/usr/local/bin/demo-origin-ready": {
-      "mode": "755",
-      "sha256": "dc96056a30b0d77dfbf780e49e87d237410ce64ac5f7945e33e1faa6ae6f2b2b"
-    },
-    "/usr/local/bin/demo-seed-catalog": {
-      "mode": "700",
-      "sha256": "02969c857c75a507f4291a9038fce6f95898bdf28662ee8562a5278e644c749c"
-    },
-    "/usr/local/bin/enroll-signup-recovery": {
-      "mode": "755",
-      "sha256": "ef4e2c2f40a1d04b0bc2d49b707dbb7880d79b47f9e82913c147046d5d1f86ed"
-    },
-    "/usr/local/bin/origin-browser-verify": {
-      "mode": "755",
-      "sha256": "bcb02f70ed30a2528b171f363a512d78679f78c67a72172f344aa69e7315fb92"
-    },
-    "/usr/local/bin/origin-verify-content.mjs": {
-      "mode": "755",
-      "sha256": "aebb04fb8f1fcf3863f05e48904fdf7b30e6dca12f547c25ffc79add04050efc"
-    },
-    "/usr/local/bin/origin-verify-crapi-browser.mjs": {
-      "mode": "755",
-      "sha256": "00fc51ef5660b766fbf2bfa656035da7277b9403a6f8ff7ff67460358f4a7c51"
-    },
-    "/usr/local/bin/origin-verify-workflows": {
-      "mode": "755",
-      "sha256": "0390aa5d0d932f439d2133d14fbca59a7631e281403c8c6a3641b862c01cbc57"
+      "sha256": "7b000cd6803988aeb393c37d97a177f8721d5d3a4041f9cf0e101da0279f9c67",
+      "mode": "0644"
     },
     "/usr/local/lib/cloud-init-helpers.sh": {
-      "mode": "644",
-      "sha256": "b5bc66f2e3780fa4c9376738f734de0f115f43d8eb079b1f5a35b7d01e1c6db2"
+      "sha256": "b5bc66f2e3780fa4c9376738f734de0f115f43d8eb079b1f5a35b7d01e1c6db2",
+      "mode": "0644"
+    },
+    "/usr/local/bin/demo-dvga-recovery": {
+      "sha256": "c18ce9f33a54874d767c550ff3d7a1ac034a500186a01ee000f898fae4de2d43",
+      "mode": "0755"
+    },
+    "/usr/local/bin/enroll-order-recovery": {
+      "sha256": "1979ff18976b917e45423198d1135bfa45b1d7b79be8b79e09d6cb7b6c6d8369",
+      "mode": "0755"
+    },
+    "/usr/local/bin/origin-verify-crapi-browser.mjs": {
+      "sha256": "00fc51ef5660b766fbf2bfa656035da7277b9403a6f8ff7ff67460358f4a7c51",
+      "mode": "0755"
+    },
+    "/usr/local/bin/origin-verify-content.mjs": {
+      "sha256": "aebb04fb8f1fcf3863f05e48904fdf7b30e6dca12f547c25ffc79add04050efc",
+      "mode": "0755"
+    },
+    "/usr/local/bin/demo-catalog-fixtures": {
+      "sha256": "7de379eacd0145b9d4c5255c0f9c5dde7b089651a88e40792b4e69b23cde7817",
+      "mode": "0755"
+    },
+    "/usr/local/bin/demo-origin-ready": {
+      "sha256": "dc96056a30b0d77dfbf780e49e87d237410ce64ac5f7945e33e1faa6ae6f2b2b",
+      "mode": "0755"
+    },
+    "/usr/local/bin/catalog-order-recovery": {
+      "sha256": "45ad289047630ed9c4e3c23a0fc1c666ec30c6d85548abd700f272e2ba019212",
+      "mode": "0755"
+    },
+    "/usr/local/bin/application_receipts.py": {
+      "sha256": "473a1fb1966622420815f4c341661079bb6ae583267723abed96c74d7f9cce91",
+      "mode": "0644"
+    },
+    "/usr/local/bin/demo-origin-provision": {
+      "sha256": "f75211cb040f4f8e82856250316c59628888f6bed8d5a8e0649e4bce317523f4",
+      "mode": "0755"
+    },
+    "/usr/local/bin/demo-dvwa-session-cleanup": {
+      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e",
+      "mode": "0755"
+    },
+    "/usr/local/bin/crapi_signup_cleanup.py": {
+      "sha256": "6564a57282fe7cafa356e9bc74a290f73f2784b2e2f2515c0345869c8b7232f4",
+      "mode": "0644"
+    },
+    "/usr/local/bin/origin-verify-workflows": {
+      "sha256": "0390aa5d0d932f439d2133d14fbca59a7631e281403c8c6a3641b862c01cbc57",
+      "mode": "0755"
+    },
+    "/usr/local/bin/enroll-signup-recovery": {
+      "sha256": "1979ff18976b917e45423198d1135bfa45b1d7b79be8b79e09d6cb7b6c6d8369",
+      "mode": "0755"
+    },
+    "/usr/local/bin/origin-browser-verify": {
+      "sha256": "bcb02f70ed30a2528b171f363a512d78679f78c67a72172f344aa69e7315fb92",
+      "mode": "0755"
+    },
+    "/usr/local/bin/catalog-signup-recovery": {
+      "sha256": "1aa4a631d1605eabf2cffeea2b08a3b8a122e8365396f970280727b6c72f9509",
+      "mode": "0755"
     },
     "/usr/local/lib/origin/application_manifest.py": {
-      "mode": "644",
-      "sha256": "849400901406a88a3fe06d276a097252b5b63c3f544907b21cf18e2dfa803453"
+      "sha256": "849400901406a88a3fe06d276a097252b5b63c3f544907b21cf18e2dfa803453",
+      "mode": "0644"
     },
     "/var/www/html/index.html": {
-      "mode": "644",
-      "sha256": "d559f268150903f786ba95c75ebdd72a6b49333b0c1efaed804a92d61059d3cb"
+      "sha256": "d559f268150903f786ba95c75ebdd72a6b49333b0c1efaed804a92d61059d3cb",
+      "mode": "0644"
     },
-    "/usr/local/lib/demo-dvwa-session-cleanup.py": {
-      "mode": "755",
-      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
+    "/opt/origin-server/applications.json": {
+      "sha256": "97049de9a3b32530facf44ab3938142602bfcda1e63f8d18e5421ac321cb6082",
+      "mode": "0644"
+    },
+    "/opt/origin-server/docker-compose.yml": {
+      "sha256": "1eccaa35a9f92b9f54ada51af26662891e77ed817a5e0c6735741fdbfbd6ac53",
+      "mode": "0644"
+    },
+    "/opt/origin-server/vampi-gunicorn.sh": {
+      "sha256": "d0b1ea900139496814655afd35c3271888cb94a951d2c40b63034106d6babef9",
+      "mode": "0755"
+    },
+    "/opt/origin-server/adapt-restaurant.py": {
+      "sha256": "148f9ba6aef2ab7f6c2367504213ab4ada6c36050d7b20ddd3dbda0e926e1e25",
+      "mode": "0644"
+    },
+    "/opt/origin-server/juice-shop-framing/preload.cjs": {
+      "sha256": "4b62710f7ca0500028dc2cd71e3f6a11075efb23412916cbde137eb48e9606d4",
+      "mode": "0644"
+    },
+    "/opt/origin-server/httpbin-adapter/adapt.py": {
+      "sha256": "1484dded7c84ee5e007f9eb675047ceb1eb12bd89fea0e1a9f1b4c532f1a7d88",
+      "mode": "0644"
+    },
+    "/opt/origin-server/httpbin-adapter/Dockerfile": {
+      "sha256": "f500d464ed447e8ffe572a8d211653004df16e72a6b3c4bcfef548c57f4b7723",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/app.py": {
+      "sha256": "7a30dd96903235737d39a7a1421273e7cbbe659f0333c1029287b9b8cd083ccc",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/requirements.txt": {
+      "sha256": "7a81f17b5c9f7533fcffe2c663385cf2e11e6f206a369d300adabf18a9fed7e8",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/Dockerfile": {
+      "sha256": "f4326ce88689bddbffcfecc4cf0edf33a2d60ad580b9085dd4806a1f0b7a72ba",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvga-adapter/adapt.py": {
+      "sha256": "9cf963a421ac91bda09d04d1d0d73f50ad8726a551cafec512df5bc68d616bc6",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvga-adapter/Dockerfile": {
+      "sha256": "3b5f916a10a2971b52be2ea259b5f7aea1a0c52117607a395e1eb18f1f28bd8f",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/verify_dvwa_browser.mjs": {
+      "sha256": "6f92f2b25813d6c00648f8ed6d8b1c8e8c1245015c4115e32125abec414a3aa2",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/package.json": {
+      "sha256": "307f53f8104d0e481a1af5ac0db016101d677f3545c649ed64d56c6df9f8d756",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/verify_content.mjs": {
+      "sha256": "aebb04fb8f1fcf3863f05e48904fdf7b30e6dca12f547c25ffc79add04050efc",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/verify_csd_browser.mjs": {
+      "sha256": "6429f5a623b5b33a09e2fd14b3fb9cbb31665161f74263786b53c3922e59f12b",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/Dockerfile": {
+      "sha256": "66b29a26713562864fc15a0225c9ee72b435166048c81e2260047fce007475dc",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/verify_dvga_browser.mjs": {
+      "sha256": "fa4d63a4522655669f673a0e72ca89111a979313630d5963fc787c1054e74d45",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/verify_restaurant_browser.mjs": {
+      "sha256": "618226f54137fd1614bb2b2dddcd89add6dd7ba53f1bda0770d6afa49bc5dd8b",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/package-lock.json": {
+      "sha256": "04950afd412401094b5149f37580905cb46049d2de58445f34627d737ab89498",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/verify_crapi_browser.mjs": {
+      "sha256": "00fc51ef5660b766fbf2bfa656035da7277b9403a6f8ff7ff67460358f4a7c51",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/verify_httpbin_browser.mjs": {
+      "sha256": "682353e0dcf4844c50eeacac11afd354c4c6bdc83b055c11cbeb5400a9142c82",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/verify_crapi_signup.mjs": {
+      "sha256": "706fcf6d57a104d0e63dd97e7ad7dee0989eabaff22cd55f39c81bf656e57f15",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/verify_juice_browser.mjs": {
+      "sha256": "3a807f8fee9da8825a7291d8d5c6a8aae4c8fe14edc0bd502b876f843159a8fd",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/entrypoint.sh": {
+      "sha256": "207b798220c63238e08652e7def22f93809ba77b03613c6563f4281ac1f254a9",
+      "mode": "0755"
+    },
+    "/opt/origin-server/dvwa-fpm/www.conf": {
+      "sha256": "f1c915376630746c4e3f93bf7cedb37e2d23ccc7d0fab9bd9c42fca916fac322",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/nginx.conf": {
+      "sha256": "c61108c7f37504dd82d05b3332f0864dd291f28f965e582db4fd822a998a9b0e",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/Dockerfile": {
+      "sha256": "ea273d68ab36b931c016783930962dde2aca99384de5b09c9888ef18c7845418",
+      "mode": "0644"
+    },
+    "/opt/origin-server/vampi/Dockerfile": {
+      "sha256": "4c1b109b83f92f63fca46ed84b1613bd1ea7a045000908c3cb8b510dadb3ed9e",
+      "mode": "0644"
+    },
+    "/opt/origin-server/crapi-frontend/Dockerfile": {
+      "sha256": "394f4a57436f20ae35a1a0544d771a4eb0031b8d9b71cde4017f236e097eac13",
+      "mode": "0644"
+    },
+    "/opt/origin-server/crapi-frontend/adapt.mjs": {
+      "sha256": "8637a3e830022cbf2d80699b3cfdf06e1bafb82ee01ff44df7917a32109bf0c0",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/templates/checkout.js": {
+      "sha256": "a9f9dca0f760f6fc6e38ba2ffc511c0ada17d12e8525246c93c1839d2c88ec3e",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/templates/checkout.html": {
+      "sha256": "f8a4ee0d61e6a80ba62642bb4e273b96553d422a70ace2edd0cece414f03af3c",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/templates/dashboard.html": {
+      "sha256": "0a4ca6c37ce2215679c43909cc6d6763e18e5b1c4d25b50b58d47a2a71557836",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/static/vendor/chart.umd.min.js": {
+      "sha256": "b38076762f7363bc9e912b68b8e034826798db5df26bb61f000ec2e7a3137bc7",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/static/vendor/underscore-min.js": {
+      "sha256": "c12dae551a8773812f3c6b682e8e66ecf71c729bf7e83f295747c0773e76cabb",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/static/vendor/lodash.min.js": {
+      "sha256": "a9705dfc47c0763380d851ab1801be6f76019f6b67e40e9b873f8b4a0603f7a9",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/static/vendor/moment.js": {
+      "sha256": "7dc0a51c32dae143f2eade235145dfd6a7756388c0f0bf409fa373dd6c233629",
+      "mode": "0644"
+    },
+    "/opt/origin-server/csd-demo/static/vendor/dayjs.min.js": {
+      "sha256": "9cfdb93f38afcf2d076abecd66d32bfd3383cdf1967654ebc26a26605daf4173",
+      "mode": "0644"
     },
     "/usr/local/lib/demo-dvwa-session-cleanup.timer": {
-      "mode": "644",
+      "mode": "0644",
       "sha256": "0fa44ac6340e8892f5cc44bee32509ec1d77c22647ccc2b85c83b6aea57ee3a0"
+    },
+    "/usr/local/bin/demo-seed-catalog": {
+      "mode": "0700",
+      "sha256": "7de379eacd0145b9d4c5255c0f9c5dde7b089651a88e40792b4e69b23cde7817"
+    },
+    "/usr/local/lib/demo-dvwa-session-cleanup.py": {
+      "mode": "0755",
+      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
     }
   },
   "schema_version": 1
