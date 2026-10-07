@@ -634,6 +634,8 @@ class SignupRecoveryEnrollmentTests(unittest.TestCase):
         (state / "signup-recovery-key.pub").write_text("ssh-ed25519 " + "A" * 68)
         (state / "order-recovery-key").write_text("PRIVATE-SYNTHETIC-ORDER-KEY")
         (state / "order-recovery-key.pub").write_text("ssh-ed25519 " + "B" * 68)
+        (state / "family-recovery-key").write_text("PRIVATE-SYNTHETIC-FAMILY-KEY")
+        (state / "family-recovery-key.pub").write_text("ssh-ed25519 " + "C" * 68)
         fixture.context.paths.known_hosts.write_text("192.0.2.1 ssh-ed25519 AAAA")
         fixtures = {
             "fixture_type": "seeded-synthetic-origin-accounts",
@@ -659,9 +661,11 @@ class SignupRecoveryEnrollmentTests(unittest.TestCase):
             fixture.ownership.catalog_fixtures()
         commands = [list(call.args[0]) for call in run.call_args_list]
         ensure(any("/usr/local/bin/enroll-signup-recovery" in cmd for cmd in commands))
+        ensure(any("/usr/local/bin/enroll-family-recovery" in cmd for cmd in commands))
         saved = json.loads((state / "catalog-fixtures.json").read_text())
         ensure_equal(saved["signup_recovery"]["host"], "192.0.2.1")
         ensure_equal(saved["order_recovery"]["host"], "192.0.2.1")
+        ensure_equal(saved["family_recovery"]["host"], "192.0.2.1")
         ensure_equal(
             saved["signup_recovery"]["key"],
             "/opt/traffic-generator/signup-recovery-key",

@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, Literal
 from demo_catalog_acceptance import catalog_metrics, coverage_failures
 from demo_catalog_clock import align_generator_clock, catalog_client
 from demo_catalog_evidence import collect_pending
-from demo_catalog_recovery import enroll_order
+from demo_catalog_recovery import enroll_recovery
 from demo_lifecycle_fixture import verify_fixture
 from demo_lifecycle_hosts import rotate_rebuilt_keys
 from demo_lifecycle_state import (
@@ -482,7 +482,7 @@ class Ownership:
         self, origin: Guest, generator: Guest, fixtures: dict
     ) -> None:
         """Delegate the dedicated forced-command order enrollment."""
-        enroll_order(
+        enroll_recovery(
             self.context,
             self.runtime,
             origin,
@@ -579,6 +579,15 @@ class Ownership:
         )
         fixtures["signup_recovery"] = recovery
         self.enroll_order_recovery(origin, generator, fixtures)
+        enroll_recovery(
+            self.context,
+            self.runtime,
+            origin,
+            generator,
+            lambda guest: self.ssh_argv(guest, "yes"),
+            fixtures,
+            "family",
+        )
         if fixtures.get(
             "fixture_type"
         ) != "seeded-synthetic-origin-accounts" or not fixtures.get("crapi_tokens"):
