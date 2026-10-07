@@ -291,3 +291,32 @@ class SampledAccessSecurityAnchor(unittest.TestCase):
         client.pages.return_value = [{**event, "req_path": "/foreign"}]
         with patch("demo_catalog_evidence.access_by_user", return_value=[]):
             ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class FreshIdentityEventDelay(unittest.TestCase):
+    def test_recording_delay_is_bounded_and_retains_raw_time(self):
+        out, pending, event, client = data()
+        row = pending["request"]["requests"][0]
+        row["synthetic_identity"] = "showcase-" + "a" * 32 + "-request"
+        event["user"] = identified_user(row["synthetic_identity"])
+        event["time"] = "1970-01-01T00:00:25.000Z"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure_equal(
+            result["evidence"]["checks"][0]["events"][0]["time"], event["time"]
+        )
+        ensure_equal(result["evidence"]["event_recording_delay_seconds"], 20)
+        event["time"] = "1970-01-01T00:00:50.000Z"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class BrowserActionBinding(unittest.TestCase):
+    def test_observed_action_marker_stays_bound_to_response(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"][0]["action_id"] = "ua-3-route-0"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure_equal(result["evidence"]["checks"][0]["action_id"], "ua-3-route-0")

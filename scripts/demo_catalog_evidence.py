@@ -22,6 +22,7 @@ MAX_PAGES = 20
 INGESTION_MARGIN = 60
 SMALL_IDENTITY_GROUP = 2
 IDENTITY_GROUP_LIMIT = 10
+EVENT_RECORDING_DELAY_SECONDS = 20
 
 
 def access_by_user(
@@ -141,7 +142,12 @@ def request_checks(
             "user": row["synthetic_identity"],
             "status": row["status"],
             "sent_at": row["sent_at"],
-            "received_at": row["received_at"],
+            "received_at": row["received_at"]
+            + (
+                EVENT_RECORDING_DELAY_SECONDS
+                if row["synthetic_identity"].endswith("-request")
+                else 0
+            ),
             "clock_offset_min": low,
             "clock_offset_max": high,
         }
@@ -197,6 +203,7 @@ def request_checks(
         checks.append(
             {
                 "response": row,
+                "action_id": row.get("action_id"),
                 "access": record,
                 "security_request_id": request_id,
                 "events": [
@@ -325,6 +332,7 @@ def evidence_bundle(
                 "domain": rows[0]["domain"],
             },
             "clock_bounds": [low, high],
+            "event_recording_delay_seconds": EVENT_RECORDING_DELAY_SECONDS,
             "firewall": firewall,
             "checks": checks,
             "collected_at": time.time(),
