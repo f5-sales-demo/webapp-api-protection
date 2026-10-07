@@ -2139,6 +2139,10 @@
     "/usr/bin/node": {
       "sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
       "mode": "0755"
+    },
+    "/etc/apt/sources.list.d/ubuntu.sources": {
+      "sha256": "23637a23e791e18e05c95516ca76dac8b0d4eb918bc8d662812b434eba8d6319",
+      "mode": "0644"
     }
   },
   "origin": {

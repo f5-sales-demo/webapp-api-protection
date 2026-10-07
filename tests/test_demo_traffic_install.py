@@ -46,6 +46,27 @@ class CloudInitTests(unittest.TestCase):
                     ],
                 )
 
+    def test_official_https_apt_sources_are_reproducible(self):
+        _, data = rendered_cloud_config()
+        ensure_equal(data["apt"]["preserve_sources_list"], True)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ubuntu.sources"
+            source = data["bootcmd"][1].replace(
+                "/etc/apt/sources.list.d/ubuntu.sources", str(path)
+            )
+            for _ in range(2):
+                ensure_equal(shell(source).returncode, 0)
+                ensure("https://archive.ubuntu.com/ubuntu/" in path.read_text())
+                ensure("https://security.ubuntu.com/ubuntu/" in path.read_text())
+                ensure("azure.archive" not in path.read_text())
+                manifest = json.loads((ROOT / "terraform/guest-files.json").read_text())
+                expected = manifest["generator"][
+                    "/etc/apt/sources.list.d/ubuntu.sources"
+                ]
+                ensure_equal(
+                    hashlib.sha256(path.read_bytes()).hexdigest(), expected["sha256"]
+                )
+
     def test_node_package_checks_content_metadata_and_installed_version(self):
         _, data = rendered_cloud_config()
         pin = json.loads((ROOT / "terraform/tool-pins.json").read_text())
