@@ -511,7 +511,7 @@ def _detection_join(log: dict[str, Any], probe: Probe, namespace: str, lb: str) 
         and log.get("suspicion_log_type") == "detection"
         and log.get("threat_level") == "High"
         and all(
-            type(log.get(field)) in (int, float) and log[field] == 1.0
+            _finite_nonnegative(log.get(field)) and 0 < log[field] <= 1.0
             for field in ("suspicion_score", "waf_suspicion_score")
         )
     )
