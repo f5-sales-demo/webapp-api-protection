@@ -973,7 +973,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_proxy.py": {
-      "sha256": "09cf9c7673f35c3bee395d405b8282125fbd3801202fd448055ea918b00bb69a",
+      "sha256": "ac8a965c87553147ab4f44cd9803a8d46a1765991306d84b59af4314a8242e51",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_report.py": {
@@ -2097,7 +2097,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_traffic_proxy.py": {
-      "sha256": "82fbdcd043f207c9cbcb3cafc266d803695e72016d98fb47825c52cf6ed583a0",
+      "sha256": "718dcc7f73b906ed3c8d31876dcf921128ad26ccd647c5d6ca54609c34da1062",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_traffic_runtime.py": {
