@@ -309,7 +309,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/en/06-runner.mdx": {
-      "sha256": "acb0215a4f7033ae313359136d8f72a0c6d189c347ac9969f3547f2888c1c922",
+      "sha256": "64f42de7be4d3c4175f1b7d0f11fc079fa1cd6948560f5d74b82d8619379f1ac",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/docs/en/07-integrate.mdx": {
@@ -889,11 +889,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_catalog.py": {
-      "sha256": "3a1fb1d03fc009eb41c88448f5821fa2bf48a066430f260f13658fd522c20e23",
+      "sha256": "6cdf128e1b793231d278fbecd08e91b197767268dd9123fc42b490594e2b0150",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_command.py": {
-      "sha256": "873f368ad4e3d9867837eb64768b9b3a97c6a7b4aa33078112c72bcc2519df8d",
+      "sha256": "924cb16c24d9cda7ffe83a2cf10070aad868635255b72534d449eadaf14689fd",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_common.py": {
@@ -912,12 +912,28 @@
       "sha256": "29ee6fee772ccc4effd79a58e0554b28f5acba71197c3e17a9383e8042f03abc",
       "mode": "0444"
     },
+    "/opt/traffic-generator/current/scripts/traffic_family_fixture.py": {
+      "sha256": "187fc48cf31d336b2119914eac6cc1690004e45d46bded6796431cd3c7b743d6",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/scripts/traffic_family_functional.py": {
+      "sha256": "ecb66c1bd9831c81c5af6132fe548378a438cf6f676799373ff74de6fcdf10be",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/scripts/traffic_family_native.py": {
+      "sha256": "74bd5086b7eab85a831ae99d135d6c3130cd5b03095e2f1f674935d86c8bd0f1",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/scripts/traffic_fixture_recovery.py": {
+      "sha256": "08f7b8f6fa9b9e2be1e5bbbb2e2f234797cb9a7c4157ccff9665f8d009587639",
+      "mode": "0444"
+    },
     "/opt/traffic-generator/current/scripts/traffic_fixtures.py": {
       "sha256": "eee9a49b5368e1d8530dab6e27e8e4a2e9c4bc5da0ef8cac603206443d2df458",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_functional.py": {
-      "sha256": "291cb9cea56214a525723dfa7ee5bca89b9ab0047150eaf7db62b4397267df61",
+      "sha256": "d443a006f3556a376ad6f011d151d7f1d5cf726c5e18581e31f98fa076a9bf66",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_multiclient.py": {
@@ -925,11 +941,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_native_identity.py": {
-      "sha256": "37a717917833ea45f20ac9d9868e1199ea57e0b631f612eb069893846b3380be",
+      "sha256": "1123c6a06e9091e76e273a68c0234f09a6cc13026010be709571f87d38dd3138",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
-      "sha256": "884ebaacb195f28b937ee85e52323408f323d9a6f82edf604e8cf4739251eae1",
+      "sha256": "18b04183624cb4dad51d8ca5ad3884f58776ac5042e2c6420575bbba88f4512b",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_order_functional.py": {
@@ -937,7 +953,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_order_host.py": {
-      "sha256": "a12b09d32684d64b3c88319f2e37f97471ddbe2276b714f3ddeb5bdcd428c25e",
+      "sha256": "1036cd9cade7c09248b16b41cdce241c1243a32f7f3dda31b9f364523f5deb58",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/scripts/traffic_origin_torture.py": {
+      "sha256": "c80e887633f17a32381b2b020a78bce5d285d0392f9be134c435a728d1953953",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_pass.py": {
@@ -949,7 +969,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_proxy.py": {
-      "sha256": "28bafa862a2dc329846662c467ca8bc8b8e01d122d3000727216027f81d39aec",
+      "sha256": "09cf9c7673f35c3bee395d405b8282125fbd3801202fd448055ea918b00bb69a",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_report.py": {
@@ -957,7 +977,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_runtime.py": {
-      "sha256": "708ec9e6323b996f1671433b7910408566bc1fb4fafe55553b972c5c84c48d72",
+      "sha256": "720572c9143de4ad63fd871cd038e2c865f36a35336e74d642792368a305f813",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
@@ -1041,7 +1061,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/bot-simulation/03-headless-form-fill.js": {
-      "sha256": "159491a50d8c786a498a04b55fada0b5ee008330b8b2339ac832d20aa03e3ec4",
+      "sha256": "b3deff1e355900f751bbb42b7bb7cc06c62fd8c7f24ba84ed6b02c18e39775e1",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/bot-simulation/04-rapid-browsing.js": {
@@ -1057,7 +1077,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "93d4dc6105d85d62ae195f7094f85b7eef9833486c4d7720c24aeabe67dc4856",
+      "sha256": "52331f22a1fa10094f9e884030a01f399ee45cc1c4fce3afe22bcc608bf68ccb",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
@@ -1093,7 +1113,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/09-origin-torture.sh": {
-      "sha256": "622253dd356ba69e3cdc295bf95eed5fa2dae4672ee9e7c632e31c77e5d57805",
+      "sha256": "5997ab9132bc4f29d4ed374d66effd537761bcd592353dbd838812e7043f427a",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/_baseline.lua": {
@@ -1101,11 +1121,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/_crapi-torture.lua": {
-      "sha256": "6224ea0612a98734e70ba9d6acd256222be617bac92d70314f8dadde2f7d3639",
+      "sha256": "f5ceac646139eb21675bd5e309e1fe05ddf5cd20a219eee6aec8db0fa6f68189",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/_graphql-torture.lua": {
-      "sha256": "b5203d702111a87b32caf29ec24e6da7311bd913f206fb6af50e856852b6bfe3",
+      "sha256": "d29c86d73dab586580ee46db22586c470b39cfafbcb4c8d11f3a8d3ff35d3b3c",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/_keepalive.lua": {
@@ -1121,7 +1141,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/_restaurant-torture.lua": {
-      "sha256": "12b21eb1bc9db82c167c3b990eff930635e2d6ca882ff815636d46cf42a6c3d3",
+      "sha256": "f64a4326e49c6405bf25cbc74fc352f14f38cc974469bdb8f3bc8289922c41cc",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/bench-keepalive.sh": {
@@ -1201,7 +1221,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/crapi-exploits/_crapi-lib.sh": {
-      "sha256": "152025af8678e99a47650f5422ec66b00055011dc68a031bed79c6879204ad5a",
+      "sha256": "0a4565df2153f888c5f61cadf37d5b2aff662e78c5eb18cce853012208f86eae",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/csd-violations/azure.mjs": {
@@ -1209,19 +1229,19 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/csd-violations/continuous.mjs": {
-      "sha256": "2d1424e2db33bfa592cd01d2580123d0a87a2ef4ea99c21554ca72cc86e37fe0",
+      "sha256": "a0015f7b33ac330065cf7347cae0742f54e3e1012f301e8d6f5547b658648b25",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/csd-violations/run.mjs": {
-      "sha256": "8aeb6cac2ed4aebf17b1e34cc27fa56f9c6ef3ca64eea6b7738f5573a65aebe2",
+      "sha256": "26763cccc389479b3f2ae8937aab3e8496029c864c7a0640f642fd18122e8636",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/csd-violations/run.sh": {
-      "sha256": "184a060f2280dd3da78d5995a6cedbc6c7fa23953f62c5f0c694e2d34c7f7512",
+      "sha256": "9c2ed59ad61ba3c7b410fa3cd45f9ef7fd1549f540465b00edab47baea960fb0",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/csd-violations/scenarios.mjs": {
-      "sha256": "694fb6178f30a9e0008bf79573ab707be3816dbca8a7cb63567a79e4aa6a5966",
+      "sha256": "c766b50f2be674fe111dab56d039805db5bdfa687f75bfb93f2cf30fc58fad41",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/discovery-words.txt": {
@@ -1257,7 +1277,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvga-exploits/08-path-traversal-upload.sh": {
-      "sha256": "2533840c08d593c5007b799f87e4a4ea3ab2b7e6fd1b442a182fd8e16661d979",
+      "sha256": "e3e203c8ecf7dcd3f9e5fe3747893bc1a7ff810f1dfea72744f5cb021eb077dc",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvga-exploits/_dvga-lib.sh": {
@@ -1281,7 +1301,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvwa-exploits/05-file-upload.sh": {
-      "sha256": "47e1d9c2c0afb7b8b357bdea9522154091639686a17b2ba05b24c4e3ea609c03",
+      "sha256": "def3e9599929febc8796a739278da38647558332a3a1b8a2c7e5b5dc61a04387",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvwa-exploits/06-sqli.sh": {
@@ -1301,7 +1321,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvwa-exploits/10-xss-stored.sh": {
-      "sha256": "ed014552e6aa6a2335dcebc25786bbfabcc6732258647405a67fdf5c15566c42",
+      "sha256": "20880d4345501043264b43c5cde7c3a1735b9ba9ba663205304ca22f467fc2ff",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvwa-exploits/11-csp-bypass.sh": {
@@ -1313,7 +1333,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvwa-exploits/13-authbypass.sh": {
-      "sha256": "3ce0db31405508151378306cf4557ef651ba73b24c0a3e695abe4634e0f7dc56",
+      "sha256": "a3205c4a97d0ff0e86cea3dc8b31fc75041ba19b019c2f7ef62eee2b6abffbc8",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvwa-exploits/14-open-redirect.sh": {
@@ -1333,7 +1353,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/01-sqli-login-bypass.sh": {
-      "sha256": "e267a29e0a0d680601634b04239bf8bf37f30328bd94b475564feed8137c3df4",
+      "sha256": "f55f70b64eae3807bb6b87147bf5cdd1a1c97c36016643226e3992f4c1086664",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/02-sqli-search-union.sh": {
@@ -1345,11 +1365,11 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/04-xss-stored-api.sh": {
-      "sha256": "5e0b02d87a6fa708faa4e65b1ece8bedb62446bc6eb54deacf318c3e1b560a54",
+      "sha256": "4b10859bdc17983d6eefac61ef746ad40c6c155db7c49cd5a191fe1623310f79",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/05-idor-basket-access.sh": {
-      "sha256": "181accda115eddd798f09346ce05e04b8609a9f11a02377a99288a721f5dc6c1",
+      "sha256": "bb453e6f4e58b0ceb88b7b745df83d48083816eaee7a30eb34d178806cc330c1",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/06-admin-access.sh": {
@@ -1361,11 +1381,11 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/08-nosql-injection.sh": {
-      "sha256": "628044af0bc1011d3e1dab425460e0399deb1f80d4f29600eb49037feb1b6a83",
+      "sha256": "245d79901e0513606d7f6d66df6e6adf28fc0e175f1e56296479cf419bde44f0",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/09-file-upload-xxe.sh": {
-      "sha256": "ef2a96a6b1204ce9d88c29279e66f5a2f3bcb5ca2933f4537743d2cdb4645ebe",
+      "sha256": "a5306842d89be39274a3fc45d40280c910aa921473da74554f237e2e65a8b22a",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/10-jwt-attacks.sh": {
@@ -1373,11 +1393,11 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/11-api-enumeration.sh": {
-      "sha256": "7054e25b7702c115730806473b972801619b0dd27d1f7365bdcc259ce3ae5337",
+      "sha256": "64e05133af89b6ea2616606bcce824dec27a8890bd3ce2caee637674e451994e",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/juice-shop-exploits/12-automated-sqlmap.sh": {
-      "sha256": "a7253cdc3e66ee36f104bf59d645cb841b527aa11170f85ccca697ced51f681d",
+      "sha256": "ee7b20508eaa46e57087a00496669f091d4b88cadf098352e3f9b931421723b6",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/malicious-user/01-identified-violations.sh": {
@@ -1413,11 +1433,11 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/mitre-attack/06-collection-exfiltration.sh": {
-      "sha256": "23bd145c49d3e283e22cecb676007ff214c05cda5c86c076b41643d70faf1d10",
+      "sha256": "88681045425aa9d48c62181cb2941c8b47ca3962e271cc8b9c7a7ff2f56b7e5d",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/mitre-attack/07-impact.sh": {
-      "sha256": "cb394e1042879fc24ee39137b52112892685c25ac0a2c242d1ad19bb57690c2c",
+      "sha256": "bec0e899d94df38220a4fa284747c1f31674deb9115b96525a1e723295a9607e",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/mitre-attack/08-attck-coverage-report.sh": {
@@ -1549,7 +1569,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/01-register-auth.sh": {
-      "sha256": "48b3f827812b0c541e8fe180a82dbadca8bb85b41b6d2d1eb9065df8e505f52e",
+      "sha256": "1e71f10ca6360c0696097e04fe41a1339b94f7d4031e091b716baa68336cdd5f",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/02-bola-profile.sh": {
@@ -1565,11 +1585,11 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/05-bfla-privilege.sh": {
-      "sha256": "1d0b22413a7bcfe36862129fb8cf07ed43ab07e01d6187c3fd97d07b0c9de2b6",
+      "sha256": "4eb9724912ddad34a7ce97df662043055f800eae6e281c7f70da229fe93daa92",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/06-ssrf-menu-image.sh": {
-      "sha256": "e3d1072c8a9bc8124732fc84d4708be92d0b20843fdc8d24d27b6d8acf8fd811",
+      "sha256": "f8b4ca772e2dbe5a44d0ea01f1bc943792f53c44392738a370020dce7d6495de",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/07-command-injection.sh": {
@@ -1577,7 +1597,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/08-full-escalation-chain.sh": {
-      "sha256": "d441f5b1d97df0928fbd4c73e3d0bf36df5e1fbe50740794506d8bb47d033e01",
+      "sha256": "0368f4b5cbeeaf0d9f1cfb9eaf6f753e397fae8022e713c85d7a076b583d9dbd",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/09-jwt-secret-crack.sh": {
@@ -1661,7 +1681,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/web-app-attacks/02-xss.sh": {
-      "sha256": "521ee61bff58b72bfa73a53023734b14d30ad42c0aee8937828f7de9ffa1f7ba",
+      "sha256": "8cd0270c6a9492bf70c266e7b474d269709fb82b43b098ff2a100a9af423cd0b",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/web-app-attacks/03-command-injection.sh": {
@@ -1689,11 +1709,11 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/web-app-attacks/09-csrf.sh": {
-      "sha256": "d4b0a24f13e0fc5f604f9a8bfaa3987978aa5bc4193d60f134173e643c81730b",
+      "sha256": "a9efc045247b213b2efbacd064c292d010942fcce7cf3e57836664961dbf2a93",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/web-app-attacks/10-file-upload.sh": {
-      "sha256": "497c3573c634325746e51593a55ee845c31101289bae6f920aa96ceeda085115",
+      "sha256": "85dcfdc7be3bd01f46e0f2dc3850e8544193d8f88acf403b3abd571f7c642ea1",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/terraform/aws/.terraform.lock.hcl": {
@@ -1701,15 +1721,15 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/terraform/aws/README.md": {
-      "sha256": "90d6cb6df160df57d043cc2a9dd9d26bbc7a2b48b3b3002b9bdcb920ebc132be",
+      "sha256": "f94d98e1f495e6812d8150b966f6dec905cb47a255f228dd1c2c94a9eb68bf71",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/terraform/aws/cloud-init.tftpl": {
-      "sha256": "eb8b13315bfb8ba42e092711ac59d0a8e2ced392056f371ecd05b5817620c9b8",
+      "sha256": "485c8a7ac354d08246939b3054d0eeaae13fe64ecfee3737c0d44745fde88f6f",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/terraform/aws/main.tf": {
-      "sha256": "2eeed7a6e1d428d17f369b38e53152c64722250884fd16b0065fe8e42c9759b4",
+      "sha256": "b3a742e63873ba19d95447bdf3a21f2f00a988161b421856cdde3767be346f66",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/terraform/aws/outputs.tf": {
@@ -1721,7 +1741,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/terraform/aws/tests/stack.tftest.hcl": {
-      "sha256": "eb4e76ceb690f7f311ddb6c77932f8b8496eca7ef8f519fe6d6c269515489847",
+      "sha256": "64a2fd3dae493b4dc0b6681545207de0e7957c64d1447b0bf44f8abc42dba3e5",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/terraform/aws/variables.tf": {
@@ -1793,7 +1813,15 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/csd-continuous.test.mjs": {
-      "sha256": "b1df5d8f241769a9c9cb046c5d47c93c35e901fcec59949848bc244d1d540a59",
+      "sha256": "ffb243001945bed60948295c48a0d5b9620bbf2b3fdf23cac2239749f2dc5e41",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/tests/csd-header-circulation.integration.mjs": {
+      "sha256": "2aa34a3ed357f84f16f6d74b74b760787d3414c353e3ed44b6bb04f99c951486",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/tests/csd-header-circulation.integration.sh": {
+      "sha256": "402b8a1017d4da33004aff2f51d6520c33f068d1321e85551e85d9acf4ad74f9",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/csd-host.integration.mjs": {
@@ -1801,7 +1829,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/csd-violations.test.mjs": {
-      "sha256": "761982b2ee418f6cc48c7f81574e44d6861a98256598c7f1a06cb9d4bdeffe8a",
+      "sha256": "3a3d90a4d827077637b61c13cd286464e7b1f35cd829e3971d0570b927c4f3b7",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/native-browser-actions.test.cjs": {
@@ -1813,7 +1841,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test-aws-bootstrap.sh": {
-      "sha256": "09074b1d466568ea86dd62a08f03bcf871c29a5b2e72ad269d04060448109c8a",
+      "sha256": "8341eb677db842851ac9ad990ac4879a84bb4cb9cb28fb3d9bf8c0a8f94b170c",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/tests/test-check-pii.sh": {
@@ -1837,7 +1865,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/tests/test-runtime-identity.sh": {
-      "sha256": "c1019a6301bf68d50d56655c32c209462477a510c989c768a19410ba023b13fb",
+      "sha256": "b7aee960164d8e61f09c5153199bd4bf2631bef3f3f538441973d68fad6d6e30",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test-translation-release-policy.sh": {
@@ -1905,7 +1933,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_crapi_video_fixture.py": {
-      "sha256": "f95386e6a48cc5513204835b25c7b006fcfe694305ba6c192df3fb0bcd8196e7",
+      "sha256": "f9b9909a85ae1e8a0be239edab11c28ba51f0cc75b499b53771a14244593a556",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_csd_action_receipt.py": {
@@ -1936,6 +1964,10 @@
       "sha256": "53f80f51860dc0283b9085d80ffb6ee2f3d9e1847b2e14ef392886344d43d64f",
       "mode": "0444"
     },
+    "/opt/traffic-generator/current/tests/test_family_functional.py": {
+      "sha256": "3ac8186a12b98a07f7465d36e01b0de943703b89a486a1f6b19c89da8008e20c",
+      "mode": "0444"
+    },
     "/opt/traffic-generator/current/tests/test_fixture_claim_boundary.py": {
       "sha256": "0b71fc25817ea9ba98fc52eb471e218fc49f3db06512091540bb5bc644af22f4",
       "mode": "0444"
@@ -1953,11 +1985,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_functional_contracts.py": {
-      "sha256": "e85421ace733935e68619101724026b99a844c96acca7d70c1a416982bffe853",
+      "sha256": "6b9ab34e02185240258c5654ab81b57ab6963ea9884353855e2c1047fc34c670",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_order_functional.py": {
-      "sha256": "70f74f6373e4b2962345d414237714cfbe8942a41faae1452270b118aca096cc",
+      "sha256": "e06f1c20b4a217dcaacb8b6f7f407c529baf2fb62798174ee66b9d1dc9c2ce9b",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_response_identity.py": {
@@ -1978,6 +2010,14 @@
     },
     "/opt/traffic-generator/current/tests/test_network_boundary.py": {
       "sha256": "6184833cc63e807926b6647bee8b8455caa04f9e4a371f870e604a7a3de7c496",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/tests/test_order_host_jobs.py": {
+      "sha256": "588c9a9f9fd8b81c749373c343093b02c37920c969d72981ca690016e5fdfca6",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/tests/test_origin_torture_coordinator.py": {
+      "sha256": "c108e11e3d34c879f8cb7f3f7af848e30e4998526f71b426426086fcea0a4614",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_payload_encoding.py": {
@@ -2009,7 +2049,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_restaurant_role_restoration.py": {
-      "sha256": "8b1ccc3deb458459e985fdf5914316bab1b771ad75fcfa260453f4c529a2c499",
+      "sha256": "2f1b9435b97e262a1805d7a39b2a6a986acdc44c369226f71cbcaa64a4ea488b",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_restaurant_transport.py": {
@@ -2053,11 +2093,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_traffic_proxy.py": {
-      "sha256": "40d742c0b9fbfa7a2e6aaac4a164613c26b83971a1a24432a6ce9213be409beb",
+      "sha256": "82fbdcd043f207c9cbcb3cafc266d803695e72016d98fb47825c52cf6ed583a0",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_traffic_runtime.py": {
-      "sha256": "3d5d8a0e67eb4eed51ef55f8f7297e99f4204074bf4bbc207506143ad542ad69",
+      "sha256": "56c9b8a4e1b0131159a55cc952d10c443865d01479c7b329951c0636bd30b02e",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_workload_receipt.py": {
@@ -2135,7 +2175,15 @@
       "mode": "0755"
     },
     "/usr/local/bin/enroll-order-recovery": {
-      "sha256": "1979ff18976b917e45423198d1135bfa45b1d7b79be8b79e09d6cb7b6c6d8369",
+      "sha256": "f9216005fd20a77c7fe5ede55e71aa99b24475bbea8737a3c5823c5f092a180c",
+      "mode": "0755"
+    },
+    "/usr/local/bin/catalog_dvwa_recovery.py": {
+      "sha256": "a9629b032b68c5061dec506b4d9fb79951c31c6af89391672d7416c7c3d40713",
+      "mode": "0644"
+    },
+    "/usr/local/bin/catalog-family-recovery": {
+      "sha256": "acc80662cd4736db4a7da614122e550cd5ec89f52b3328d329455a06a655fbb1",
       "mode": "0755"
     },
     "/usr/local/bin/origin-verify-crapi-browser.mjs": {
@@ -2146,9 +2194,21 @@
       "sha256": "aebb04fb8f1fcf3863f05e48904fdf7b30e6dca12f547c25ffc79add04050efc",
       "mode": "0755"
     },
+    "/usr/local/bin/enroll-family-recovery": {
+      "sha256": "f9216005fd20a77c7fe5ede55e71aa99b24475bbea8737a3c5823c5f092a180c",
+      "mode": "0755"
+    },
     "/usr/local/bin/demo-catalog-fixtures": {
       "sha256": "7de379eacd0145b9d4c5255c0f9c5dde7b089651a88e40792b4e69b23cde7817",
       "mode": "0755"
+    },
+    "/usr/local/bin/catalog_dvga_recovery.py": {
+      "sha256": "32009ec2a88ca8b48f77ecf4ab5198b2a24694bcdd02fc70977ac638b11abab9",
+      "mode": "0644"
+    },
+    "/usr/local/bin/catalog_restaurant_recovery.py": {
+      "sha256": "d22a57fe686f761d48ea51a2950e2b032a02eaebba8b56f8ee3742cac3682ff1",
+      "mode": "0644"
     },
     "/usr/local/bin/demo-origin-ready": {
       "sha256": "dc96056a30b0d77dfbf780e49e87d237410ce64ac5f7945e33e1faa6ae6f2b2b",
@@ -2179,16 +2239,28 @@
       "mode": "0755"
     },
     "/usr/local/bin/enroll-signup-recovery": {
-      "sha256": "1979ff18976b917e45423198d1135bfa45b1d7b79be8b79e09d6cb7b6c6d8369",
+      "sha256": "f9216005fd20a77c7fe5ede55e71aa99b24475bbea8737a3c5823c5f092a180c",
       "mode": "0755"
     },
     "/usr/local/bin/origin-browser-verify": {
       "sha256": "bcb02f70ed30a2528b171f363a512d78679f78c67a72172f344aa69e7315fb92",
       "mode": "0755"
     },
+    "/usr/local/bin/catalog_juice_recovery.py": {
+      "sha256": "5e76e5dff6de3e57553952dcbecbee7a55875f5141762e984ec9b9a09f60f485",
+      "mode": "0644"
+    },
+    "/usr/local/bin/catalog_crapi_recovery.py": {
+      "sha256": "0949783f2457d66f0768f9b62fef0d16fbd751332d55238e17c2e73317a1a298",
+      "mode": "0644"
+    },
     "/usr/local/bin/catalog-signup-recovery": {
       "sha256": "1aa4a631d1605eabf2cffeea2b08a3b8a122e8365396f970280727b6c72f9509",
       "mode": "0755"
+    },
+    "/usr/local/bin/catalog_order_recovery.py": {
+      "sha256": "45ad289047630ed9c4e3c23a0fc1c666ec30c6d85548abd700f272e2ba019212",
+      "mode": "0644"
     },
     "/usr/local/lib/origin/application_manifest.py": {
       "sha256": "849400901406a88a3fe06d276a097252b5b63c3f544907b21cf18e2dfa803453",
@@ -2203,7 +2275,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/docker-compose.yml": {
-      "sha256": "1eccaa35a9f92b9f54ada51af26662891e77ed817a5e0c6735741fdbfbd6ac53",
+      "sha256": "69ad430ad52d61664c18ae3cdcb2f52028c748f4219fb80f582c201add92c41f",
       "mode": "0644"
     },
     "/opt/origin-server/vampi-gunicorn.sh": {
@@ -2215,7 +2287,11 @@
       "mode": "0644"
     },
     "/opt/origin-server/juice-shop-framing/preload.cjs": {
-      "sha256": "4b62710f7ca0500028dc2cd71e3f6a11075efb23412916cbde137eb48e9606d4",
+      "sha256": "2dae99d78f356c4e672213ca5ae946557f9ce2f65adaf0e96cccd2cce2c73bad",
+      "mode": "0644"
+    },
+    "/opt/origin-server/juice-shop-framing/catalog-journal.cjs": {
+      "sha256": "630c9a61b9f657d0abd4149e1d78eb6696c361eae98977fb6435a6f87bc3b6b5",
       "mode": "0644"
     },
     "/opt/origin-server/httpbin-adapter/adapt.py": {
@@ -2239,7 +2315,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/dvga-adapter/adapt.py": {
-      "sha256": "9cf963a421ac91bda09d04d1d0d73f50ad8726a551cafec512df5bc68d616bc6",
+      "sha256": "4c0d14d988ee036e479d14ce30b359ae7d56473c846e53d0c30bc2195e51846f",
       "mode": "0644"
     },
     "/opt/origin-server/dvga-adapter/Dockerfile": {

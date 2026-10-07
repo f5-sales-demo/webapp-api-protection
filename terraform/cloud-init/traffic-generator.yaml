@@ -627,7 +627,7 @@ runcmd:
         "http_rps": 200, "benign_rps": 180, "attack_rps": 20,
         "connection_rps": 20, "slow_connections": 20,
         "csd_enabled": False, "protections_enabled": True,
-        "scenario_timeout_seconds": 900, "retention_days": 7,
+        "scenario_timeout_seconds": 7200, "retention_days": 7,
         "retention_bytes": 10737418240,
         "results_dir": "/opt/traffic-generator/runtime",
         "source_commit": "${generator_commit}", "artifact_sha256": "${generator_sha256}"
