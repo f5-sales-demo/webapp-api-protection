@@ -163,17 +163,20 @@ def grouped_records(
     security: bool,
 ) -> list[dict]:
     """Collect every page for bounded synthetic identities, then reject prefix collisions."""
-    identities = {identified_user(user) for user in users}
-    kind, key = (
-        ("app_security/events", "events") if security else ("access_logs", "logs")
+    users = [identified_user(user) for user in users]
+    key = "events" if security else "logs"
+    path = (
+        "/api/data/namespaces/"
+        + namespace
+        + "/"
+        + ("app_security/events" if security else "access_logs")
     )
-    path = "/api/data/namespaces/" + namespace + "/" + kind
     payload = {
         "namespace": namespace,
         "query": "{vh_name="
         + json.dumps(virtual_host(lb))
         + ",user=~"
-        + json.dumps("|".join(sorted(identities)))
+        + json.dumps("|".join(sorted(users)))
         + "}",
         "start_time": str(int(start)),
         "end_time": str(int(end) + 1),
@@ -192,7 +195,7 @@ def grouped_records(
         total = count
         records.extend(decode_event(item) for item in batch)
         if len(records) == total:
-            return [row for row in records if row.get("user") in identities]
+            return [row for row in records if row.get("user") in users]
         fingerprint = json.dumps(batch, sort_keys=True)
         if len(records) > total or not token or not batch or fingerprint in seen:
             message = "grouped telemetry pagination incomplete"
