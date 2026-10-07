@@ -398,7 +398,7 @@ def _mud(event: dict[str, Any], namespace: str, lb: str) -> bool:
         and any(
             hit.get("malicious_user_mitigate_action") == "MUM_BLOCK_TEMPORARILY"
             and hit.get("policy_namespace") == namespace
-            and hit.get("policy") == "ves-io-http-loadbalancer-oas-validation-" + lb
+            and hit.get("policy") == "ves-io-http-loadbalancer-challenge-" + lb
             and hit.get("policy_set") == "ves-io-http-loadbalancer-waf-exclusion-" + lb
             for hit in policy_hits(event)
         )
