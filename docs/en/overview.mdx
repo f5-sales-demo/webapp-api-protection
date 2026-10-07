@@ -29,7 +29,7 @@ and API protection.
 | Automation | GitHub Actions | Plan on every pull request, apply on merge to `main`. Backend coordinates and inputs come from repository **variables**; credentials from **secrets**. |
 
 <Aside type="note">
-Iteration 1 targets the **staging tenant** (`https://nferreira.staging.volterra.us`), which is
+Iteration 1 targets the **staging tenant** (`<XCSH_API_URL>`), which is
 VPN-accessible only. During prototyping, Terraform is run locally over the VPN; CI plan/apply against
 this tenant requires a self-hosted runner on the VPN.
 </Aside>
