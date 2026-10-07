@@ -321,7 +321,8 @@ write_files:
       clone_repo() {
         _url="$1"; _dest="$2"; _commit="$3"
         log_phase "git" "cloning $_url -> $_dest"
-        [[ "$_commit" =~ ^[0-9a-f]{40}$ ]]
+        [ "$${#_commit}" -eq 40 ]
+        case "$_commit" in *[!0-9a-f]*) return 1 ;; esac
         git init "$_dest"
         git -C "$_dest" remote add origin "$_url"
         retry_cmd 3 10 git -C "$_dest" fetch --depth 1 origin "$_commit"

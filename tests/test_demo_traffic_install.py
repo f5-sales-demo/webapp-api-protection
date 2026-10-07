@@ -27,6 +27,27 @@ from tests.demo_traffic_fixtures import (
 
 
 class CloudInitTests(unittest.TestCase):
+    def test_posix_clone_helper_validates_pin_before_git(self):
+        _, data = rendered_cloud_config()
+        helper = content(data, "/usr/local/lib/cloud-init-helpers.sh")
+        ensure("[[" not in helper)
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "helper.sh"
+            script.write_text(helper)
+            result = subprocess.run(  # noqa: S603 - declared helper under POSIX shell
+                [
+                    "/bin/sh",
+                    "-c",
+                    ' . "$1"; clone_repo https://example.test/repo /unused invalid',
+                    "sh",
+                    str(script),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        ensure_equal(result.returncode, 1)
+
     def test_embedded_shell_syntax_and_wire_limit(self):
         template, data = rendered_cloud_config()
         encoded = azure_custom_data(template.encode())
