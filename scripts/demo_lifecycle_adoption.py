@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 import shutil
 import time
@@ -16,6 +17,53 @@ if TYPE_CHECKING:
 
     from demo_lifecycle_state import Context
     from demo_lifecycle_terraform import Terraform
+
+
+def _move_listeners(
+    document: dict, state: Path, terraform: Terraform, context: Context
+) -> list[dict]:
+    moves = document.get("moves", [])
+    permitted_moves = {
+        "module.http_lb.xcsh_http_loadbalancer.this": 'module.http_lb.xcsh_http_loadbalancer.this["primary"]',
+        "module.http_lb.xcsh_http_loadbalancer.http[0]": 'module.http_lb.xcsh_http_loadbalancer.this["http"]',
+    }
+    if not isinstance(moves, list) or len(moves) != len(permitted_moves):
+        message = "adoption requires the reviewed identity-preserving listener moves"
+        raise Blocked(message)
+    listed = set()
+    for move in moves:
+        if (
+            not isinstance(move, dict)
+            or not isinstance(move.get("from"), str)
+            or permitted_moves.get(str(move.get("from"))) != move.get("to")
+            or move.get("from") in listed
+        ):
+            message = "adoption listener move differs from reviewed configuration"
+            raise Blocked(message)
+        listed.add(move["from"])
+    snapshot = private_json(state)
+    identities = {}
+    for row in snapshot.get("resources", []):
+        for instance in row.get("instances", []):
+            address = row.get("module", "") + "." + row["type"] + "." + row["name"]
+            if "index_key" in instance:
+                address += "[" + json.dumps(instance["index_key"]) + "]"
+            identities[address.lstrip(".")] = instance.get("attributes", {}).get("id")
+    for move in moves:
+        source, destination = move["from"], move["to"]
+        if (
+            not move.get("id")
+            or identities.get(source, identities.get(destination)) != move["id"]
+        ):
+            message = "adoption listener identity differs from inventory"
+            raise Blocked(message)
+        if source in identities and destination in identities:
+            message = "adoption listener source and destination both exist"
+            raise Blocked(message)
+    for move in moves:
+        if move["from"] in identities:
+            terraform.tf(context.paths.app, "state", "mv", move["from"], move["to"])
+    return moves
 
 
 def adopt(context: Context, terraform: Terraform, mapping: Path) -> None:
@@ -93,6 +141,7 @@ def adopt(context: Context, terraform: Terraform, mapping: Path) -> None:
         if source.is_file():
             shutil.copyfile(source, backup / name)
             (backup / name).chmod(0o600)
+    moves = _move_listeners(document, state, terraform, context)
     terraform.tf(
         context.paths.app,
         "import",
@@ -106,6 +155,7 @@ def adopt(context: Context, terraform: Terraform, mapping: Path) -> None:
         {
             "schema_version": 1,
             "imports": entries,
+            "moves": moves,
             "backup": str(backup),
             "review_sha256": hashlib.sha256(mapping.read_bytes()).hexdigest(),
         },

@@ -9,7 +9,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from demo_lifecycle_adoption import adopt
+from demo_lifecycle_adoption import _move_listeners, adopt
 from demo_lifecycle_state import Blocked, save_json
 from demo_test_support import expect_error
 
@@ -134,4 +134,51 @@ class AdoptionTests(unittest.TestCase):
                 expect_error(Blocked),
             ):
                 adopt(context, terraform, mapping)
+            terraform.tf.assert_not_called()
+
+    def test_listener_moves_preserve_exact_ids_and_resume(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            state = root / "application.tfstate"
+            save_json(
+                state,
+                {
+                    "resources": [
+                        {
+                            "module": "module.http_lb",
+                            "type": "xcsh_http_loadbalancer",
+                            "name": "this",
+                            "instances": [{"attributes": {"id": "primary-id"}}],
+                        },
+                        {
+                            "module": "module.http_lb",
+                            "type": "xcsh_http_loadbalancer",
+                            "name": "http",
+                            "instances": [
+                                {"index_key": 0, "attributes": {"id": "http-id"}}
+                            ],
+                        },
+                    ]
+                },
+            )
+            moves = [
+                {
+                    "from": "module.http_lb.xcsh_http_loadbalancer.this",
+                    "to": 'module.http_lb.xcsh_http_loadbalancer.this["primary"]',
+                    "id": "primary-id",
+                },
+                {
+                    "from": "module.http_lb.xcsh_http_loadbalancer.http[0]",
+                    "to": 'module.http_lb.xcsh_http_loadbalancer.this["http"]',
+                    "id": "http-id",
+                },
+            ]
+            context = SimpleNamespace(paths=SimpleNamespace(app=root))
+            terraform = Mock()
+            _move_listeners({"moves": moves}, state, terraform, context)
+            assert terraform.tf.call_count == 2
+            terraform.reset_mock()
+            moves[0]["id"] = "foreign-id"
+            with expect_error(Blocked):
+                _move_listeners({"moves": moves}, state, terraform, context)
             terraform.tf.assert_not_called()

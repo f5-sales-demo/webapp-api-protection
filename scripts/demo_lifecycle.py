@@ -393,10 +393,10 @@ class Lifecycle:
         self.terraform.plan("post-second-apply-drift", "noop")
 
     def plan(self) -> None:
-        """Save a fresh private application plan and summarized changes."""
+        """Save current declared inputs and a fresh private summarized plan."""
         self.terraform.namespace_tf_prepare()
         self.terraform.app_init()
-        _deployed_vars(self.context)
+        _upload_profile(self.context, self.runtime)
         self.terraform.plan("review")
 
     def adopt(self) -> None:
