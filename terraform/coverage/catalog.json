@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "expected_entries": 164,
-  "generator_source": "bfd313c59d5138ec3c6163cdfbdd60e45cac28af",
+  "generator_source": "248dd11a906c7b29fc8fab593cc006f6c30454ed",
   "entries": [
     {
       "id": "api-attacks/01-vampi-owasp-top10",
@@ -234,7 +234,7 @@
       "fixture_refresh": ["vampi"],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -300,7 +300,7 @@
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -324,8 +324,8 @@
       "fixture_refresh": [],
       "positive_test": "Native DVWA accepts the seeded credential, rejects fourteen invalid pairs, and closes the authenticated session",
       "verifier": "native-dvwa-credentials",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["credential_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -580,7 +580,7 @@
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -899,8 +899,8 @@
       "fixture_refresh": [],
       "positive_test": "The browser performs every declared synthetic DOM/request step and restores injected state with screenshot and closed-browser evidence; CSD enforcement disabled",
       "verifier": "native-browser-display",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -911,8 +911,8 @@
       "fixture_refresh": [],
       "positive_test": "The browser performs every declared synthetic DOM/request step and restores injected state with screenshot and closed-browser evidence; CSD enforcement disabled",
       "verifier": "native-browser-display",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -923,8 +923,8 @@
       "fixture_refresh": [],
       "positive_test": "The browser performs every declared synthetic DOM/request step and restores injected state with screenshot and closed-browser evidence; CSD enforcement disabled",
       "verifier": "native-browser-display",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -935,8 +935,8 @@
       "fixture_refresh": [],
       "positive_test": "Pinned native browser libraries execute and all injected nodes, controls, listeners and timers are cleaned up",
       "verifier": "native-csd-libraries",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -947,8 +947,8 @@
       "fixture_refresh": [],
       "positive_test": "Pinned native browser libraries execute and all injected nodes, controls, listeners and timers are cleaned up",
       "verifier": "native-csd-libraries",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -959,8 +959,8 @@
       "fixture_refresh": [],
       "positive_test": "Pinned native browser libraries execute and all injected nodes, controls, listeners and timers are cleaned up",
       "verifier": "native-csd-libraries",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -971,8 +971,8 @@
       "fixture_refresh": [],
       "positive_test": "The browser performs every declared synthetic DOM/request step and restores injected state with screenshot and closed-browser evidence; CSD enforcement disabled",
       "verifier": "native-browser-display",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -983,8 +983,8 @@
       "fixture_refresh": [],
       "positive_test": "The browser performs every declared synthetic DOM/request step and restores injected state with screenshot and closed-browser evidence; CSD enforcement disabled",
       "verifier": "native-browser-display",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -995,8 +995,8 @@
       "fixture_refresh": [],
       "positive_test": "The browser performs every declared synthetic DOM/request step and restores injected state with screenshot and closed-browser evidence; CSD enforcement disabled",
       "verifier": "native-browser-display",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -1007,8 +1007,8 @@
       "fixture_refresh": [],
       "positive_test": "The browser performs every declared synthetic DOM/request step and restores injected state with screenshot and closed-browser evidence; CSD enforcement disabled",
       "verifier": "native-browser-display",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -1019,8 +1019,8 @@
       "fixture_refresh": [],
       "positive_test": "The browser performs every declared synthetic DOM/request step and restores injected state with screenshot and closed-browser evidence; CSD enforcement disabled",
       "verifier": "native-browser-display",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["browser_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -1029,9 +1029,9 @@
       "entrypoint": "suites/dvwa-payloads/01-sqli-waf-endpoint.sh",
       "application_paths": ["/dvwa/vulnerabilities/sqli/"],
       "fixture_refresh": [],
-      "positive_test": null,
-      "verifier": null,
-      "mutation_policy": null,
+      "positive_test": "Every preserved payload returns authenticated native content or an exactly attributed WAF block",
+      "verifier": "native-dvwa-corpus",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -1041,9 +1041,9 @@
       "entrypoint": "suites/dvwa-payloads/02-xss-waf-endpoint.sh",
       "application_paths": ["/dvwa/vulnerabilities/xss_r/"],
       "fixture_refresh": [],
-      "positive_test": null,
-      "verifier": null,
-      "mutation_policy": null,
+      "positive_test": "Every preserved payload returns authenticated native content or an exactly attributed WAF block",
+      "verifier": "native-dvwa-corpus",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -1187,7 +1187,7 @@
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -1281,9 +1281,9 @@
       "entrypoint": "suites/dvwa-exploits/12-weak-session.sh",
       "application_paths": ["/dvwa/login.php", "/dvwa/vulnerabilities/weak_id/"],
       "fixture_refresh": [],
-      "positive_test": null,
-      "verifier": null,
-      "mutation_policy": null,
+      "positive_test": "Twenty native generated session cookies have consecutive numeric values",
+      "verifier": "native-dvwa-weak-session",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -3041,7 +3041,7 @@
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -3053,7 +3053,7 @@
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -3074,7 +3074,7 @@
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -3098,7 +3098,7 @@
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -3161,7 +3161,7 @@
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -3275,7 +3275,7 @@
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
-      "mutation_policy": "requires-no-change-or-restoration-proof",
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"

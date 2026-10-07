@@ -688,13 +688,13 @@
       "sha256": "eee9a49b5368e1d8530dab6e27e8e4a2e9c4bc5da0ef8cac603206443d2df458"
     },
     "/opt/traffic-generator/current/scripts/traffic_functional.py": {
-      "sha256": "245e714c12c7301271617ab54bc2a48bb58646d77358dfbf0f92a9fa76a30101"
+      "sha256": "70bc4bfa1d461049829ea0932ae4ccea95976412aea1c39ceecea48cbe840cfa"
     },
     "/opt/traffic-generator/current/scripts/traffic_multiclient.py": {
       "sha256": "b640d3569604bbc213bfe39fc88060ff08565a7276ef2067fe31168027851a88"
     },
     "/opt/traffic-generator/current/scripts/traffic_native_identity.py": {
-      "sha256": "0df37e5a6f60e2375d15045856857d11423b6ea69f0f19ee78a9ad2d18cf36ab"
+      "sha256": "e70cd8cb41862230010f59d2b2f44822e19c84ffc730c92e7c60fb53608c2e25"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
       "sha256": "4fc0b9ac46502bdcbafef7487ff2711d9e8f4842d330809a671ba4bbfc3012bb"
@@ -706,13 +706,13 @@
       "sha256": "95755a1bb9d9ef211a9eb7b24ea72eb534065046e66893fb4bb489fb86217369"
     },
     "/opt/traffic-generator/current/scripts/traffic_proxy.py": {
-      "sha256": "662d0cb2a456dba1fafbc6988f5fa573df5981c98a9bc44fcf278a9dc2f6a2ca"
+      "sha256": "28bafa862a2dc329846662c467ca8bc8b8e01d122d3000727216027f81d39aec"
     },
     "/opt/traffic-generator/current/scripts/traffic_report.py": {
       "sha256": "7ad2b0ff2bb33e3ae6f9f47c98005df13506afefbc3dd13a235f119bd0faae59"
     },
     "/opt/traffic-generator/current/scripts/traffic_runtime.py": {
-      "sha256": "b5fa29254713843ad0fdf84acea2b99d9637fcbe39d24c7b89d9c8ca9b6caa73"
+      "sha256": "73e0bf9a02585cb3bf2e9b21c891192dc5528374d916143fd1811c38aa040843"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
       "sha256": "f67a9ae49fc4c2b17c07ae7081e0cdbc312f933aed1da09e2e944c3674f10f1b"
@@ -736,7 +736,7 @@
       "sha256": "ef6f8702d3e3ed86ad2c4808548622075ce8a1286ee4590c24c94346cdf6ad5c"
     },
     "/opt/traffic-generator/current/suites/api-attacks/01-vampi-owasp-top10.sh": {
-      "sha256": "fc6f4a91a42862f116fbbd7288dfd02f1c156c6c950582602b11ca53d710f4f3"
+      "sha256": "afaec12d066e4526c8bddef522c762b4933b8bc2df98483d72fb0eb284b30205"
     },
     "/opt/traffic-generator/current/suites/api-attacks/02-sqlmap-api.sh": {
       "sha256": "4d77e5f0de2b02160a219eac24c5e1f53f563070dceaa4e36fa8b098b30d4130"
@@ -748,7 +748,7 @@
       "sha256": "58e6e7c2e85562dc22f8810b9fef7a88d9e8ae0827c0f26ee1a1a8b816ee6db1"
     },
     "/opt/traffic-generator/current/suites/api-attacks/05-broken-auth.sh": {
-      "sha256": "1f843f2ca3b39682841163019968e3b0915cf428b383c4381b96c3391014aae9"
+      "sha256": "1b11155bed828c252c132951f8c3cdc0eba45c8b993894cca9f0ec11ef8e308a"
     },
     "/opt/traffic-generator/current/suites/api-attacks/06-mass-assignment.sh": {
       "sha256": "268af4e909767fddcf7c0e5b9952aa2291a1c579afe317ab9f7e145b63f31141"
@@ -787,7 +787,7 @@
       "sha256": "04aa37f26a11ca3a4e52c3083b9e73d55f5258a7fa52ec00ef71be7a0ab313e0"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "db0173a606571d888f93f1f2de9b90b7b1c99b8b0a9e0c7324c22bf1143543aa"
+      "sha256": "770c5dd39c61c8b2ce5d4339f758ca16fe021c311021ad0a8076953e355c62cf"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
       "sha256": "00e87ef6b49c6939812c6a4b13dce481a0b07ec5e106b05f336728921a15b85e"
@@ -802,7 +802,7 @@
       "sha256": "dd9e46955b09881368b6ae5115d8a84c02b2e3257b5bc5d0862736457575b4fc"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/05-post-put-bypass.sh": {
-      "sha256": "8d6ad6d4802eb7e7569cff681aa2e2850466a460ac725955037c29857ddc733f"
+      "sha256": "4b1e9bf8203f91876e0d5a674cd824448d48e9a2c401d12b61c94f798001db9a"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/06-multi-client-simulation.sh": {
       "sha256": "4cee9d084eb271d81a3a2352d0f689ce773c574b5c97a3476dd3a43ac55e1228"
@@ -1453,10 +1453,10 @@
       "sha256": "41401a7968ceb5574276696b8ac280f7cb8179b1b94298036d30614d434f5fe4"
     },
     "/opt/traffic-generator/current/tests/test_native_functional_contracts.py": {
-      "sha256": "50be00d75fca6a306d60cb4de91ef14b74f6845b64d084a654a4eb481d79bd39"
+      "sha256": "6d15f811cedbacc5e7606b08753ff6e8656f28693c4541b0431f1375524abbde"
     },
     "/opt/traffic-generator/current/tests/test_native_response_identity.py": {
-      "sha256": "1b22ab2493c11e89f28520110638a6b3f831c24fa5777133db4b7f64b39a17ca"
+      "sha256": "f492792ea11f531b37c90de5313d63ee0199ba434be48670a5537516ec6e17b5"
     },
     "/opt/traffic-generator/current/tests/test_native_scanner_process.py": {
       "sha256": "c2e30bc64c4573d4dc73d8ba89d6eea0e6ff066ae47a2c913541ca3b50efc9fa"
