@@ -841,7 +841,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/rapid_navigation.cjs": {
-      "sha256": "821f15c272e24f008c8115b6fbc4a04043e54c360c4be8571be1df5c58abb0cd",
+      "sha256": "cf4828da92a13b2bc4a854ae0c21752fad4ef3e3e99850132815979fe9fb18f9",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/restaurant_profile_fixture.py": {
@@ -945,7 +945,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_native_identity.py": {
-      "sha256": "ab6bf59c118d241cac131a663019d61a7a2a7a3d133c30056787a146d967ca9f",
+      "sha256": "2597da3fce574abb7b9d554c1c231749871e71eac2b160c063f429792b1718c3",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
@@ -973,7 +973,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_proxy.py": {
-      "sha256": "ac8a965c87553147ab4f44cd9803a8d46a1765991306d84b59af4314a8242e51",
+      "sha256": "7cd422aa124be234bec61cbb755bb8a60c6fd9282e17ec7a6b37b54be4cdb60b",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_report.py": {
@@ -985,7 +985,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
-      "sha256": "329d696864991793a7fd9aeed33609ef97eabcbf8ec5e87698eed04aa0956925",
+      "sha256": "f31fab157cc510b4954539af6caac785d039921bff5e0e0b9525f0e4ca5eecac",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_tool.py": {
@@ -1069,7 +1069,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/bot-simulation/04-rapid-browsing.js": {
-      "sha256": "551920300e112dedb13cfeb11a5430813dd7f1e1a83731f7b06588a79537556c",
+      "sha256": "2d4c000f620bf3b223e9094693eb5580bf95c9fc5f00b2f6b31069dc04f69ed2",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/bot-simulation/05-hydra-brute-force.sh": {
@@ -1841,7 +1841,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/rapid-navigation.test.cjs": {
-      "sha256": "9c99124746edac88f1d2ac8ad58d49e4b8bfc47ba7cd235b1bef4c19c4621242",
+      "sha256": "0d4512cdaef1a725d4c0e148ea67b720ef1bb1c65fb9df2d99fda211082e01ad",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test-aws-bootstrap.sh": {
@@ -1969,7 +1969,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_endpoint_attribution.py": {
-      "sha256": "2de3c62a228b78318faa6c8ca04e4a86b204e71279fa1c32c1519dba67fc06bf",
+      "sha256": "bf3d1db5fd2ece9875e2d034ee3deaa3c9d354cb2de1a9b9f7ee963893715675",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_family_functional.py": {
@@ -2001,7 +2001,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_response_identity.py": {
-      "sha256": "270d451dbad4d5c0fcec6bfbdc612b0860138ccfea01389309f99cba288d2961",
+      "sha256": "9b2bf4a852f5ea3da7364c12266368d2ebb17f9971e047e0a3995b4fc7a84d29",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_scanner_process.py": {
@@ -2101,7 +2101,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_traffic_proxy.py": {
-      "sha256": "718dcc7f73b906ed3c8d31876dcf921128ad26ccd647c5d6ca54609c34da1062",
+      "sha256": "8a5e79b658ad708f4b61f51a8f3a4230778616f3541f7752433093e14f10ea83",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_traffic_runtime.py": {
