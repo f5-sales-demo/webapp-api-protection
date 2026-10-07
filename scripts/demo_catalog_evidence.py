@@ -155,6 +155,7 @@ def collect_pending(runtime: Any, ssh: list[str], out: dict, client: Client) -> 
                 "sudo",
                 "-n",
                 "python3",
+                "-B",
                 "/opt/traffic-generator/current/scripts/catalog_evidence.py",
                 "pending",
             ]
@@ -169,6 +170,7 @@ def collect_pending(runtime: Any, ssh: list[str], out: dict, client: Client) -> 
                     "sudo",
                     "-n",
                     "python3",
+                    "-B",
                     "/opt/traffic-generator/current/scripts/catalog_evidence.py",
                     "install",
                 ],
