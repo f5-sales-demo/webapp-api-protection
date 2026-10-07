@@ -12,6 +12,8 @@ import time
 from typing import TYPE_CHECKING, Any, Literal
 
 from demo_catalog_acceptance import catalog_metrics, coverage_failures
+from demo_catalog_clock import align_generator_clock, catalog_client
+from demo_catalog_evidence import collect_pending
 from demo_lifecycle_hosts import rotate_rebuilt_keys
 from demo_lifecycle_state import (
     AZURE_TYPES,
@@ -682,6 +684,8 @@ class Ownership:
         guest = self.owned_guest(
             _resources(self.context), "generator", outputs["generator"]
         )
+        client = catalog_client(self.context, outputs)
+        align_generator_clock(client, self.runtime, self.ssh_argv(guest, "yes"))
         while True:
             self.runtime.remaining()
             status = json.loads(
@@ -695,6 +699,7 @@ class Ownership:
                     ]
                 )[0]
             )
+            collect_pending(self.runtime, self.ssh_argv(guest, "yes"), outputs, client)
             passes = status.get("catalog_passes", [])
             if (
                 status.get("service_active") is not True
