@@ -255,3 +255,19 @@ class ExactUnspecifiedAccessMethod(unittest.TestCase):
         access["req_id"] = "foreign"
         with patch("demo_catalog_evidence.access_by_user", return_value=[access]):
             ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class EncodedRequestPath(unittest.TestCase):
+    def test_decoded_log_path_preserves_exact_sent_route(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"][0]["path"] = "/httpbin/%61nything/%27"
+        event["req_path"] = "/httpbin/anything/'"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        access = result["evidence"]["checks"][0]["access"]
+        ensure_equal(access["raw_req_path"], "/httpbin/anything/'")
+        ensure_equal(access["req_path"], "/httpbin/%61nything/%27")
+        event["req_path"] = "/httpbin/anything/foreign"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)

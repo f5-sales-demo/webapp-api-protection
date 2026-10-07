@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import time
 from typing import TYPE_CHECKING, Any
+from urllib.parse import unquote
 
 from demo_verify_client import Client, _page_batch
 from demo_verify_evidence import decode_event, identified_user, stamp, virtual_host
@@ -99,6 +100,27 @@ def security_bindings(
     return bindings
 
 
+def request_paths(records: list[dict], rows: list[dict]) -> list[dict]:
+    """Match one decoded log route to one exact sent route and retain the raw value."""
+    result = []
+    for record in records:
+        paths = {
+            row["path"]
+            for row in rows
+            if record.get("domain") == row["domain"]
+            and record.get("user") == identified_user(row["synthetic_identity"])
+            and record.get("req_path") in (row["path"], unquote(row["path"]))
+        }
+        if len(paths) == 1:
+            path = next(iter(paths))
+            result.append(
+                {**record, "req_path": path, "raw_req_path": record["req_path"]}
+            )
+        else:
+            result.append(record)
+    return result
+
+
 def request_checks(
     records: list[dict],
     events: list[dict],
@@ -109,6 +131,8 @@ def request_checks(
 ) -> list[dict] | None:
     """Require one exact access join and its security records for every request."""
     low, high = bounds
+    records = request_paths(records, rows)
+    events = request_paths(events, rows)
     probes = [
         {
             "host": row["domain"],
