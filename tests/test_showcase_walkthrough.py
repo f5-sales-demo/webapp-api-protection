@@ -181,6 +181,26 @@ class RequestFailures(unittest.TestCase):
 
 
 class PhaseScopeTests(unittest.TestCase):
+    def test_rate_requests_have_unique_markers_and_shared_limiter_identity(self):
+        client = Mock(spec=["request"])
+
+        def reply(host, path, method, user, body=None):
+            return 200, {
+                "url": "http://" + host + path,
+                "headers": {"X-Mud-User": user},
+            }
+
+        client.request.side_effect = reply
+        probes = runner.requests(
+            client, "rate.example.test", "rate-limit", "synthetic", False
+        )
+        burst = [probe for probe in probes if probe["label"] == "burst"]
+        self.assertEqual(len({probe["request_target"] for probe in burst}), 30)
+        self.assertEqual(len({probe["user"] for probe in burst}), 1)
+        self.assertEqual(
+            {probe["path"] for probe in burst}, {"/httpbin/anything/rate-limit"}
+        )
+
     def test_mud_rejects_ambiguous_200_before_detection_polling(self):
         client = Mock(spec=["request"])
         client.request.return_value = (200, {})

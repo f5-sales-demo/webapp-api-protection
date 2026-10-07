@@ -139,12 +139,15 @@ def requests(  # pylint: disable=too-many-branches
             )
         )
     elif category == "rate-limit":
-        for _ in range(30):
+        for index in range(30):
             result.append(  # noqa: PERF401 - retain dispatch order and partial receipts
                 send(
                     client,
                     host,
-                    "/httpbin/anything/rate-limit",
+                    "/httpbin/anything/rate-limit?demo_request="
+                    + prefix
+                    + "-"
+                    + str(index),
                     "GET",
                     prefix + "-burst",
                     control="rate-limit",
@@ -252,7 +255,11 @@ def requests(  # pylint: disable=too-many-branches
         for probe in result:
             if probe["status"] == SUCCESS:
                 rate_origin(
-                    probe["status"], probe["body"], host, probe["path"], probe["user"]
+                    probe["status"],
+                    probe["body"],
+                    host,
+                    probe["request_target"],
+                    probe["user"],
                 )
             elif probe["label"] == "burst" and probe["status"] != RATE_DENIAL:
                 fail("unexpected rate burst response")
@@ -283,7 +290,11 @@ def requests(  # pylint: disable=too-many-branches
             ):
                 fail("HTTPBin body echo mismatch")
             rate_origin(
-                probe["status"], probe["body"], host, probe["path"], probe["user"]
+                probe["status"],
+                probe["body"],
+                host,
+                probe["request_target"],
+                probe["user"],
             )
     return result
 
