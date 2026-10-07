@@ -6,6 +6,7 @@ import math
 import time
 from typing import TYPE_CHECKING
 
+from demo_catalog_evidence import access_by_user
 from demo_verify_client import Client
 
 if TYPE_CHECKING:
@@ -13,7 +14,6 @@ if TYPE_CHECKING:
     from demo_lifecycle_state import Context
 from demo_verify_evidence import identified_user, rate_origin, stamp, virtual_host
 from showcase_walkthrough_config import fail, save
-from showcase_walkthrough_evidence import access_pages
 
 LOG_INGESTION_MARGIN = 60
 MAX_CLOCK_OFFSET = 5
@@ -46,13 +46,18 @@ def calibrate_clock(client: Client, out: dict, prefix: str) -> None:
             probe["status"], probe["body"], probe["host"], probe["path"], probe["user"]
         )
     while True:
-        records = access_pages(
-            client,
-            out["namespace"],
-            out["loadbalancer_name"],
-            probes[0]["sent_at"] - 5,
-            probes[-1]["received_at"] + LOG_INGESTION_MARGIN,
-        )
+        records = [
+            record
+            for probe in probes
+            for record in access_by_user(
+                client,
+                out["namespace"],
+                out["loadbalancer_name"],
+                probe["user"],
+                probe["sent_at"] - 5,
+                probe["received_at"] + LOG_INGESTION_MARGIN,
+            )
+        ]
         clocks = []
         for probe in probes:
             hits = [

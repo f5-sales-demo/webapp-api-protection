@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from demo_catalog_clock import calibrate_clock
 from demo_catalog_evidence import evidence_bundle
 from demo_lifecycle_fixtures import TEST_SCOPE
 from demo_test_support import ensure, ensure_equal, expect_error
+from demo_verify_evidence import identified_user, virtual_host
 from demo_verify_types import EvidenceError
 
 
@@ -102,3 +107,58 @@ class UniqueCatalogJoins(unittest.TestCase):
             "demo_catalog_evidence.access_by_user", return_value=[event, second]
         ):
             ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class ClockQueryScope(unittest.TestCase):
+    def test_clock_calibration_queries_only_each_fresh_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.verify_identity_queries(Path(directory))
+
+    def verify_identity_queries(self, tmp_path):
+        client = SimpleNamespace(walkthrough_directory=tmp_path)
+        probes = [
+            {
+                "host": "www.example.com",
+                "path": "/httpbin/get",
+                "method": "GET",
+                "user": "showcase-" + "a" * 32 + "-clock-" + str(i),
+                "sent_at": 100.0 + i,
+                "received_at": 100.2 + i,
+                "status": 200,
+                "body": {},
+            }
+            for i in range(3)
+        ]
+        out = {
+            "domains": ["www.example.com"],
+            "namespace": TEST_SCOPE["namespace"],
+            "loadbalancer_name": TEST_SCOPE["namespace"],
+        }
+        calls = []
+
+        def query(_client, namespace, lb, user, _start, _end):
+            calls.append(user)
+            probe = next(p for p in probes if p["user"] == user)
+            return [
+                {
+                    "user": identified_user(user),
+                    "domain": probe["host"],
+                    "req_path": probe["path"],
+                    "namespace": namespace,
+                    "vh_name": virtual_host(lb),
+                    "method": "GET",
+                    "rsp_code": "200",
+                    "time": "1970-01-01T00:01:"
+                    + str(41 + probes.index(probe)).zfill(2)
+                    + ".000Z",
+                }
+            ]
+
+        with (
+            patch("demo_catalog_clock.clock_probe", side_effect=probes),
+            patch("demo_catalog_clock.rate_origin"),
+            patch("demo_catalog_clock.access_by_user", side_effect=query),
+        ):
+            calibrate_clock(client, out, "showcase-test")
+        ensure_equal(calls, [p["user"] for p in probes])
+        ensure_equal(client.clock_bounds, (-1, 2))
