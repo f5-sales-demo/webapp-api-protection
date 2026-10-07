@@ -276,7 +276,7 @@ def save_json(path: Path, value: object) -> None:
 
 def _guard_change(
     item: dict[str, Any],
-    mode: Literal["deploy", "noop", "destroy"],
+    mode: Literal["deploy", "rebuild", "noop", "destroy"],
     owned: Mapping[str, str] | None,
     persistent: Collection[str],
 ) -> None:
@@ -300,6 +300,22 @@ def _guard_change(
     if mode == "deploy" and "delete" in actions:
         message = "deployment deletion or replacement requires a reviewed rebuild plan"
         raise Blocked(message)
+    if mode == "rebuild" and "delete" in actions:
+        allowed = (
+            actions == ["delete", "create"] and kind == "azurerm_linux_virtual_machine"
+        )
+        allowed = allowed or (
+            actions == ["delete", "create"] and kind == "xcsh_swagger_object"
+        )
+        if (
+            not allowed
+            or owned is None
+            or owned.get(item["address"]) != before.get("id")
+        ):
+            message = (
+                "rebuild deletion or replacement is not a reviewed owned VM or fixture"
+            )
+            raise Blocked(message)
     if mode == "noop" and actions != ["no-op"]:
         message = "nonzero drift; verify never repairs infrastructure"
         raise Blocked(message)
@@ -324,7 +340,7 @@ def _guard_destroy(item: dict[str, Any], owned: Mapping[str, str] | None) -> Non
 
 def guard_plan(
     plan: dict[str, Any],
-    mode: Literal["deploy", "noop", "destroy"],
+    mode: Literal["deploy", "rebuild", "noop", "destroy"],
     owned: Mapping[str, str] | None = None,
     persistent: Collection[str] = (),
 ) -> None:

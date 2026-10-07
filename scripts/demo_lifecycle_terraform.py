@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
+import time
 from typing import TYPE_CHECKING, Any, Literal
 
 from demo_lifecycle_plan import require_current, seal
@@ -559,7 +561,7 @@ class Terraform:
     def plan(
         self,
         name: str,
-        mode: Literal["deploy", "noop", "destroy"] = "deploy",
+        mode: Literal["deploy", "rebuild", "noop", "destroy"] = "deploy",
         owned: Mapping[str, str] | None = None,
     ) -> Path:
         """Create a private plan and enforce ownership, scope and mutation mode."""
@@ -584,13 +586,44 @@ class Terraform:
         )
         if name != "review":
             guard_plan(parsed, mode, owned, self.context.state.persistent.values())
-        if mode == "deploy" and name != "review":
+        if mode in ("deploy", "rebuild") and name != "review":
             self.guard_conflicts(parsed)
         if mode == "noop" and code != 0:
             message = "nonzero detailed-exitcode drift"
             raise Blocked(message)
         seal(self.context, path, parsed)
         self.runtime.phase(name + "-guarded-plan")
+        return path
+
+    def reviewed_rebuild(self, owned: Mapping[str, str]) -> Path:
+        """Consume the exact current private review plan after ownership checks."""
+        path = self.context.paths.state / "review.plan"
+        require_current(self.context, path)
+        parsed = _object(
+            json.loads(self.tf(self.context.paths.app, "show", "-json", path)[0]),
+            "reviewed rebuild plan unavailable",
+        )
+        guard_plan(parsed, "rebuild", owned, self.context.state.persistent.values())
+        self.guard_conflicts(parsed)
+        backup = self.context.paths.state / ("rebuild-backup-" + str(time.time_ns()))
+        backup.mkdir(mode=0o700)
+        for name in (
+            "application.tfstate",
+            "namespace.tfstate",
+            "showcase.tfvars.json",
+            "swagger-receipt.json",
+            "run-manifest.json",
+            "outputs.json",
+            "review.plan",
+            "review.binding.json",
+            "review.summary.json",
+        ):
+            source = self.context.paths.state / name
+            secure_artifact(source)
+            if source.is_file():
+                shutil.copyfile(source, backup / name)
+                (backup / name).chmod(0o600)
+        self.runtime.phase("reviewed-rebuild-guarded-plan")
         return path
 
     def apply(self, plan: Path) -> None:

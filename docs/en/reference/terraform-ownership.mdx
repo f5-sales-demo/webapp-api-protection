@@ -22,6 +22,12 @@ XC environment. The command saves `review.plan`, `review.binding.json`, and `rev
 beside the private application state. Review proposed replacements before deployment. Bindings
 reject changed source, inputs, provider locks, state, or plan bytes.
 
+Run `rebuild` only after reviewing the saved plan. It consumes that exact source-bound `review.plan`,
+allows replacement only of captured demo VMs and the owned Swagger version, and preserves listener,
+network and namespace identities. The command backs up enrolled host keys and rotates only the
+replaced VM entries after verifying Azure's unique VM identities. Missing or stale review plans fail
+before traffic is stopped or infrastructure is changed.
+
 Normal deployment rejects out-of-state objects. Review the private inventory and place the exact
 Swagger adoption mapping in `adoption-review.json`; run `scripts/demo-lifecycle.sh adopt` only after
 the review plan is current. The mapping binds the approved scope, state digest, exact

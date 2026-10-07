@@ -534,6 +534,32 @@ class Guards(unittest.TestCase):
                 "noop",
             )
 
+    def test_rebuild_allows_only_captured_owned_replacements(self):
+        for kind, actions, captured, allowed in (
+            ("azurerm_linux_virtual_machine", ["delete", "create"], "owned", True),
+            ("xcsh_swagger_object", ["delete", "create"], "owned", True),
+            ("azurerm_linux_virtual_machine", ["delete", "create"], "other", False),
+            ("azurerm_linux_virtual_machine", ["delete"], "owned", False),
+            ("azurerm_linux_virtual_machine", ["create", "delete"], "owned", False),
+            ("xcsh_http_loadbalancer", ["delete", "create"], "owned", False),
+            ("azurerm_public_ip", ["delete", "create"], "owned", False),
+        ):
+            with self.subTest(kind=kind, actions=actions, captured=captured):
+                plan = {
+                    "resource_changes": [
+                        {
+                            "address": "main",
+                            "type": kind,
+                            "change": {"actions": actions, "before": {"id": "owned"}},
+                        }
+                    ]
+                }
+                if allowed:
+                    state_module.guard_plan(plan, "rebuild", {"main": captured})
+                else:
+                    with expect_error(state_module.Blocked, "reviewed owned"):
+                        state_module.guard_plan(plan, "rebuild", {"main": captured})
+
     def test_destroy_rejects_namespace(self):
         with expect_error(state_module.Blocked):
             state_module.guard_plan(

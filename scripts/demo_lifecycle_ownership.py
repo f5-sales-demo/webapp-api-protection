@@ -12,6 +12,7 @@ import time
 from typing import TYPE_CHECKING, Any, Literal
 
 from demo_catalog_acceptance import catalog_metrics, coverage_failures
+from demo_lifecycle_hosts import rotate_rebuilt_keys
 from demo_lifecycle_state import (
     AZURE_TYPES,
     XC_COLLECTIONS,
@@ -463,6 +464,21 @@ class Ownership:
             "UserKnownHostsFile=" + str(self.context.paths.known_hosts),
             guest["admin_username"] + "@" + guest["public_ip"],
         ]
+
+    def rotate_rebuilt_hosts(self, previous: Sequence[dict[str, Any]]) -> None:
+        """Rotate only replaced owned VMs after checking Azure's unique VM identity."""
+        current = _resources(self.context)
+        roles: tuple[Literal["origin", "generator"], ...] = ("origin", "generator")
+        records = [
+            (_guest_records(previous, role), _guest_records(current, role), role)
+            for role in roles
+        ]
+        rotate_rebuilt_keys(
+            self.context,
+            self.runtime,
+            records,
+            lambda role: self.owned_guest(current, role),
+        )
 
     def enroll_guest(self, guest: Guest) -> None:
         """Bound authenticated host enrollment without replacing existing keys."""

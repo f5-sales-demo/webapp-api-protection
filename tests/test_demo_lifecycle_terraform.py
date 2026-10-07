@@ -55,6 +55,47 @@ def render_guest(profile: dict[str, Any], defaults: dict[str, Any]) -> dict[str,
     return json.loads(config_line)
 
 
+class ReviewedRebuild(unittest.TestCase):
+    """Do not apply or inspect a stale review as a replacement authorization."""
+
+    def test_stale_review_rejected_before_provider_reads(self):
+        fixture = make_fixture(self)
+        with (
+            patch.object(
+                terraform_module,
+                "require_current",
+                side_effect=state_module.Blocked("stale"),
+            ),
+            patch.object(fixture.terraform, "tf") as tf,
+            expect_error(state_module.Blocked, "stale"),
+        ):
+            fixture.terraform.reviewed_rebuild({})
+        tf.assert_not_called()
+
+    def test_reviewed_unowned_deletion_rejected(self):
+        fixture = make_fixture(self)
+        plan = {
+            "resource_changes": [
+                {
+                    "address": "vm",
+                    "type": "azurerm_linux_virtual_machine",
+                    "change": {
+                        "actions": ["delete", "create"],
+                        "before": {"id": "unknown"},
+                    },
+                }
+            ]
+        }
+        with (
+            patch.object(terraform_module, "require_current"),
+            patch.object(fixture.terraform, "tf", return_value=(json.dumps(plan), 0)),
+            patch.object(fixture.terraform, "guard_conflicts") as conflicts,
+            expect_error(state_module.Blocked, "reviewed owned"),
+        ):
+            fixture.terraform.reviewed_rebuild({"vm": "owned"})
+        conflicts.assert_not_called()
+
+
 class TerraformWiring(unittest.TestCase):
     def test_generator_identity_is_not_deferred_by_load_balancer(self):
         config = hcl2.loads((ROOT / "terraform/main.tf").read_text())

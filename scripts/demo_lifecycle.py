@@ -395,6 +395,30 @@ class Lifecycle:
         self.runtime.phase("zero-change-apply")
         self.terraform.plan("post-second-apply-drift", "noop")
 
+    def rebuild(self) -> None:
+        """Apply reviewed owned replacements while preserving XC and network identities."""
+        self.terraform.namespace_tf_prepare()
+        self.terraform.app_init()
+        owned = self.ownership.inventory()
+        resources = self.context.state.resources
+        if resources is None:
+            message = "rebuild ownership state unavailable"
+            raise Blocked(message)
+        plan = self.terraform.reviewed_rebuild(owned)
+        self.runtime.phase("rebuild-traffic-stop-authorized")
+        self.ownership.cleanup_access(resources)
+        self.ownership.traffic("stop")
+        self.terraform.apply(plan)
+        self.terraform.get_outputs()
+        self.ownership.inventory()
+        self.ownership.rotate_rebuilt_hosts(resources)
+        self.ownership.verify_phase("readiness")
+        self.ownership.traffic("start")
+        self.ownership.verify_phase("acceptance")
+        noop = self.terraform.plan("post-rebuild-drift", "noop")
+        self.terraform.apply(noop)
+        self.terraform.plan("post-rebuild-second-apply-drift", "noop")
+
     def plan(self) -> None:
         """Save current declared inputs and a fresh private summarized plan."""
         self.terraform.namespace_tf_prepare()
@@ -462,11 +486,7 @@ class Lifecycle:
             complete = False
             try:
                 self.preflight(self.context.settings.operation in ("deploy", "rebuild"))
-                if self.context.settings.operation == "rebuild":
-                    self.destroy()
-                    self.deploy()
-                else:
-                    getattr(self, self.context.settings.operation)()
+                getattr(self, self.context.settings.operation)()
                 self.context.state.receipt["status"] = "verified"
                 self.runtime.phase("complete")
                 complete = True
@@ -544,9 +564,17 @@ def _failed_operation(lifecycle: Lifecycle, failure: BaseException | None) -> No
     )
     # Cleanup must never replace the original failure, including a second interruption.
     try:
-        if lifecycle.context.settings.operation not in ("plan", "adopt"):
+        operation = lifecycle.context.settings.operation
+        rebuild_started = any(
+            phase["name"] == "rebuild-traffic-stop-authorized"
+            for phase in receipt["phases"]
+        )
+        if operation not in ("plan", "adopt") and (
+            operation != "rebuild" or rebuild_started
+        ):
             _cleanup_traffic(lifecycle)
-    except BaseException:  # pylint: disable=broad-exception-caught
+    # pylint: disable-next=broad-exception-caught
+    except BaseException:  # noqa: BLE001 - cleanup must preserve the original failure
         receipt["cleanup"] = (
             "traffic stop failed or unreachable; original failure retained"
         )
