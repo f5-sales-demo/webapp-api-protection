@@ -1770,7 +1770,7 @@
     },
     "/usr/local/bin/demo-origin-ready": {
       "mode": "755",
-      "sha256": "c3c8d91d20c18be3a9405ff9f73f6ba19b18729e663c581815b2cdaaf2d9cb72"
+      "sha256": "dc96056a30b0d77dfbf780e49e87d237410ce64ac5f7945e33e1faa6ae6f2b2b"
     },
     "/usr/local/bin/demo-seed-catalog": {
       "mode": "700",
