@@ -585,6 +585,7 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
             str(exc) if isinstance(exc, EvidenceError) else "private execution failure"
         )
     finally:
+        client.deadline = time.monotonic() + 90
         report["restored"] = configuration.restore() if configuration.original else True
         report["finished"] = time.time()
         report["duration_seconds"] = report["finished"] - report["started"]
@@ -625,7 +626,7 @@ def main() -> int:
     parser.add_argument("category", choices=CATEGORIES)
     parser.add_argument("--config", type=Path)
     parser.add_argument("--state-dir", type=Path)
-    parser.add_argument("--timeout-seconds", type=int, default=300)
+    parser.add_argument("--timeout-seconds", type=int, default=1800)
     args = parser.parse_args()
     if not MIN_TIMEOUT <= args.timeout_seconds <= MAX_TIMEOUT:
         parser.error("timeout must be 60-1800 seconds")
