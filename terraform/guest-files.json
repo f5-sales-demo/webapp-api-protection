@@ -3,6 +3,9 @@
     "/etc/systemd/system/tgen-continuous.service": {
       "sha256": "8fa225c645fc3aa0e1736c1396a72c1e81686dc1c3b5a91d3ca96cfd5cb4a448"
     },
+    "/usr/local/bin/tgen-control": {
+      "sha256": "4ad612ab1bfd302319978f8d2ab466d65ffd306798dde8a8ffeaee61cee64f94"
+    },
     "/opt/traffic-generator/current/.agents/skills/demo-components/SKILL.md": {
       "sha256": "59939b307d360e5b4bbd7b078e7483f70fe6bd812c120c48a8a1f217ddd028c6"
     },
@@ -13,7 +16,7 @@
       "sha256": "1c21f56418c0be7a5563e32fe5063cd98dcb854ca486811ec240f13a2655464f"
     },
     "/opt/traffic-generator/current/.claude/governance.json": {
-      "sha256": "8bbe574dcae2ade55dff5913c27bab84cc09457410e090c7c11dab4ef6be5db4"
+      "sha256": "0650136c16e0507368d5515f256eeb1c4d6405902403bcda06a2159a3a6cbb7c"
     },
     "/opt/traffic-generator/current/.claude/hooks/protect-managed-files.sh": {
       "sha256": "365945a960113cac45e22c010e14d4eadd42dcc3fa509586897d717a2e94e67a"
@@ -37,34 +40,34 @@
       "sha256": "17b0bf278e42f81a1d690f03825beaff9adf27c6214abc270959d76bcc33be14"
     },
     "/opt/traffic-generator/current/.github/ISSUE_TEMPLATE/bug_report.md": {
-      "sha256": "3c9c587335e1af7ba7321c4c5d46ea7df35eb4a98842201770c0afeb9570c60f"
+      "sha256": "19af1a316527f138ad09cb1361ba060c8227423080d216bd0207be394e29d3a4"
     },
     "/opt/traffic-generator/current/.github/ISSUE_TEMPLATE/config.yml": {
       "sha256": "ec700f0379bbd6d0ae1290df1cd18b8ef74f3be349dfc2ed5bee156faf9a8b90"
     },
     "/opt/traffic-generator/current/.github/ISSUE_TEMPLATE/documentation.md": {
-      "sha256": "746a2f0fead126874a106a921a8ef3f75e566a43bd73933ff4600aec9f96bb4e"
+      "sha256": "0f3f0d38ba79824cad9e2834149a32506b8939ef171b71027fb1fceb8c9b2ca7"
     },
     "/opt/traffic-generator/current/.github/ISSUE_TEMPLATE/feature_request.md": {
-      "sha256": "2b6e306d9f9c38bf58a6dcccbc30db6b8bb92a87f7ef894ce00039883e93b011"
+      "sha256": "4b6e892a4c9c0de42282253bb72d99c1aa42ae2fd90177fb821658d2cbd1ce21"
     },
     "/opt/traffic-generator/current/.github/PULL_REQUEST_TEMPLATE.md": {
       "sha256": "bdbdc4016ac13d0cf14ceebc2fcbd376d8a603fb665dbd87c734056228a4c0ee"
     },
     "/opt/traffic-generator/current/.github/actionlint.yaml": {
-      "sha256": "fe7c5112aebbec1abdbcbb6ffb6c7abaeb7d05c18ade4195086028b586c9fdb8"
+      "sha256": "e49b95be30cc3936bdfefda194b6f04d7b7e1ca1bf6dbace41ec147ee6e1c115"
     },
     "/opt/traffic-generator/current/.github/config/self-hosted-runner-policy.json": {
-      "sha256": "c8242fb137c23c630a44b42e8e8d639cf7b81601ca3f6d6edfe4445e4c467ccd"
+      "sha256": "31d8204f43de31967c7c0361c61f102efdc0c8a79b38e74140ba821639cc0c2d"
     },
     "/opt/traffic-generator/current/.github/workflows/antigravity-review.yml": {
-      "sha256": "8e25ff0a6a7af756d526e8452a1a319434abe730b9c2e831e80d03a26ea43e0a"
+      "sha256": "3709bebdf8e5e0eeead641115d8414afbb69c2c6d31e3648dcd8e56a7de90e80"
     },
     "/opt/traffic-generator/current/.github/workflows/auto-merge.yml": {
-      "sha256": "b5accb940327f53ced8f01db36ca31ebc6083c46e52fe3320f17983fdb43013b"
+      "sha256": "e0fc40728dbf0eb15bb59381edba4ca8499115d21be4b158dc0b556a8e47401e"
     },
     "/opt/traffic-generator/current/.github/workflows/github-pages-deploy.yml": {
-      "sha256": "07eb19e57b8b5f08d66e121fea829a38723dbfd89a59e265417dd853961222c8"
+      "sha256": "46ed04c0e308115e6b620f0b3cb9150f5984eae93ef46a823051d6a33f0e3887"
     },
     "/opt/traffic-generator/current/.github/workflows/require-linked-issue.yml": {
       "sha256": "6929160188fbb718c863c1d743d87d10c2a8bf9278ee5a7d8508204a0f0e0a74"
@@ -73,7 +76,7 @@
       "sha256": "94ee17afb1ec8f748a4eb62fb322032812268fb543995e12f55a7fe897c24928"
     },
     "/opt/traffic-generator/current/.github/workflows/super-linter.yml": {
-      "sha256": "157804b524b1cc5c91e7ed265a72082926441566559d4e9d2ac2b003a277f538"
+      "sha256": "2c0c71b9680ee8bdec4bfd666b0b7bcd9bae020d905bfd4fcc8e69dd12688b3e"
     },
     "/opt/traffic-generator/current/.github/workflows/translation-audit.yml": {
       "sha256": "d75f9c267630e0fdd2f62511dec433863505347cee7c57d727d35dd137e4c6db"
@@ -220,49 +223,37 @@
       "sha256": "a7f40cea0484802138a49804a03a59f171cf98bfd3ac11b7f15930622635981d"
     },
     "/opt/traffic-generator/current/docs/en/01-architecture.mdx": {
-      "sha256": "c3ddef5f412ac72949ab3cd1a055a8b144d350912510ffa86a15a10fcf572134"
+      "sha256": "0af61d099e8ab347cddc0ef1b76a068d6edec3c13ce7402220634675dabae080"
     },
     "/opt/traffic-generator/current/docs/en/02-prerequisites.mdx": {
-      "sha256": "8d2d1a28ffd61cdb58aefc536891b8740dcdd6096ed6052949af1023739ffcd0"
+      "sha256": "8f15020bb712cab3ae8eab75a45838696933cb0f0495e912a82e026bc939cf37"
     },
     "/opt/traffic-generator/current/docs/en/03-deploy.mdx": {
-      "sha256": "e7027a648c36dd0a4f77dfb7f625d00154084589dda8d549d939e7ff82c9a743"
+      "sha256": "56ebeb7d2950eced6ed43993dd9f20e7bf7951302250742efcfb7c31f4c87924"
     },
     "/opt/traffic-generator/current/docs/en/04-tool-catalog.mdx": {
-      "sha256": "8593890d75aea2ca66433126d7fd2a890c7c8882dbaaa1de6e8a231c50cda4a8"
+      "sha256": "7eb4f8c5a57d75dca60b7130c4cde13876bfe4da3e910154132207925c42d0f4"
     },
     "/opt/traffic-generator/current/docs/en/05-suites.mdx": {
-      "sha256": "72e077284cc2479d39a10ce55fdd8ab1b03bdb9a3ef218bd9ec6ae1d71d76239"
+      "sha256": "924b8949bec1911fa81e0555d6ef2f93d198fd85ad1e5def324bbe3c190d6ade"
     },
     "/opt/traffic-generator/current/docs/en/06-runner.mdx": {
-      "sha256": "a3114d950ee72f73df95b8e448643a87c14d38d91fe4257e40b4813f03141951"
+      "sha256": "acb0215a4f7033ae313359136d8f72a0c6d189c347ac9969f3547f2888c1c922"
     },
     "/opt/traffic-generator/current/docs/en/07-integrate.mdx": {
-      "sha256": "02cca0d3ece9aa3075cd7fc242df5ae966cd693a4325d8862f87960c025027a3"
+      "sha256": "09ee8b9ad7aead0c5cc29722c5cfe5c59b4fbce805264ef2ca7da773b8258464"
     },
     "/opt/traffic-generator/current/docs/en/08-teardown.mdx": {
       "sha256": "52b1b13d78c126933c12ed3f0646dbc150f23b5b2fcf04ee3dd2c01aaa72895e"
     },
-    "/opt/traffic-generator/current/docs/en/archive/continuous-catalog-history.md": {
-      "sha256": "1ea37b8910c3866321c0f0c0baee1ba165cde06a953a4268b0229f55c64f3fa7"
-    },
     "/opt/traffic-generator/current/docs/en/continuous-catalog-tasks.md": {
-      "sha256": "58ccb7a849a0940727bf3bc715677bec0ac098a19b48d5893fcfdc62d6697777"
+      "sha256": "284cbd2cf54d1b1eb73640c284c22708a158338686069a46562198b251b60cfd"
     },
     "/opt/traffic-generator/current/docs/en/continuous-catalog.mdx": {
-      "sha256": "20ae3232ad3eb8df9bbd729650289ec9fe016c56c57b80dc37c257b527fc0cc0"
-    },
-    "/opt/traffic-generator/current/docs/en/dvwa-payload-mapping.md": {
-      "sha256": "cd4ba51e213cfad9e320e55098cc142b000524363ff232f85a0b605b1a6fcb9d"
+      "sha256": "ccb45e969ea09aa68e2875a129109f51505d46d8c4815d1ffd177674ee5857a5"
     },
     "/opt/traffic-generator/current/docs/en/index.mdx": {
-      "sha256": "7407937f46be0b7b46ea4d53f3e550e1b2e7e2b8973bdad28c9441dc84824332"
-    },
-    "/opt/traffic-generator/current/docs/en/llm-discovery.mdx": {
-      "sha256": "a3da6f43c2ade825834dc9cedb74dfe56c1b7d9473d94984905f90b56c5bf9e3"
-    },
-    "/opt/traffic-generator/current/docs/en/native-tool-remediation.md": {
-      "sha256": "2818b8eee549b95ceb1537df4ec139d9d538112c72f9092f5f813aecbb648d9f"
+      "sha256": "85c63ea38d7df6193196f62fe560a8f154e5c555b3d0f12840071e4198958eec"
     },
     "/opt/traffic-generator/current/docs/es/01-architecture.mdx": {
       "sha256": "a6fcccb2021efeb5450b1c1ba872b9b0c8e893752058c32b053538cccad73526"
@@ -427,7 +418,7 @@
       "sha256": "35bddec38925d906e662034627347e454f92b5cbee2782f5d24697200757c7e1"
     },
     "/opt/traffic-generator/current/docs/llms-config.json": {
-      "sha256": "e8cb6ce3cf9eb02e440b632be16736cfa57beeeb1be6a4c003d0056946dfa2fd"
+      "sha256": "1fc4f71ab4f21a58edfd0d1d3c25d486d0865c12c3213e2033a895e1d3ed275e"
     },
     "/opt/traffic-generator/current/docs/placeholders.json": {
       "sha256": "817d35097acf507d98e20d5a05c3a23429efbfd30a2ef6b42480b5b1fb814a6e"
@@ -541,13 +532,13 @@
       "sha256": "ec7399247f6356bc6c2502d6a621321bff92dd1f2f94b02274b69289639126fd"
     },
     "/opt/traffic-generator/current/scripts/audit-runner-workflows.py": {
-      "sha256": "9abdce125a091e1a4016378ab8629a47ae59aa1ff029974195e2086bf4a42520"
+      "sha256": "7677137f5a0c2ea835786c7a9711666875699be476fd151bf0e90190d495ad33"
     },
     "/opt/traffic-generator/current/scripts/browser_requests.cjs": {
       "sha256": "9ace9386224db7e9f4e768f8af64e2959ae99d18ef759ec6526ff1f579e0bbcb"
     },
     "/opt/traffic-generator/current/scripts/catalog_pass_receipt.py": {
-      "sha256": "638be0345e0a10190928369708fc6a9416efeb7f62fdf982997bd745bd06b4a9"
+      "sha256": "c96fd921dd7c73ff25905d9ed8ac38bcd8a006693bca37ed6bd9264da55886a5"
     },
     "/opt/traffic-generator/current/scripts/catalog_readiness.py": {
       "sha256": "5fe64f6067308c7302628297c6d3171478fa3670cff3b9e2d49d74c5610940ab"
@@ -598,7 +589,7 @@
       "sha256": "558401955f291f7771e849c994c2a2499e801acf00c56699facc0ea3164edc20"
     },
     "/opt/traffic-generator/current/scripts/github-api-resilience.cjs": {
-      "sha256": "9d4791818799b4087a1b4efee0ad4609b395a3055d239824f956fe258d99c870"
+      "sha256": "6977fb51449d7cedca9780b2ebda05bc79793f8ad66dbd736690f645ee423a3d"
     },
     "/opt/traffic-generator/current/scripts/install-release.sh": {
       "sha256": "190a6286f9fd5652ca275c03ca8a777a7691baabc58991b39cc5931f501bdb4b"
@@ -706,7 +697,10 @@
       "sha256": "0df37e5a6f60e2375d15045856857d11423b6ea69f0f19ee78a9ad2d18cf36ab"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
-      "sha256": "fdddd8eef6383a1e21ce78c54bda7f05cca5f791e1eacaa554086b9289623008"
+      "sha256": "4fc0b9ac46502bdcbafef7487ff2711d9e8f4842d330809a671ba4bbfc3012bb"
+    },
+    "/opt/traffic-generator/current/scripts/traffic_pass.py": {
+      "sha256": "b9cf4fee289208f5f06b795de0750d8d9678c84aa2952fef8b320ecf00d77768"
     },
     "/opt/traffic-generator/current/scripts/traffic_profile.py": {
       "sha256": "95755a1bb9d9ef211a9eb7b24ea72eb534065046e66893fb4bb489fb86217369"
@@ -718,7 +712,7 @@
       "sha256": "7ad2b0ff2bb33e3ae6f9f47c98005df13506afefbc3dd13a235f119bd0faae59"
     },
     "/opt/traffic-generator/current/scripts/traffic_runtime.py": {
-      "sha256": "455003475e0b1bfd2a24fc868a7d376bd40b1772e351aa989658f9497d742a3e"
+      "sha256": "5aa3c8844b15b5575e3a9d6c7cd37cb89b7a2ddb21acfaa998daae4967c67089"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
       "sha256": "f67a9ae49fc4c2b17c07ae7081e0cdbc312f933aed1da09e2e944c3674f10f1b"
@@ -736,7 +730,7 @@
       "sha256": "63aa11518c18277597a4a6a6522ac0ef32135c832c7508a0675cb0c20b1b6c17"
     },
     "/opt/traffic-generator/current/scripts/workflow_security_validator.py": {
-      "sha256": "0e99087be34aa483cddad9261e0d44eb930f8f42b26241497e9273a94cb907b0"
+      "sha256": "7c474d3f90dcb42a9432d3f6390f25fd7c1e1f03aafebf287e36e8adb9b8b068"
     },
     "/opt/traffic-generator/current/scripts/wrk_drain_adapter.py": {
       "sha256": "ef6f8702d3e3ed86ad2c4808548622075ce8a1286ee4590c24c94346cdf6ad5c"
@@ -1372,7 +1366,7 @@
       "sha256": "18c1703bb1cc09e3626adf851b7ca9a033c5a1072e149875d99e14f8db89840b"
     },
     "/opt/traffic-generator/current/tests/test-github-api-resilience.sh": {
-      "sha256": "01e869a466e8fb2ef36645580c4cb13a369518ed2a5271de2e4167a4e6f18922"
+      "sha256": "06d63afa09c1fad8bbf84e8cb76241b54c167705ba00e964ad083d168655d7a0"
     },
     "/opt/traffic-generator/current/tests/test-lint-mdx-prose.sh": {
       "sha256": "6ba959476c3eae2429d43383db4a5d658ed810ae0f799c3bb26aca9271773e7c"
@@ -1396,7 +1390,7 @@
       "sha256": "a8c20ac66f30429688fa69c236e5a08fe5373ffc3bbd4edeef316528d364c7c7"
     },
     "/opt/traffic-generator/current/tests/test_catalog_pass_receipt.py": {
-      "sha256": "e536298b6cc999fbbfece59414c3b123b1281a82726498184c5b7f504bf7d152"
+      "sha256": "6df8d2498ceb70fcc98af897b13dc476fe9f1bcf128fbba8b96a897fe738d8c2"
     },
     "/opt/traffic-generator/current/tests/test_catalog_payload_inventory.py": {
       "sha256": "80dc4872e02003d0a8163488e48d568c0f4861c7a3f2f93334a74e0ddb365de5"
@@ -1474,7 +1468,7 @@
       "sha256": "fc9955a8aa08350ed335fb88c6118c48541dcee3a1a845319964fc331b3aeb7b"
     },
     "/opt/traffic-generator/current/tests/test_network_boundary.py": {
-      "sha256": "d07ac0f52dbe25659e3e8b7d1a587867b8612aaa83114cb50e937fe7d5000dec"
+      "sha256": "6184833cc63e807926b6647bee8b8455caa04f9e4a371f870e604a7a3de7c496"
     },
     "/opt/traffic-generator/current/tests/test_payload_encoding.py": {
       "sha256": "e2852f7240a8c1b10ac48e04ac7346a585f396e1894263b0d11682fce23fe9a8"
@@ -1547,9 +1541,6 @@
     },
     "/opt/traffic-generator/current/zizmor.yaml": {
       "sha256": "5fd7a25f4293b1fc86b0f38f3e2c9967a9b04dce05fda3f850205da9ad349025"
-    },
-    "/usr/local/bin/tgen-control": {
-      "sha256": "4ad612ab1bfd302319978f8d2ab466d65ffd306798dde8a8ffeaee61cee64f94"
     }
   },
   "origin": {
