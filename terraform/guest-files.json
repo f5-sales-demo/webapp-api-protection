@@ -892,6 +892,10 @@
       "sha256": "6cdf128e1b793231d278fbecd08e91b197767268dd9123fc42b490594e2b0150",
       "mode": "0555"
     },
+    "/opt/traffic-generator/current/scripts/traffic_child_metadata.py": {
+      "sha256": "0657c92e67eb7533146c2b7651c3bb2ab8f7863255c06104a6ea84043df679c4",
+      "mode": "0444"
+    },
     "/opt/traffic-generator/current/scripts/traffic_command.py": {
       "sha256": "924cb16c24d9cda7ffe83a2cf10070aad868635255b72534d449eadaf14689fd",
       "mode": "0444"
@@ -977,11 +981,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_runtime.py": {
-      "sha256": "720572c9143de4ad63fd871cd038e2c865f36a35336e74d642792368a305f813",
+      "sha256": "ab7637c14986b908247aa133f6ce918c76c8201fbfe4714473b4d0f9ca6d0c36",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
-      "sha256": "c1ea1f2a6c2bd23439d3dcc209ad010e851c4b88957c7a4e0ed52161aec2239b",
+      "sha256": "24d43128670a6fc00eb73abeaf8351d12c47c3af0136bcaa77b3318f12e218da",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_tool.py": {
@@ -1061,7 +1065,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/bot-simulation/03-headless-form-fill.js": {
-      "sha256": "b3deff1e355900f751bbb42b7bb7cc06c62fd8c7f24ba84ed6b02c18e39775e1",
+      "sha256": "8f1d161873cc3251121a8d1d1a11465ca912473ee2fef7cf6993888f671b9b59",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/bot-simulation/04-rapid-browsing.js": {
@@ -1917,7 +1921,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_control_evidence_handshake.py": {
-      "sha256": "52571686678f63d77ecac285209af4b59273beab661a3805d2e258d4b19ca281",
+      "sha256": "28ae66514fcbb1a3cb6143082673c98b4be878cc5221cf7bc1d8d0e3b954d6b8",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_crapi_conversion_workflow.py": {
@@ -1985,7 +1989,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_functional_contracts.py": {
-      "sha256": "6b9ab34e02185240258c5654ab81b57ab6963ea9884353855e2c1047fc34c670",
+      "sha256": "f9121e6fa164cd70c3dafedb8269969f6e60da3e3df831a46a729fbb4f96d714",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_order_functional.py": {
@@ -2247,7 +2251,7 @@
       "mode": "0755"
     },
     "/usr/local/bin/catalog_juice_recovery.py": {
-      "sha256": "5e76e5dff6de3e57553952dcbecbee7a55875f5141762e984ec9b9a09f60f485",
+      "sha256": "2ede22cc8f20ea22ec1d0d32af7a76a4d95c14ce9c1ce1b3edf42e4140503c55",
       "mode": "0644"
     },
     "/usr/local/bin/catalog_crapi_recovery.py": {
