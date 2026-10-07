@@ -80,7 +80,9 @@ part of `deploy`, not an extra manual step. Readiness, traffic and live acceptan
 must pass before the application zero-change plan is applied. `verify` reads existing
 ownership, checks namespace preservation and fixture integrity, runs live acceptance
 and requires zero drift; it never imports, applies or repairs infrastructure.
-`rebuild` verifies owned application deletion and persistent survival, then redeploys.
+`rebuild` consumes the exact current reviewed plan and replaces only captured demo VMs or the
+owned Swagger version, preserving XC, namespace and network identities. It snapshots private
+inputs/state and verifies Azure unique VM identities before rotating rebuilt host keys.
 `destroy` deletes only owned disposable application resources and proves their absence;
 it retains local state/receipts, namespace and shared DNS zone. Terraform deletes only the owned schema versions.
 Rebuild and destroy are destructive and must only be invoked deliberately for this demo.
