@@ -73,10 +73,6 @@ def request_join(event: dict, probe: dict, namespace: str, lb: str) -> bool:
             and event.get("vh_name") == virtual_host(lb)
             and event.get("domain") == probe["host"]
             and event.get("req_path") == probe["path"]
-            and (
-                "demo_request=" not in probe.get("request_target", "")
-                or event.get("original_path") == probe["request_target"]
-            )
             and event.get("method") == probe["method"]
             and event.get("user") == identified_user(probe["user"])
             and str(event.get("rsp_code")) == str(probe["status"])

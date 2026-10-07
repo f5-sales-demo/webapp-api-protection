@@ -181,7 +181,7 @@ class RequestFailures(unittest.TestCase):
 
 
 class PhaseScopeTests(unittest.TestCase):
-    def test_rate_requests_have_unique_markers_and_shared_limiter_identity(self):
+    def test_rate_requests_are_spaced_and_keep_one_limiter_identity(self):
         client = Mock(spec=["request"])
 
         def reply(host, path, method, user, body=None):
@@ -191,14 +191,22 @@ class PhaseScopeTests(unittest.TestCase):
             }
 
         client.request.side_effect = reply
-        probes = runner.requests(
-            client, "rate.example.test", "rate-limit", "synthetic", False
-        )
+        with patch.object(runner.time, "sleep") as sleep:
+            probes = runner.requests(
+                client, "rate.example.test", "rate-limit", "synthetic", False
+            )
         burst = [probe for probe in probes if probe["label"] == "burst"]
-        self.assertEqual(len({probe["request_target"] for probe in burst}), 30)
+        self.assertEqual(len(burst), runner.RATE_BURST_REQUESTS)
         self.assertEqual(len({probe["user"] for probe in burst}), 1)
         self.assertEqual(
             {probe["path"] for probe in burst}, {"/httpbin/anything/rate-limit"}
+        )
+        self.assertEqual(sleep.call_count, runner.RATE_BURST_REQUESTS)
+        self.assertTrue(
+            all(
+                call.args == (runner.RATE_BURST_SPACING,)
+                for call in sleep.call_args_list
+            )
         )
 
     def test_mud_rejects_ambiguous_200_before_detection_polling(self):

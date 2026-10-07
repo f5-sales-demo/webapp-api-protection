@@ -42,6 +42,8 @@ from showcase_walkthrough_evidence import (
 SUCCESS, FORBIDDEN, RATE_DENIAL = 200, 403, 429
 MIN_TIMEOUT, MAX_TIMEOUT = 60, 1800
 MAX_CLOCK_OFFSET = 5
+RATE_BURST_REQUESTS = 90
+RATE_BURST_SPACING = 2
 CATEGORIES = ("waf", "schema", "endpoint-denial", "rate-limit", "mud")
 
 
@@ -139,21 +141,19 @@ def requests(  # pylint: disable=too-many-branches
             )
         )
     elif category == "rate-limit":
-        for index in range(30):
-            result.append(  # noqa: PERF401 - retain dispatch order and partial receipts
+        for _ in range(RATE_BURST_REQUESTS):
+            result.append(
                 send(
                     client,
                     host,
-                    "/httpbin/anything/rate-limit?demo_request="
-                    + prefix
-                    + "-"
-                    + str(index),
+                    "/httpbin/anything/rate-limit",
                     "GET",
                     prefix + "-burst",
                     control="rate-limit",
                     label="burst",
                 )
             )
+            time.sleep(RATE_BURST_SPACING)
         result.append(
             send(
                 client,
