@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "expected_entries": 164,
-  "generator_source": "ec7a0553fbb762c3296b45e7b462cfdf7073480f",
+  "generator_source": "bfd313c59d5138ec3c6163cdfbdd60e45cac28af",
   "entries": [
     {
       "id": "api-attacks/01-vampi-owasp-top10",
@@ -320,7 +320,13 @@
     {
       "id": "bot-simulation/01-playwright-credential-stuff",
       "entrypoint": "suites/bot-simulation/01-playwright-credential-stuff.js",
-      "application_paths": ["/dvwa/", "/dvwa/login.php", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/dvwa/",
+        "/dvwa/login.php",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "Native DVWA accepts the seeded credential, rejects fourteen invalid pairs, and closes the authenticated session",
       "verifier": "native-dvwa-credentials",
@@ -350,7 +356,7 @@
       "fixture_refresh": [],
       "positive_test": "Every declared scraped native page has matched content, response digest and screenshot evidence with complete browser cleanup",
       "verifier": "native-scraper",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -395,7 +401,7 @@
       "fixture_refresh": [],
       "positive_test": "All declared native rendered navigation outcomes have source-bound screenshot evidence and complete browser cleanup; unattributed denials do not qualify rendering",
       "verifier": "native-browser-routes",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -437,7 +443,7 @@
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -464,7 +470,15 @@
     {
       "id": "cdn-load-testing/03-accept-encoding-variation",
       "entrypoint": "suites/cdn-load-testing/03-accept-encoding-variation.sh",
-      "application_paths": ["/dvwa/", "/health", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/", "/whoami/"],
+      "application_paths": [
+        "/dvwa/",
+        "/health",
+        "/httpbin/",
+        "/httpbin/get",
+        "/juice-shop/",
+        "/vampi/",
+        "/whoami/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -476,7 +490,14 @@
     {
       "id": "cdn-load-testing/04-thundering-herd",
       "entrypoint": "suites/cdn-load-testing/04-thundering-herd.sh",
-      "application_paths": ["/dvwa/", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/", "/whoami/"],
+      "application_paths": [
+        "/dvwa/",
+        "/httpbin/",
+        "/httpbin/get",
+        "/juice-shop/",
+        "/vampi/",
+        "/whoami/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -555,7 +576,7 @@
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -620,11 +641,18 @@
     {
       "id": "cdn-load-testing/bench-keepalive",
       "entrypoint": "suites/cdn-load-testing/bench-keepalive.sh",
-      "application_paths": ["/dvwa/", "/dvwa/login.php", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/dvwa/",
+        "/dvwa/login.php",
+        "/httpbin/",
+        "/httpbin/get",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -632,11 +660,18 @@
     {
       "id": "cdn-load-testing/bench-vm-compare",
       "entrypoint": "suites/cdn-load-testing/bench-vm-compare.sh",
-      "application_paths": ["/dvwa/", "/dvwa/login.php", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/dvwa/",
+        "/dvwa/login.php",
+        "/httpbin/",
+        "/httpbin/get",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -644,7 +679,13 @@
     {
       "id": "challenge-verify/01-js-challenge-interstitial",
       "entrypoint": "suites/challenge-verify/01-js-challenge-interstitial.sh",
-      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -669,15 +710,19 @@
       "fixture_refresh": ["crapi"],
       "positive_test": "Origin issues a fresh synthetic signup JWT, welcome VIN/pincode and reset OTP; the journaled actor, vehicle and mail are removed through an enrolled forced-command recovery route",
       "verifier": "native-crapi-signup",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["signup_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
     {
       "id": "crapi-exploits/02-bola-vehicle-location",
       "entrypoint": "suites/crapi-exploits/02-bola-vehicle-location.sh",
-      "application_paths": ["/crapi/health", "/crapi/identity/api/auth/login", "/crapi/mailhog/api/v2/messages"],
+      "application_paths": [
+        "/crapi/health",
+        "/crapi/identity/api/auth/login",
+        "/crapi/mailhog/api/v2/messages"
+      ],
       "fixture_refresh": ["crapi"],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -715,8 +760,8 @@
       "fixture_refresh": ["crapi"],
       "positive_test": "Native reset mail establishes the isolated actor prerequisite; both sampled guess batches return declared native OTP outcomes and password/mail state is restored",
       "verifier": "native-crapi-otp",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["otp_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -743,7 +788,7 @@
       "application_paths": ["/crapi/community/api/v2/community/posts/recent"],
       "fixture_refresh": ["crapi"],
       "positive_test": "Native seeded community posts expose synthetic author email through the recent-posts API",
-      "verifier": null,
+      "verifier": "direct-native-api",
       "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
@@ -761,15 +806,19 @@
       "fixture_refresh": ["crapi"],
       "positive_test": "Four synthetic owned videos are natively uploaded and deleted by the regular actor, then exact absence is read back for each object",
       "verifier": "native-video-deletion",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["disposable_video_cleanup"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
     {
       "id": "crapi-exploits/08-mass-assignment-orders",
       "entrypoint": "suites/crapi-exploits/08-mass-assignment-orders.sh",
-      "application_paths": ["/crapi/health", "/crapi/identity/api/auth/login", "/crapi/mailhog/api/v2/messages"],
+      "application_paths": [
+        "/crapi/health",
+        "/crapi/identity/api/auth/login",
+        "/crapi/mailhog/api/v2/messages"
+      ],
       "fixture_refresh": ["crapi"],
       "positive_test": null,
       "verifier": null,
@@ -858,15 +907,19 @@
       "fixture_refresh": ["crapi"],
       "positive_test": "All native video parameter updates and conversion triggers have exact protocol evidence and original media/name/parameter restoration; command execution is not inferred",
       "verifier": "native-video-conversion",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["video_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
     {
       "id": "crapi-exploits/14-unauth-order-access",
       "entrypoint": "suites/crapi-exploits/14-unauth-order-access.sh",
-      "application_paths": ["/crapi/health", "/crapi/identity/api/auth/login", "/crapi/mailhog/api/v2/messages"],
+      "application_paths": [
+        "/crapi/health",
+        "/crapi/identity/api/auth/login",
+        "/crapi/mailhog/api/v2/messages"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1103,8 +1156,8 @@
       "fixture_refresh": [],
       "positive_test": "seven native stored-paste outcomes and exact owned removal",
       "verifier": "native-dvga-pastes",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["paste_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -1163,7 +1216,7 @@
       "fixture_refresh": [],
       "positive_test": "Every preserved command payload reaches authenticated native DVWA and returns declared command output or an explicit negative backtick command outcome",
       "verifier": "native-dvwa-command",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -1175,8 +1228,8 @@
       "fixture_refresh": [],
       "positive_test": "Isolated synthetic password changes and fresh login are observed, then original credentials authenticate after exact recovery",
       "verifier": "native-dvwa-csrf",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["csrf_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -1219,7 +1272,10 @@
     {
       "id": "dvwa-exploits/07-sqli-blind",
       "entrypoint": "suites/dvwa-exploits/07-sqli-blind.sh",
-      "application_paths": ["/dvwa/login.php", "/dvwa/vulnerabilities/sqli_blind/"],
+      "application_paths": [
+        "/dvwa/login.php",
+        "/dvwa/vulnerabilities/sqli_blind/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1279,7 +1335,10 @@
     {
       "id": "dvwa-exploits/12-weak-session",
       "entrypoint": "suites/dvwa-exploits/12-weak-session.sh",
-      "application_paths": ["/dvwa/login.php", "/dvwa/vulnerabilities/weak_id/"],
+      "application_paths": [
+        "/dvwa/login.php",
+        "/dvwa/vulnerabilities/weak_id/"
+      ],
       "fixture_refresh": [],
       "positive_test": null,
       "verifier": null,
@@ -1307,7 +1366,10 @@
     {
       "id": "dvwa-exploits/14-open-redirect",
       "entrypoint": "suites/dvwa-exploits/14-open-redirect.sh",
-      "application_paths": ["/dvwa/login.php", "/dvwa/vulnerabilities/open_redirect/source/low.php"],
+      "application_paths": [
+        "/dvwa/login.php",
+        "/dvwa/vulnerabilities/open_redirect/source/low.php"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1375,7 +1437,11 @@
     {
       "id": "juice-shop-exploits/04-xss-stored-api",
       "entrypoint": "suites/juice-shop-exploits/04-xss-stored-api.sh",
-      "application_paths": ["/juice-shop/", "/juice-shop/api/Feedbacks/", "/juice-shop/rest/products/1/reviews"],
+      "application_paths": [
+        "/juice-shop/",
+        "/juice-shop/api/Feedbacks/",
+        "/juice-shop/rest/products/1/reviews"
+      ],
       "fixture_refresh": ["juice"],
       "positive_test": null,
       "verifier": null,
@@ -1509,7 +1575,10 @@
     {
       "id": "juice-shop-exploits/10-jwt-attacks",
       "entrypoint": "suites/juice-shop-exploits/10-jwt-attacks.sh",
-      "application_paths": ["/juice-shop/", "/juice-shop/rest/admin/application-configuration"],
+      "application_paths": [
+        "/juice-shop/",
+        "/juice-shop/rest/admin/application-configuration"
+      ],
       "fixture_refresh": ["juice"],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1904,7 +1973,14 @@
     {
       "id": "owasp-scanning/01-zap-baseline",
       "entrypoint": "suites/owasp-scanning/01-zap-baseline.sh",
-      "application_paths": ["/", "/csd-demo/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/csd-demo/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1916,7 +1992,14 @@
     {
       "id": "owasp-scanning/02-zap-active-scan",
       "entrypoint": "suites/owasp-scanning/02-zap-active-scan.sh",
-      "application_paths": ["/", "/csd-demo/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/csd-demo/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1928,7 +2011,14 @@
     {
       "id": "owasp-scanning/03-nikto-full",
       "entrypoint": "suites/owasp-scanning/03-nikto-full.sh",
-      "application_paths": ["/", "/csd-demo/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/csd-demo/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1940,7 +2030,13 @@
     {
       "id": "owasp-scanning/04-nuclei-full",
       "entrypoint": "suites/owasp-scanning/04-nuclei-full.sh",
-      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1956,7 +2052,7 @@
       "fixture_refresh": [],
       "positive_test": "The named native scanner completes its structured report with actual scoped and measured connection attempts",
       "verifier": "native-scanner",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2228,7 +2324,7 @@
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2279,7 +2375,7 @@
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2291,7 +2387,7 @@
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2360,7 +2456,7 @@
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2385,7 +2481,7 @@
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2487,7 +2583,7 @@
       "fixture_refresh": [],
       "positive_test": "The named native scanner completes its structured report with actual scoped and measured connection attempts",
       "verifier": "native-scanner",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2499,7 +2595,7 @@
       "fixture_refresh": [],
       "positive_test": "Native Masscan sends paced SYN probes to authorized application ports 80 and 443 and observes real SYN-ACK replies",
       "verifier": "native-masscan",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2601,11 +2697,17 @@
     {
       "id": "reconnaissance/05-subfinder-enum",
       "entrypoint": "suites/reconnaissance/05-subfinder-enum.sh",
-      "application_paths": ["/dvwa/", "/health", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/dvwa/",
+        "/health",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "Native passive discovery rows remain within the authorized root and bind report bytes, binary provenance, installed source and observed process cleanup",
       "verifier": "native-subfinder",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2688,7 +2790,13 @@
     {
       "id": "reconnaissance/07-waf-fingerprint",
       "entrypoint": "suites/reconnaissance/07-waf-fingerprint.sh",
-      "application_paths": ["/dvwa/", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/dvwa/",
+        "/httpbin/",
+        "/httpbin/get",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -2700,7 +2808,12 @@
     {
       "id": "restaurant-exploits/01-register-auth",
       "entrypoint": "suites/restaurant-exploits/01-register-auth.sh",
-      "application_paths": ["/restaurant/", "/restaurant/profile", "/restaurant/register", "/restaurant/token"],
+      "application_paths": [
+        "/restaurant/",
+        "/restaurant/profile",
+        "/restaurant/register",
+        "/restaurant/token"
+      ],
       "fixture_refresh": ["restaurant"],
       "positive_test": null,
       "verifier": null,
@@ -2767,8 +2880,8 @@
       "fixture_refresh": ["restaurant"],
       "positive_test": "Every role payload has an actual native profile readback and exact original synthetic actor restoration",
       "verifier": "native-role-mutation",
-      "mutation_policy": null,
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["fixture_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -2821,7 +2934,11 @@
     {
       "id": "restaurant-exploits/08-full-escalation-chain",
       "entrypoint": "suites/restaurant-exploits/08-full-escalation-chain.sh",
-      "application_paths": ["/restaurant/", "/restaurant/admin/stats/disk", "/restaurant/profile"],
+      "application_paths": [
+        "/restaurant/",
+        "/restaurant/admin/stats/disk",
+        "/restaurant/profile"
+      ],
       "fixture_refresh": ["restaurant"],
       "positive_test": null,
       "verifier": null,
@@ -2892,7 +3009,14 @@
     {
       "id": "service-policy-verify/01-service-policy-deny",
       "entrypoint": "suites/service-policy-verify/01-service-policy-deny.sh",
-      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/spol-denied", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/spol-denied",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -2908,7 +3032,7 @@
       "fixture_refresh": [],
       "positive_test": "The named native scanner completes its structured report with actual scoped and measured connection attempts",
       "verifier": "native-scanner",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2920,7 +3044,7 @@
       "fixture_refresh": [],
       "positive_test": "The named native scanner completes its structured report with actual scoped and measured connection attempts",
       "verifier": "native-scanner",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2932,7 +3056,7 @@
       "fixture_refresh": [],
       "positive_test": "The named native scanner completes its structured report with actual scoped and measured connection attempts",
       "verifier": "native-scanner",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2965,7 +3089,7 @@
       "fixture_refresh": [],
       "positive_test": "Native TLS sockets send incomplete HTTP headers, repeat three paced header rounds, observe peer closure, and close all sockets",
       "verifier": "native-slow-headers",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -2997,7 +3121,13 @@
     {
       "id": "traffic-generation/04-ua-rotation",
       "entrypoint": "suites/traffic-generation/04-ua-rotation.sh",
-      "application_paths": ["/dvwa/", "/httpbin/", "/juice-shop/", "/juice-shop/rest/products/search", "/vampi/"],
+      "application_paths": [
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/juice-shop/rest/products/search",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -3049,7 +3179,13 @@
     {
       "id": "waf-encoding-evasion/03-unicode-utf8-evasion",
       "entrypoint": "suites/waf-encoding-evasion/03-unicode-utf8-evasion.sh",
-      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
@@ -3082,7 +3218,13 @@
     {
       "id": "waf-encoding-evasion/05-null-byte-iis-base64",
       "entrypoint": "suites/waf-encoding-evasion/05-null-byte-iis-base64.sh",
-      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -3094,7 +3236,13 @@
     {
       "id": "waf-encoding-evasion/06-case-chunked-evasion",
       "entrypoint": "suites/waf-encoding-evasion/06-case-chunked-evasion.sh",
-      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
@@ -3106,7 +3254,13 @@
     {
       "id": "waf-encoding-evasion/07-header-cookie-evasion",
       "entrypoint": "suites/waf-encoding-evasion/07-header-cookie-evasion.sh",
-      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -3157,7 +3311,13 @@
     {
       "id": "web-app-attacks/03-command-injection",
       "entrypoint": "suites/web-app-attacks/03-command-injection.sh",
-      "application_paths": ["/dvwa/", "/dvwa/vulnerabilities/exec/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/dvwa/",
+        "/dvwa/vulnerabilities/exec/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
@@ -3228,7 +3388,13 @@
     {
       "id": "web-app-attacks/05-nikto-scan",
       "entrypoint": "suites/web-app-attacks/05-nikto-scan.sh",
-      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -3240,7 +3406,13 @@
     {
       "id": "web-app-attacks/06-nuclei-scan",
       "entrypoint": "suites/web-app-attacks/06-nuclei-scan.sh",
-      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/",
+        "/dvwa/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -3271,7 +3443,14 @@
     {
       "id": "web-app-attacks/08-ssrf",
       "entrypoint": "suites/web-app-attacks/08-ssrf.sh",
-      "application_paths": ["/dvwa/", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/", "/vampi/users/v1/_debug"],
+      "application_paths": [
+        "/dvwa/",
+        "/httpbin/",
+        "/httpbin/get",
+        "/juice-shop/",
+        "/vampi/",
+        "/vampi/users/v1/_debug"
+      ],
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
@@ -3305,7 +3484,13 @@
     {
       "id": "web-app-attacks/10-file-upload",
       "entrypoint": "suites/web-app-attacks/10-file-upload.sh",
-      "application_paths": ["/dvwa/", "/dvwa/vulnerabilities/upload/", "/httpbin/", "/juice-shop/", "/vampi/"],
+      "application_paths": [
+        "/dvwa/",
+        "/dvwa/vulnerabilities/upload/",
+        "/httpbin/",
+        "/juice-shop/",
+        "/vampi/"
+      ],
       "fixture_refresh": [],
       "positive_test": null,
       "verifier": null,
@@ -3321,7 +3506,7 @@
       "fixture_refresh": [],
       "positive_test": "Recompute every declared dependency from current-pass native functional receipts bound to the installed source and immutable artifact",
       "verifier": "current-pass-report",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
@@ -3333,7 +3518,7 @@
       "fixture_refresh": [],
       "positive_test": "Recompute every declared dependency from current-pass native functional receipts bound to the installed source and immutable artifact",
       "verifier": "current-pass-report",
-      "mutation_policy": null,
+      "mutation_policy": "read-only",
       "restoration_fields": [],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"

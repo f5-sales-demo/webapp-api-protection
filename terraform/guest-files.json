@@ -688,7 +688,7 @@
       "sha256": "eee9a49b5368e1d8530dab6e27e8e4a2e9c4bc5da0ef8cac603206443d2df458"
     },
     "/opt/traffic-generator/current/scripts/traffic_functional.py": {
-      "sha256": "830c1f28e8ea8fe0850f72cb136f8f7f379ade665a55d89b0f7c41ff98c93031"
+      "sha256": "245e714c12c7301271617ab54bc2a48bb58646d77358dfbf0f92a9fa76a30101"
     },
     "/opt/traffic-generator/current/scripts/traffic_multiclient.py": {
       "sha256": "b640d3569604bbc213bfe39fc88060ff08565a7276ef2067fe31168027851a88"
@@ -712,7 +712,7 @@
       "sha256": "7ad2b0ff2bb33e3ae6f9f47c98005df13506afefbc3dd13a235f119bd0faae59"
     },
     "/opt/traffic-generator/current/scripts/traffic_runtime.py": {
-      "sha256": "5aa3c8844b15b5575e3a9d6c7cd37cb89b7a2ddb21acfaa998daae4967c67089"
+      "sha256": "b5fa29254713843ad0fdf84acea2b99d9637fcbe39d24c7b89d9c8ca9b6caa73"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
       "sha256": "f67a9ae49fc4c2b17c07ae7081e0cdbc312f933aed1da09e2e944c3674f10f1b"
@@ -787,7 +787,7 @@
       "sha256": "04aa37f26a11ca3a4e52c3083b9e73d55f5258a7fa52ec00ef71be7a0ab313e0"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "5f52b85b2a16352e2d7e4085c17b4a8d798a306c1f8c8a221c9667ca1c76e5a4"
+      "sha256": "db0173a606571d888f93f1f2de9b90b7b1c99b8b0a9e0c7324c22bf1143543aa"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
       "sha256": "00e87ef6b49c6939812c6a4b13dce481a0b07ec5e106b05f336728921a15b85e"
@@ -1453,7 +1453,7 @@
       "sha256": "41401a7968ceb5574276696b8ac280f7cb8179b1b94298036d30614d434f5fe4"
     },
     "/opt/traffic-generator/current/tests/test_native_functional_contracts.py": {
-      "sha256": "25e2022adb8b5d82284cd7c0f0673084e8d74b2e12ac2cc5d27e6bb2cf0354af"
+      "sha256": "50be00d75fca6a306d60cb4de91ef14b74f6845b64d084a654a4eb481d79bd39"
     },
     "/opt/traffic-generator/current/tests/test_native_response_identity.py": {
       "sha256": "1b22ab2493c11e89f28520110638a6b3f831c24fa5777133db4b7f64b39a17ca"
