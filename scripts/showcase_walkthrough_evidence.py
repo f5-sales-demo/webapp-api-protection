@@ -202,7 +202,7 @@ def schema_report(events: list[dict], access: dict, label: str) -> bool:
     )
 
 
-LOG_INGESTION_MARGIN = 10
+LOG_INGESTION_MARGIN = 60
 FORBIDDEN, RATE_DENIAL = 403, 429
 
 

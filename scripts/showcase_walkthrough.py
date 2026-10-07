@@ -31,6 +31,7 @@ from demo_verify_scope import effective, outputs
 from demo_verify_types import EvidenceError
 from showcase_walkthrough_config import Configuration, fail, save
 from showcase_walkthrough_evidence import (
+    LOG_INGESTION_MARGIN,
     access_pages,
     blocked,
     collect,
@@ -400,7 +401,7 @@ def calibrate_clock(client: Client, out: dict, prefix: str) -> None:
             out["namespace"],
             out["loadbalancer_name"],
             probes[0]["sent_at"] - 5,
-            probes[-1]["received_at"] + 10,
+            probes[-1]["received_at"] + LOG_INGESTION_MARGIN,
         )
         clocks = []
         for probe in probes:
