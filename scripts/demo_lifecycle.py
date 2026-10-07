@@ -302,19 +302,21 @@ def _quota(runtime: Runtime, released: dict[str, int]) -> None:
 
 
 def _skus(runtime: Runtime) -> None:
-    skus = _rows(
-        runtime.az(
-            "vm",
-            "list-skus",
-            "--location",
-            "eastus2",
-            "--resource-type",
-            "virtualMachines",
-            "--all",
-        ),
-        "subscription-aware eastus2 SKU response unavailable",
-    )
     for name in _SKU_FAMILIES:
+        skus = _rows(
+            runtime.az(
+                "vm",
+                "list-skus",
+                "--location",
+                "eastus2",
+                "--resource-type",
+                "virtualMachines",
+                "--size",
+                name,
+                "--all",
+            ),
+            "subscription-aware eastus2 SKU response unavailable",
+        )
         matches = [row for row in skus if row.get("name") == name]
         if len(matches) != 1 or any(
             row.get("type") == "Location" for row in matches[0].get("restrictions", [])
