@@ -985,7 +985,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
-      "sha256": "f31fab157cc510b4954539af6caac785d039921bff5e0e0b9525f0e4ca5eecac",
+      "sha256": "2bda6206263f87604a2e48af8bbdc3a93176833c4ca61bb6ad6ae03552b29def",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_tool.py": {
@@ -1921,7 +1921,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_control_evidence_handshake.py": {
-      "sha256": "28ae66514fcbb1a3cb6143082673c98b4be878cc5221cf7bc1d8d0e3b954d6b8",
+      "sha256": "f7c5dd4d93799883b0af43ef206590f820af41e69fe88d7538acdd978764355b",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_crapi_conversion_workflow.py": {
