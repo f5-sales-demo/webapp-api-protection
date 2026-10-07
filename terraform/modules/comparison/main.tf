@@ -21,6 +21,10 @@ resource "xcsh_app_firewall" "this" {
   monitoring                 = var.category == "waf" && !each.value.protected ? {} : null
   blocking                   = var.category != "waf" || each.value.protected ? {} : null
   default_detection_settings = {}
+  blocking_page {
+    blocking_page = "string:///PCFkb2N0eXBlIGh0bWw+PGh0bWw+PGJvZHk+UmVxdWVzdCBSZWplY3RlZDwvYm9keT48L2h0bWw+"
+    response_code = "Forbidden"
+  }
 }
 resource "xcsh_user_identification" "this" {
   for_each  = local.endpoints

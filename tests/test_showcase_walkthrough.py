@@ -181,6 +181,12 @@ class RequestFailures(unittest.TestCase):
 
 
 class PhaseScopeTests(unittest.TestCase):
+    def test_mud_rejects_ambiguous_200_before_detection_polling(self):
+        client = Mock(spec=["request"])
+        client.request.return_value = (200, {})
+        with self.assertRaisesRegex(EvidenceError, "explicit WAF enforcement"):
+            runner.requests(client, "mud.example.test", "mud", "synthetic", True)
+
     def test_endpoint_get_stays_allowed_on_exact_admin_path(self):
         client = Mock(spec=["request"])
 

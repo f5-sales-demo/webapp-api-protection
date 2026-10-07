@@ -174,6 +174,8 @@ def requests(  # pylint: disable=too-many-branches
                     label="sequence-" + str(index),
                 )
             )
+        if any(probe["status"] != FORBIDDEN for probe in result):
+            fail("MUD sequence requires explicit WAF enforcement responses")
         if enabled:
             # Detection evidence must precede the later benign mitigation request.
             out = client.walkthrough_outputs
