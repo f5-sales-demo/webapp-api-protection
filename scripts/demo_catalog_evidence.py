@@ -133,8 +133,34 @@ def request_checks(
         if request_id in used:
             return None
         used.add(request_id)
+        candidates = [
+            record for record in records if record.get("req_id") == request_id
+        ]
+        candidates = [
+            {
+                **record,
+                "method": probe["method"],
+                "raw_method": record["method"],
+                "method_source_request_id": request_id,
+            }
+            if record.get("method") == "METHOD_UNSPECIFIED"
+            and probe["method"]
+            not in {
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "PATCH",
+                "HEAD",
+                "OPTIONS",
+                "CONNECT",
+                "TRACE",
+            }
+            else record
+            for record in candidates
+        ]
         record = matched(
-            [record for record in records if record.get("req_id") == request_id],
+            candidates,
             {**probe, "server_request_id": request_id},
             namespace,
             lb,

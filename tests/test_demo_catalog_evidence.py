@@ -237,3 +237,21 @@ class GroupedIdentityCollection(unittest.TestCase):
         ensure_equal(result, events[:2])
         query = client.api.call_args.args[1]["query"]
         ensure("user=~" in query and "^" not in query and "$" not in query)
+
+
+class ExactUnspecifiedAccessMethod(unittest.TestCase):
+    def test_only_exact_security_id_can_supply_extension_method(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"][0]["method"] = "PROPFIND"
+        event["method"] = "PROPFIND"
+        access = {**event, "method": "METHOD_UNSPECIFIED"}
+        with patch("demo_catalog_evidence.access_by_user", return_value=[access]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure_equal(
+            result["evidence"]["checks"][0]["access"]["raw_method"],
+            "METHOD_UNSPECIFIED",
+        )
+        access["req_id"] = "foreign"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[access]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
