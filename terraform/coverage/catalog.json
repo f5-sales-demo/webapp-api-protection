@@ -320,13 +320,7 @@
     {
       "id": "bot-simulation/01-playwright-credential-stuff",
       "entrypoint": "suites/bot-simulation/01-playwright-credential-stuff.js",
-      "application_paths": [
-        "/dvwa/",
-        "/dvwa/login.php",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/dvwa/", "/dvwa/login.php", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "Native DVWA accepts the seeded credential, rejects fourteen invalid pairs, and closes the authenticated session",
       "verifier": "native-dvwa-credentials",
@@ -470,15 +464,7 @@
     {
       "id": "cdn-load-testing/03-accept-encoding-variation",
       "entrypoint": "suites/cdn-load-testing/03-accept-encoding-variation.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/health",
-        "/httpbin/",
-        "/httpbin/get",
-        "/juice-shop/",
-        "/vampi/",
-        "/whoami/"
-      ],
+      "application_paths": ["/dvwa/", "/health", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/", "/whoami/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -490,14 +476,7 @@
     {
       "id": "cdn-load-testing/04-thundering-herd",
       "entrypoint": "suites/cdn-load-testing/04-thundering-herd.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/httpbin/",
-        "/httpbin/get",
-        "/juice-shop/",
-        "/vampi/",
-        "/whoami/"
-      ],
+      "application_paths": ["/dvwa/", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/", "/whoami/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -641,14 +620,7 @@
     {
       "id": "cdn-load-testing/bench-keepalive",
       "entrypoint": "suites/cdn-load-testing/bench-keepalive.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/dvwa/login.php",
-        "/httpbin/",
-        "/httpbin/get",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/dvwa/", "/dvwa/login.php", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
@@ -660,14 +632,7 @@
     {
       "id": "cdn-load-testing/bench-vm-compare",
       "entrypoint": "suites/cdn-load-testing/bench-vm-compare.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/dvwa/login.php",
-        "/httpbin/",
-        "/httpbin/get",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/dvwa/", "/dvwa/login.php", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All declared native tool/concurrency/path/connection phases complete with real reports, application content and process cleanup; no cross-host hardware performance claim",
       "verifier": "native-load",
@@ -679,13 +644,7 @@
     {
       "id": "challenge-verify/01-js-challenge-interstitial",
       "entrypoint": "suites/challenge-verify/01-js-challenge-interstitial.sh",
-      "application_paths": [
-        "/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -718,11 +677,7 @@
     {
       "id": "crapi-exploits/02-bola-vehicle-location",
       "entrypoint": "suites/crapi-exploits/02-bola-vehicle-location.sh",
-      "application_paths": [
-        "/crapi/health",
-        "/crapi/identity/api/auth/login",
-        "/crapi/mailhog/api/v2/messages"
-      ],
+      "application_paths": ["/crapi/health", "/crapi/identity/api/auth/login", "/crapi/mailhog/api/v2/messages"],
       "fixture_refresh": ["crapi"],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -814,11 +769,7 @@
     {
       "id": "crapi-exploits/08-mass-assignment-orders",
       "entrypoint": "suites/crapi-exploits/08-mass-assignment-orders.sh",
-      "application_paths": [
-        "/crapi/health",
-        "/crapi/identity/api/auth/login",
-        "/crapi/mailhog/api/v2/messages"
-      ],
+      "application_paths": ["/crapi/health", "/crapi/identity/api/auth/login", "/crapi/mailhog/api/v2/messages"],
       "fixture_refresh": ["crapi"],
       "positive_test": null,
       "verifier": null,
@@ -915,11 +866,7 @@
     {
       "id": "crapi-exploits/14-unauth-order-access",
       "entrypoint": "suites/crapi-exploits/14-unauth-order-access.sh",
-      "application_paths": [
-        "/crapi/health",
-        "/crapi/identity/api/auth/login",
-        "/crapi/mailhog/api/v2/messages"
-      ],
+      "application_paths": ["/crapi/health", "/crapi/identity/api/auth/login", "/crapi/mailhog/api/v2/messages"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1272,10 +1219,7 @@
     {
       "id": "dvwa-exploits/07-sqli-blind",
       "entrypoint": "suites/dvwa-exploits/07-sqli-blind.sh",
-      "application_paths": [
-        "/dvwa/login.php",
-        "/dvwa/vulnerabilities/sqli_blind/"
-      ],
+      "application_paths": ["/dvwa/login.php", "/dvwa/vulnerabilities/sqli_blind/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1335,10 +1279,7 @@
     {
       "id": "dvwa-exploits/12-weak-session",
       "entrypoint": "suites/dvwa-exploits/12-weak-session.sh",
-      "application_paths": [
-        "/dvwa/login.php",
-        "/dvwa/vulnerabilities/weak_id/"
-      ],
+      "application_paths": ["/dvwa/login.php", "/dvwa/vulnerabilities/weak_id/"],
       "fixture_refresh": [],
       "positive_test": null,
       "verifier": null,
@@ -1366,10 +1307,7 @@
     {
       "id": "dvwa-exploits/14-open-redirect",
       "entrypoint": "suites/dvwa-exploits/14-open-redirect.sh",
-      "application_paths": [
-        "/dvwa/login.php",
-        "/dvwa/vulnerabilities/open_redirect/source/low.php"
-      ],
+      "application_paths": ["/dvwa/login.php", "/dvwa/vulnerabilities/open_redirect/source/low.php"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1437,11 +1375,7 @@
     {
       "id": "juice-shop-exploits/04-xss-stored-api",
       "entrypoint": "suites/juice-shop-exploits/04-xss-stored-api.sh",
-      "application_paths": [
-        "/juice-shop/",
-        "/juice-shop/api/Feedbacks/",
-        "/juice-shop/rest/products/1/reviews"
-      ],
+      "application_paths": ["/juice-shop/", "/juice-shop/api/Feedbacks/", "/juice-shop/rest/products/1/reviews"],
       "fixture_refresh": ["juice"],
       "positive_test": null,
       "verifier": null,
@@ -1575,10 +1509,7 @@
     {
       "id": "juice-shop-exploits/10-jwt-attacks",
       "entrypoint": "suites/juice-shop-exploits/10-jwt-attacks.sh",
-      "application_paths": [
-        "/juice-shop/",
-        "/juice-shop/rest/admin/application-configuration"
-      ],
+      "application_paths": ["/juice-shop/", "/juice-shop/rest/admin/application-configuration"],
       "fixture_refresh": ["juice"],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1973,14 +1904,7 @@
     {
       "id": "owasp-scanning/01-zap-baseline",
       "entrypoint": "suites/owasp-scanning/01-zap-baseline.sh",
-      "application_paths": [
-        "/",
-        "/csd-demo/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/csd-demo/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -1992,14 +1916,7 @@
     {
       "id": "owasp-scanning/02-zap-active-scan",
       "entrypoint": "suites/owasp-scanning/02-zap-active-scan.sh",
-      "application_paths": [
-        "/",
-        "/csd-demo/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/csd-demo/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -2011,14 +1928,7 @@
     {
       "id": "owasp-scanning/03-nikto-full",
       "entrypoint": "suites/owasp-scanning/03-nikto-full.sh",
-      "application_paths": [
-        "/",
-        "/csd-demo/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/csd-demo/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -2030,13 +1940,7 @@
     {
       "id": "owasp-scanning/04-nuclei-full",
       "entrypoint": "suites/owasp-scanning/04-nuclei-full.sh",
-      "application_paths": [
-        "/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -2697,13 +2601,7 @@
     {
       "id": "reconnaissance/05-subfinder-enum",
       "entrypoint": "suites/reconnaissance/05-subfinder-enum.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/health",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/dvwa/", "/health", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "Native passive discovery rows remain within the authorized root and bind report bytes, binary provenance, installed source and observed process cleanup",
       "verifier": "native-subfinder",
@@ -2790,13 +2688,7 @@
     {
       "id": "reconnaissance/07-waf-fingerprint",
       "entrypoint": "suites/reconnaissance/07-waf-fingerprint.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/httpbin/",
-        "/httpbin/get",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/dvwa/", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -2808,12 +2700,7 @@
     {
       "id": "restaurant-exploits/01-register-auth",
       "entrypoint": "suites/restaurant-exploits/01-register-auth.sh",
-      "application_paths": [
-        "/restaurant/",
-        "/restaurant/profile",
-        "/restaurant/register",
-        "/restaurant/token"
-      ],
+      "application_paths": ["/restaurant/", "/restaurant/profile", "/restaurant/register", "/restaurant/token"],
       "fixture_refresh": ["restaurant"],
       "positive_test": null,
       "verifier": null,
@@ -2934,11 +2821,7 @@
     {
       "id": "restaurant-exploits/08-full-escalation-chain",
       "entrypoint": "suites/restaurant-exploits/08-full-escalation-chain.sh",
-      "application_paths": [
-        "/restaurant/",
-        "/restaurant/admin/stats/disk",
-        "/restaurant/profile"
-      ],
+      "application_paths": ["/restaurant/", "/restaurant/admin/stats/disk", "/restaurant/profile"],
       "fixture_refresh": ["restaurant"],
       "positive_test": null,
       "verifier": null,
@@ -3009,14 +2892,7 @@
     {
       "id": "service-policy-verify/01-service-policy-deny",
       "entrypoint": "suites/service-policy-verify/01-service-policy-deny.sh",
-      "application_paths": [
-        "/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/spol-denied",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/spol-denied", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -3121,13 +2997,7 @@
     {
       "id": "traffic-generation/04-ua-rotation",
       "entrypoint": "suites/traffic-generation/04-ua-rotation.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/juice-shop/rest/products/search",
-        "/vampi/"
-      ],
+      "application_paths": ["/dvwa/", "/httpbin/", "/juice-shop/", "/juice-shop/rest/products/search", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -3179,13 +3049,7 @@
     {
       "id": "waf-encoding-evasion/03-unicode-utf8-evasion",
       "entrypoint": "suites/waf-encoding-evasion/03-unicode-utf8-evasion.sh",
-      "application_paths": [
-        "/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
@@ -3218,13 +3082,7 @@
     {
       "id": "waf-encoding-evasion/05-null-byte-iis-base64",
       "entrypoint": "suites/waf-encoding-evasion/05-null-byte-iis-base64.sh",
-      "application_paths": [
-        "/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -3236,13 +3094,7 @@
     {
       "id": "waf-encoding-evasion/06-case-chunked-evasion",
       "entrypoint": "suites/waf-encoding-evasion/06-case-chunked-evasion.sh",
-      "application_paths": [
-        "/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
@@ -3254,13 +3106,7 @@
     {
       "id": "waf-encoding-evasion/07-header-cookie-evasion",
       "entrypoint": "suites/waf-encoding-evasion/07-header-cookie-evasion.sh",
-      "application_paths": [
-        "/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "Every declared request returns application-specific native protocol content or an explicit protection candidate; no exploit or mitigation attribution inferred",
       "verifier": "composed-native",
@@ -3311,13 +3157,7 @@
     {
       "id": "web-app-attacks/03-command-injection",
       "entrypoint": "suites/web-app-attacks/03-command-injection.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/dvwa/vulnerabilities/exec/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/dvwa/", "/dvwa/vulnerabilities/exec/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
@@ -3388,13 +3228,7 @@
     {
       "id": "web-app-attacks/05-nikto-scan",
       "entrypoint": "suites/web-app-attacks/05-nikto-scan.sh",
-      "application_paths": [
-        "/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -3406,13 +3240,7 @@
     {
       "id": "web-app-attacks/06-nuclei-scan",
       "entrypoint": "suites/web-app-attacks/06-nuclei-scan.sh",
-      "application_paths": [
-        "/",
-        "/dvwa/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/", "/dvwa/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
@@ -3443,14 +3271,7 @@
     {
       "id": "web-app-attacks/08-ssrf",
       "entrypoint": "suites/web-app-attacks/08-ssrf.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/httpbin/",
-        "/httpbin/get",
-        "/juice-shop/",
-        "/vampi/",
-        "/vampi/users/v1/_debug"
-      ],
+      "application_paths": ["/dvwa/", "/httpbin/", "/httpbin/get", "/juice-shop/", "/vampi/", "/vampi/users/v1/_debug"],
       "fixture_refresh": [],
       "positive_test": "All preserved native payload requests return declared application protocol identity or protection candidate; tool phases and transport cleanup independently verified",
       "verifier": "composed-native",
@@ -3484,13 +3305,7 @@
     {
       "id": "web-app-attacks/10-file-upload",
       "entrypoint": "suites/web-app-attacks/10-file-upload.sh",
-      "application_paths": [
-        "/dvwa/",
-        "/dvwa/vulnerabilities/upload/",
-        "/httpbin/",
-        "/juice-shop/",
-        "/vampi/"
-      ],
+      "application_paths": ["/dvwa/", "/dvwa/vulnerabilities/upload/", "/httpbin/", "/juice-shop/", "/vampi/"],
       "fixture_refresh": [],
       "positive_test": null,
       "verifier": null,
