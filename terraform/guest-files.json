@@ -1771,7 +1771,7 @@
     },
     "/usr/local/bin/demo-dvwa-session-cleanup": {
       "mode": "755",
-      "sha256": "0f93a7a8182e06527ca56e1e69bfa21e980b8cca89e87e25f0a954372b9918de"
+      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
     },
     "/usr/local/bin/demo-origin-provision": {
       "mode": "755",
@@ -1816,6 +1816,14 @@
     "/var/www/html/index.html": {
       "mode": "644",
       "sha256": "d559f268150903f786ba95c75ebdd72a6b49333b0c1efaed804a92d61059d3cb"
+    },
+    "/usr/local/lib/demo-dvwa-session-cleanup.py": {
+      "mode": "755",
+      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
+    },
+    "/usr/local/lib/demo-dvwa-session-cleanup.timer": {
+      "mode": "644",
+      "sha256": "0fa44ac6340e8892f5cc44bee32509ec1d77c22647ccc2b85c83b6aea57ee3a0"
     }
   },
   "schema_version": 1

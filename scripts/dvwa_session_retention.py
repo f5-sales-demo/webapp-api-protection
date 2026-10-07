@@ -14,6 +14,7 @@ VOLUME = "origin-server_dvwa-sessions"
 ROOT = "/var/lib/docker/volumes/" + VOLUME + "/_data"
 RETENTION_SECONDS = 86400
 MAX_SESSION_BYTES = 65536
+MAX_REMOVALS = 25000
 
 
 def cleanup(root: str, cutoff: float) -> dict:
@@ -43,6 +44,8 @@ def cleanup(root: str, cutoff: float) -> dict:
             ):
                 Path(entry.path).unlink()
                 removed += 1
+                if removed >= MAX_REMOVALS:
+                    break
     return {"removed": removed, "authenticated_preserved": preserved}
 
 

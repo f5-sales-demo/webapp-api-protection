@@ -2,7 +2,7 @@
 package_update: true
 packages: [ca-certificates, curl, nginx, python3, sysstat, git]
 write_files:
-  - path: /etc/systemd/system/demo-dvwa-session-cleanup.timer
+  - path: /usr/local/lib/demo-dvwa-session-cleanup.timer
     permissions: '0644'
     content: |
       [Unit]
@@ -13,7 +13,7 @@ write_files:
       Persistent=true
       [Install]
       WantedBy=timers.target
-  - path: /usr/local/bin/demo-dvwa-session-cleanup
+  - path: /usr/local/lib/demo-dvwa-session-cleanup.py
     permissions: '0755'
     content: |
       ${session_retention_script}
@@ -33,6 +33,8 @@ write_files:
       bash "$stage/install-release.sh" '${origin_commit}' '${origin_archive_sha256}' '${origin_python_installer_sha256}'
 runcmd:
   - [bash, /usr/local/bin/bootstrap-origin]
+  - [install, -m, '0755', /usr/local/lib/demo-dvwa-session-cleanup.py, /usr/local/bin/demo-dvwa-session-cleanup]
+  - [install, -m, '0644', /usr/local/lib/demo-dvwa-session-cleanup.timer, /etc/systemd/system/demo-dvwa-session-cleanup.timer]
   - [python3, /usr/local/bin/demo-seed-catalog, --seed]
   - [systemctl, daemon-reload]
   - [systemctl, enable, --now, demo-dvwa-session-cleanup.timer]
