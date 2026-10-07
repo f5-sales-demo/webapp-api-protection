@@ -1587,7 +1587,7 @@
     },
     "/etc/systemd/system/demo-dvwa-session-cleanup.timer": {
       "mode": "644",
-      "sha256": "a83dd191487cb50fdd5e2c99d46db5720524b8ec41aa03fa4a8db1d2c5b9ab0a"
+      "sha256": "0fa44ac6340e8892f5cc44bee32509ec1d77c22647ccc2b85c83b6aea57ee3a0"
     },
     "/etc/systemd/system/nginx.service.d/limits.conf": {
       "mode": "644",
@@ -1771,7 +1771,7 @@
     },
     "/usr/local/bin/demo-dvwa-session-cleanup": {
       "mode": "755",
-      "sha256": "d3b4efc3c6a74d89a0dbc31cb7cee13e4ef1f23aea232045cce54b689f25c80e"
+      "sha256": "0f93a7a8182e06527ca56e1e69bfa21e980b8cca89e87e25f0a954372b9918de"
     },
     "/usr/local/bin/demo-origin-provision": {
       "mode": "755",

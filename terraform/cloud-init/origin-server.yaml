@@ -2,6 +2,21 @@
 package_update: true
 packages: [ca-certificates, curl, nginx, python3, sysstat, git]
 write_files:
+  - path: /etc/systemd/system/demo-dvwa-session-cleanup.timer
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Schedule bounded anonymous DVWA session retention
+      [Timer]
+      OnBootSec=5m
+      OnUnitActiveSec=5m
+      Persistent=true
+      [Install]
+      WantedBy=timers.target
+  - path: /usr/local/bin/demo-dvwa-session-cleanup
+    permissions: '0755'
+    content: |
+      ${session_retention_script}
   - path: /usr/local/bin/demo-seed-catalog
     permissions: '0700'
     content: |
@@ -19,3 +34,5 @@ write_files:
 runcmd:
   - [bash, /usr/local/bin/bootstrap-origin]
   - [python3, /usr/local/bin/demo-seed-catalog, --seed]
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, --now, demo-dvwa-session-cleanup.timer]

@@ -48,6 +48,7 @@ module "origin_server" {
   # limit uncompressed. cloud-init detects the gzip magic bytes and decompresses
   # user-data automatically, so the VM receives the same YAML.
   custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {
+    session_retention_script       = indent(6, file("${path.module}/../scripts/dvwa_session_retention.py"))
     catalog_seed_script            = indent(6, file("${path.module}/../scripts/demo_catalog_fixtures.py"))
     origin_commit                  = var.origin_commit
     origin_archive_sha256          = var.origin_archive_sha256
