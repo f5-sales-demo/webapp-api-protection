@@ -32,6 +32,7 @@ write_files:
       printf '%s  %s\n' '${origin_installer_sha256}' "$stage/install-release.sh" | sha256sum --check --status
       bash "$stage/install-release.sh" '${origin_commit}' '${origin_archive_sha256}' '${origin_python_installer_sha256}'
 runcmd:
+  - set -eu
   - [bash, /usr/local/bin/bootstrap-origin]
   - [install, -m, '0755', /usr/local/lib/demo-dvwa-session-cleanup.py, /usr/local/bin/demo-dvwa-session-cleanup]
   - [install, -m, '0644', /usr/local/lib/demo-dvwa-session-cleanup.timer, /etc/systemd/system/demo-dvwa-session-cleanup.timer]
