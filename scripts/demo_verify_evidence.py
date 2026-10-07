@@ -545,7 +545,9 @@ def _detection_activity(log: dict[str, Any]) -> bool:
     return (
         _counters(activity, ACTIVITY_COUNTERS)
         and _counters(mitigation, MITIGATION_COUNTERS)
-        and 0 < activity["waf_sec_event_count"] <= activity["req_count"]
+        # XC counts security events independently; one request can emit several.
+        and activity["waf_sec_event_count"] > 0
+        and activity["req_count"] > 0
     )
 
 

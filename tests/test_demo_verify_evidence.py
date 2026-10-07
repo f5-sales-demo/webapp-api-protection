@@ -535,6 +535,18 @@ class RiskReadinessEvidenceTests(unittest.TestCase):
                 )
             )
 
+    def test_mud_detection_allows_multiple_waf_events_per_request(self):
+        raw, probe, event = fixtures.mud_evidence()
+        log = evaluation.decode_event(raw)
+        activity = evaluation.decode_event(log["incremental_activity_info"])
+        activity.update(waf_sec_event_count=20, req_count=19)
+        log["incremental_activity_info"] = json.dumps(activity)
+        ensure(
+            evaluation.detection_attributed(
+                json.dumps(log), probe, [event], "demo", "demo-lb", 110
+            )
+        )
+
     def test_mud_detection_requires_same_fresh_waf_attack(self):
         raw, probe, event = fixtures.mud_evidence()
         for key, value in (
