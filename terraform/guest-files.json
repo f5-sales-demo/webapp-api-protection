@@ -897,7 +897,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_command.py": {
-      "sha256": "924cb16c24d9cda7ffe83a2cf10070aad868635255b72534d449eadaf14689fd",
+      "sha256": "683bd5a2862c0c0b8227409814a5e6fa0e518de660f84159065527475037041e",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_common.py": {
@@ -981,7 +981,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_runtime.py": {
-      "sha256": "ab7637c14986b908247aa133f6ce918c76c8201fbfe4714473b4d0f9ca6d0c36",
+      "sha256": "77810c0f353f8bb0373ef197295bd87599835207bacc5e5636580e80b3f9dadb",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/traffic_security.py": {
@@ -2009,7 +2009,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_nested_receipt.py": {
-      "sha256": "fc9955a8aa08350ed335fb88c6118c48541dcee3a1a845319964fc331b3aeb7b",
+      "sha256": "093b8d4bc66eec5732cb1ef3c875b9fe69bdec6b6bea3f491968869680c15779",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_network_boundary.py": {
