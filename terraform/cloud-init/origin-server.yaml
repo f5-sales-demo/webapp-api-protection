@@ -35,6 +35,7 @@ runcmd:
   - [bash, /usr/local/bin/bootstrap-origin]
   - [install, -m, '0755', /usr/local/lib/demo-dvwa-session-cleanup.py, /usr/local/bin/demo-dvwa-session-cleanup]
   - [install, -m, '0644', /usr/local/lib/demo-dvwa-session-cleanup.timer, /etc/systemd/system/demo-dvwa-session-cleanup.timer]
+  - [install, -m, '0755', /usr/local/bin/demo-seed-catalog, /usr/local/bin/demo-catalog-fixtures]
   - [python3, /usr/local/bin/demo-seed-catalog, --seed]
   - [systemctl, daemon-reload]
   - [systemctl, enable, --now, demo-dvwa-session-cleanup.timer]

@@ -21,7 +21,9 @@ class FixtureExportTests(unittest.TestCase):
                     "crapi_order_id": 7,
                 },
             ),
-            patch.object(fixtures, "login", side_effect=["token-a", "token-b"]),
+            patch.object(
+                fixtures, "login", side_effect=["video", "otp", "token-a", "token-b"]
+            ),
             patch.object(fixtures, "restaurant_fixtures", return_value={}),
             patch.object(fixtures.Path, "is_file", return_value=True),
             patch.object(
@@ -29,8 +31,14 @@ class FixtureExportTests(unittest.TestCase):
                 "stat",
                 return_value=__import__("types").SimpleNamespace(st_mode=0o600),
             ),
-            patch.object(fixtures.Path, "read_text", return_value="{}"),
+            patch.object(
+                fixtures.Path,
+                "read_text",
+                return_value='{"dvwa_sessions":{},"dvwa_csrf_sessions":{}}',
+            ),
+            patch.object(fixtures, "urlopen") as opened,
         ):
+            opened.return_value.__enter__.return_value.read.return_value = b'{"auth_token":"synthetic","config":{"application":{"domain":"example.test"}}}'
             result = fixtures.collect()
         assert result["crapi_tokens"] == ["token-a", "token-b"]
         assert result["crapi_order_id"] == 7

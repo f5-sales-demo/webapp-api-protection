@@ -1754,7 +1754,7 @@
     },
     "/usr/local/bin/demo-catalog-fixtures": {
       "mode": "755",
-      "sha256": "a3d63b9afb3d6b1fe24e87cd9c14c9db19e0675e248f37a22c7e68616da01f5c"
+      "sha256": "02969c857c75a507f4291a9038fce6f95898bdf28662ee8562a5278e644c749c"
     },
     "/usr/local/bin/demo-dvga-recovery": {
       "mode": "755",
@@ -1774,7 +1774,7 @@
     },
     "/usr/local/bin/demo-seed-catalog": {
       "mode": "700",
-      "sha256": "e5d1748c5fee7f9f158ab1fe4c4e2fda3349b860a401a004350ddbca61f43e5f"
+      "sha256": "02969c857c75a507f4291a9038fce6f95898bdf28662ee8562a5278e644c749c"
     },
     "/usr/local/bin/enroll-signup-recovery": {
       "mode": "755",
