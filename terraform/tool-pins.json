@@ -53,6 +53,11 @@
     "amass_linux_amd64.tar.gz": {
       "url": "https://github.com/owasp-amass/amass/releases/download/v5.1.1/amass_linux_amd64.tar.gz",
       "sha256": "5e22b5f0239e7eb79439d60d43d3cd20dca2478588bc2242e91ab0c4f8fa40dd"
+    },
+    "nodejs_24.21.0-1nodesource1_amd64.deb": {
+      "url": "https://deb.nodesource.com/node_24.x/pool/main/n/nodejs/nodejs_24.21.0-1nodesource1_amd64.deb",
+      "sha256": "6f091c83324fefd8f7dd9d358b77131b679c04aa6f5859244749f3a6c60ea56a",
+      "metadata_signing_key": "6F71F525282841EEDAF851B42F59B5F99B1BE0B4"
     }
   },
   "nodejs_deb_version": "24.21.0-1nodesource1",

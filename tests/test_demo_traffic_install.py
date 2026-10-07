@@ -2,6 +2,7 @@
 
 import base64
 import gzip
+import hashlib
 import json
 import os
 import re
@@ -27,6 +28,81 @@ from tests.demo_traffic_fixtures import (
 
 
 class CloudInitTests(unittest.TestCase):
+    def test_apt_retry_configuration_precedes_package_installation(self):
+        _, data = rendered_cloud_config()
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / "apt.conf"
+            source = data["bootcmd"][0].replace(
+                "/etc/apt/apt.conf.d/80-demo-acquire", str(config)
+            )
+            for _ in range(2):
+                ensure_equal(shell(source).returncode, 0)
+                ensure_equal(
+                    config.read_text().splitlines(),
+                    [
+                        'Acquire::Retries "5";',
+                        'Acquire::http::Timeout "60";',
+                        'Acquire::https::Timeout "60";',
+                    ],
+                )
+
+    def test_node_package_checks_content_metadata_and_installed_version(self):
+        _, data = rendered_cloud_config()
+        pin = json.loads((ROOT / "terraform/tool-pins.json").read_text())
+        asset = pin["release_assets"]["nodejs_24.21.0-1nodesource1_amd64.deb"]
+        source = phase(data, "installing Node.js 24").replace(
+            ". /usr/local/lib/cloud-init-helpers.sh", ""
+        )
+        ensure(asset["url"] in source and asset["sha256"] in source)
+        ensure("setup_24.x" not in source)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "fixture.deb"
+            archive.write_bytes(b"declared-node-package")
+            digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+            installer = source.replace(
+                "/tmp/nodejs-pinned.deb",  # noqa: S108 -- owned local fixture replaces guest path
+                str(root / "download.deb"),
+            ).replace("dpkg-deb", "deb_metadata")
+            stubs = (
+                "set -eu\nlog_phase() { :; };\n"
+                "dpkg() { echo amd64; };\n"
+                'deb_metadata() { case "$3" in Package) echo "$PACKAGE" ;; '
+                'Version) echo "$VERSION" ;; Architecture) echo "$ARCH" ;; esac; };\n'
+                'node() { echo "$RUNTIME"; };\n'
+                'install_packages() { echo installed >> "$CALLS"; };\n'
+                "fetch_url() { cp " + shlex.quote(str(archive)) + ' "$2"; };\n'
+            )
+            environment = {
+                **os.environ,
+                "CALLS": str(root / "calls"),
+                "PACKAGE": "nodejs",
+                "VERSION": pin["nodejs_deb_version"],
+                "ARCH": "amd64",
+                "RUNTIME": "v24.21.0",
+            }
+            bad_hash = shell(stubs + installer, environment)
+            ensure(bad_hash.returncode != 0)
+            ensure(not (root / "calls").exists())
+            installer = installer.replace(asset["sha256"], digest)
+            for field, wrong in (
+                ("PACKAGE", "other"),
+                ("VERSION", "24.20.0"),
+                ("ARCH", "arm64"),
+            ):
+                with self.subTest(field=field):
+                    result = shell(stubs + installer, {**environment, field: wrong})
+                    ensure(result.returncode != 0)
+                    ensure(not (root / "calls").exists())
+            result = shell(stubs + installer, {**environment, "RUNTIME": "v24.20.0"})
+            ensure(result.returncode != 0)
+            ensure((root / "download.deb").exists(), result.stdout + result.stderr)
+            (root / "calls").unlink()
+            result = shell(stubs + installer, environment)
+            ensure_equal(result.returncode, 0)
+            ensure_equal((root / "calls").read_text(), "installed\n")
+            ensure(not (root / "download.deb").exists())
+
     def test_posix_clone_helper_validates_pin_before_git(self):
         _, data = rendered_cloud_config()
         helper = content(data, "/usr/local/lib/cloud-init-helpers.sh")

@@ -2,6 +2,12 @@
 package_update: true
 package_upgrade: true
 
+# bootcmd runs before cloud-init's package module, including the first apt update.
+bootcmd:
+  - |
+    set -eu
+    printf '%s\n' 'Acquire::Retries "5";' 'Acquire::http::Timeout "60";' 'Acquire::https::Timeout "60";' > /etc/apt/apt.conf.d/80-demo-acquire
+
 packages:
   # System essentials
   - ca-certificates
@@ -411,9 +417,15 @@ runcmd:
   - |
     . /usr/local/lib/cloud-init-helpers.sh
     log_phase "phase1" "installing Node.js 24"
-    fetch_url 'https://deb.nodesource.com/setup_24.x' /tmp/nodesource-setup.sh 'Node.js repository setup'
-    retry_cmd 3 10 bash /tmp/nodesource-setup.sh
-    install_packages nodejs=24.21.0-1nodesource1
+    [ "$(dpkg --print-architecture)" = amd64 ]
+    fetch_url 'https://deb.nodesource.com/node_24.x/pool/main/n/nodejs/nodejs_24.21.0-1nodesource1_amd64.deb' /tmp/nodejs-pinned.deb 'Node.js 24.21.0 package'
+    printf '%s  %s\n' '6f091c83324fefd8f7dd9d358b77131b679c04aa6f5859244749f3a6c60ea56a' /tmp/nodejs-pinned.deb | sha256sum --check --strict -
+    [ "$(dpkg-deb -f /tmp/nodejs-pinned.deb Package)" = nodejs ]
+    [ "$(dpkg-deb -f /tmp/nodejs-pinned.deb Version)" = 24.21.0-1nodesource1 ]
+    [ "$(dpkg-deb -f /tmp/nodejs-pinned.deb Architecture)" = amd64 ]
+    install_packages /tmp/nodejs-pinned.deb
+    [ "$(node --version)" = v24.21.0 ]
+    rm /tmp/nodejs-pinned.deb
 
   # --- Phase 2: Python toolchain (uv) ---
   - |

@@ -2131,6 +2131,14 @@
     "/etc/systemd/system/tgen-continuous.service": {
       "sha256": "8fa225c645fc3aa0e1736c1396a72c1e81686dc1c3b5a91d3ca96cfd5cb4a448",
       "mode": "0644"
+    },
+    "/etc/apt/apt.conf.d/80-demo-acquire": {
+      "sha256": "cac8d44f109998badd392ec7e8e9c2839aff7a08fb168e1f16dd309f3cc81b99",
+      "mode": "0644"
+    },
+    "/usr/bin/node": {
+      "sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "mode": "0755"
     }
   },
   "origin": {
