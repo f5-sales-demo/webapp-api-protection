@@ -181,6 +181,47 @@ class RequestFailures(unittest.TestCase):
 
 
 class PhaseScopeTests(unittest.TestCase):
+    def test_endpoint_get_stays_allowed_on_exact_admin_path(self):
+        client = Mock(spec=["request"])
+
+        def reply(host, path, method, user, body=None):
+            if method in ("POST", "DELETE"):
+                return 403, {}
+            return 200, {
+                "url": "http://" + host + path,
+                "headers": {"X-Mud-User": user},
+                "json": body,
+            }
+
+        client.request.side_effect = reply
+        result = runner.requests(
+            client, "after.example.test", "endpoint-denial", "synthetic", True
+        )
+        admin_get = next(probe for probe in result if probe["label"] == "admin-get")
+        self.assertEqual(admin_get["path"], "/httpbin/anything/admin")
+        self.assertEqual(admin_get["method"], "GET")
+        self.assertEqual(admin_get["status"], 200)
+        self.assertEqual(admin_get["control"], "")
+
+    def test_waf_preparation_retains_each_declared_host_session(self):
+        sessions = {"before.example.test": "a" * 16, "after.example.test": "b" * 16}
+        client = Mock()
+        client.ssh.side_effect = [
+            "/opt/traffic-generator/fixtures.json",
+            __import__("json").dumps({"dvwa_sessions": sessions}),
+        ]
+        args = Mock(category="waf")
+        configuration = Mock()
+        out = {
+            "generator": {},
+            "domains": ["www.example.test"],
+            "loadbalancer_name": "example",
+        }
+        selected, _ = runner.prepare_category(
+            client, args, out, configuration, "/api/config/", "/api/config/lb"
+        )
+        self.assertEqual(selected, sessions)
+
     def test_schema_legitimate_get_is_not_checked_as_json_post(self):
         client = Mock(spec=["request"])
 

@@ -127,6 +127,16 @@ def requests(  # pylint: disable=too-many-branches
                     label=method,
                 )
             )
+        result.append(
+            send(
+                client,
+                host,
+                "/httpbin/anything/admin",
+                "GET",
+                prefix + "-admin-get",
+                label="admin-get",
+            )
+        )
     elif category == "rate-limit":
         for _ in range(30):
             result.append(  # noqa: PERF401 - retain dispatch order and partial receipts
@@ -437,7 +447,7 @@ def prepare_category(
     configuration: Configuration,
     base: str,
     lb: str,
-) -> tuple[str | None, str]:
+) -> tuple[dict | None, str]:
     """Validate private fixtures and snapshot the resources before stopping traffic."""
     session = None
     if args.category == "waf":
@@ -456,7 +466,7 @@ def prepare_category(
                 "sudo -n cat /opt/traffic-generator/fixtures.json",
             )
         )
-        session = fixtures.get("dvwa_sessions", {}).get(out["domains"][0])
+        session = fixtures.get("dvwa_sessions", {})
         client.command(["node", "-e", "require('playwright')"])
     configuration.capture(lb)
     firewall = base + "app_firewalls/" + out["loadbalancer_name"] + "-waf"
@@ -539,7 +549,13 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
             prefix = "showcase-" + run_id + "-" + phase
             if args.category == "waf":
                 probes = dvwa.requests(
-                    client, out["domains"][0], prefix, session, enabled
+                    client,
+                    out["domains"][0],
+                    prefix,
+                    session.get(out["domains"][0], "")
+                    if isinstance(session, dict)
+                    else "",
+                    enabled,
                 )
                 marker = next(p for p in probes if p["label"] == "xss")
                 save(

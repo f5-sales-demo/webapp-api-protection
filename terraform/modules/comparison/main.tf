@@ -143,6 +143,7 @@ resource "xcsh_http_loadbalancer" "this" {
     for_each = ["/juice-shop/socket.io/", "/dvga/subscriptions"]
     content {
       simple_route {
+        http_method = "ANY"
         path { prefix = routes.value }
         origin_pools {
           pool {
@@ -153,6 +154,7 @@ resource "xcsh_http_loadbalancer" "this" {
           priority = 1
         }
         advanced_options {
+          priority = "DEFAULT"
           web_socket_config { use_websocket = true }
         }
       }
