@@ -945,7 +945,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_native_identity.py": {
-      "sha256": "2597da3fce574abb7b9d554c1c231749871e71eac2b160c063f429792b1718c3",
+      "sha256": "c47576323a23e5a412f44f287e37d812d8ba8644f4c92c02f4ad3978b319a106",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
@@ -1081,7 +1081,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "52331f22a1fa10094f9e884030a01f399ee45cc1c4fce3afe22bcc608bf68ccb",
+      "sha256": "a37036191d5d566fa146120f110d9230839c7efd8137cc1d3b02e8c5f762b577",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
@@ -2001,7 +2001,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_response_identity.py": {
-      "sha256": "9b2bf4a852f5ea3da7364c12266368d2ebb17f9971e047e0a3995b4fc7a84d29",
+      "sha256": "d65fe34fe6caf02264c017949914ba3b5e1af7c968a2423bb522aad1d622dc1c",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_scanner_process.py": {
