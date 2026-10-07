@@ -218,7 +218,12 @@ def collect(
     while True:
         records = access_pages(client, namespace, lb, start, end)
         save(client.walkthrough_directory / "access-log-window.json", records)
-        events = client.pages(namespace, lb, start, end)
+        users = sorted({probe["user"] for probe in probes if probe.get("control")})
+        events = [
+            event
+            for user in users
+            for event in client.pages(namespace, lb, start, end, user=user)
+        ]
         save(client.walkthrough_directory / "security-log-window.json", events)
         bind_ordered_requests(records, probes, namespace, lb)
         access_complete = all(matched(records, p, namespace, lb) for p in probes)
