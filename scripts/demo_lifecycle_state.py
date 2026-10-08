@@ -305,7 +305,8 @@ def _guard_change(
             actions == ["delete", "create"] and kind == "azurerm_linux_virtual_machine"
         )
         allowed = allowed or (
-            actions in (["delete", "create"], ["create", "delete"]) and kind == "xcsh_swagger_object"
+            actions in (["delete", "create"], ["create", "delete"])
+            and kind == "xcsh_swagger_object"
         )
         if (
             not allowed
