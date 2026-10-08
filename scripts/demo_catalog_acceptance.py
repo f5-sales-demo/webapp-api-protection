@@ -45,6 +45,14 @@ def catalog_metrics(status: dict[str, Any]) -> bool:
     )
 
 
+def coverage_mapping(manifest: dict, entry: dict, key: str, table: str) -> dict:
+    """Resolve one explicit entry reference to its shared coverage contract."""
+    value = entry.get(key)
+    if isinstance(value, str):
+        value = manifest.get(table, {}).get(value)
+    return value if isinstance(value, dict) else {}
+
+
 def coverage_failures(manifest: dict) -> list[str]:
     """Reject incomplete positive, negative and recovery coverage."""
     entries = manifest.get("entries", [])
@@ -62,12 +70,18 @@ def coverage_failures(manifest: dict) -> list[str]:
         or not entry.get("entrypoint")
         or not entry.get("protected_endpoints")
         or not entry.get("endpoint_outputs")
-        or not isinstance(entry.get("fixture_owner"), dict)
-        or not entry["fixture_owner"].get("terraform")
-        or not isinstance(entry.get("negative_control"), dict)
-        or not entry["negative_control"].get("requests")
-        or not entry["negative_control"].get("verifier")
-        or not entry["negative_control"].get("response_identity_tests")
+        or not coverage_mapping(manifest, entry, "fixture_owner", "fixtures").get(
+            "terraform"
+        )
+        or not coverage_mapping(
+            manifest, entry, "negative_control", "negative_controls"
+        ).get("requests")
+        or not coverage_mapping(
+            manifest, entry, "negative_control", "negative_controls"
+        ).get("verifier")
+        or not coverage_mapping(
+            manifest, entry, "negative_control", "negative_controls"
+        ).get("response_identity_tests")
         or entry.get("mutation_policy") not in ("read-only", "journaled-restoration")
         or (
             entry.get("mutation_policy") == "journaled-restoration"

@@ -23,3 +23,21 @@ class RequiredCatalogMapping(unittest.TestCase):
             changed = json.loads(json.dumps(manifest))
             changed["entries"][0].pop(key)
             ensure_equal(coverage_failures(changed), [manifest["entries"][0]["id"]])
+
+    def test_missing_shared_contract_rejects_referencing_entries(self):
+        manifest = json.loads((ROOT / "terraform/coverage/catalog.json").read_text())
+        manifest["fixtures"] = {}
+        ensure_equal(
+            coverage_failures(manifest), [entry["id"] for entry in manifest["entries"]]
+        )
+        manifest = json.loads((ROOT / "terraform/coverage/catalog.json").read_text())
+        key = manifest["entries"][0]["negative_control"]
+        manifest["negative_controls"].pop(key)
+        ensure_equal(
+            coverage_failures(manifest),
+            [
+                entry["id"]
+                for entry in manifest["entries"]
+                if entry["negative_control"] == key
+            ],
+        )
