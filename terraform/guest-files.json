@@ -1085,7 +1085,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "cedba74cf3a84f13df36dde3db1cfc29a7114acde802b16359190af2b8d48af8",
+      "sha256": "71f40ccaf22429cecb6a55779f500a086b8160cb6b797460bc4d5707caad4a77",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
@@ -1997,7 +1997,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_functional_contracts.py": {
-      "sha256": "5c22fda6ba737d0d41aeba3b66c5a299596db11489aeb3760db5c119a1b7d3b0",
+      "sha256": "8f0d6742d56eb91f10cfe566b654ddd009d8ef92e01b9d52359e9ea151574a35",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_order_functional.py": {
