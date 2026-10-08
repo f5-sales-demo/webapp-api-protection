@@ -17,6 +17,7 @@ from demo_verify_evidence import (
     attributed,
     decode_event,
     identified_user,
+    rate_origin,
     stamp,
     virtual_host,
 )
@@ -96,6 +97,17 @@ def matched(records: list[dict], probe: dict, namespace: str, lb: str) -> dict |
     return next(iter(matches.values())) if len(matches) == 1 else None
 
 
+def successful_rate_burst(probe: dict) -> bool:
+    """Recognize only the successful native endpoint-limiter burst response."""
+    return (
+        probe.get("control") == "rate-limit"
+        and probe.get("label") == "burst"
+        and probe.get("method") == "GET"
+        and probe.get("status") == SUCCESS
+        and probe.get("path") == "/httpbin/anything/rate-limit"
+    )
+
+
 def bind_ordered_requests(
     records: list[dict], probes: list[dict], namespace: str, lb: str
 ) -> None:
@@ -118,6 +130,12 @@ def bind_ordered_requests(
             and r.get("namespace") == namespace
             and r.get("vh_name") == virtual_host(lb)
         ]
+        if all(
+            p.get("control") == "rate-limit" and p.get("label") == "burst"
+            for p in group
+        ):
+            group = [p for p in group if p["status"] == RATE_DENIAL]
+            logs = [r for r in logs if str(r.get("rsp_code")) == str(RATE_DENIAL)]
         logs = sorted(
             {r["req_id"]: r for r in logs if r.get("req_id")}.values(),
             key=lambda r: stamp(r["time"]),
@@ -241,7 +259,19 @@ def collect(
         ]
         save(client.walkthrough_directory / "security-log-window.json", events)
         bind_ordered_requests(records, probes, namespace, lb)
-        access_complete = all(matched(records, p, namespace, lb) for p in probes)
+        for probe in probes:
+            if successful_rate_burst(probe):
+                rate_origin(
+                    probe["status"],
+                    probe["body"],
+                    probe["host"],
+                    probe["request_target"],
+                    probe["user"],
+                )
+        access_complete = all(
+            successful_rate_burst(p) or matched(records, p, namespace, lb)
+            for p in probes
+        )
         if access_complete:
             required = [
                 p

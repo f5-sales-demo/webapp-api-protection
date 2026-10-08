@@ -150,6 +150,92 @@ class ReadOnlyControlSampling(unittest.TestCase):
         self.assertEqual(probes, original)
 
 
+class RateSampleEvidence(unittest.TestCase):
+    def test_successful_burst_uses_exact_echo_without_inventing_access(self):
+        with tempfile.TemporaryDirectory() as directory:
+            client = Mock()
+            client.walkthrough_directory = Path(directory)
+            probe = {
+                "host": "before.example.test",
+                "path": "/httpbin/anything/rate-limit",
+                "request_target": "/httpbin/anything/rate-limit",
+                "method": "GET",
+                "user": "showcase-" + "a" * 32 + "-burst",
+                "sent_at": 100.0,
+                "received_at": 100.2,
+                "status": 200,
+                "control": "rate-limit",
+                "label": "burst",
+                "body": {
+                    "url": "http://before.example.test/httpbin/anything/rate-limit",
+                    "headers": {"X-Mud-User": "showcase-" + "a" * 32 + "-burst"},
+                },
+            }
+            with (
+                patch("showcase_walkthrough_evidence.access_pages", return_value=[]),
+                patch.object(client, "pages", return_value=[]),
+            ):
+                records, events = __import__("showcase_walkthrough_evidence").collect(
+                    client, "example", "example", [probe]
+                )
+            self.assertEqual(records, [])
+            self.assertEqual(events, [])
+            bad = {
+                **probe,
+                "body": {"url": "http://wrong.example.test/", "headers": {}},
+            }
+            with (
+                patch("showcase_walkthrough_evidence.access_pages", return_value=[]),
+                patch.object(client, "pages", return_value=[]),
+                self.assertRaises(EvidenceError),
+            ):
+                __import__("showcase_walkthrough_evidence").collect(
+                    client, "example", "example", [bad]
+                )
+
+    def test_denials_bind_separately_from_sampled_successful_burst(self):
+        first = probe()
+        first.update(
+            status=429,
+            control="rate-limit",
+            label="burst",
+            received_at=first["sent_at"] + 0.1,
+        )
+        second = {
+            **first,
+            "sent_at": first["sent_at"] + 1.5,
+            "received_at": first["sent_at"] + 1.6,
+        }
+        success = {
+            **first,
+            "status": 200,
+            "sent_at": first["sent_at"] + 0.5,
+            "received_at": first["sent_at"] + 0.6,
+        }
+        row = event()
+        row.update(
+            req_id="first-denial", rsp_code="429", time="1970-01-01T00:01:40.050Z"
+        )
+        other = {**row, "req_id": "second-denial", "time": "1970-01-01T00:01:41.550Z"}
+        namespace, lb = (
+            row["namespace"],
+            row["vh_name"].removeprefix("ves-io-http-loadbalancer-"),
+        )
+        bind_ordered_requests([row, other], [first, success, second], namespace, lb)
+        self.assertEqual(first.get("server_request_id"), "first-denial")
+        self.assertEqual(second.get("server_request_id"), "second-denial")
+        self.assertIsNone(success.get("server_request_id"))
+        missing_first, missing_second = (
+            {k: v for k, v in first.items() if k != "server_request_id"},
+            {k: v for k, v in second.items() if k != "server_request_id"},
+        )
+        bind_ordered_requests(
+            [row], [missing_first, success, missing_second], namespace, lb
+        )
+        self.assertIsNone(missing_first.get("server_request_id"))
+        self.assertIsNone(missing_second.get("server_request_id"))
+
+
 class LogPages(unittest.TestCase):
     def client(self, pages):
         class Pages:
