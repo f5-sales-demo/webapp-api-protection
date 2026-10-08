@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from demo_lifecycle_runtime import Runtime
     from demo_lifecycle_state import Context, Guest
     from demo_lifecycle_terraform import Terraform
+    from demo_verify_client import Client
 
 _ACCESS_BUDGET_SECONDS = 20
 _REQUIRED_CATALOG_PASSES = 2
@@ -368,6 +369,7 @@ class Ownership:
         self.context = context
         self.runtime = runtime
         self.terraform = terraform
+        self.catalog_evidence_client: Client | None = None
 
     def owned_guest(
         self,
@@ -623,6 +625,10 @@ class Ownership:
             self.enroll_guest(guest)
             if action == "start":
                 self.catalog_fixtures()
+                # Complete calibration before the first catalog request needs evidence.
+                client = catalog_client(self.context, outputs)
+                align_generator_clock(client, self.runtime, self.ssh_argv(guest, "yes"))
+                self.catalog_evidence_client = client
             self.runtime.run(
                 [
                     *self.ssh_argv(guest, "yes"),
@@ -653,8 +659,10 @@ class Ownership:
         guest = self.owned_guest(
             _resources(self.context), "generator", outputs["generator"]
         )
-        client = catalog_client(self.context, outputs)
-        align_generator_clock(client, self.runtime, self.ssh_argv(guest, "yes"))
+        client = self.catalog_evidence_client
+        if client is None:
+            client = catalog_client(self.context, outputs)
+            align_generator_clock(client, self.runtime, self.ssh_argv(guest, "yes"))
         while True:
             self.runtime.remaining()
             status = json.loads(

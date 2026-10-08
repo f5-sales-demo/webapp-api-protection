@@ -327,30 +327,32 @@ class BrowserActionBinding(unittest.TestCase):
         ensure_equal(result["evidence"]["checks"][0]["action_id"], "ua-3-route-0")
 
 
-def test_transient_catalog_read_retries_require_complete_success():
-    client = Mock()
-    client.remaining.return_value = 10
-    error = EvidenceError("API transport or JSON failure")
-    error.__cause__ = TimeoutError("read timed out")
-    reader = Mock(side_effect=[error, [{"req_id": "exact"}]])
-    with patch("demo_catalog_evidence.time.sleep") as sleep:
-        ensure_equal(read_retry(client, reader), [{"req_id": "exact"}])
-    ensure_equal(reader.call_count, 2)
-    sleep.assert_called_once_with(1)
+class CatalogReadRetries(unittest.TestCase):
+    """The standard unittest runner executes transient read failure regressions."""
 
+    def test_transient_catalog_read_retries_require_complete_success(self):
+        client = Mock()
+        client.remaining.return_value = 10
+        error = EvidenceError("API transport or JSON failure")
+        error.__cause__ = TimeoutError("read timed out")
+        reader = Mock(side_effect=[error, [{"req_id": "exact"}]])
+        with patch("demo_catalog_evidence.time.sleep") as sleep:
+            ensure_equal(read_retry(client, reader), [{"req_id": "exact"}])
+        ensure_equal(reader.call_count, 2)
+        sleep.assert_called_once_with(1)
 
-def test_catalog_retry_exhaustion_and_bad_json_fail():
-    client = Mock()
-    client.remaining.return_value = 10
-    error = EvidenceError("API transport or JSON failure")
-    error.__cause__ = TimeoutError("read timed out")
-    reader = Mock(side_effect=error)
-    with patch("demo_catalog_evidence.time.sleep"), expect_error(EvidenceError):
-        read_retry(client, reader)
-    ensure_equal(reader.call_count, 3)
-    invalid = EvidenceError("API transport or JSON failure")
-    invalid.__cause__ = ValueError("invalid JSON")
-    reader = Mock(side_effect=invalid)
-    with expect_error(EvidenceError):
-        read_retry(client, reader)
-    ensure_equal(reader.call_count, 1)
+    def test_catalog_retry_exhaustion_and_bad_json_fail(self):
+        client = Mock()
+        client.remaining.return_value = 10
+        error = EvidenceError("API transport or JSON failure")
+        error.__cause__ = TimeoutError("read timed out")
+        reader = Mock(side_effect=error)
+        with patch("demo_catalog_evidence.time.sleep"), expect_error(EvidenceError):
+            read_retry(client, reader)
+        ensure_equal(reader.call_count, 3)
+        invalid = EvidenceError("API transport or JSON failure")
+        invalid.__cause__ = ValueError("invalid JSON")
+        reader = Mock(side_effect=invalid)
+        with expect_error(EvidenceError):
+            read_retry(client, reader)
+        ensure_equal(reader.call_count, 1)
