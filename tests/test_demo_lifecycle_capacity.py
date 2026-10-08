@@ -119,7 +119,20 @@ class RepeatAzureCapacity(unittest.TestCase):
         capacity = capacity_fixture(self)
         fixture = capacity.fixture
         fixture.context.settings = replace(fixture.context.settings, operation="deploy")
-        (fixture.context.paths.state / "application.tfstate").write_text("{}")
+        (fixture.context.paths.state / "application.tfstate").write_text(
+            '{"resources": [{}]}'
+        )
         fixture.lifecycle.capacity_permissions()
         capacity.inventory.assert_called_once()
         capacity.verify_fixture.assert_called_once()
+
+    def test_destroyed_empty_state_has_no_allocated_capacity_credit(self):
+        capacity = capacity_fixture(self)
+        fixture = capacity.fixture
+        fixture.context.settings = replace(fixture.context.settings, operation="deploy")
+        (fixture.context.paths.state / "application.tfstate").write_text(
+            '{"resources": []}'
+        )
+        with expect_error(Blocked, "VM quota"):
+            fixture.lifecycle.capacity_permissions()
+        capacity.inventory.assert_not_called()
