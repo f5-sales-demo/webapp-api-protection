@@ -312,7 +312,7 @@ class FreshGuestFixtures(unittest.TestCase):
             out = {
                 "origin": {},
                 "generator": {},
-                "namespace": "test-namespace",
+                "namespace": "example",
                 "loadbalancer_name": "synthetic",
                 "domains": ["synthetic.example.test"],
             }
