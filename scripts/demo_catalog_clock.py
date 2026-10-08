@@ -17,6 +17,8 @@ from showcase_walkthrough_config import fail, save
 
 LOG_INGESTION_MARGIN = 60
 MAX_CLOCK_OFFSET = 5
+CLOCK_ATTEMPT_SECONDS = 60
+MAX_CLOCK_ATTEMPTS = 10
 
 
 def clock_probe(client: Client, host: str, user: str) -> dict:
@@ -37,18 +39,37 @@ def clock_probe(client: Client, host: str, user: str) -> dict:
 
 def calibrate_clock(client: Client, out: dict, prefix: str) -> None:
     """Measure bounded server-log offset using three fresh benign identities."""
-    probes = [
-        clock_probe(client, out["domains"][0], prefix + "-clock-" + str(i))
-        for i in range(3)
-    ]
-    for probe in probes:
-        rate_origin(
-            probe["status"], probe["body"], probe["host"], probe["path"], probe["user"]
-        )
+    attempts: list[dict] = []
+    attempt = 0
+    probes: list[dict] = []
+    attempt_started = 0.0
     while True:
+        if not probes or time.monotonic() - attempt_started >= CLOCK_ATTEMPT_SECONDS:
+            if attempt >= MAX_CLOCK_ATTEMPTS:
+                fail("fresh clock calibration records unavailable")
+            probes = [
+                clock_probe(
+                    client,
+                    out["domains"][0],
+                    prefix + "-attempt-" + str(attempt) + "-clock-" + str(i),
+                )
+                for i in range(3)
+            ]
+            for probe in probes:
+                rate_origin(
+                    probe["status"],
+                    probe["body"],
+                    probe["host"],
+                    probe["path"],
+                    probe["user"],
+                )
+            attempt_started = time.monotonic()
+            attempt += 1
+            attempts.append({"probes": probes, "access_logs": []})
         records = [
             record
-            for probe in probes
+            for candidate in attempts
+            for probe in candidate["probes"]
             for record in access_by_user(
                 client,
                 out["namespace"],
@@ -58,42 +79,53 @@ def calibrate_clock(client: Client, out: dict, prefix: str) -> None:
                 probe["received_at"] + LOG_INGESTION_MARGIN,
             )
         ]
-        clocks = []
-        for probe in probes:
-            hits = [
-                r
-                for r in records
-                if r.get("user") == identified_user(probe["user"])
-                and r.get("domain") == probe["host"]
-                and r.get("req_path") == probe["path"]
-                and r.get("namespace") == out["namespace"]
-                and r.get("vh_name") == virtual_host(out["loadbalancer_name"])
-                and r.get("method") == "GET"
-                and r.get("rsp_code") == "200"
+        for candidate in attempts:
+            users = {identified_user(probe["user"]) for probe in candidate["probes"]}
+            candidate["access_logs"] = [
+                record for record in records if record.get("user") in users
             ]
-            if len(hits) == 1:
-                moment = stamp(hits[0]["time"])
-                clocks.append(
-                    (moment - probe["received_at"], moment - probe["sent_at"])
+        save(
+            client.walkthrough_directory / "clock-attempts.json", {"attempts": attempts}
+        )
+        for candidate in attempts:
+            probes = candidate["probes"]
+            clocks = []
+            for probe in probes:
+                hits = [
+                    r
+                    for r in records
+                    if r.get("user") == identified_user(probe["user"])
+                    and r.get("domain") == probe["host"]
+                    and r.get("req_path") == probe["path"]
+                    and r.get("namespace") == out["namespace"]
+                    and r.get("vh_name") == virtual_host(out["loadbalancer_name"])
+                    and r.get("method") == "GET"
+                    and r.get("rsp_code") == "200"
+                ]
+                if len(hits) == 1:
+                    moment = stamp(hits[0]["time"])
+                    clocks.append(
+                        (moment - probe["received_at"], moment - probe["sent_at"])
+                    )
+            if len(clocks) == len(probes):
+                low, high = (
+                    math.floor(min(c[0] for c in clocks)) - 1,
+                    math.ceil(max(c[1] for c in clocks)) + 1,
                 )
-        if len(clocks) == len(probes):
-            low, high = (
-                math.floor(min(c[0] for c in clocks)) - 1,
-                math.ceil(max(c[1] for c in clocks)) + 1,
-            )
-            if not -MAX_CLOCK_OFFSET <= low <= high <= MAX_CLOCK_OFFSET:
-                fail("log clock calibration exceeds five-second bound")
-            client.clock_bounds = (low, high)
-            save(
-                client.walkthrough_directory / "clock-calibration.json",
-                {
-                    "probes": probes,
-                    "access_logs": records,
-                    "offset_min": low,
-                    "offset_max": high,
-                },
-            )
-            return
+                if not -MAX_CLOCK_OFFSET <= low <= high <= MAX_CLOCK_OFFSET:
+                    fail("log clock calibration exceeds five-second bound")
+                client.clock_bounds = (low, high)
+                save(
+                    client.walkthrough_directory / "clock-calibration.json",
+                    {
+                        "probes": probes,
+                        "access_logs": records,
+                        "offset_min": low,
+                        "offset_max": high,
+                        "attempts": attempts,
+                    },
+                )
+                return
         client.remaining()
         time.sleep(min(5, client.remaining()))
 

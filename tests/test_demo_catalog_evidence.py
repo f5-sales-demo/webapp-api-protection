@@ -176,6 +176,117 @@ class ClockQueryScope(unittest.TestCase):
         ensure_equal(client.clock_bounds, (-1, 2))
 
 
+class SampledClockCalibration(unittest.TestCase):
+    def test_exhausted_samples_never_set_clock_bounds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            client = SimpleNamespace(
+                walkthrough_directory=Path(directory), remaining=lambda: 20
+            )
+            out = {
+                "domains": ["www.example.test"],
+                "namespace": TEST_SCOPE["namespace"],
+                "loadbalancer_name": "synthetic-lb",
+            }
+
+            def probe(_client, host, user):
+                return {
+                    "host": host,
+                    "user": user,
+                    "path": "/httpbin/get",
+                    "method": "GET",
+                    "status": 200,
+                    "body": {},
+                    "sent_at": 100,
+                    "received_at": 101,
+                }
+
+            with (
+                patch("demo_catalog_clock.clock_probe", side_effect=probe),
+                patch("demo_catalog_clock.rate_origin"),
+                patch("demo_catalog_clock.access_by_user", return_value=[]),
+                patch("demo_catalog_clock.MAX_CLOCK_ATTEMPTS", 1),
+                patch("demo_catalog_clock.time.monotonic", side_effect=[0, 61]),
+                patch("demo_catalog_clock.time.sleep"),
+                expect_error(EvidenceError, "records unavailable"),
+            ):
+                calibrate_clock(client, out, "showcase-" + "a" * 32 + "-test")
+            ensure(not hasattr(client, "clock_bounds"))
+            receipt = json.loads((Path(directory) / "clock-attempts.json").read_text())
+            ensure_equal(len(receipt["attempts"]), 1)
+            ensure_equal(receipt["attempts"][0]["access_logs"], [])
+
+    def test_missing_sample_requires_new_exact_probes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            client = SimpleNamespace(
+                walkthrough_directory=Path(directory),
+                remaining=Mock(
+                    side_effect=[
+                        20,
+                        20,
+                        EvidenceError("synthetic sampled probe missing"),
+                    ]
+                ),
+            )
+            out = {
+                "domains": ["www.example.test"],
+                "namespace": TEST_SCOPE["namespace"],
+                "loadbalancer_name": "synthetic-lb",
+            }
+            probes: list[dict] = []
+
+            def send(_client, host, user):
+                probe = {
+                    "host": host,
+                    "path": "/httpbin/get",
+                    "method": "GET",
+                    "user": user,
+                    "sent_at": 100.0 + len(probes),
+                    "received_at": 100.2 + len(probes),
+                    "status": 200,
+                    "body": {},
+                }
+                probes.append(probe)
+                return probe
+
+            def query(_client, namespace, lb, user, _start, _end):
+                probe = next(p for p in probes if p["user"] == user)
+                if probes.index(probe) < 3:
+                    return []
+                return [
+                    {
+                        "req_id": user,
+                        "user": identified_user(user),
+                        "domain": probe["host"],
+                        "req_path": probe["path"],
+                        "namespace": namespace,
+                        "vh_name": virtual_host(lb),
+                        "method": "GET",
+                        "rsp_code": "200",
+                        "time": "1970-01-01T00:01:"
+                        + str(41 + probes.index(probe)).zfill(2)
+                        + ".000Z",
+                    }
+                ]
+
+            with (
+                patch("demo_catalog_clock.clock_probe", side_effect=send),
+                patch("demo_catalog_clock.rate_origin"),
+                patch("demo_catalog_clock.access_by_user", side_effect=query),
+                patch("demo_catalog_clock.time.monotonic", side_effect=[0, 61, 62]),
+                patch("demo_catalog_clock.time.sleep"),
+            ):
+                calibrate_clock(client, out, "showcase-" + "a" * 32 + "-test")
+            ensure_equal(len(probes), 6)
+            ensure_equal(len({p["user"] for p in probes}), 6)
+            ensure_equal(client.clock_bounds, (-1, 2))
+            receipt = json.loads(
+                (Path(directory) / "clock-calibration.json").read_text()
+            )
+            ensure_equal(len(receipt["attempts"]), 2)
+            ensure_equal(receipt["attempts"][0]["access_logs"], [])
+            ensure_equal(receipt["probes"], probes[3:])
+
+
 class ParallelIdentityCollection(unittest.TestCase):
     def test_every_identity_keeps_both_exact_query_results(self):
         client = Mock()
