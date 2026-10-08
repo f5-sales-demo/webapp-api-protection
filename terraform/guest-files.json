@@ -869,7 +869,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/tgen-continuous.service": {
-      "sha256": "8fa225c645fc3aa0e1736c1396a72c1e81686dc1c3b5a91d3ca96cfd5cb4a448",
+      "sha256": "8c3f850e9c3ad08567fb5c80ebaa0a63a521deeb216287ac1010e7640a5c9021",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/tgen-control": {
@@ -917,7 +917,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_family_fixture.py": {
-      "sha256": "187fc48cf31d336b2119914eac6cc1690004e45d46bded6796431cd3c7b743d6",
+      "sha256": "bee212648a762a2b0155a239d90185fd9f9e7f456ce6d2701e9c8e2295fe0e7d",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_family_functional.py": {
@@ -1990,6 +1990,10 @@
     },
     "/opt/traffic-generator/current/tests/test_install_catalog.py": {
       "sha256": "84f6fb1f29a728ff1d76af178fd50f580258d1a6c430df89c2851d2f4ea8aced",
+      "mode": "0444"
+    },
+    "/opt/traffic-generator/current/tests/test_interrupted_family_start.py": {
+      "sha256": "0b65193aecbde405780492c98b20a2e815ea74965eef7a5dfdb8df759b45ad64",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_multiclient_identity.py": {
