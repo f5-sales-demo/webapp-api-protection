@@ -327,7 +327,10 @@ class Lifecycle:
         _permissions(self.context, self.runtime)
         _xc_capacity(self.runtime)
         released = dict.fromkeys(_QUOTA_NEEDS, 0)
-        if self.context.settings.operation == "rebuild":
+        if (
+            self.context.settings.operation == "rebuild"
+            or (self.context.paths.state / "application.tfstate").is_file()
+        ):
             self.terraform.namespace_prepare()
             self.terraform.app_init()
             _deployed_vars(self.context)

@@ -1,12 +1,14 @@
 """Clean capacity, no-op repeat deployment and quota failure are distinct gates."""
 
 import unittest
+from dataclasses import replace
 from typing import Any
 from unittest.mock import Mock
 
 from demo_lifecycle_capacity import QUOTA_TYPES, creation_needs, require_capacity
 from demo_lifecycle_state import Blocked
 from demo_test_support import ensure_equal, expect_error
+from test_demo_lifecycle import capacity_fixture
 
 
 def quota(needs):
@@ -110,3 +112,14 @@ class PlannedCapacity(unittest.TestCase):
                     ]
                 }
             )
+
+
+class RepeatAzureCapacity(unittest.TestCase):
+    def test_repeat_deploy_credits_only_verified_current_owned_vms(self) -> None:
+        capacity = capacity_fixture(self)
+        fixture = capacity.fixture
+        fixture.context.settings = replace(fixture.context.settings, operation="deploy")
+        (fixture.context.paths.state / "application.tfstate").write_text("{}")
+        fixture.lifecycle.capacity_permissions()
+        capacity.inventory.assert_called_once()
+        capacity.verify_fixture.assert_called_once()
