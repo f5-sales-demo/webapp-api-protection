@@ -9,6 +9,7 @@ import shutil
 import time
 from typing import TYPE_CHECKING, Any, Literal
 
+from demo_lifecycle_capacity import creation_needs, require_capacity
 from demo_lifecycle_plan import require_current, seal
 from demo_lifecycle_state import (
     AZURE_TYPES,
@@ -588,6 +589,7 @@ class Terraform:
             guard_plan(parsed, mode, owned, self.context.state.persistent.values())
         if mode in ("deploy", "rebuild") and name != "review":
             self.guard_conflicts(parsed)
+            require_capacity(self.runtime, creation_needs(parsed))
         if mode == "noop" and code != 0:
             message = "nonzero detailed-exitcode drift"
             raise Blocked(message)
@@ -605,6 +607,7 @@ class Terraform:
         )
         guard_plan(parsed, "rebuild", owned, self.context.state.persistent.values())
         self.guard_conflicts(parsed)
+        require_capacity(self.runtime, creation_needs(parsed))
         backup = self.context.paths.state / ("rebuild-backup-" + str(time.time_ns()))
         backup.mkdir(mode=0o700)
         for name in (

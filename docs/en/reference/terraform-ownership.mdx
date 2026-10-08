@@ -34,6 +34,8 @@ the review plan is current. The mapping binds the approved scope, state digest, 
 namespace/name/version, verified content digest, and ownership review. Adoption backs up state and
 receipts before import.
 
+Capacity checks count new resources from the fresh plan, including all twelve listeners on a clean deployment. Unchanged and imported resources need no additional quota; unknown limits or insufficient capacity fail before apply.
+
 The namespace remains in its separate protected state. DNS and tenant subscriptions retain their owning plans. Never move these shared prerequisites into application state.
 
 ## Immutable fixture and guest artifacts

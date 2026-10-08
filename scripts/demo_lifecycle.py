@@ -14,9 +14,10 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from demo_lifecycle_adoption import adopt
+from demo_lifecycle_capacity import require_capacity as _xc_capacity
 from demo_lifecycle_ownership import Ownership
 from demo_lifecycle_runtime import Runtime
 from demo_lifecycle_state import (
@@ -162,43 +163,6 @@ def _entitlement_dns(runtime: Runtime) -> None:
     if len(soa) != _SOA_FIELDS or not all(value.isdigit() for value in soa[2:]):
         message = "shared public DNS zone SOA unavailable"
         raise Blocked(message)
-
-
-def _xc_capacity(runtime: Runtime) -> None:
-    """Require capacity for all ten additional comparison hosts and policies."""
-    response = runtime.xc("/api/web/namespaces/system/quota/usage")
-    if response is None:
-        message = "XC quota usage unavailable"
-        raise Blocked(message)
-    usage = _object(response.get("quota_usage"), "XC quota usage unavailable")
-    needs = {
-        "HTTP Load Balancer": 10,
-        "TLS Certificate": 10,
-        "Application Firewall": 10,
-        "API Definition": 2,
-        "User Identification": 10,
-        "Malicious User Mitigation": 1,
-    }
-    for kind, needed in needs.items():
-        row = _object(usage.get(kind), "XC quota category unavailable: " + kind)
-        maximum = _object(row.get("limit"), "XC quota limit unavailable").get("maximum")
-        current = _object(row.get("usage"), "XC quota consumption unavailable").get(
-            "current"
-        )
-        valid_counts = all(
-            isinstance(value, int) and not isinstance(value, bool)
-            for value in (maximum, current)
-        )
-        if not valid_counts:
-            message = "unavailable XC capacity: " + kind
-            raise Blocked(message)
-        maximum, current = cast("int", maximum), cast("int", current)
-        if current < 0 or maximum < -1:
-            message = "unavailable XC capacity: " + kind
-            raise Blocked(message)
-        if maximum != -1 and current + needed > maximum:
-            message = "insufficient or unavailable XC capacity: " + kind
-            raise Blocked(message)
 
 
 def _permissions(context: Context, runtime: Runtime) -> None:

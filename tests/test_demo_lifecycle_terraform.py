@@ -94,6 +94,7 @@ class ReviewedRebuild(unittest.TestCase):
             patch.object(terraform_module, "require_current"),
             patch.object(fixture.terraform, "tf", return_value=(json.dumps(plan), 0)),
             patch.object(fixture.terraform, "guard_conflicts"),
+            patch.object(terraform_module, "require_capacity"),
         ):
             ensure_equal(
                 fixture.terraform.reviewed_rebuild({"vm": "owned"}),
