@@ -94,6 +94,48 @@ class CatalogStart(unittest.TestCase):
             fixture.ownership.traffic("start")
         run.assert_not_called()
 
+    def test_family_recovery_precedes_fixture_export_and_start(self):
+        fixture = self.prepare()
+        calls = []
+        fixture.context.state.outputs["origin"] = {"id": "owned-origin"}
+        fixture.ownership.catalog_fixtures.side_effect = lambda: calls.append(
+            "fixtures"
+        )
+        stub(
+            self,
+            fixture.ownership,
+            "recover_catalog_families",
+            side_effect=lambda: calls.append("recover"),
+        )
+
+        def start(*_args, **_kwargs):
+            calls.append("start")
+            return "", 0
+
+        stub(self, fixture.runtime, "run", side_effect=start)
+        with (
+            patch(
+                "demo_lifecycle_ownership.catalog_client",
+                side_effect=lambda *_: calls.append("calibrate"),
+            ),
+            patch("demo_lifecycle_ownership.align_generator_clock"),
+        ):
+            fixture.ownership.traffic("start")
+        ensure_equal(calls, ["recover", "fixtures", "calibrate", "start"])
+
+    def test_recovery_preserves_journals_of_running_catalog(self):
+        fixture = self.prepare()
+        fixture.context.state.outputs["origin"] = {"id": "owned-origin"}
+        run = stub(
+            self,
+            fixture.runtime,
+            "run",
+            return_value=(json.dumps({"service_active": True}), 0),
+        )
+        fixture.ownership.recover_catalog_families()
+        run.assert_called_once()
+        ensure_equal(run.call_args.args[0][-1], "status")
+
     def test_stop_does_not_require_calibration_or_api_evidence(self):
         fixture = self.prepare()
         run = stub(self, fixture.runtime, "run", return_value=("", 0))

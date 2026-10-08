@@ -607,6 +607,62 @@ class Ownership:
         )
         self.runtime.phase("synthetic-catalog-fixtures-restored")
 
+    def recover_catalog_families(self) -> None:
+        """Restore only active host-owned family journals before restarting traffic."""
+        outputs = self.context.state.outputs
+        if not outputs or "origin" not in outputs:
+            return
+        generator = self.owned_guest(
+            _resources(self.context), "generator", outputs["generator"]
+        )
+        status = json.loads(
+            self.runtime.run(
+                [
+                    *self.ssh_argv(generator, "yes"),
+                    "sudo",
+                    "-n",
+                    "/usr/local/bin/tgen-control",
+                    "status",
+                ]
+            )[0]
+        )
+        if status.get("service_active") is True:
+            # An unchanged deploy may call start on an already-running catalog.
+            # Its active journal belongs to that execution and must remain untouched.
+            return
+        if status.get("service_active") is not False:
+            message = "catalog activity state unavailable for family recovery"
+            raise Blocked(message)
+        origin = self.owned_guest(_resources(self.context), "origin", outputs["origin"])
+        self.enroll_guest(origin)
+        script = (
+            "import json,pathlib,runpy,sys;sys.path.insert(0,'/usr/local/bin');"
+            "module=runpy.run_path('/usr/local/bin/catalog-family-recovery');"
+            "root=module['JOURNALS'];restored=[];"
+            "\nfor active in sorted(root.glob('*.active.json')):"
+            "\n family=active.name.removesuffix('.active.json');identity=json.loads(active.read_text())['identity']"
+            "\n receipt=module['operate']({'action':'restore','identity':identity,'family':family})"
+            "\n if not receipt.get('restored') or receipt.get('after')!=receipt.get('replicas'):raise ValueError('family recovery incomplete')"
+            "\n restored.append({'family':family,'identity':identity,'restored':True})"
+            "\nprint(json.dumps({'restored':restored,'remaining_active':[f.name for f in root.glob('*.active.json')]}))"
+        )
+        raw = self.runtime.run(
+            [
+                *self.ssh_argv(origin, "yes"),
+                "sudo -n python3 -B -c " + shlex.quote(script),
+            ]
+        )[0]
+        receipt = json.loads(raw)
+        if receipt.get("remaining_active") != []:
+            message = "active catalog family recovery incomplete"
+            raise Blocked(message)
+        save_json(
+            self.context.paths.state
+            / ("family-restart-recovery-" + str(time.time_ns()) + ".json"),
+            receipt,
+        )
+        self.runtime.phase("interrupted-family-journals-restored")
+
     def traffic(self, action: Literal["start", "stop"], cleanup: bool = False) -> None:
         """Control only the owned generator, granting cleanup its bounded stop budget."""
         if action not in ("start", "stop"):
@@ -624,6 +680,7 @@ class Ownership:
             )
             self.enroll_guest(guest)
             if action == "start":
+                self.recover_catalog_families()
                 self.catalog_fixtures()
                 # Complete calibration before the first catalog request needs evidence.
                 client = catalog_client(self.context, outputs)
