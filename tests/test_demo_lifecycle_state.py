@@ -538,6 +538,8 @@ class Guards(unittest.TestCase):
         for kind, actions, captured, allowed in (
             ("azurerm_linux_virtual_machine", ["delete", "create"], "owned", True),
             ("xcsh_swagger_object", ["delete", "create"], "owned", True),
+            ("xcsh_swagger_object", ["create", "delete"], "owned", True),
+            ("xcsh_swagger_object", ["create", "delete"], "other", False),
             ("azurerm_linux_virtual_machine", ["delete", "create"], "other", False),
             ("azurerm_linux_virtual_machine", ["delete"], "owned", False),
             ("azurerm_linux_virtual_machine", ["create", "delete"], "owned", False),
