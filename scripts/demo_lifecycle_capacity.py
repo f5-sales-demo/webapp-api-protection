@@ -30,10 +30,12 @@ def creation_needs(plan: dict) -> dict[str, int]:
         if row["type"] == "xcsh_http_loadbalancer":
             after = change.get("after") or {}
             unknown = change.get("after_unknown") or {}
-            if unknown.get("https_auto_cert"):
+            certificate = after.get("https_auto_cert")
+            unresolved = unknown.get("https_auto_cert")
+            if unresolved is True or (unresolved and not isinstance(certificate, dict)):
                 message = "planned automatic certificate capacity is unknown"
                 raise Blocked(message)
-            if after.get("https_auto_cert") is not None:
+            if certificate is not None:
                 needs["TLS Certificate"] += 1
     return needs
 

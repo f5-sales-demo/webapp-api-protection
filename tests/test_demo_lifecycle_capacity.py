@@ -49,6 +49,34 @@ class PlannedCapacity(unittest.TestCase):
         for kind, count in counts.items():
             ensure_equal(needs[QUOTA_TYPES[kind]], count)
 
+    def test_declared_certificate_with_unknown_computed_children_counts_one(self):
+        change = {
+            "actions": ["create"],
+            "after": {"https_auto_cert": {"port": 443, "no_mtls": {}}},
+            "after_unknown": {
+                "https_auto_cert": {
+                    "add_hsts": True,
+                    "connection_idle_timeout": True,
+                    "enable_path_normalize": True,
+                    "no_mtls": {},
+                }
+            },
+        }
+        needs = creation_needs(
+            {"resource_changes": [{"type": "xcsh_http_loadbalancer", "change": change}]}
+        )
+        ensure_equal(needs["TLS Certificate"], 1)
+        ensure_equal(needs["HTTP Load Balancer"], 1)
+        change["after"]["https_auto_cert"] = None
+        with expect_error(Blocked, "unknown"):
+            creation_needs(
+                {
+                    "resource_changes": [
+                        {"type": "xcsh_http_loadbalancer", "change": change}
+                    ]
+                }
+            )
+
     def test_repeat_at_full_quota_and_import_require_no_extra_capacity(self):
         plan = {
             "resource_changes": [
