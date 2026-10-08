@@ -2406,8 +2406,12 @@
       "sha256": "ea273d68ab36b931c016783930962dde2aca99384de5b09c9888ef18c7845418",
       "mode": "0644"
     },
+    "/opt/origin-server/vampi/seed.py": {
+      "sha256": "8ef6faa6de34749f4b4c1e107b9c200cf98d37273409bd45b01fdf910931be99",
+      "mode": "0644"
+    },
     "/opt/origin-server/vampi/Dockerfile": {
-      "sha256": "4c1b109b83f92f63fca46ed84b1613bd1ea7a045000908c3cb8b510dadb3ed9e",
+      "sha256": "5d26c3fb0686a2c7d0c1bf4b94bb2383f71fb448c48985b31e7b42859a872f0d",
       "mode": "0644"
     },
     "/opt/origin-server/crapi-frontend/Dockerfile": {
