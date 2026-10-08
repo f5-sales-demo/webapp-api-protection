@@ -273,6 +273,30 @@ class RateSecurityAnchor(unittest.TestCase):
         )
 
 
+class MixedStatusOrder(unittest.TestCase):
+    def test_later_allowed_response_does_not_shift_blocked_sequence(self):
+        denied = probe()
+        denied.update(
+            status=403, received_at=100.2, clock_offset_min=-1, clock_offset_max=3
+        )
+        allowed = {**denied, "status": 200, "sent_at": 100.3, "received_at": 100.5}
+        row = event()
+        row.update(req_id="denied", rsp_code="403", time="1970-01-01T00:01:41Z")
+        success = {
+            **row,
+            "req_id": "allowed",
+            "rsp_code": "200",
+            "time": "1970-01-01T00:01:40.900Z",
+        }
+        namespace, lb = (
+            row["namespace"],
+            row["vh_name"].removeprefix("ves-io-http-loadbalancer-"),
+        )
+        bind_ordered_requests([success, row], [denied, allowed], namespace, lb)
+        self.assertEqual(denied.get("server_request_id"), "denied")
+        self.assertEqual(allowed.get("server_request_id"), "allowed")
+
+
 class LogPages(unittest.TestCase):
     def client(self, pages):
         class Pages:

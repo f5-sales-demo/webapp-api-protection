@@ -112,21 +112,30 @@ def bind_ordered_requests(
     records: list[dict], probes: list[dict], namespace: str, lb: str
 ) -> None:
     """Bind a fresh sequential identity only when every request has one log record."""
-    keys = {(p["host"], p["path"], p["method"], p["user"]) for p in probes}
+    keys = {
+        (p["host"], p["path"], p["method"], p["user"], str(p["status"])) for p in probes
+    }
     for key in keys:
         group = sorted(
             (
                 p
                 for p in probes
-                if (p["host"], p["path"], p["method"], p["user"]) == key
+                if (p["host"], p["path"], p["method"], p["user"], str(p["status"]))
+                == key
             ),
             key=lambda p: p["sent_at"],
         )
         logs = [
             r
             for r in records
-            if (r.get("domain"), r.get("req_path"), r.get("method"), r.get("user"))
-            == (*key[:3], identified_user(key[3]))
+            if (
+                r.get("domain"),
+                r.get("req_path"),
+                r.get("method"),
+                r.get("user"),
+                str(r.get("rsp_code")),
+            )
+            == (*key[:3], identified_user(key[3]), key[4])
             and r.get("namespace") == namespace
             and r.get("vh_name") == virtual_host(lb)
         ]
