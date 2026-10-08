@@ -40,7 +40,7 @@ The namespace remains in its separate protected state. DNS and tenant subscripti
 
 ## Immutable fixture and guest artifacts
 
-`xcsh_swagger_object` owns one content-verified version. API definitions consume its immutable path. Import uses namespace/name/version. Content changes require replacement of the owned version; the resource never selects latest or deletes every version.
+`xcsh_swagger_object` owns one content-verified version. API definitions consume its immutable path. Import uses namespace/name/version. Object names contain the document digest. Changed content creates a different name and immutable path before the old owned version is deleted. XC can reuse a deleted version label, so same-name content changes are rejected. The resource never selects latest or deletes every version.
 
 Origin and generator source revisions and hashes are declared in the showcase profile. Changing
 Azure custom data requires VM replacement, so review that change explicitly. Runtime checks compare

@@ -1,12 +1,19 @@
+locals {
+  showcase_schema_content   = local.showcase_schema_content
+  comparison_schema_content = file("${path.module}/fixtures/comparison-openapi.json")
+}
+
 resource "xcsh_swagger_object" "showcase" {
-  name      = "showcase-form-native"
+  name      = "showcase-form-${substr(sha256(local.showcase_schema_content), 0, 32)}"
   namespace = var.namespace
-  content   = file("${path.module}/fixtures/showcase-openapi.json")
+  content   = local.showcase_schema_content
+  lifecycle { create_before_destroy = true }
 }
 resource "xcsh_swagger_object" "comparison" {
-  name      = "comparison-schema"
+  name      = "comparison-${substr(sha256(local.comparison_schema_content), 0, 32)}"
   namespace = var.namespace
-  content   = file("${path.module}/fixtures/comparison-openapi.json")
+  content   = local.comparison_schema_content
+  lifecycle { create_before_destroy = true }
 }
 module "use_case" {
   for_each         = toset(["waf", "schema", "endpoint", "rate", "mud"])

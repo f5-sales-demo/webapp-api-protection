@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import Mock, patch
 
 from demo_catalog_clock import calibrate_clock
@@ -482,7 +484,14 @@ class EffectiveSchemaReadback(unittest.TestCase):
         }
         path = "/api/object_store/namespaces/demo/stored_objects/swagger/showcase-form-native/v1"
         definition = {"spec": {"swagger_specs": [path]}}
-        fixture = {"metadata": {"version": "v1"}, "string_value": "{}"}
+        fixture = {
+            "metadata": {
+                "namespace": "demo",
+                "name": "showcase-form-native",
+                "version": "v1",
+            },
+            "string_value": "{}",
+        }
         client.api.side_effect = [(200, listener), (200, definition), (200, fixture)]
         ensure_equal(schema_configuration(client, "demo", "lb")["fixture"], fixture)
         ensure_equal(client.api.call_args.args[0], path)
@@ -494,3 +503,57 @@ class EffectiveSchemaReadback(unittest.TestCase):
         client.api.side_effect = [(200, listener)]
         with expect_error(EvidenceError, "reference"):
             schema_configuration(client, "demo", "lb")
+
+
+class ContentAddressedSchemaReadback(unittest.TestCase):
+    def test_name_content_and_exact_metadata_must_agree(self):
+        content = (
+            '{"openapi":"3.0.3","info":{"title":"Synthetic","version":"1"},"paths":{}}'
+        )
+        name = "showcase-form-" + hashlib.sha256(content.encode()).hexdigest()[:32]
+        path = (
+            "/api/object_store/namespaces/demo/stored_objects/swagger/" + name + "/v1"
+        )
+        listener = {
+            "spec": {
+                "api_specification": {
+                    "api_definition": {"namespace": "demo", "name": "lb-api-def"}
+                }
+            }
+        }
+        definition = {"spec": {"swagger_specs": [path]}}
+        fixture: dict[str, Any] = {
+            "metadata": {"namespace": "demo", "name": name, "version": "v1"},
+            "string_value": content,
+        }
+        client = Mock()
+        client.api.side_effect = [(200, listener), (200, definition), (200, fixture)]
+        ensure_equal(schema_configuration(client, "demo", "lb")["fixture"], fixture)
+        for key, value in [
+            ("namespace", "foreign"),
+            ("name", "foreign"),
+            ("version", "v2"),
+        ]:
+            with self.subTest(key=key):
+                changed = {**fixture, "metadata": {**fixture["metadata"], key: value}}
+                client.api.side_effect = [
+                    (200, listener),
+                    (200, definition),
+                    (200, changed),
+                ]
+                with expect_error(EvidenceError, "identity"):
+                    schema_configuration(client, "demo", "lb")
+        client.api.side_effect = [
+            (200, listener),
+            (200, definition),
+            (200, {**fixture, "string_value": content + " "}),
+        ]
+        with expect_error(EvidenceError, "digest"):
+            schema_configuration(client, "demo", "lb")
+        for suffix in ["LATEST", "latest"]:
+            definition["spec"]["swagger_specs"] = [
+                path.rsplit("/", 1)[0] + "/" + suffix
+            ]
+            client.api.side_effect = [(200, listener), (200, definition)]
+            with expect_error(EvidenceError, "immutable"):
+                schema_configuration(client, "demo", "lb")

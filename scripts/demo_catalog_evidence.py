@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 import time
 from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote
@@ -348,18 +350,38 @@ def schema_configuration(client: Client, namespace: str, lb: str) -> dict:
     if (
         code != OK
         or len(paths) != 1
-        or not paths[0].startswith(
-            "/api/object_store/namespaces/"
-            + namespace
-            + "/stored_objects/swagger/showcase-form-native/"
+        or not isinstance(paths[0], str)
+        or not re.fullmatch(
+            re.escape(
+                "/api/object_store/namespaces/" + namespace + "/stored_objects/swagger/"
+            )
+            + r"(?:showcase-form-native|showcase-form-[a-f0-9]{32})/[A-Za-z0-9][A-Za-z0-9._-]*",
+            paths[0],
         )
-        or paths[0].endswith("/latest")
+        or paths[0].rsplit("/", 1)[-1].lower() == "latest"
     ):
         message = "catalog immutable schema unavailable"
         raise EvidenceError(message)
     code, fixture = client.api(paths[0])
     if code != OK:
         message = "catalog schema content unavailable"
+        raise EvidenceError(message)
+    name, version = paths[0].rsplit("/", 2)[-2:]
+    metadata = fixture.get("metadata", {})
+    content = fixture.get("string_value")
+    if (
+        metadata.get("namespace") != namespace
+        or metadata.get("name") != name
+        or metadata.get("version") != version
+        or not isinstance(content, str)
+    ):
+        message = "catalog exact schema content identity differs"
+        raise EvidenceError(message)
+    if name not in {
+        "showcase-form-native",
+        "showcase-form-" + hashlib.sha256(content.encode()).hexdigest()[:32],
+    }:
+        message = "catalog schema content digest differs from object name"
         raise EvidenceError(message)
     return {"listener": listener, "definition": definition, "fixture": fixture}
 
