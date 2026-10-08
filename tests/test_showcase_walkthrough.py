@@ -296,7 +296,7 @@ class FreshGuestFixtures(unittest.TestCase):
             ]
             configuration = Mock()
             configuration.original = {}
-            events = []
+            events: list[str] = []
             lifecycle.ownership.traffic.side_effect = events.append
 
             def fixtures():
