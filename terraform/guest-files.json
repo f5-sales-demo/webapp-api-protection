@@ -1085,7 +1085,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "71f40ccaf22429cecb6a55779f500a086b8160cb6b797460bc4d5707caad4a77",
+      "sha256": "350afe5e397f68eda8790d9c9ac72555d8ed9c556f3c747d3b283c20b094fb2b",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
@@ -1601,15 +1601,15 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/07-command-injection.sh": {
-      "sha256": "60e8930e352285f4af3443ccfe4d63cab5315fdb55ea56eed565fc514d914813",
+      "sha256": "6c3f87f7a235689ae69ba60809772d0b5366b4ca493f0f56cff8f05c99e71a59",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/08-full-escalation-chain.sh": {
-      "sha256": "0368f4b5cbeeaf0d9f1cfb9eaf6f753e397fae8022e713c85d7a076b583d9dbd",
+      "sha256": "b283f30c2c5b85442d767e5f1d50df1043bbff19830b11e92c836fff40c1fc3c",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/09-jwt-secret-crack.sh": {
-      "sha256": "3576e6b1dc758de524d018b5a90574c9a1385c67147ee1f7789a6faff62f19b5",
+      "sha256": "6978d07ca9a493e2978072c28d75d70cdf0e90edd965c6f36d6b8734cc3274b7",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/restaurant-exploits/10-api-discovery.sh": {
@@ -2060,6 +2060,10 @@
       "sha256": "e85d9a9fcabdca94b91fec30bb2cafd37421084442866996aee177d752003371",
       "mode": "0444"
     },
+    "/opt/traffic-generator/current/tests/test_restaurant_native_roles.py": {
+      "sha256": "97c5236e20a4195c06dc7ee81739008f2ec4916cda90b45d51e20ecbb94409d8",
+      "mode": "0444"
+    },
     "/opt/traffic-generator/current/tests/test_restaurant_role_restoration.py": {
       "sha256": "2f1b9435b97e262a1805d7a39b2a6a986acdc44c369226f71cbcaa64a4ea488b",
       "mode": "0444"
@@ -2235,7 +2239,7 @@
       "mode": "0644"
     },
     "/usr/local/bin/catalog_restaurant_recovery.py": {
-      "sha256": "d22a57fe686f761d48ea51a2950e2b032a02eaebba8b56f8ee3742cac3682ff1",
+      "sha256": "63a3b617c2c981da05a32339bdc8ca8b80c463a4aedc260dddf2a4d08e07f5b2",
       "mode": "0644"
     },
     "/usr/local/bin/demo-origin-ready": {
@@ -2303,7 +2307,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/docker-compose.yml": {
-      "sha256": "69ad430ad52d61664c18ae3cdcb2f52028c748f4219fb80f582c201add92c41f",
+      "sha256": "6b5c9a30c3b2335865e6320712239b3252d0941e620ed7164b42107b7c89e22c",
       "mode": "0644"
     },
     "/opt/origin-server/vampi-gunicorn.sh": {

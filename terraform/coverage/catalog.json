@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "expected_entries": 164,
-  "generator_source": "4365e1fb7c0a008f87d8610d76ac2ab1f1b53d83",
+  "generator_source": "781d32d797ab7236605356910de2880fe3979d4b",
   "entries": [
     {
       "id": "api-attacks/01-vampi-owasp-top10",
@@ -2818,8 +2818,8 @@
       "fixture_refresh": ["restaurant"],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
-      "mutation_policy": "read-only",
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["family_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
@@ -2842,8 +2842,8 @@
       "fixture_refresh": ["restaurant"],
       "positive_test": "All declared native requests have application-specific response identity and complete expected protocol outcomes; scanner phases, tool provenance and cleanup remain required",
       "verifier": "composed-native",
-      "mutation_policy": "read-only",
-      "restoration_fields": [],
+      "mutation_policy": "journaled-restoration",
+      "restoration_fields": ["family_restoration"],
       "protected_endpoints": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
       "terraform_owner": "module.http_lb"
     },
