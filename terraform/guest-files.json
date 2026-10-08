@@ -1085,7 +1085,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "544ef055b2ad0d9620c8baadde8aba49cc1d0357e49bdcbfd47d7401866a2781",
+      "sha256": "cedba74cf3a84f13df36dde3db1cfc29a7114acde802b16359190af2b8d48af8",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
@@ -1269,7 +1269,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvga-exploits/04-sqli-filter.sh": {
-      "sha256": "4ba2d62be2839203a1d2f39e9660d6f709b9f39621711dd89b2ed498edc741ed",
+      "sha256": "3fe0f1613b27b6edda003bc231aca23a2aba0e7ec66438431fe4533fa5e68274",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/dvga-exploits/05-xss-createpaste.sh": {
@@ -1953,7 +1953,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_dispatch_requirements.py": {
-      "sha256": "e692afb3c87e914fda079745fe08d656bce6517ad3116bbbb7019e1d6e2f2fd9",
+      "sha256": "c883dbb45d01dbc6cbdb4dcd9a948c2eb81a1a2e95ba0a16a1ce2a525c35def7",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_dvga_paste_recovery.py": {
