@@ -2,7 +2,7 @@
 # xcsh_service_policy rule-handling + server-scope oneofs and the LB
 # service_policies_choice wiring. Targets ./modules/http-lb. command = plan (no creds).
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -70,7 +70,7 @@ run "lb_active_service_policies_wiring" {
     service_policy_active   = ["spol-a"]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.active_service_policies.policies[0].name == "spol-a"
+    condition     = xcsh_http_loadbalancer.this["primary"].active_service_policies.policies[0].name == "spol-a"
     error_message = "LB active_service_policies must reference the policy by name"
   }
 }
@@ -84,7 +84,7 @@ run "default_creates_nothing" {
     error_message = "default (empty service_policies) must create no service policy"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.active_service_policies == null && xcsh_http_loadbalancer.this.no_service_policies == null
+    condition     = xcsh_http_loadbalancer.this["primary"].active_service_policies == null && xcsh_http_loadbalancer.this["primary"].no_service_policies == null
     error_message = "default service_policies_choice=omit must emit no LB service-policy block"
   }
 }

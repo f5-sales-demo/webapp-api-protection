@@ -12,7 +12,7 @@ run "plan_creates_loadbalancer_and_pool" {
   }
 
   variables {
-    namespace         = "webapp-api-protection"
+    namespace         = "example"
     lb_domains        = ["www.f5-sales-demo.com", "api.f5-sales-demo.com"]
     origin_ip         = "203.0.113.10"
     origin_port       = 80

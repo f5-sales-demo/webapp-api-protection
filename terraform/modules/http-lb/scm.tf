@@ -7,7 +7,7 @@
 # enable_api_discovery.api_discovery_from_code_scan.
 resource "xcsh_code_base_integration" "this" {
   count     = var.code_base_integration_enabled ? 1 : 0
-  name      = "${var.namespace}-api-catalog"
+  name      = "${local.lb_name}-api-catalog"
   namespace = var.namespace
 
   code_base_integration {

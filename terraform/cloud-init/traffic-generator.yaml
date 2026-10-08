@@ -1,6 +1,30 @@
 #cloud-config
 package_update: true
 package_upgrade: true
+apt:
+  preserve_sources_list: true
+
+# bootcmd runs before cloud-init's package module, including the first apt update.
+bootcmd:
+  - |
+    set -eu
+    printf '%s\n' 'Acquire::Retries "5";' 'Acquire::http::Timeout "60";' 'Acquire::https::Timeout "60";' > /etc/apt/apt.conf.d/80-demo-acquire
+
+  - |
+    set -eu
+    cat > /etc/apt/sources.list.d/ubuntu.sources <<'DEMO_UBUNTU_SOURCES'
+    Types: deb
+    URIs: https://archive.ubuntu.com/ubuntu/
+    Suites: noble noble-updates noble-backports
+    Components: main universe restricted multiverse
+    Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+    Types: deb
+    URIs: https://security.ubuntu.com/ubuntu/
+    Suites: noble-security
+    Components: main universe restricted multiverse
+    Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+    DEMO_UBUNTU_SOURCES
 
 packages:
   # System essentials
@@ -12,6 +36,7 @@ packages:
   - git
   - unzip
   - build-essential
+  - ffmpeg
   - python3
   - python3-pip
   - python3-venv
@@ -81,27 +106,6 @@ write_files:
       fd,name=tempfile.mkstemp(prefix="fixtures-", dir=root)
       with os.fdopen(fd, "w") as stream: json.dump(data,stream)
       os.replace(name,root/"fixtures.json")
-
-  - path: /usr/local/bin/ghlatest
-    permissions: '0755'
-    content: |
-      #!/bin/sh
-      set -e
-      REPO="$1"
-      if [ -z "$REPO" ]; then echo "Usage: ghlatest owner/repo" >&2; exit 1; fi
-      R=0; M=3
-      while [ "$R" -lt "$M" ]; do
-        RESP=$(curl -fsSL -w "\n%%{http_code}" "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null) || true
-        HTTP_CODE=$(echo "$RESP" | tail -1)
-        BODY=$(echo "$RESP" | sed '$d')
-        if [ "$HTTP_CODE" = "403" ] || [ "$HTTP_CODE" = "429" ]; then
-          echo "WARN: ghlatest rate-limited ($HTTP_CODE) for $REPO" >&2; exit 1
-        fi
-        V=$(echo "$BODY" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"v\{0,1\}\([^"]*\)".*/\1/')
-        if [ -n "$V" ]; then echo "$V"; exit 0; fi
-        R=$((R + 1)); sleep $((R * 3))
-      done
-      echo "ERROR: ghlatest failed for $REPO" >&2; exit 1
 
   - path: /etc/sysctl.d/99-traffic-generator.conf
     content: |
@@ -339,9 +343,15 @@ write_files:
         retry_cmd 3 10 apt-get install -y -o DPkg::Lock::Timeout=60 "$@"
       }
       clone_repo() {
-        _url="$1"; _dest="$2"; _depth="$${3:-1}"
+        _url="$1"; _dest="$2"; _commit="$3"
         log_phase "git" "cloning $_url -> $_dest"
-        retry_cmd 3 10 git clone --depth "$_depth" --single-branch "$_url" "$_dest"
+        [ "$${#_commit}" -eq 40 ]
+        case "$_commit" in *[!0-9a-f]*) return 1 ;; esac
+        git init "$_dest"
+        git -C "$_dest" remote add origin "$_url"
+        retry_cmd 3 10 git -C "$_dest" fetch --depth 1 origin "$_commit"
+        git -C "$_dest" checkout --detach "$_commit"
+        [ "$(git -C "$_dest" rev-parse HEAD)" = "$_commit" ]
       }
       wait_for_http() {
         _url="$1"; _max="$2"; _desc="$${3:-$_url}"
@@ -425,18 +435,24 @@ runcmd:
   - |
     . /usr/local/lib/cloud-init-helpers.sh
     log_phase "phase1" "installing Node.js 24"
-    fetch_url 'https://deb.nodesource.com/setup_24.x' /tmp/nodesource-setup.sh 'Node.js repository setup'
-    retry_cmd 3 10 bash /tmp/nodesource-setup.sh
-    install_packages nodejs
+    [ "$(dpkg --print-architecture)" = amd64 ]
+    fetch_url 'https://deb.nodesource.com/node_24.x/pool/main/n/nodejs/nodejs_24.21.0-1nodesource1_amd64.deb' /tmp/nodejs-pinned.deb 'Node.js 24.21.0 package'
+    printf '%s  %s\n' '6f091c83324fefd8f7dd9d358b77131b679c04aa6f5859244749f3a6c60ea56a' /tmp/nodejs-pinned.deb | sha256sum --check --strict -
+    [ "$(dpkg-deb -f /tmp/nodejs-pinned.deb Package)" = nodejs ]
+    [ "$(dpkg-deb -f /tmp/nodejs-pinned.deb Version)" = 24.21.0-1nodesource1 ]
+    [ "$(dpkg-deb -f /tmp/nodejs-pinned.deb Architecture)" = amd64 ]
+    install_packages /tmp/nodejs-pinned.deb
+    [ "$(node --version)" = v24.21.0 ]
+    rm /tmp/nodejs-pinned.deb
 
   # --- Phase 2: Python toolchain (uv) ---
   - |
     . /usr/local/lib/cloud-init-helpers.sh
     log_phase "phase2" "installing Python uv"
-    fetch_url 'https://astral.sh/uv/install.sh' /tmp/uv-install.sh 'uv installer'
-    retry_cmd 4 5 sh /tmp/uv-install.sh
-    cp /root/.local/bin/uv /usr/local/bin/uv
-    cp /root/.local/bin/uvx /usr/local/bin/uvx
+    fetch_url 'https://github.com/astral-sh/uv/releases/download/0.12.22/uv-x86_64-unknown-linux-gnu.tar.gz' /tmp/uv.tar.gz 'uv 0.12.22'
+    printf '%s  %s\n' 'b9980552309f09c15172b8be828555e375097f16deb459795ce7bfd200380f0b' /tmp/uv.tar.gz | sha256sum --check --strict -
+    tar -xzf /tmp/uv.tar.gz -C /usr/local/bin --strip-components=1 uv-x86_64-unknown-linux-gnu/uv uv-x86_64-unknown-linux-gnu/uvx
+    rm /tmp/uv.tar.gz
 
   # --- Phase 3: Security binaries (Go tools via ghlatest) ---
   - |
@@ -446,36 +462,42 @@ runcmd:
     export PATH=/usr/local/bin:$PATH
 
     echo "Installing nuclei..."
-    NUCLEI_VER=$(ghlatest projectdiscovery/nuclei)
+    NUCLEI_VER=3.11.1
     fetch_url "https://github.com/projectdiscovery/nuclei/releases/download/v$${NUCLEI_VER}/nuclei_$${NUCLEI_VER}_linux_$${DPKG_ARCH}.zip" /tmp/nuclei.zip "nuclei"
+    printf '%s  %s\n' 'ea63d4ae232808cd7c6bc00d0142428e231fab59dae01042246097d195835ab6' /tmp/nuclei.zip | sha256sum --check --strict -
     unzip -oq /tmp/nuclei.zip nuclei -d /usr/local/bin
     rm /tmp/nuclei.zip
 
     echo "Installing subfinder..."
-    SUBFINDER_VER=$(ghlatest projectdiscovery/subfinder)
+    SUBFINDER_VER=2.16.0
     fetch_url "https://github.com/projectdiscovery/subfinder/releases/download/v$${SUBFINDER_VER}/subfinder_$${SUBFINDER_VER}_linux_$${DPKG_ARCH}.zip" /tmp/subfinder.zip "subfinder"
+    printf '%s  %s\n' '1b7f9c608e9a5bd59e609a5e09710d63c5485e92d3d49dc2c16eb4fdbe10cb60' /tmp/subfinder.zip | sha256sum --check --strict -
     unzip -oq /tmp/subfinder.zip subfinder -d /usr/local/bin
     rm /tmp/subfinder.zip
 
     echo "Installing httpx..."
-    HTTPX_VER=$(ghlatest projectdiscovery/httpx)
+    HTTPX_VER=1.12.0
     fetch_url "https://github.com/projectdiscovery/httpx/releases/download/v$${HTTPX_VER}/httpx_$${HTTPX_VER}_linux_$${DPKG_ARCH}.zip" /tmp/httpx.zip "httpx"
+    printf '%s  %s\n' '9d8439e8b6c9aa7d1e2314817a392e00d5178da3af5652f7475f88868f418f76' /tmp/httpx.zip | sha256sum --check --strict -
     unzip -oq /tmp/httpx.zip httpx -d /usr/local/bin
     rm /tmp/httpx.zip
 
     echo "Installing ffuf..."
-    FFUF_VER=$(ghlatest ffuf/ffuf)
+    FFUF_VER=2.3.0
     fetch_url "https://github.com/ffuf/ffuf/releases/download/v$${FFUF_VER}/ffuf_$${FFUF_VER}_linux_$${DPKG_ARCH}.tar.gz" /tmp/ffuf.tar.gz 'ffuf'
+    printf '%s  %s\n' 'b2a3c725fcb9da175159682f54d6e9149f2905b00d84d155e7efc5d599975ceb' /tmp/ffuf.tar.gz | sha256sum --check --strict -
     tar -xzf /tmp/ffuf.tar.gz -C /usr/local/bin ffuf
 
     echo "Installing gobuster..."
-    GOBUSTER_VER=$(ghlatest OJ/gobuster)
+    GOBUSTER_VER=3.8.2
     fetch_url "https://github.com/OJ/gobuster/releases/download/v$${GOBUSTER_VER}/gobuster_Linux_$(uname -m).tar.gz" /tmp/gobuster.tar.gz 'gobuster'
+    printf '%s  %s\n' 'c8a8c6a966eeb011d682a0ef2305a3e3a86b8b3fabe744350c00a766cc0f8021' /tmp/gobuster.tar.gz | sha256sum --check --strict -
     tar -xzf /tmp/gobuster.tar.gz -C /usr/local/bin gobuster
 
     echo "Installing feroxbuster..."
-    FEROX_VER=$(ghlatest epi052/feroxbuster)
+    FEROX_VER=2.13.1
     fetch_url "https://github.com/epi052/feroxbuster/releases/download/v$${FEROX_VER}/feroxbuster_$${DPKG_ARCH}.deb.zip" /tmp/ferox.zip "feroxbuster"
+    printf '%s  %s\n' '80e2069b105001c536c55eae040065dc00b0e877863ef07416253a9268521b1f' /tmp/ferox.zip | sha256sum --check --strict -
     unzip -oq /tmp/ferox.zip -d /tmp
     dpkg -i /tmp/feroxbuster_*.deb
     rm -f /tmp/ferox.zip /tmp/feroxbuster_*.deb
@@ -491,8 +513,9 @@ runcmd:
     rm /tmp/dalfox.tar.gz
 
     echo "Installing amass..."
-    AMASS_VER=$(ghlatest owasp-amass/amass)
+    AMASS_VER=5.1.1
     fetch_url "https://github.com/owasp-amass/amass/releases/download/v$${AMASS_VER}/amass_linux_$${DPKG_ARCH}.tar.gz" /tmp/amass.tar.gz "amass"
+    printf '%s  %s\n' '5e22b5f0239e7eb79439d60d43d3cd20dca2478588bc2242e91ab0c4f8fa40dd' /tmp/amass.tar.gz | sha256sum --check --strict -
     mkdir -p /tmp/amass
     tar -xzf /tmp/amass.tar.gz -C /tmp/amass
     cp /tmp/amass/amass_linux_$${DPKG_ARCH}/amass /usr/local/bin/
@@ -562,24 +585,24 @@ runcmd:
   - |
     . /usr/local/lib/cloud-init-helpers.sh
     log_phase "phase5" "installing browser automation tools"
-    retry_cmd 3 15 npm install -g playwright puppeteer puppeteer-extra puppeteer-extra-plugin-stealth
+    retry_cmd 3 15 npm install -g playwright@1.63.0 puppeteer@25.12.0 puppeteer-extra@3.3.6 puppeteer-extra-plugin-stealth@2.11.2
   - |
     . /usr/local/lib/cloud-init-helpers.sh
-    retry_cmd 3 30 npx --yes playwright install chromium
-    retry_cmd 3 30 sh -c 'su - azureuser -c "export NODE_PATH=/usr/lib/node_modules && npx --yes playwright install chromium"'
-    retry_cmd 3 30 npx --yes playwright install-deps chromium
+    retry_cmd 3 30 npx --no-install playwright install chromium
+    retry_cmd 3 30 sh -c 'su - azureuser -c "export NODE_PATH=/usr/lib/node_modules && npx --no-install playwright install chromium"'
+    retry_cmd 3 30 npx --no-install playwright install-deps chromium
 
   # --- Phase 6: Git-cloned tools ---
   - |
     . /usr/local/lib/cloud-init-helpers.sh
     log_phase "phase6" "cloning tool repositories"
-    clone_repo "https://github.com/drwetter/testssl.sh.git" /opt/testssl.sh
+    clone_repo "https://github.com/drwetter/testssl.sh.git" /opt/testssl.sh 5b900792f2a6a86135d1151e965c05c59a861e72
     ln -sf /opt/testssl.sh/testssl.sh /usr/local/bin/testssl
-    clone_repo "https://github.com/danielmiessler/SecLists.git" /opt/SecLists
-    clone_repo "https://github.com/lanmaster53/recon-ng.git" /opt/recon-ng
-    clone_repo "https://github.com/smicallef/spiderfoot.git" /opt/spiderfoot
-    clone_repo "https://github.com/nemesida-waf/waf-bypass.git" /opt/waf-bypass
-    clone_repo "https://github.com/swisskyrepo/PayloadsAllTheThings.git" /opt/PayloadsAllTheThings
+    clone_repo "https://github.com/danielmiessler/SecLists.git" /opt/SecLists 63802eeee4d5cb8791587bab59d78862ce381a32
+    clone_repo "https://github.com/lanmaster53/recon-ng.git" /opt/recon-ng c08acee0f84645ecf521ec616ac2dde94cbc1d63
+    clone_repo "https://github.com/smicallef/spiderfoot.git" /opt/spiderfoot 0f815a203afebf05c98b605dba5cf0475a0ee5fd
+    clone_repo "https://github.com/nemesida-waf/waf-bypass.git" /opt/waf-bypass 887f2f9d4667bc72c89a1384e1445925a10413c4
+    clone_repo "https://github.com/swisskyrepo/PayloadsAllTheThings.git" /opt/PayloadsAllTheThings 3ac27901c711bdf3f5b65a7b1d1820a1f65bd09a
 
   # --- Phase 7: Every catalog requires the full ZAP/browser runtime ---
   - |
@@ -634,7 +657,7 @@ runcmd:
         "http_rps": 200, "benign_rps": 180, "attack_rps": 20,
         "connection_rps": 20, "slow_connections": 20,
         "csd_enabled": False, "protections_enabled": True,
-        "scenario_timeout_seconds": 900, "retention_days": 7,
+        "scenario_timeout_seconds": 7200, "retention_days": 7,
         "retention_bytes": 10737418240,
         "results_dir": "/opt/traffic-generator/runtime",
         "source_commit": "${generator_commit}", "artifact_sha256": "${generator_sha256}"

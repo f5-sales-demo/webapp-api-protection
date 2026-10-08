@@ -13,9 +13,10 @@ from typing import TYPE_CHECKING, Any, Literal, NotRequired, Protocol, TypedDict
 if TYPE_CHECKING:
     from collections.abc import Collection, Iterator, Mapping
 
+DEMO_NAMESPACE = "webapp-api-protection"
 FIXED: dict[str, Any] = {
     "xc_url": "https://f5-sales-demo.console.ves.volterra.io",
-    "namespace": "webapp-api-protection",
+    "namespace": DEMO_NAMESPACE,
     "domains": ["www.f5-sales-demo.com", "api.f5-sales-demo.com"],
 }
 AZURE_TYPES = {
@@ -37,6 +38,7 @@ XC_TYPES = {
     "xcsh_api_discovery",
     "xcsh_http_loadbalancer",
     "xcsh_api_definition",
+    "xcsh_swagger_object",
     "xcsh_service_policy",
     "xcsh_rate_limiter",
     "xcsh_rate_limiter_policy",
@@ -107,7 +109,13 @@ class LifecycleOptions(Protocol):
     config: Path | None
     state_dir: Path | None
     timeout_seconds: int
-    operation: Literal["deploy", "verify", "rebuild", "destroy"]
+    operation: Literal["deploy", "plan", "adopt", "verify", "rebuild", "destroy"]
+
+
+def foundation_identity(namespace: str) -> dict[str, str]:
+    """Build the protected namespace ledger identity from approved scope."""
+    identity = f"system/{namespace}"
+    return {"namespace": identity}
 
 
 def quota_count(value: object) -> int:
@@ -268,11 +276,14 @@ def save_json(path: Path, value: object) -> None:
 
 def _guard_change(
     item: dict[str, Any],
-    mode: Literal["deploy", "noop", "destroy"],
+    mode: Literal["deploy", "rebuild", "noop", "destroy"],
     owned: Mapping[str, str] | None,
     persistent: Collection[str],
 ) -> None:
     actions = item["change"]["actions"]
+    if item["change"].get("importing"):
+        message = "normal deployment cannot silently adopt objects"
+        raise Blocked(message)
     kind = item.get("type", "")
     if kind == "xcsh_namespace":
         message = (
@@ -286,6 +297,25 @@ def _guard_change(
     if before.get("id") in persistent and actions != ["no-op"]:
         message = "persistent resource in application plan"
         raise Blocked(message)
+    if mode == "deploy" and "delete" in actions:
+        message = "deployment deletion or replacement requires a reviewed rebuild plan"
+        raise Blocked(message)
+    if mode == "rebuild" and "delete" in actions:
+        allowed = (
+            actions == ["delete", "create"] and kind == "azurerm_linux_virtual_machine"
+        )
+        allowed = allowed or (
+            actions == ["delete", "create"] and kind == "xcsh_swagger_object"
+        )
+        if (
+            not allowed
+            or owned is None
+            or owned.get(item["address"]) != before.get("id")
+        ):
+            message = (
+                "rebuild deletion or replacement is not a reviewed owned VM or fixture"
+            )
+            raise Blocked(message)
     if mode == "noop" and actions != ["no-op"]:
         message = "nonzero drift; verify never repairs infrastructure"
         raise Blocked(message)
@@ -310,7 +340,7 @@ def _guard_destroy(item: dict[str, Any], owned: Mapping[str, str] | None) -> Non
 
 def guard_plan(
     plan: dict[str, Any],
-    mode: Literal["deploy", "noop", "destroy"],
+    mode: Literal["deploy", "rebuild", "noop", "destroy"],
     owned: Mapping[str, str] | None = None,
     persistent: Collection[str] = (),
 ) -> None:
@@ -392,7 +422,7 @@ class Settings:
 
     config: Config
     scope: Scope
-    operation: Literal["deploy", "verify", "rebuild", "destroy"]
+    operation: Literal["deploy", "plan", "adopt", "verify", "rebuild", "destroy"]
 
 
 @dataclass

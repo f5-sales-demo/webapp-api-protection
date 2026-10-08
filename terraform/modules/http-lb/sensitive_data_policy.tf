@@ -7,7 +7,7 @@
 # deferred this cycle — see docs/superpowers/plans/sp3-findings.md.
 resource "xcsh_sensitive_data_policy" "this" {
   count     = var.sensitive_data_policy_choice == "custom" ? 1 : 0
-  name      = "${var.namespace}-sensitive-data"
+  name      = "${local.lb_name}-sensitive-data"
   namespace = var.namespace
 
   compliances                    = length(var.sensitive_data_compliances) > 0 ? var.sensitive_data_compliances : null

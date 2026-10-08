@@ -2,7 +2,7 @@
 # ./modules/http-lb. command = plan (no creds). The JWKS is a readable JSON document; the
 # module base64-encodes it for the API (F5 XC "cleartext" field is validated as base64).
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -28,15 +28,15 @@ run "graphql_rule_renders" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.graphql_rules[0].metadata.name == "gql"
+    condition     = xcsh_http_loadbalancer.this["primary"].graphql_rules[0].metadata.name == "gql"
     error_message = "graphql_rules metadata.name must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.graphql_rules[0].exact_path == "/graphql"
+    condition     = xcsh_http_loadbalancer.this["primary"].graphql_rules[0].exact_path == "/graphql"
     error_message = "graphql_rules exact_path must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.graphql_rules[0].graphql_settings.max_batched_queries == 3 && xcsh_http_loadbalancer.this.graphql_rules[0].graphql_settings.max_total_length == 4096
+    condition     = xcsh_http_loadbalancer.this["primary"].graphql_rules[0].graphql_settings.max_batched_queries == 3 && xcsh_http_loadbalancer.this["primary"].graphql_rules[0].graphql_settings.max_total_length == 4096
     error_message = "GraphQL batch and total-length limits must render their explicit test values"
   }
 }
@@ -72,7 +72,7 @@ run "graphql_empty_by_default" {
   command = plan
   module { source = "./modules/http-lb" }
   assert {
-    condition     = length(xcsh_http_loadbalancer.this.graphql_rules) == 0
+    condition     = length(xcsh_http_loadbalancer.this["primary"].graphql_rules) == 0
     error_message = "graphql_rules must be empty by default"
   }
 }
@@ -90,11 +90,11 @@ run "jwt_block_renders_base64_jwks" {
     }
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.jwt_validation.jwks_config.cleartext == base64encode("{\"keys\":[]}")
+    condition     = xcsh_http_loadbalancer.this["primary"].jwt_validation.jwks_config.cleartext == base64encode("{\"keys\":[]}")
     error_message = "jwks_config.cleartext must be the base64-encoded JWKS"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.jwt_validation.reserved_claims.issuer == "https://issuer.example.com"
+    condition     = xcsh_http_loadbalancer.this["primary"].jwt_validation.reserved_claims.issuer == "https://issuer.example.com"
     error_message = "reserved_claims.issuer must render"
   }
 }
@@ -114,19 +114,19 @@ run "jwt_report_derives_disable_arms" {
   # issuer omitted -> issuer_disable arm; audiences empty -> audience_disable arm. Both required
   # oneofs must carry an arm (the API rejects a nil oneof), so the derived disable blocks render.
   assert {
-    condition     = xcsh_http_loadbalancer.this.jwt_validation.reserved_claims.issuer == null
+    condition     = xcsh_http_loadbalancer.this["primary"].jwt_validation.reserved_claims.issuer == null
     error_message = "issuer must be null when omitted"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.jwt_validation.reserved_claims.issuer_disable != null
+    condition     = xcsh_http_loadbalancer.this["primary"].jwt_validation.reserved_claims.issuer_disable != null
     error_message = "issuer_disable arm must render when issuer omitted"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.jwt_validation.reserved_claims.audience_disable != null
+    condition     = xcsh_http_loadbalancer.this["primary"].jwt_validation.reserved_claims.audience_disable != null
     error_message = "audience_disable arm must render when audiences empty"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.jwt_validation.reserved_claims.validate_period_disable != null
+    condition     = xcsh_http_loadbalancer.this["primary"].jwt_validation.reserved_claims.validate_period_disable != null
     error_message = "validate_period_disable arm must render when validate_period=false"
   }
 }
@@ -166,7 +166,7 @@ run "jwt_omitted_by_default" {
   command = plan
   module { source = "./modules/http-lb" }
   assert {
-    condition     = xcsh_http_loadbalancer.this.jwt_validation == null
+    condition     = xcsh_http_loadbalancer.this["primary"].jwt_validation == null
     error_message = "jwt_validation must be omitted (null) by default"
   }
 }

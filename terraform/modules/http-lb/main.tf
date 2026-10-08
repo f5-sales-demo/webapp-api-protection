@@ -18,7 +18,7 @@
 #                     `api_definition` / `enable_api_discovery {}` blocks.
 
 resource "xcsh_healthcheck" "origin" {
-  name      = "origin-healthcheck"
+  name      = var.resource_name == "webapp-api-protection" ? "origin-healthcheck" : "${local.lb_name}-healthcheck"
   namespace = var.namespace
   labels    = var.labels
 
@@ -54,7 +54,7 @@ resource "xcsh_healthcheck" "origin" {
 }
 
 resource "xcsh_origin_pool" "origin" {
-  name      = "origin-pool"
+  name      = var.resource_name == "webapp-api-protection" ? "origin-pool" : "${local.lb_name}-origin"
   namespace = var.namespace
   labels    = var.labels
 
@@ -107,7 +107,7 @@ resource "xcsh_origin_pool" "origin" {
 # NOTE (lock-step provider gap): examples/resources/xcsh_app_firewall/blocking.tf
 # declares the suppressed markers and is thus NOT import-round-trip-clean.
 resource "xcsh_app_firewall" "this" {
-  name      = "webapp-api-protection-waf"
+  name      = "${local.lb_name}-waf"
   namespace = var.namespace
   labels    = var.labels
 
@@ -240,7 +240,7 @@ resource "xcsh_app_firewall" "this" {
 # acceptance-tested example xcsh_malicious_user_mitigation/with-mitigation-type.tf.
 resource "xcsh_malicious_user_mitigation" "mud" {
   count     = var.mud_enabled ? 1 : 0
-  name      = "webapp-api-protection-mud"
+  name      = "${local.lb_name}-mud"
   namespace = var.namespace
   labels    = var.labels
 
@@ -290,7 +290,7 @@ resource "xcsh_malicious_user_mitigation" "mud" {
 # server-default user_id_client_ip (import-suppressed).
 resource "xcsh_user_identification" "mud" {
   count     = var.mud_enabled && var.mud_user_id == "user_identification" ? 1 : 0
-  name      = "webapp-api-protection-mud-userid"
+  name      = "${local.lb_name}-mud-userid"
   namespace = var.namespace
   labels    = var.labels
 
@@ -320,7 +320,7 @@ resource "xcsh_user_identification" "mud" {
 # emit no arm (server default default_api_auth_discovery is import-suppressed).
 resource "xcsh_api_discovery" "this" {
   count     = var.api_discovery_auth_mode == "custom" ? 1 : 0
-  name      = "${var.namespace}-api-discovery"
+  name      = "${local.lb_name}-api-discovery"
   namespace = var.namespace
 
   dynamic "custom_auth_types" {
@@ -333,7 +333,8 @@ resource "xcsh_api_discovery" "this" {
 }
 
 resource "xcsh_http_loadbalancer" "this" {
-  name      = local.lb_name
+  for_each  = local.listeners
+  name      = each.value.name
   namespace = var.namespace
   labels    = var.labels
 
@@ -345,7 +346,7 @@ resource "xcsh_http_loadbalancer" "this" {
   domains = var.lb_domains
 
   dynamic "http" {
-    for_each = var.lb_https_auto_cert ? [] : [1]
+    for_each = each.value.https ? [] : [1]
     content {
       port                 = 80
       dns_volterra_managed = true
@@ -353,7 +354,7 @@ resource "xcsh_http_loadbalancer" "this" {
   }
 
   dynamic "https_auto_cert" {
-    for_each = var.lb_https_auto_cert ? [1] : []
+    for_each = each.value.https ? [1] : []
     content {
       port          = 443
       http_redirect = false
@@ -425,17 +426,22 @@ resource "xcsh_http_loadbalancer" "this" {
           # deferred to a later slice.
           dynamic "advanced_options" {
             for_each = anytrue([
-              routes.value.prefix_rewrite != null, routes.value.disable_location_add,
+              routes.value.use_websocket, routes.value.disable_retries, routes.value.prefix_rewrite != null, routes.value.disable_location_add,
               routes.value.timeout_ms != null, length(routes.value.req_headers_add) > 0,
               length(routes.value.req_headers_remove) > 0, length(routes.value.resp_headers_add) > 0,
               length(routes.value.resp_headers_remove) > 0, length(routes.value.req_cookies_remove) > 0,
               length(routes.value.resp_cookies_remove) > 0, routes.value.waf_mode != "inherited",
             ]) ? [1] : []
             content {
+              dynamic "web_socket_config" {
+                for_each = routes.value.use_websocket ? [1] : []
+                content { use_websocket = true }
+              }
               prefix_rewrite             = routes.value.prefix_rewrite
               priority                   = routes.value.priority
               disable_location_add       = routes.value.disable_location_add
               timeout                    = routes.value.timeout_ms
+              no_retry_policy            = routes.value.disable_retries ? {} : null
               request_headers_to_remove  = length(routes.value.req_headers_remove) > 0 ? routes.value.req_headers_remove : null
               response_headers_to_remove = length(routes.value.resp_headers_remove) > 0 ? routes.value.resp_headers_remove : null
               request_cookies_to_remove  = length(routes.value.req_cookies_remove) > 0 ? routes.value.req_cookies_remove : null
@@ -1421,7 +1427,7 @@ resource "xcsh_http_loadbalancer" "this" {
   # Header/cookie manipulation (LPC-2) via more_option. Emitted only when a header/cookie
   # list is set (0-change otherwise); *_to_remove lists null-when-empty.
   dynamic "more_option" {
-    for_each = (length(var.request_headers_to_add) + length(var.request_headers_to_remove) + length(var.response_headers_to_add) + length(var.response_headers_to_remove) + length(var.request_cookies_to_remove) + length(var.response_cookies_to_remove)) > 0 || var.disable_default_error_pages ? [1] : []
+    for_each = (length(var.request_headers_to_add) + length(var.request_headers_to_remove) + length(var.response_headers_to_add) + length(var.response_headers_to_remove) + length(var.request_cookies_to_remove) + length(var.response_cookies_to_remove)) > 0 || var.disable_default_error_pages || var.lb_stream_idle_timeout_ms != null ? [1] : []
     content {
       dynamic "request_headers_to_add" {
         for_each = var.request_headers_to_add
@@ -1443,6 +1449,7 @@ resource "xcsh_http_loadbalancer" "this" {
       response_headers_to_remove  = length(var.response_headers_to_remove) > 0 ? var.response_headers_to_remove : null
       request_cookies_to_remove   = length(var.request_cookies_to_remove) > 0 ? var.request_cookies_to_remove : null
       response_cookies_to_remove  = length(var.response_cookies_to_remove) > 0 ? var.response_cookies_to_remove : null
+      idle_timeout                = var.lb_stream_idle_timeout_ms
       disable_default_error_pages = var.disable_default_error_pages
     }
   }

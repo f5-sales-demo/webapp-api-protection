@@ -3,7 +3,7 @@
 # sensitive_data_disclosure_rules, and disabled_predefined_data_types. Targets
 # ./modules/http-lb. Defaults keep everything off (0-change).
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -148,20 +148,20 @@ run "sensitive_data_disclosure_mask_and_report" {
     ]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.sensitive_data_disclosure_rules != null && xcsh_http_loadbalancer.this.sensitive_data_disclosure_rules.sensitive_data_types_in_response[0].mask != null
+    condition     = xcsh_http_loadbalancer.this["primary"].sensitive_data_disclosure_rules != null && xcsh_http_loadbalancer.this["primary"].sensitive_data_disclosure_rules.sensitive_data_types_in_response[0].mask != null
     error_message = "action=mask must render mask on the first disclosure rule"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.sensitive_data_disclosure_rules.sensitive_data_types_in_response[0].api_endpoint.path == "/api/users" && xcsh_http_loadbalancer.this.sensitive_data_disclosure_rules.sensitive_data_types_in_response[1].report != null
+    condition     = xcsh_http_loadbalancer.this["primary"].sensitive_data_disclosure_rules.sensitive_data_types_in_response[0].api_endpoint.path == "/api/users" && xcsh_http_loadbalancer.this["primary"].sensitive_data_disclosure_rules.sensitive_data_types_in_response[1].report != null
     error_message = "disclosure rules must render api_endpoint + report arm"
   }
   # mask/report are a oneof, and a fieldless rule omits the body block entirely.
   assert {
-    condition     = xcsh_http_loadbalancer.this.sensitive_data_disclosure_rules.sensitive_data_types_in_response[0].report == null && xcsh_http_loadbalancer.this.sensitive_data_disclosure_rules.sensitive_data_types_in_response[1].mask == null
+    condition     = xcsh_http_loadbalancer.this["primary"].sensitive_data_disclosure_rules.sensitive_data_types_in_response[0].report == null && xcsh_http_loadbalancer.this["primary"].sensitive_data_disclosure_rules.sensitive_data_types_in_response[1].mask == null
     error_message = "mask/report must be mutually exclusive per rule"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.sensitive_data_disclosure_rules.sensitive_data_types_in_response[0].body != null && xcsh_http_loadbalancer.this.sensitive_data_disclosure_rules.sensitive_data_types_in_response[1].body == null
+    condition     = xcsh_http_loadbalancer.this["primary"].sensitive_data_disclosure_rules.sensitive_data_types_in_response[0].body != null && xcsh_http_loadbalancer.this["primary"].sensitive_data_disclosure_rules.sensitive_data_types_in_response[1].body == null
     error_message = "body block must render when fields are named and be omitted when none are"
   }
 }

@@ -47,7 +47,14 @@ module "origin_server" {
   # gzip + base64: the rendered cloud-init exceeds Azure's 65535-byte custom_data
   # limit uncompressed. cloud-init detects the gzip magic bytes and decompresses
   # user-data automatically, so the VM receives the same YAML.
-  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {}))
+  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {
+    session_retention_script       = indent(6, file("${path.module}/../scripts/dvwa_session_retention.py"))
+    catalog_seed_script            = indent(6, file("${path.module}/../scripts/demo_catalog_fixtures.py"))
+    origin_commit                  = var.origin_commit
+    origin_archive_sha256          = var.origin_archive_sha256
+    origin_installer_sha256        = var.origin_installer_sha256
+    origin_python_installer_sha256 = var.origin_python_installer_sha256
+  }))
 }
 
 # --- F5 XC HTTP load balancer in the persistent namespace-only root's namespace --
@@ -81,6 +88,7 @@ module "http_lb" {
   origin_endpoint_selection    = var.origin_endpoint_selection
   origin_connection_timeout    = var.origin_connection_timeout
   origin_http_idle_timeout     = var.origin_http_idle_timeout
+  lb_stream_idle_timeout_ms    = var.lb_stream_idle_timeout_ms
   custom_routes                = var.custom_routes
   route_objects                = var.route_objects
   custom_route_ref             = var.custom_route_ref
@@ -144,7 +152,7 @@ module "http_lb" {
 
   # API Definition & spec enforcement (SP2) passthrough. Default disable (0-change).
   api_definition_choice              = var.api_definition_choice
-  api_definition_swagger_specs       = var.api_definition_swagger_specs
+  api_definition_swagger_specs       = [xcsh_swagger_object.showcase.path]
   api_definition_inventory_inclusion = var.api_definition_inventory_inclusion
   api_definition_inventory_exclusion = var.api_definition_inventory_exclusion
   api_definition_non_api_endpoints   = var.api_definition_non_api_endpoints

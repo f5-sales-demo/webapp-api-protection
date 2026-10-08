@@ -8,7 +8,6 @@ import fcntl
 import fnmatch
 import json
 import os
-import re
 import shutil
 import signal
 import subprocess
@@ -17,12 +16,15 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from demo_lifecycle_adoption import adopt
+from demo_lifecycle_capacity import require_capacity as _xc_capacity
 from demo_lifecycle_ownership import Ownership
 from demo_lifecycle_runtime import Runtime
 from demo_lifecycle_state import (
     Blocked,
     create_context,
     managed_resources,
+    private_json,
     quota_count,
     save_json,
     secure_artifact,
@@ -141,7 +143,16 @@ def _entitlement_dns(runtime: Runtime) -> None:
     if addon is None or addon.get("state") != "AS_SUBSCRIBED":
         message = "WAAP entitlement is not AS_SUBSCRIBED"
         raise Blocked(message)
-    # Only check the shared zone; readiness later verifies concrete LB endpoints.
+    zone = runtime.xc("/api/config/dns/namespaces/system/dns_zones/f5-sales-demo.com")
+    if (
+        zone is None
+        or zone.get("metadata", {}).get("name") != "f5-sales-demo.com"
+        or zone.get("spec", {}).get("primary", {}).get("allow_http_lb_managed_records")
+        is not True
+    ):
+        message = "shared DNS identity or managed HTTP listener records unavailable"
+        raise Blocked(message)
+    # Readiness later verifies concrete LB endpoints.
     soa = (
         runtime.run(
             ["dig", "+time=2", "+tries=1", "+short", "SOA", "f5-sales-demo.com"]
@@ -255,19 +266,21 @@ def _quota(runtime: Runtime, released: dict[str, int]) -> None:
 
 
 def _skus(runtime: Runtime) -> None:
-    skus = _rows(
-        runtime.az(
-            "vm",
-            "list-skus",
-            "--location",
-            "eastus2",
-            "--resource-type",
-            "virtualMachines",
-            "--all",
-        ),
-        "subscription-aware eastus2 SKU response unavailable",
-    )
     for name in _SKU_FAMILIES:
+        skus = _rows(
+            runtime.az(
+                "vm",
+                "list-skus",
+                "--location",
+                "eastus2",
+                "--resource-type",
+                "virtualMachines",
+                "--size",
+                name,
+                "--all",
+            ),
+            "subscription-aware eastus2 SKU response unavailable",
+        )
         matches = [row for row in skus if row.get("name") == name]
         if len(matches) != 1 or any(
             row.get("type") == "Location" for row in matches[0].get("restrictions", [])
@@ -312,8 +325,13 @@ class Lifecycle:
     def capacity_permissions(self) -> None:
         """Prove exact ownership before granting rebuild quota credit or deletion."""
         _permissions(self.context, self.runtime)
+        _xc_capacity(self.runtime)
         released = dict.fromkeys(_QUOTA_NEEDS, 0)
-        if self.context.settings.operation == "rebuild":
+        application_state = self.context.paths.state / "application.tfstate"
+        populated = application_state.is_file() and bool(
+            private_json(application_state).get("resources")
+        )
+        if self.context.settings.operation == "rebuild" or populated:
             self.terraform.namespace_prepare()
             self.terraform.app_init()
             _deployed_vars(self.context)
@@ -334,15 +352,58 @@ class Lifecycle:
         self.terraform.app_init()
         _upload_profile(self.context, self.runtime)
         plan = self.terraform.plan("application")
-        self.terraform.tf(self.context.paths.app, "apply", "-input=false", str(plan))
+        self.terraform.apply(plan)
         self.terraform.get_outputs()
         self.ownership.inventory()
         self.ownership.verify_phase("readiness")
         self.ownership.traffic("start")
         self.ownership.verify_phase("acceptance")
         noop = self.terraform.plan("post-acceptance-drift", "noop")
-        self.terraform.tf(self.context.paths.app, "apply", "-input=false", str(noop))
+        self.terraform.apply(noop)
         self.runtime.phase("zero-change-apply")
+        self.terraform.plan("post-second-apply-drift", "noop")
+
+    def rebuild(self) -> None:
+        """Apply reviewed owned replacements while preserving XC and network identities."""
+        self.terraform.namespace_tf_prepare()
+        self.terraform.app_init()
+        owned = self.ownership.inventory()
+        resources = self.context.state.resources
+        if resources is None:
+            message = "rebuild ownership state unavailable"
+            raise Blocked(message)
+        plan = self.terraform.reviewed_rebuild(owned)
+        self.runtime.phase("rebuild-traffic-stop-authorized")
+        self.ownership.cleanup_access(resources)
+        self.ownership.traffic("stop")
+        self.terraform.apply(plan)
+        self.terraform.get_outputs()
+        self.ownership.inventory()
+        self.ownership.rotate_rebuilt_hosts(resources)
+        self.ownership.verify_phase("readiness")
+        self.ownership.traffic("start")
+        self.ownership.verify_phase("acceptance")
+        noop = self.terraform.plan("post-rebuild-drift", "noop")
+        self.terraform.apply(noop)
+        self.terraform.plan("post-rebuild-second-apply-drift", "noop")
+
+    def plan(self) -> None:
+        """Save current declared inputs and a fresh private summarized plan."""
+        self.terraform.namespace_tf_prepare()
+        self.terraform.app_init()
+        _upload_profile(self.context, self.runtime)
+        self.terraform.plan("review")
+
+    def adopt(self) -> None:
+        """Apply only the reviewed import map after private plan review."""
+        self.terraform.namespace_tf_prepare()
+        self.terraform.app_init()
+        _deployed_vars(self.context)
+        adopt(
+            self.context,
+            self.terraform,
+            self.context.paths.state / "adoption-review.json",
+        )
 
     def verify(self) -> None:
         """Verify live app behavior and drift without repairing infrastructure."""
@@ -368,15 +429,14 @@ class Lifecycle:
         self.ownership.cleanup_access(resources)
         self.ownership.traffic("stop")
         plan = self.terraform.plan("destroy", "destroy", owned)
-        self.terraform.tf(self.context.paths.app, "apply", "-input=false", str(plan))
+        self.terraform.apply(plan)
         remaining = _application_resources(self.context, self.terraform)
         if remaining:
             message = "application state remains populated after destroy"
             raise Blocked(message)
         self.ownership.verify_phase("absence")
         self.terraform.namespace_tf_prepare()
-        self.ownership.verify_fixture()
-        self.runtime.phase("schema-fixture-survives")
+        self.runtime.phase("owned-schema-removed")
         self.runtime.phase("persistent-resources-survive")
         self.context.state.outputs = None
 
@@ -394,11 +454,7 @@ class Lifecycle:
             complete = False
             try:
                 self.preflight(self.context.settings.operation in ("deploy", "rebuild"))
-                if self.context.settings.operation == "rebuild":
-                    self.destroy()
-                    self.deploy()
-                else:
-                    getattr(self, self.context.settings.operation)()
+                getattr(self, self.context.settings.operation)()
                 self.context.state.receipt["status"] = "verified"
                 self.runtime.phase("complete")
                 complete = True
@@ -416,27 +472,8 @@ def _deployed_vars(context: Context) -> None:
 
 
 def _upload_profile(context: Context, runtime: Runtime) -> None:
+    """Prepare declared inputs; Swagger issuance belongs solely to Terraform."""
     paths, scope = context.paths, context.settings.scope
-    upload_env = dict(
-        context.env, SWAGGER_RECEIPT_PATH=str(paths.state / "swagger-receipt.json")
-    )
-    pinned = runtime.run(
-        [
-            "bash",
-            paths.root / "scripts/swagger-upload.sh",
-            "showcase",
-            paths.app / "fixtures/showcase-openapi.json",
-            scope["namespace"],
-        ],
-        env=upload_env,
-    )[0].strip()
-    if not re.fullmatch(
-        r"/api/object_store/namespaces/webapp-api-protection/"
-        r"stored_objects/swagger/showcase/[A-Za-z0-9][A-Za-z0-9._-]*",
-        pinned,
-    ) or pinned.endswith("/latest"):
-        message = "upload did not return exact versioned object path"
-        raise Blocked(message)
     profile = _object(
         json.loads((paths.app / "showcase.tfvars.json").read_text()),
         "showcase profile unavailable",
@@ -446,10 +483,17 @@ def _upload_profile(context: Context, runtime: Runtime) -> None:
         subscription_id=scope["subscription_id"],
         lb_domains=scope["domains"],
         ssh_public_key_path=str(paths.key) + ".pub",
-        api_definition_swagger_specs=[pinned],
     )
+    receipt = paths.state / "swagger-receipt.json"
+    if receipt.is_file():
+        saved = private_json(receipt)
+        if (
+            saved.get("namespace") == scope["namespace"]
+            and saved.get("api_url") == scope["xc_url"]
+        ):
+            profile["api_definition_swagger_specs"] = [saved["path"]]
     save_json(paths.vars, profile)
-    runtime.phase("pinned-schema-upload")
+    runtime.phase("declared-profile-prepared")
 
 
 def _application_resources(
@@ -488,8 +532,17 @@ def _failed_operation(lifecycle: Lifecycle, failure: BaseException | None) -> No
     )
     # Cleanup must never replace the original failure, including a second interruption.
     try:
-        _cleanup_traffic(lifecycle)
-    except BaseException:  # pylint: disable=broad-exception-caught
+        operation = lifecycle.context.settings.operation
+        rebuild_started = any(
+            phase["name"] == "rebuild-traffic-stop-authorized"
+            for phase in receipt["phases"]
+        )
+        if operation not in ("plan", "adopt") and (
+            operation != "rebuild" or rebuild_started
+        ):
+            _cleanup_traffic(lifecycle)
+    # pylint: disable-next=broad-exception-caught
+    except BaseException:
         receipt["cleanup"] = (
             "traffic stop failed or unreachable; original failure retained"
         )
@@ -510,10 +563,24 @@ def _finalize_artifacts(context: Context, failure: BaseException | None) -> None
             raise
 
 
+def _canonical_state(lifecycle: Lifecycle) -> None:
+    """Use one private subscription state and lock across Ubuntu worktrees."""
+    canonical = (
+        Path.home()
+        / ".local/state/waap-showcase"
+        / lifecycle.context.settings.scope["subscription_id"]
+    )
+    if lifecycle.context.paths.state != canonical.resolve():
+        message = "deployment state must use the canonical Ubuntu subscription location"
+        raise Blocked(message)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Parse the unchanged CLI and report only safe failure summaries."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("deploy", "verify", "rebuild", "destroy"))
+    parser.add_argument(
+        "operation", choices=("deploy", "plan", "adopt", "verify", "rebuild", "destroy")
+    )
     parser.add_argument(
         "--config",
         type=Path,
@@ -525,14 +592,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--state-dir", type=Path, help="private persistent directory outside checkout"
     )
-    parser.add_argument("--timeout-seconds", type=int, default=1800)
+    parser.add_argument("--timeout-seconds", type=int, default=43200)
     args = parser.parse_args(argv)
     if args.timeout_seconds < 1:
         parser.error("--timeout-seconds must be positive")
     os.umask(0o077)
     signal.signal(signal.SIGTERM, _interrupt)
     try:
-        Lifecycle(args).execute()
+        lifecycle = Lifecycle(args)
+        _canonical_state(lifecycle)
+        lifecycle.execute()
     except (
         Blocked,
         OSError,

@@ -46,7 +46,7 @@ def config_file(
             **(
                 value
                 if value is not None
-                else {"expected_azure_user": "operator@example.test"}
+                else {"expected_azure_user": "operator@example.com"}
             ),
         ),
     )
@@ -108,12 +108,22 @@ def preflight_fixture(
                     "id": TEST_SCOPE["subscription_id"],
                     "tenantId": TEST_SCOPE["tenant_id"],
                     "state": "Enabled",
-                    "user": {"type": "user", "name": "OPERATOR@EXAMPLE.TEST"},
+                    "user": {"type": "user", "name": "OPERATOR@EXAMPLE.COM"},
                 }
             },
         ),
         (fixture.terraform, "namespace_prepare", {}),
-        (fixture.runtime, "xc", {"return_value": {"state": "AS_SUBSCRIBED"}}),
+        (
+            fixture.runtime,
+            "xc",
+            {
+                "return_value": {
+                    "state": "AS_SUBSCRIBED",
+                    "metadata": {"name": "f5-sales-demo.com"},
+                    "spec": {"primary": {"allow_http_lb_managed_records": True}},
+                }
+            },
+        ),
         (fixture.lifecycle, "capacity_permissions", {}),
     ):
         mock_patch = patch.object(owner, name, **options)
@@ -131,9 +141,7 @@ class OperatorConfiguration(unittest.TestCase):
     def test_default_private_operator_file(self):
         path = config_file(self.files)
         obj = bind_fixture(self.files).context
-        ensure_equal(
-            obj.settings.config["expected_azure_user"], "operator@example.test"
-        )
+        ensure_equal(obj.settings.config["expected_azure_user"], "operator@example.com")
         ensure_equal(path.stat().st_mode & 0o777, 0o600)
         ensure_equal(obj.paths.state.stat().st_mode & 0o777, 0o700)
         ensure("expected_azure_user" not in obj.state.receipt["scope"])
@@ -141,30 +149,28 @@ class OperatorConfiguration(unittest.TestCase):
     def test_explicit_config_replaces_default_without_merge(self):
         config_file(
             self.files,
-            value={"expected_azure_user": "other@example.test", "ssh_key": "/unused"},
+            value={"expected_azure_user": "other@example.com", "ssh_key": "/unused"},
         )
         self.files.args.config = config_file(self.files, "explicit.json")
         obj = bind_fixture(self.files).context
-        ensure_equal(
-            obj.settings.config["expected_azure_user"], "operator@example.test"
-        )
+        ensure_equal(obj.settings.config["expected_azure_user"], "operator@example.com")
         ensure(str(obj.paths.key) != "/unused")
 
     def test_config_overrides_environment(self):
         config_file(self.files)
-        with patch.dict(os.environ, {"DEMO_AZURE_USER": "env@example.test"}):
+        with patch.dict(os.environ, {"DEMO_AZURE_USER": "env@example.com"}):
             ensure_equal(
                 bind_fixture(self.files).context.settings.config["expected_azure_user"],
-                "operator@example.test",
+                "operator@example.com",
             )
 
     def test_environment_only_when_chosen_config_omits_user(self):
-        config_file(self.files, value={"expected_azure_user": "other@example.test"})
+        config_file(self.files, value={"expected_azure_user": "other@example.com"})
         self.files.args.config = config_file(self.files, "explicit.json", {})
-        with patch.dict(os.environ, {"DEMO_AZURE_USER": "env@example.test"}):
+        with patch.dict(os.environ, {"DEMO_AZURE_USER": "env@example.com"}):
             ensure_equal(
                 bind_fixture(self.files).context.settings.config["expected_azure_user"],
-                "env@example.test",
+                "env@example.com",
             )
         ensure(
             "expected_azure_user"
@@ -172,10 +178,10 @@ class OperatorConfiguration(unittest.TestCase):
         )
 
     def test_environment_without_operator_file(self):
-        with patch.dict(os.environ, {"DEMO_AZURE_USER": "env@example.test"}):
+        with patch.dict(os.environ, {"DEMO_AZURE_USER": "env@example.com"}):
             ensure_equal(
                 bind_fixture(self.files).context.settings.config["expected_azure_user"],
-                "env@example.test",
+                "env@example.com",
             )
 
     def test_approved_ids_override_environment_without_global_mutation(self):
@@ -296,7 +302,7 @@ class OperatorConfiguration(unittest.TestCase):
         self.files.args.state_dir.mkdir(mode=0o700)
         state_module.save_json(
             self.files.args.state_dir / "operator.json",
-            dict(TEST_APPROVAL, expected_azure_user="foreign@example.test"),
+            dict(TEST_APPROVAL, expected_azure_user="foreign@example.com"),
         )
         obj = bind_fixture(self.files).context
         ensure("expected_azure_user" not in obj.settings.config)
@@ -325,14 +331,14 @@ class OperatorConfiguration(unittest.TestCase):
             [],
             "",
             "no-at-sign",
-            "@example.test",
+            "@example.com",
             "operator@",
-            "operator@@example.test",
-            "operator@example.test\n",
-            "operator @example.test",
-            "operator\x00@example.test",
-            "öperator@example.test",
-            "a" * 309 + "@example.test",
+            "operator@@example.com",
+            "operator@example.com\n",
+            "operator @example.com",
+            "operator\x00@example.com",
+            "öperator@example.com",
+            "a" * 309 + "@example.com",
         )
         for value in invalid_values:
             with (
@@ -416,14 +422,12 @@ class OperatorConfiguration(unittest.TestCase):
         state.mkdir(parents=True, mode=0o700)
         state_module.save_json(
             state.parent / "operator.json",
-            dict(TEST_APPROVAL, expected_azure_user="operator@example.test"),
+            dict(TEST_APPROVAL, expected_azure_user="operator@example.com"),
         )
         with patch.object(Path, "home", return_value=home):
             obj = bind_fixture(self.files).context
         ensure_equal(obj.paths.state, state)
-        ensure_equal(
-            obj.settings.config["expected_azure_user"], "operator@example.test"
-        )
+        ensure_equal(obj.settings.config["expected_azure_user"], "operator@example.com")
 
     def test_operator_config_preserves_fixed_scope_restrictions(self):
         for key in state_module.FIXED:
@@ -432,7 +436,7 @@ class OperatorConfiguration(unittest.TestCase):
                     self.files,
                     value={
                         key: "other",
-                        "expected_azure_user": "operator@example.test",
+                        "expected_azure_user": "operator@example.com",
                     },
                 )
                 with expect_error(
@@ -464,13 +468,13 @@ class OperatorPreflight(unittest.TestCase):
             obj.fixture.lifecycle.preflight(True)
         obj.capacity_permissions.assert_called_once()
         ensure(
-            "operator@example.test"
+            "operator@example.com"
             not in json.dumps(obj.fixture.context.state.receipt).lower()
         )
 
     def test_wrong_human_type_subscription_tenant_or_state_blocks(self):
         for field, value in (
-            ("name", "another@example.test"),
+            ("name", "another@example.com"),
             ("name", None),
             ("type", "servicePrincipal"),
             ("id", "other"),
@@ -501,7 +505,7 @@ class Guards(unittest.TestCase):
 
     def test_identity_override_rejected(self):
         with expect_error(state_module.Blocked):
-            state_module.config_values({"subscription_id": "other"})
+            state_module.config_values({"subscription_id": "example"})
 
     def test_unknown_config_rejected(self):
         with expect_error(state_module.Blocked):
@@ -529,6 +533,32 @@ class Guards(unittest.TestCase):
                 },
                 "noop",
             )
+
+    def test_rebuild_allows_only_captured_owned_replacements(self):
+        for kind, actions, captured, allowed in (
+            ("azurerm_linux_virtual_machine", ["delete", "create"], "owned", True),
+            ("xcsh_swagger_object", ["delete", "create"], "owned", True),
+            ("azurerm_linux_virtual_machine", ["delete", "create"], "other", False),
+            ("azurerm_linux_virtual_machine", ["delete"], "owned", False),
+            ("azurerm_linux_virtual_machine", ["create", "delete"], "owned", False),
+            ("xcsh_http_loadbalancer", ["delete", "create"], "owned", False),
+            ("azurerm_public_ip", ["delete", "create"], "owned", False),
+        ):
+            with self.subTest(kind=kind, actions=actions, captured=captured):
+                plan = {
+                    "resource_changes": [
+                        {
+                            "address": "main",
+                            "type": kind,
+                            "change": {"actions": actions, "before": {"id": "owned"}},
+                        }
+                    ]
+                }
+                if allowed:
+                    state_module.guard_plan(plan, "rebuild", {"main": captured})
+                else:
+                    with expect_error(state_module.Blocked, "reviewed owned"):
+                        state_module.guard_plan(plan, "rebuild", {"main": captured})
 
     def test_destroy_rejects_namespace(self):
         with expect_error(state_module.Blocked):

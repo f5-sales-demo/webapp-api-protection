@@ -1,7 +1,7 @@
 # Plan-level tests for header/cookie manipulation (LPC-2): more_option request/response
 # headers add/remove + cookies remove. Targets ./modules/http-lb. command = plan (no creds).
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -21,19 +21,19 @@ run "headers_add_remove_render" {
     response_headers_to_remove = ["server"]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.more_option.request_headers_to_add[0].name == "x-env"
+    condition     = xcsh_http_loadbalancer.this["primary"].more_option.request_headers_to_add[0].name == "x-env"
     error_message = "request_headers_to_add must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.more_option.request_headers_to_add[0].append == true
+    condition     = xcsh_http_loadbalancer.this["primary"].more_option.request_headers_to_add[0].append == true
     error_message = "request_headers_to_add append must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.more_option.response_headers_to_add[0].value == "DENY"
+    condition     = xcsh_http_loadbalancer.this["primary"].more_option.response_headers_to_add[0].value == "DENY"
     error_message = "response_headers_to_add must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.more_option.response_headers_to_remove[0] == "server"
+    condition     = xcsh_http_loadbalancer.this["primary"].more_option.response_headers_to_remove[0] == "server"
     error_message = "response_headers_to_remove must render"
   }
 }
@@ -46,7 +46,7 @@ run "cookies_remove_render" {
     response_cookies_to_remove = ["debug"]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.more_option.request_cookies_to_remove[0] == "tracking"
+    condition     = xcsh_http_loadbalancer.this["primary"].more_option.request_cookies_to_remove[0] == "tracking"
     error_message = "request_cookies_to_remove must render"
   }
 }
@@ -55,7 +55,7 @@ run "more_option_omitted_by_default" {
   command = plan
   module { source = "./modules/http-lb" }
   assert {
-    condition     = xcsh_http_loadbalancer.this.more_option == null
+    condition     = xcsh_http_loadbalancer.this["primary"].more_option == null
     error_message = "more_option must be omitted (null) by default"
   }
 }
@@ -65,7 +65,36 @@ run "disable_default_error_pages_renders" {
   module { source = "./modules/http-lb" }
   variables { disable_default_error_pages = true }
   assert {
-    condition     = xcsh_http_loadbalancer.this.more_option.disable_default_error_pages == true
+    condition     = xcsh_http_loadbalancer.this["primary"].more_option.disable_default_error_pages == true
     error_message = "disable_default_error_pages must render inside more_option"
+  }
+}
+
+run "stream_idle_timeout_renders_on_both_listeners" {
+  command = plan
+  module { source = "./modules/http-lb" }
+  variables {
+    custom_routes                = [{ path_value = "/dvga/graphql", timeout_ms = 600000, disable_retries = true }]
+    lb_https_auto_cert           = true
+    lb_stream_idle_timeout_ms    = 600000
+    api_specification_validation = "all_spec_endpoints"
+    api_validation_request_mode  = "block"
+    challenge                    = { mode = "enable" }
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this["primary"].routes[0].simple_route.advanced_options.no_retry_policy != null
+    error_message = "Costly HTTPS route must not retry upstream work"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this["http"].routes[0].simple_route.advanced_options.no_retry_policy != null
+    error_message = "Costly HTTP route must not retry upstream work"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this["primary"].more_option.idle_timeout == 600000
+    error_message = "HTTPS stream timeout must render"
+  }
+  assert {
+    condition     = xcsh_http_loadbalancer.this["http"].more_option.idle_timeout == 600000
+    error_message = "HTTP companion stream timeout must render"
   }
 }

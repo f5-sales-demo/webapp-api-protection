@@ -143,6 +143,8 @@ def continuous_status(status):
     return {
         **status,
         "service_active": True,
+        "source_commit": "a" * 40,
+        "artifact_sha256": "b" * 64,
         "service_enabled": True,
         "heartbeat": now,
         "run_started": start - 1,
@@ -151,6 +153,9 @@ def continuous_status(status):
                 "id": "pass-fixture-a",
                 "complete": True,
                 "catalog_complete": True,
+                "catalog_accepted": True,
+                "source_commit": "a" * 40,
+                "artifact_sha256": "b" * 64,
                 "passed": True,
                 "started": start,
             },
@@ -158,6 +163,9 @@ def continuous_status(status):
                 "id": "pass-fixture-b",
                 "complete": True,
                 "catalog_complete": True,
+                "catalog_accepted": True,
+                "source_commit": "a" * 40,
+                "artifact_sha256": "b" * 64,
                 "passed": True,
                 "started": now - 1,
             },
@@ -167,6 +175,20 @@ def continuous_status(status):
             "benign_requests": 5400,
             "benign_success": 5400,
             "attack_requests": 600,
+            "benign_per_application": dict.fromkeys(
+                [
+                    "/juice-shop/rest/products/search",
+                    "/dvwa/login.php",
+                    "/vampi/",
+                    "/httpbin/get",
+                    "/whoami/",
+                    "/csd-demo/",
+                    "/dvga/",
+                    "/restaurant/openapi.json",
+                    "/crapi/",
+                ],
+                600,
+            ),
             "benign_transport_failures": 0,
             "attack_transport_failures": 0,
             "benign_per_domain": dict.fromkeys(DOMAINS, 2700),
@@ -175,7 +197,9 @@ def continuous_status(status):
     }
 
 
-def readiness_client(cloud_status="done", returned_host=None, returned_path="/get"):
+def readiness_client(
+    cloud_status="done", returned_host=None, returned_path="/httpbin/get"
+):
     client = Mock()
     client.ssh.side_effect = [
         json.dumps({"status": cloud_status, "errors": [], "recoverable_errors": {}}),
@@ -231,7 +255,7 @@ def azure_retry_status() -> dict[str, Any]:
 def effective_fixture(challenge="enable_challenge"):
     # Allowlisted shape observed on the rebuilt LB, not provider HCL nesting.
     def ref(name):
-        return {"tenant": "demo-tenant", "namespace": "demo", "name": name}
+        return {"tenant": "example-tenant", "namespace": "demo", "name": name}
 
     spec = {
         "domains": DOMAINS,
@@ -349,7 +373,7 @@ def rate_client(statuses):
     def respond(host, path, method, user):
         code = next(codes)
         return code, {
-            "url": "http://" + host + path.removeprefix("/httpbin"),
+            "url": "http://" + host + path,
             "headers": {"X-Mud-User": user},
         } if code == 200 else None
 

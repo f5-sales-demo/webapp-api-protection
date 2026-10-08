@@ -1,0 +1,69 @@
+---
+title: Terraform ownership and comparison endpoints
+description: Operate the declared demo and review adoption without changing protection during walkthroughs.
+---
+
+Terraform declares the existing www and api endpoints and five simultaneous HTTPS comparisons under f5-sales-demo.com. Read the private `use_cases` output to obtain before/after URLs and policy references.
+
+| Comparison | Before | After |
+| --- | --- | --- |
+| WAF | waf-before | waf-after |
+| Request schema | schema-before | schema-after |
+| Endpoint methods | endpoint-before | endpoint-after |
+| Per-user rate limit | rate-before | rate-after |
+| Malicious-user detection | mud-before | mud-after |
+
+Each comparison has its own firewall and user identity. Origin pools and health checks remain shared. MUD is enabled only on mud-after; CSD remains display-only. Background traffic continues to target the protected www/api hosts and excludes baseline hosts.
+
+## Plan and adoption
+
+Run `scripts/demo-lifecycle.sh plan` on Ubuntu with the approved private operator configuration and
+XC environment. The command saves `review.plan`, `review.binding.json`, and `review.summary.json`
+beside the private application state. Review proposed replacements before deployment. Bindings
+reject changed source, inputs, provider locks, state, or plan bytes.
+
+Run `rebuild` only after reviewing the saved plan. It consumes that exact source-bound `review.plan`,
+allows replacement only of captured demo VMs and the owned Swagger version, and preserves listener,
+network and namespace identities. The command backs up enrolled host keys and rotates only the
+replaced VM entries after verifying Azure's unique VM identities. Missing or stale review plans fail
+before traffic is stopped or infrastructure is changed.
+
+Normal deployment rejects out-of-state objects. Review the private inventory and place the exact
+Swagger adoption mapping in `adoption-review.json`; run `scripts/demo-lifecycle.sh adopt` only after
+the review plan is current. The mapping binds the approved scope, state digest, exact
+namespace/name/version, verified content digest, and ownership review. Adoption backs up state and
+receipts before import.
+
+Capacity checks count new resources from the fresh plan, including all twelve listeners on a clean deployment. Unchanged and imported resources need no additional quota; unknown limits or insufficient capacity fail before apply.
+
+The namespace remains in its separate protected state. DNS and tenant subscriptions retain their owning plans. Never move these shared prerequisites into application state.
+
+## Immutable fixture and guest artifacts
+
+`xcsh_swagger_object` owns one content-verified version. API definitions consume its immutable path. Import uses namespace/name/version. Content changes require replacement of the owned version; the resource never selects latest or deletes every version.
+
+Origin and generator source revisions and hashes are declared in the showcase profile. Changing
+Azure custom data requires VM replacement, so review that change explicitly. Runtime checks compare
+source receipts and every declared guest file against the verified artifact. The guest manifest also
+records the service/control files. Tool versions, release hashes, browser packages and tool
+repository commits are declared in `terraform/tool-pins.json`. Direct file changes fail
+verification.
+
+## Session retention
+
+Terraform declares a five-minute DVWA cleanup timer and a 24-hour anonymous-session retention
+window. The cleanup verifies the named demo volume, preserves authenticated and recent sessions, and
+leaves unrelated files untouched. Benign generator workers reuse an anonymous session per domain, so
+login-page probes do not create a new file for every request. Guest-file verification checks the
+cleanup program and timer against their declared hashes.
+
+## Acceptance
+
+The coverage manifest is `terraform/coverage/demo.json`. Publication requires all five attributed
+comparisons, successful legitimate requests, nine applications across native/proxy/published routes,
+two complete 164-entry catalog passes at 200 aggregate HTTP requests/second within 5%, at least 99%
+benign success, and zero baseline transport failures.
+
+Lifecycle commands use a finite 12-hour whole-operation deadline by default; override it with `--timeout-seconds` when needed. The collector calibrates XC and generator clocks before traffic starts, so early catalog requests can receive matched evidence.
+
+Verify restart and reboot recovery. Require a second unchanged apply and a refreshed plan with zero resource and output actions after walkthroughs, catalog passes, and reboot. Source tests and candidate provider checks do not satisfy live deployment acceptance.

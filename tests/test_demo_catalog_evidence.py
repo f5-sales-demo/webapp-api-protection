@@ -1,0 +1,385 @@
+"""Operator evidence collection preserves exact request and configured host scope."""
+
+from __future__ import annotations
+
+import json
+import tempfile
+import unittest
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
+
+from demo_catalog_clock import calibrate_clock
+from demo_catalog_evidence import (
+    evidence_bundle,
+    grouped_records,
+    identity_records,
+    read_retry,
+    schema_configuration,
+)
+from demo_lifecycle_fixtures import TEST_SCOPE
+from demo_test_support import ensure, ensure_equal, expect_error
+from demo_verify_evidence import identified_user, virtual_host
+from demo_verify_types import EvidenceError
+
+
+def data():
+    out = {
+        "namespace": TEST_SCOPE["namespace"],
+        "loadbalancer_name": "webapp-api-protection",
+        "domains": ["www.example.test", "api.example.test"],
+    }
+    row = {
+        "scenario": "synthetic/action",
+        "domain": "www.example.test",
+        "path": "/httpbin/post",
+        "method": "POST",
+        "synthetic_identity": "showcase-" + "a" * 32 + "-synthetic",
+        "status": 403,
+        "sent_at": 10,
+        "received_at": 11,
+    }
+    pending = {
+        "pass": "pass-" + "a" * 32,
+        "request_sha256": "b" * 64,
+        "request": {
+            "scenario": "synthetic/action",
+            "source_commit": "c" * 40,
+            "artifact_sha256": "d" * 64,
+            "requests": [row],
+        },
+    }
+    event = {
+        "req_id": "exact",
+        "namespace": TEST_SCOPE["namespace"],
+        "vh_name": "ves-io-http-loadbalancer-webapp-api-protection",
+        "domain": "www.example.test",
+        "req_path": "/httpbin/post",
+        "method": "POST",
+        "user": "Header-X-Mud-User-showcase-" + "a" * 32 + "-synthetic",
+        "rsp_code": "403",
+        "time": "1970-01-01T00:00:10.500Z",
+    }
+    client = Mock()
+    client.pages.return_value = [event]
+    client.api.return_value = (
+        200,
+        {"metadata": {"name": "webapp-api-protection-waf"}, "spec": {"blocking": {}}},
+    )
+    return out, pending, event, client
+
+
+def test_bundle_requires_exact_access_record_and_preserves_provenance():
+    out, pending, event, client = data()
+    with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+        result = evidence_bundle(client, pending, out, [-1, 1])
+    ensure(result is not None)
+    ensure_equal(
+        result["evidence"]["checks"][0]["response"], pending["request"]["requests"][0]
+    )
+    ensure_equal(
+        result["evidence"]["source_commit"], pending["request"]["source_commit"]
+    )
+
+
+def test_foreign_request_or_absent_access_never_produces_bundle():
+    out, pending, _event, client = data()
+    with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+        result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure(result["evidence"]["checks"][0]["access"] is None)
+        ensure_equal(
+            result["evidence"]["checks"][0]["security_request_id"], _event["req_id"]
+        )
+    pending["request"]["requests"][0]["domain"] = "foreign.example.test"
+    with expect_error(EvidenceError, "outside declared scope"):
+        evidence_bundle(client, pending, out, [-1, 1])
+
+
+class CatalogEvidenceTests(unittest.TestCase):
+    def test_exact_join(self):
+        test_bundle_requires_exact_access_record_and_preserves_provenance()
+
+    def test_scope_and_absence(self):
+        test_foreign_request_or_absent_access_never_produces_bundle()
+
+
+class UniqueCatalogJoins(unittest.TestCase):
+    def test_one_server_id_cannot_satisfy_two_requests(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"] *= 2
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+    def test_ambiguous_security_time_join_is_rejected(self):
+        out, pending, event, client = data()
+        second = {**event, "req_id": "other"}
+        client.pages.return_value = [event, second]
+        with patch(
+            "demo_catalog_evidence.access_by_user", return_value=[event, second]
+        ):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class ClockQueryScope(unittest.TestCase):
+    def test_clock_calibration_queries_only_each_fresh_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.verify_identity_queries(Path(directory))
+
+    def verify_identity_queries(self, tmp_path):
+        client = SimpleNamespace(walkthrough_directory=tmp_path)
+        probes = [
+            {
+                "host": "www.example.com",
+                "path": "/httpbin/get",
+                "method": "GET",
+                "user": "showcase-" + "a" * 32 + "-clock-" + str(i),
+                "sent_at": 100.0 + i,
+                "received_at": 100.2 + i,
+                "status": 200,
+                "body": {},
+            }
+            for i in range(3)
+        ]
+        out = {
+            "domains": ["www.example.com"],
+            "namespace": TEST_SCOPE["namespace"],
+            "loadbalancer_name": TEST_SCOPE["namespace"],
+        }
+        calls = []
+
+        def query(_client, namespace, lb, user, _start, _end):
+            calls.append(user)
+            probe = next(p for p in probes if p["user"] == user)
+            return [
+                {
+                    "user": identified_user(user),
+                    "domain": probe["host"],
+                    "req_path": probe["path"],
+                    "namespace": namespace,
+                    "vh_name": virtual_host(lb),
+                    "method": "GET",
+                    "rsp_code": "200",
+                    "time": "1970-01-01T00:01:"
+                    + str(41 + probes.index(probe)).zfill(2)
+                    + ".000Z",
+                }
+            ]
+
+        with (
+            patch("demo_catalog_clock.clock_probe", side_effect=probes),
+            patch("demo_catalog_clock.rate_origin"),
+            patch("demo_catalog_clock.access_by_user", side_effect=query),
+        ):
+            calibrate_clock(client, out, "showcase-test")
+        ensure_equal(calls, [p["user"] for p in probes])
+        ensure_equal(client.clock_bounds, (-1, 2))
+
+
+class ParallelIdentityCollection(unittest.TestCase):
+    def test_every_identity_keeps_both_exact_query_results(self):
+        client = Mock()
+        client.pages.side_effect = lambda _namespace, _lb, _start, _end, user: [
+            {"user": user, "security": True}
+        ]
+        with patch(
+            "demo_catalog_evidence.access_by_user",
+            side_effect=lambda _client, _namespace, _lb, user, _start, _end: [
+                {"user": user, "access": True}
+            ],
+        ):
+            records, events = identity_records(
+                client,
+                TEST_SCOPE["namespace"],
+                "synthetic-lb",
+                ["first", "second"],
+                100,
+                110,
+            )
+        ensure_equal(
+            records,
+            [{"user": "first", "access": True}, {"user": "second", "access": True}],
+        )
+        ensure_equal(
+            events,
+            [{"user": "first", "security": True}, {"user": "second", "security": True}],
+        )
+
+    def test_failed_exact_query_cannot_return_partial_evidence(self):
+        client = Mock()
+        with (
+            patch(
+                "demo_catalog_evidence.access_by_user",
+                side_effect=EvidenceError("failed exact query"),
+            ),
+            expect_error(EvidenceError, "failed exact query"),
+        ):
+            identity_records(
+                client,
+                TEST_SCOPE["namespace"],
+                "synthetic-lb",
+                ["first", "second"],
+                100,
+                110,
+            )
+
+
+class GroupedIdentityCollection(unittest.TestCase):
+    def test_complete_group_filters_prefix_collisions_and_preserves_ids(self):
+        users = [
+            "showcase-" + "a" * 32 + "-request",
+            "showcase-" + "b" * 32 + "-request",
+        ]
+        events = [
+            {"user": identified_user(user), "req_id": str(i)}
+            for i, user in enumerate(users)
+        ]
+        events.append(
+            {"user": identified_user(users[0]) + "-foreign", "req_id": "foreign"}
+        )
+        client = Mock()
+        client.api.return_value = (
+            200,
+            {"logs": [json.dumps(row) for row in events], "total_hits": 3},
+        )
+        result = grouped_records(
+            client, TEST_SCOPE["namespace"], "synthetic-lb", users, 100, 110, False
+        )
+        ensure_equal(result, events[:2])
+        query = client.api.call_args.args[1]["query"]
+        ensure("user=~" in query and "^" not in query and "$" not in query)
+
+
+class ExactUnspecifiedAccessMethod(unittest.TestCase):
+    def test_only_exact_security_id_can_supply_extension_method(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"][0]["method"] = "PROPFIND"
+        event["method"] = "PROPFIND"
+        access = {**event, "method": "METHOD_UNSPECIFIED"}
+        with patch("demo_catalog_evidence.access_by_user", return_value=[access]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure_equal(
+            result["evidence"]["checks"][0]["access"]["raw_method"],
+            "METHOD_UNSPECIFIED",
+        )
+        access["req_id"] = "foreign"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[access]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class EncodedRequestPath(unittest.TestCase):
+    def test_decoded_log_path_preserves_exact_sent_route(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"][0]["path"] = "/httpbin/%61nything/%27"
+        event["req_path"] = "/httpbin/anything/'"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        access = result["evidence"]["checks"][0]["access"]
+        ensure_equal(access["raw_req_path"], "/httpbin/anything/'")
+        ensure_equal(access["req_path"], "/httpbin/%61nything/%27")
+        event["req_path"] = "/httpbin/anything/foreign"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class SampledAccessSecurityAnchor(unittest.TestCase):
+    def test_missing_access_requires_exact_unambiguous_security_record(self):
+        out, pending, event, client = data()
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure(result["evidence"]["checks"][0]["access"] is None)
+        client.pages.return_value = [event, {**event, "req_id": "foreign"}]
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+        client.pages.return_value = [{**event, "req_path": "/foreign"}]
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class FreshIdentityEventDelay(unittest.TestCase):
+    def test_recording_delay_is_bounded_and_retains_raw_time(self):
+        out, pending, event, client = data()
+        row = pending["request"]["requests"][0]
+        row["synthetic_identity"] = "showcase-" + "a" * 32 + "-request"
+        event["user"] = identified_user(row["synthetic_identity"])
+        event["time"] = "1970-01-01T00:00:25.000Z"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure_equal(
+            result["evidence"]["checks"][0]["events"][0]["time"], event["time"]
+        )
+        ensure_equal(result["evidence"]["event_recording_delay_seconds"], 20)
+        event["time"] = "1970-01-01T00:00:50.000Z"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+
+class BrowserActionBinding(unittest.TestCase):
+    def test_observed_action_marker_stays_bound_to_response(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"][0]["action_id"] = "ua-3-route-0"
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        ensure_equal(result["evidence"]["checks"][0]["action_id"], "ua-3-route-0")
+
+
+class CatalogReadRetries(unittest.TestCase):
+    """The standard unittest runner executes transient read failure regressions."""
+
+    def test_transient_catalog_read_retries_require_complete_success(self):
+        client = Mock()
+        client.remaining.return_value = 10
+        error = EvidenceError("API transport or JSON failure")
+        error.__cause__ = TimeoutError("read timed out")
+        reader = Mock(side_effect=[error, [{"req_id": "exact"}]])
+        with patch("demo_catalog_evidence.time.sleep") as sleep:
+            ensure_equal(read_retry(client, reader), [{"req_id": "exact"}])
+        ensure_equal(reader.call_count, 2)
+        sleep.assert_called_once_with(1)
+
+    def test_catalog_retry_exhaustion_and_bad_json_fail(self):
+        client = Mock()
+        client.remaining.return_value = 10
+        error = EvidenceError("API transport or JSON failure")
+        error.__cause__ = TimeoutError("read timed out")
+        reader = Mock(side_effect=error)
+        with patch("demo_catalog_evidence.time.sleep"), expect_error(EvidenceError):
+            read_retry(client, reader)
+        ensure_equal(reader.call_count, 3)
+        invalid = EvidenceError("API transport or JSON failure")
+        invalid.__cause__ = ValueError("invalid JSON")
+        reader = Mock(side_effect=invalid)
+        with expect_error(EvidenceError):
+            read_retry(client, reader)
+        ensure_equal(reader.call_count, 1)
+
+
+class EffectiveSchemaReadback(unittest.TestCase):
+    def test_effective_reference_and_immutable_path_are_required(self):
+        client = Mock()
+        listener = {
+            "spec": {
+                "api_specification": {
+                    "api_definition": {"name": "lb-api-def", "namespace": "demo"}
+                }
+            }
+        }
+        path = "/api/object_store/namespaces/demo/stored_objects/swagger/showcase-form-native/v1"
+        definition = {"spec": {"swagger_specs": [path]}}
+        fixture = {"metadata": {"version": "v1"}, "string_value": "{}"}
+        client.api.side_effect = [(200, listener), (200, definition), (200, fixture)]
+        ensure_equal(schema_configuration(client, "demo", "lb")["fixture"], fixture)
+        ensure_equal(client.api.call_args.args[0], path)
+        definition["spec"]["swagger_specs"] = [path.rsplit("/", 1)[0] + "/latest"]
+        client.api.side_effect = [(200, listener), (200, definition)]
+        with expect_error(EvidenceError, "immutable"):
+            schema_configuration(client, "demo", "lb")
+        listener["spec"]["api_specification"]["api_definition"]["namespace"] = "foreign"
+        client.api.side_effect = [(200, listener)]
+        with expect_error(EvidenceError, "reference"):
+            schema_configuration(client, "demo", "lb")

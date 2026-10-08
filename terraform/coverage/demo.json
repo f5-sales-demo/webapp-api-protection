@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "publication_gate": "live acceptance required",
+  "applications": ["httpbin", "juice-shop", "dvwa", "vampi", "whoami", "dvga", "restaurant", "crapi", "csd"],
+  "catalog": {
+    "expected_entries": 164,
+    "passes": 2,
+    "aggregate_http_rps": 200,
+    "tolerance_percent": 5,
+    "benign_success_percent": 99,
+    "baseline_transport_failures": 0
+  },
+  "use_cases": {
+    "waf": {
+      "terraform": "module.use_case[\"waf\"]",
+      "outputs": "use_cases.waf",
+      "fixture": null,
+      "positive_test": "DVWA SQL injection and reflected XSS blocked with WAF signature attribution",
+      "negative_control": "legitimate authenticated DVWA requests succeed",
+      "walkthrough": "scripts/showcase_walkthrough.py",
+      "baseline": "waf-before.f5-sales-demo.com",
+      "protected": "waf-after.f5-sales-demo.com",
+      "plan_test": "terraform/tests/comparison.tftest.hcl"
+    },
+    "schema": {
+      "terraform": "module.use_case[\"schema\"]",
+      "outputs": "use_cases.schema",
+      "fixture": "terraform/fixtures/comparison-openapi.json",
+      "positive_test": "missing or incorrectly typed demo_id blocked with schema attribution",
+      "negative_control": "valid demo_id and unrelated GET succeed",
+      "walkthrough": "scripts/showcase_walkthrough.py",
+      "baseline": "schema-before.f5-sales-demo.com",
+      "protected": "schema-after.f5-sales-demo.com",
+      "plan_test": "terraform/tests/comparison.tftest.hcl"
+    },
+    "endpoint": {
+      "terraform": "module.use_case[\"endpoint\"]",
+      "outputs": "use_cases.endpoint",
+      "fixture": null,
+      "positive_test": "exact admin POST/DELETE denied with endpoint policy attribution",
+      "negative_control": "admin GET and unrelated GET succeed",
+      "walkthrough": "scripts/showcase_walkthrough.py",
+      "baseline": "endpoint-before.f5-sales-demo.com",
+      "protected": "endpoint-after.f5-sales-demo.com",
+      "plan_test": "terraform/tests/comparison.tftest.hcl"
+    },
+    "rate": {
+      "terraform": "module.use_case[\"rate\"]",
+      "outputs": "use_cases.rate",
+      "fixture": null,
+      "positive_test": "20/minute per-user limiter returns attributed 429",
+      "negative_control": "independent user and unrelated path succeed",
+      "walkthrough": "scripts/showcase_walkthrough.py",
+      "baseline": "rate-before.f5-sales-demo.com",
+      "protected": "rate-after.f5-sales-demo.com",
+      "plan_test": "terraform/tests/comparison.tftest.hcl"
+    },
+    "mud": {
+      "terraform": "module.use_case[\"mud\"]",
+      "outputs": "use_cases.mud",
+      "fixture": null,
+      "positive_test": "fresh detection then temporary mitigation",
+      "negative_control": "independent identity succeeds",
+      "walkthrough": "scripts/showcase_walkthrough.py",
+      "baseline": "mud-before.f5-sales-demo.com",
+      "protected": "mud-after.f5-sales-demo.com",
+      "plan_test": "terraform/tests/comparison.tftest.hcl"
+    }
+  },
+  "guest_files": "terraform/guest-files.json",
+  "tool_pins": "terraform/tool-pins.json",
+  "acceptance_status": "pending-live",
+  "provider_dependency": "terraform-provider-xcsh#2474"
+}
