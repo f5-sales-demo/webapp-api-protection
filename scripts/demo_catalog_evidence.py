@@ -269,6 +269,24 @@ def grouped_records(
     raise EvidenceError(message)
 
 
+def read_retry(client: Client, reader: Any, *args: Any) -> Any:
+    """Retry only known transient read failures; malformed evidence still fails."""
+    attempts = 3
+    for attempt in range(attempts):
+        try:
+            return reader(*args)
+        except EvidenceError as exc:
+            cause = exc.__cause__
+            transient = isinstance(cause, OSError) and (
+                not hasattr(cause, "code") or cause.code in (429, 503)
+            )
+            if not transient or attempt == attempts - 1:
+                raise
+            time.sleep(min(attempt + 1, client.remaining()))
+    message = "bounded read retry exhausted"
+    raise AssertionError(message)
+
+
 def identity_records(
     client: Client, namespace: str, lb: str, users: list[str], start: float, end: float
 ) -> tuple[list[dict], list[dict]]:
@@ -277,13 +295,32 @@ def identity_records(
     events: list[dict] = []
     if len(users) <= SMALL_IDENTITY_GROUP:
         for user in users:
-            records.extend(access_by_user(client, namespace, lb, user, start, end))
-            events.extend(client.pages(namespace, lb, start, end, user=user))
+            records.extend(
+                read_retry(
+                    client, access_by_user, client, namespace, lb, user, start, end
+                )
+            )
+            events.extend(
+                read_retry(
+                    client,
+                    lambda user=user: client.pages(
+                        namespace, lb, start, end, user=user
+                    ),
+                )
+            )
         return records, events
     for offset in range(0, len(users), IDENTITY_GROUP_LIMIT):
         group = users[offset : offset + IDENTITY_GROUP_LIMIT]
-        records.extend(grouped_records(client, namespace, lb, group, start, end, False))
-        events.extend(grouped_records(client, namespace, lb, group, start, end, True))
+        records.extend(
+            read_retry(
+                client, grouped_records, client, namespace, lb, group, start, end, False
+            )
+        )
+        events.extend(
+            read_retry(
+                client, grouped_records, client, namespace, lb, group, start, end, True
+            )
+        )
     return records, events
 
 
