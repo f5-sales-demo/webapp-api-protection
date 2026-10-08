@@ -1069,7 +1069,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/bot-simulation/03-headless-form-fill.js": {
-      "sha256": "8f1d161873cc3251121a8d1d1a11465ca912473ee2fef7cf6993888f671b9b59",
+      "sha256": "f759cf9bf514930ed2219fe5b481e7b292b45a97630ddc91a801cebc59894ccd",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/bot-simulation/04-rapid-browsing.js": {
