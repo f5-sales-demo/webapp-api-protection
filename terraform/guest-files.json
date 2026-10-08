@@ -973,7 +973,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_proxy.py": {
-      "sha256": "3b1a4ff7ddcc48e2f6b246aee19d96587afebeab4ea59ee5ff7c7399d7c32f10",
+      "sha256": "ca0d74e53b060a04f168c10f3ef2d0bc832408e002acc93a820d56d01ef705dc",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_report.py": {
@@ -1101,7 +1101,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/04-thundering-herd.sh": {
-      "sha256": "dd9e46955b09881368b6ae5115d8a84c02b2e3257b5bc5d0862736457575b4fc",
+      "sha256": "ab2c1c5baf50dc776202621973d70de668e6c1f6d6f24c71a411957fcbeccaf0",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/05-post-put-bypass.sh": {
@@ -1117,7 +1117,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/08-kraken-cdn-max.sh": {
-      "sha256": "b7d89d65b92050741e58674d094b43af90833e24050cbdf4f4145a57874e8295",
+      "sha256": "7e0135578a9325ee298844f010e618e1099a575331c0005cb2859377826c191a",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/09-origin-torture.sh": {
@@ -1141,7 +1141,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/_lib.sh": {
-      "sha256": "aaf416348957c1864f5d4981493d122c19bdc55d07fd3328d6b28a01e76c1512",
+      "sha256": "10cf8d31eb550d59383f1947260f5fd363d4fd68aba215e9d6d7836893694591",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/_multi-client.lua": {
@@ -1892,6 +1892,10 @@
       "sha256": "3d308147fb959c1ef72a87319aef7e8ada443f1c50fea10a6fa54ea52addcbf4",
       "mode": "0444"
     },
+    "/opt/traffic-generator/current/tests/test_cache_monitor.py": {
+      "sha256": "18f50aee42ed6ada60cb0b9fe7e1d757399997541a1a102637b43a1fbf595449",
+      "mode": "0444"
+    },
     "/opt/traffic-generator/current/tests/test_catalog.py": {
       "sha256": "a8c20ac66f30429688fa69c236e5a08fe5373ffc3bbd4edeef316528d364c7c7",
       "mode": "0444"
@@ -2117,7 +2121,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_traffic_proxy.py": {
-      "sha256": "8a5e79b658ad708f4b61f51a8f3a4230778616f3541f7752433093e14f10ea83",
+      "sha256": "1503dbef9da9f3efc026415ae2b4f979d747d18b34ed0aa9409e66104adb2653",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_traffic_runtime.py": {
