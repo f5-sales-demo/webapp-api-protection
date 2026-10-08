@@ -31,11 +31,14 @@ from showcase_walkthrough_evidence import (
     blocked,
     collect,
     matched,
+    read_only_retryable,
     schema_report,
 )
 
 SUCCESS, FORBIDDEN, RATE_DENIAL = 200, 403, 429
 MIN_TIMEOUT, MAX_TIMEOUT = 60, 1800
+LEGITIMATE_RETRY_SECONDS = 60
+MAX_LEGITIMATE_RETRIES = 10
 RATE_BURST_REQUESTS = 90
 RATE_BURST_SPACING = 1.5
 CATEGORIES = ("waf", "schema", "endpoint-denial", "rate-limit", "mud")
@@ -90,6 +93,53 @@ def send(  # pylint: disable=too-many-arguments
 
 
 # Request loops retain one timestamp and identity for each dispatch.
+def resample_legitimate(
+    client: Client,
+    probes: list[dict],
+    records: list[dict],
+    namespace: str,
+    lb: str,
+    state: dict,
+) -> None:
+    """Repeat only missing read-only origin controls, preserving every old response."""
+    if (
+        time.monotonic() - state["started"] < LEGITIMATE_RETRY_SECONDS
+        or state["attempts"] >= MAX_LEGITIMATE_RETRIES
+    ):
+        return
+    missing = [
+        p
+        for p in probes
+        if read_only_retryable(p) and not matched(records, p, namespace, lb)
+    ]
+    if not missing:
+        return
+    state["attempts"] += 1
+    journal = client.walkthrough_directory / "legitimate-sample-retries.json"
+    history = json.loads(journal.read_text()) if journal.exists() else []
+    for original in missing:
+        user = original["user"] + "-sample-" + str(state["attempts"])
+        retry = send(
+            client,
+            original["host"],
+            original["request_target"],
+            "GET",
+            user,
+            label=original["label"],
+        )
+        rate_origin(
+            retry["status"],
+            retry["body"],
+            retry["host"],
+            retry["request_target"],
+            retry["user"],
+        )
+        probes[probes.index(original)] = retry
+        history.append({"original": original, "retry": retry})
+        save(journal, history)
+    state["started"] = time.monotonic()
+
+
 def requests(  # pylint: disable=too-many-branches
     client: Client, host: str, category: str, prefix: str, enabled: bool
 ) -> list[dict]:
@@ -458,6 +508,7 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
     directory.mkdir(mode=0o700)
     client.walkthrough_outputs = out
     client.walkthrough_directory = directory
+    client.legitimate_sampler = resample_legitimate
     configuration = Configuration(client, directory)
     base = "/api/config/namespaces/" + out["namespace"] + "/"
     lb = base + "http_loadbalancers/" + out["loadbalancer_name"]

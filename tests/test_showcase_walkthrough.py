@@ -59,6 +59,97 @@ class Transactions(unittest.TestCase):
             self.assertFalse(self.config.restore())
 
 
+class ReadOnlyControlSampling(unittest.TestCase):
+    def test_missing_legitimate_get_is_retried_with_exact_origin_echo(self):
+        with tempfile.TemporaryDirectory() as directory:
+            client = Mock()
+            client.walkthrough_directory = Path(directory)
+            client.clock_bounds = (-1, 3)
+            original: dict = {
+                "host": "www.example.test",
+                "path": "/httpbin/get",
+                "request_target": "/httpbin/get",
+                "method": "GET",
+                "user": "showcase-" + "a" * 32 + "-legitimate",
+                "sent_at": 100,
+                "received_at": 101,
+                "status": 200,
+                "body": {},
+                "control": "",
+                "label": "legitimate",
+                "clock_offset_min": -1,
+                "clock_offset_max": 3,
+            }
+            probes = [original]
+            retry = {
+                **original,
+                "user": original["user"] + "-sample-1",
+                "sent_at": 200,
+                "received_at": 201,
+            }
+            with (
+                patch("showcase_walkthrough_evidence.matched", return_value=None),
+                patch.object(runner, "send", return_value=retry) as send,
+                patch.object(runner, "rate_origin") as echo,
+                patch("showcase_walkthrough_evidence.time.monotonic", return_value=61),
+            ):
+                runner.resample_legitimate(
+                    client,
+                    probes,
+                    [],
+                    "example",
+                    "example",
+                    {"started": 0, "attempts": 0},
+                )
+            self.assertEqual(probes, [retry])
+            self.assertEqual(send.call_args.args[3], "GET")
+            self.assertEqual(
+                echo.call_args.args,
+                (200, {}, retry["host"], "/httpbin/get", retry["user"]),
+            )
+            journal = __import__("json").loads(
+                (Path(directory) / "legitimate-sample-retries.json").read_text()
+            )
+            self.assertEqual(journal[0]["original"], original)
+            self.assertEqual(journal[0]["retry"], retry)
+
+    def test_mutation_denial_and_rate_burst_are_never_resampled(self):
+        client = Mock()
+        probes = [
+            {
+                "method": "POST",
+                "path": "/httpbin/post",
+                "status": 200,
+                "control": "",
+                "label": "valid",
+            },
+            {
+                "method": "GET",
+                "path": "/httpbin/get",
+                "status": 403,
+                "control": "mud",
+                "label": "later-benign",
+            },
+            {
+                "method": "GET",
+                "path": "/httpbin/anything/rate-limit",
+                "status": 200,
+                "control": "rate-limit",
+                "label": "burst",
+            },
+        ]
+        original = copy.deepcopy(probes)
+        with (
+            patch.object(runner, "send") as send,
+            patch("showcase_walkthrough_evidence.time.monotonic", return_value=61),
+        ):
+            runner.resample_legitimate(
+                client, probes, [], "example", "example", {"started": 0, "attempts": 0}
+            )
+        send.assert_not_called()
+        self.assertEqual(probes, original)
+
+
 class LogPages(unittest.TestCase):
     def client(self, pages):
         class Pages:

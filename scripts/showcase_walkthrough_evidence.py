@@ -206,16 +206,31 @@ LOG_INGESTION_MARGIN = 60
 FORBIDDEN, RATE_DENIAL = 403, 429
 
 
+SUCCESS = 200
+
+
+def read_only_retryable(probe: dict) -> bool:
+    """Only read-only native HTTPBin negative controls may get fresh identities."""
+    return (
+        probe.get("method") == "GET"
+        and probe.get("status") == SUCCESS
+        and not probe.get("control")
+        and probe.get("path", "").startswith("/httpbin/")
+        and probe.get("label") in {"legitimate", "independent", "admin-get"}
+    )
+
+
 def collect(
     client: Client, namespace: str, lb: str, probes: list[dict]
 ) -> tuple[list[dict], list[dict]]:
     """Poll logs only; never repeat attack requests while waiting for ingestion."""
     start = min(p["sent_at"] + p.get("clock_offset_min", 0) for p in probes)
-    end = (
-        max(p["received_at"] + p.get("clock_offset_max", 0) for p in probes)
-        + LOG_INGESTION_MARGIN
-    )
+    retry_state = {"started": time.monotonic(), "attempts": 0}
     while True:
+        end = (
+            max(p["received_at"] + p.get("clock_offset_max", 0) for p in probes)
+            + LOG_INGESTION_MARGIN
+        )
         records = access_pages(client, namespace, lb, start, end)
         save(client.walkthrough_directory / "access-log-window.json", records)
         users = sorted({probe["user"] for probe in probes if probe.get("control")})
@@ -249,5 +264,9 @@ def collect(
             )
             if ready:
                 return records, events
+        if hasattr(client, "legitimate_sampler"):
+            client.legitimate_sampler(
+                client, probes, records, namespace, lb, retry_state
+            )
         client.remaining()
         time.sleep(min(5, client.remaining()))
