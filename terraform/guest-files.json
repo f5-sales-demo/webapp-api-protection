@@ -973,7 +973,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_proxy.py": {
-      "sha256": "7cd422aa124be234bec61cbb755bb8a60c6fd9282e17ec7a6b37b54be4cdb60b",
+      "sha256": "3b1a4ff7ddcc48e2f6b246aee19d96587afebeab4ea59ee5ff7c7399d7c32f10",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_report.py": {
@@ -1921,7 +1921,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_control_evidence_handshake.py": {
-      "sha256": "f7c5dd4d93799883b0af43ef206590f820af41e69fe88d7538acdd978764355b",
+      "sha256": "f09cbc4d3745498dcf594423a28ff2375cc5d760b82de51594f2293a8f2205f5",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_crapi_conversion_workflow.py": {
@@ -2335,7 +2335,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/dvga-adapter/adapt.py": {
-      "sha256": "4c0d14d988ee036e479d14ce30b359ae7d56473c846e53d0c30bc2195e51846f",
+      "sha256": "f57f0c03c17850b78f532c826f4d4e013974dd7478a93d3318033df78cb1d8c3",
       "mode": "0644"
     },
     "/opt/origin-server/dvga-adapter/Dockerfile": {
@@ -2449,18 +2449,6 @@
     "/opt/origin-server/csd-demo/static/vendor/dayjs.min.js": {
       "sha256": "9cfdb93f38afcf2d076abecd66d32bfd3383cdf1967654ebc26a26605daf4173",
       "mode": "0644"
-    },
-    "/usr/local/lib/demo-dvwa-session-cleanup.timer": {
-      "mode": "0644",
-      "sha256": "0fa44ac6340e8892f5cc44bee32509ec1d77c22647ccc2b85c83b6aea57ee3a0"
-    },
-    "/usr/local/bin/demo-seed-catalog": {
-      "mode": "0700",
-      "sha256": "7de379eacd0145b9d4c5255c0f9c5dde7b089651a88e40792b4e69b23cde7817"
-    },
-    "/usr/local/lib/demo-dvwa-session-cleanup.py": {
-      "mode": "0755",
-      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
     }
   },
   "schema_version": 1
