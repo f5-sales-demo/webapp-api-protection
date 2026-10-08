@@ -14,6 +14,7 @@ from demo_catalog_acceptance import catalog_metrics, coverage_failures
 from demo_catalog_clock import align_generator_clock, catalog_client
 from demo_catalog_evidence import collect_pending
 from demo_catalog_recovery import enroll_recovery
+from demo_catalog_start import await_catalog_start, catalog_status
 from demo_lifecycle_fixture import verify_fixture
 from demo_lifecycle_hosts import rotate_rebuilt_keys
 from demo_lifecycle_state import (
@@ -615,17 +616,7 @@ class Ownership:
         generator = self.owned_guest(
             _resources(self.context), "generator", outputs["generator"]
         )
-        status = json.loads(
-            self.runtime.run(
-                [
-                    *self.ssh_argv(generator, "yes"),
-                    "sudo",
-                    "-n",
-                    "/usr/local/bin/tgen-control",
-                    "status",
-                ]
-            )[0]
-        )
+        status = catalog_status(self.runtime, self.ssh_argv(generator, "yes"))
         if status.get("service_active") is True:
             # An unchanged deploy may call start on an already-running catalog.
             # Its active journal belongs to that execution and must remain untouched.
@@ -679,7 +670,9 @@ class Ownership:
                 _resources(self.context), "generator", outputs["generator"]
             )
             self.enroll_guest(guest)
+            previous = {}
             if action == "start":
+                previous = catalog_status(self.runtime, self.ssh_argv(guest, "yes"))
                 self.recover_catalog_families()
                 self.catalog_fixtures()
                 # Complete calibration before the first catalog request needs evidence.
@@ -695,6 +688,10 @@ class Ownership:
                     action,
                 ]
             )
+            if action == "start":
+                await_catalog_start(
+                    self.context, self.runtime, self.ssh_argv(guest, "yes"), previous
+                )
         finally:
             self.context.state.deadline = original
         self.runtime.phase("traffic-" + action)
