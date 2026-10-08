@@ -2363,7 +2363,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_dvga_browser.mjs": {
-      "sha256": "fa4d63a4522655669f673a0e72ca89111a979313630d5963fc787c1054e74d45",
+      "sha256": "b1c1fa7426647689d75b3328820afd4c3935ea043c946add9db49db37fcffaa2",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_restaurant_browser.mjs": {
