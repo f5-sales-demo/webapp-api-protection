@@ -945,7 +945,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_native_identity.py": {
-      "sha256": "cadaebeb353ade912b61620d70d5f9a8cee5f8bb9f632eb557eb3eb9c1033f8c",
+      "sha256": "0282ac32755e40438c6a5b3dc87f1d1853683cc38fb8c81a726a34506d97dd4a",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
@@ -989,7 +989,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_tool.py": {
-      "sha256": "8cc1b9df163b14c3370fb42e30433ca91426a9e2bd19aeeeeb9163f449102da0",
+      "sha256": "2e92f9e168562525878845ebfad7b282243e738a3a4bdde80c229c6f215c28e2",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_workload.py": {
@@ -1081,7 +1081,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "04672588a966ca6ca0789fa409e5e7023b6ea53a1356071c116f1f416d5911e9",
+      "sha256": "544ef055b2ad0d9620c8baadde8aba49cc1d0357e49bdcbfd47d7401866a2781",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
@@ -1993,7 +1993,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_functional_contracts.py": {
-      "sha256": "39bca80ccaa1132e7941121eb0f1e0ff53bbb845b4f50eb6fc553aac8b938b12",
+      "sha256": "06b932a3870d6ea24a5cd741cebffcbf3566d8006f9604fc188dbc08f9438c9b",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_order_functional.py": {
@@ -2001,7 +2001,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_response_identity.py": {
-      "sha256": "d381cf74c183dc2d17a3c43efebef60068e2af21d83cc4b62012a84232872406",
+      "sha256": "304962616249e3f2b30cb7bd2f7e22d68c6274bd7394e7b77aef6b580589908e",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_scanner_process.py": {
@@ -2085,7 +2085,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_tool_action_receipt.py": {
-      "sha256": "c7ba28cc14115f8adfc7882ebf1e99166a043193fe7e0923abbcb1a9fa3804aa",
+      "sha256": "098dff8ed1ffb653f7cd903959b939f69982cf2ec28a2f76a305a983588240cb",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_traffic_benchmark.py": {
