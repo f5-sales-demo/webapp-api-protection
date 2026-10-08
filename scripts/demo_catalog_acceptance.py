@@ -58,6 +58,16 @@ def coverage_failures(manifest: dict) -> list[str]:
         for entry in entries
         if not entry.get("verifier")
         or not entry.get("positive_test")
+        or not entry.get("terraform_owner")
+        or not entry.get("entrypoint")
+        or not entry.get("protected_endpoints")
+        or not entry.get("endpoint_outputs")
+        or not isinstance(entry.get("fixture_owner"), dict)
+        or not entry["fixture_owner"].get("terraform")
+        or not isinstance(entry.get("negative_control"), dict)
+        or not entry["negative_control"].get("requests")
+        or not entry["negative_control"].get("verifier")
+        or not entry["negative_control"].get("response_identity_tests")
         or entry.get("mutation_policy") not in ("read-only", "journaled-restoration")
         or (
             entry.get("mutation_policy") == "journaled-restoration"

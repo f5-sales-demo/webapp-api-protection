@@ -972,6 +972,16 @@ class CatalogCoverageTests(unittest.TestCase):
                 "verifier": "native",
                 "positive_test": "observed native behavior",
                 "mutation_policy": "read-only",
+                "terraform_owner": "module.http_lb",
+                "entrypoint": "suites/example.sh",
+                "protected_endpoints": ["www.example.test"],
+                "endpoint_outputs": ["showcase.domains"],
+                "fixture_owner": {"terraform": "module.origin_server"},
+                "negative_control": {
+                    "requests": [{"method": "GET", "path": "/httpbin/get"}],
+                    "verifier": "catalog_metrics",
+                    "response_identity_tests": "native_identity",
+                },
             }
             for index in range(164)
         ]
