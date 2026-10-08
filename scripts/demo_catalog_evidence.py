@@ -324,6 +324,46 @@ def identity_records(
     return records, events
 
 
+def schema_configuration(client: Client, namespace: str, lb: str) -> dict:
+    """Read the effective listener and exact immutable schema without mutation."""
+    code, listener = client.api(
+        "/api/config/namespaces/" + namespace + "/http_loadbalancers/" + lb
+    )
+    if code != OK:
+        message = "catalog effective schema listener unavailable"
+        raise EvidenceError(message)
+    reference = (
+        listener.get("spec", {}).get("api_specification", {}).get("api_definition", {})
+    )
+    if (
+        reference.get("namespace") != namespace
+        or reference.get("name") != lb + "-api-def"
+    ):
+        message = "catalog effective schema reference differs"
+        raise EvidenceError(message)
+    code, definition = client.api(
+        "/api/config/namespaces/" + namespace + "/api_definitions/" + reference["name"]
+    )
+    paths = definition.get("spec", {}).get("swagger_specs", [])
+    if (
+        code != OK
+        or len(paths) != 1
+        or not paths[0].startswith(
+            "/api/object_store/namespaces/"
+            + namespace
+            + "/stored_objects/swagger/showcase-form-native/"
+        )
+        or paths[0].endswith("/latest")
+    ):
+        message = "catalog immutable schema unavailable"
+        raise EvidenceError(message)
+    code, fixture = client.api(paths[0])
+    if code != OK:
+        message = "catalog schema content unavailable"
+        raise EvidenceError(message)
+    return {"listener": listener, "definition": definition, "fixture": fixture}
+
+
 def evidence_bundle(
     client: Client, pending: dict, out: dict, bounds: Sequence[float]
 ) -> dict | None:
@@ -358,6 +398,14 @@ def evidence_bundle(
     if code != OK or not isinstance(firewall, dict):
         message = "catalog effective firewall unavailable"
         raise EvidenceError(message)
+    schema = (
+        schema_configuration(client, namespace, lb)
+        if any(
+            event.get("sec_event_name") == "OpenAPI Validation Failure"
+            for event in events
+        )
+        else None
+    )
     return {
         **pending,
         "evidence": {
@@ -371,6 +419,7 @@ def evidence_bundle(
             "clock_bounds": [low, high],
             "event_recording_delay_seconds": EVENT_RECORDING_DELAY_SECONDS,
             "firewall": firewall,
+            "schema": schema,
             "checks": checks,
             "collected_at": time.time(),
         },

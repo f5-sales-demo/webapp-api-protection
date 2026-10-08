@@ -15,6 +15,7 @@ from demo_catalog_evidence import (
     grouped_records,
     identity_records,
     read_retry,
+    schema_configuration,
 )
 from demo_lifecycle_fixtures import TEST_SCOPE
 from demo_test_support import ensure, ensure_equal, expect_error
@@ -356,3 +357,29 @@ class CatalogReadRetries(unittest.TestCase):
         with expect_error(EvidenceError):
             read_retry(client, reader)
         ensure_equal(reader.call_count, 1)
+
+
+class EffectiveSchemaReadback(unittest.TestCase):
+    def test_effective_reference_and_immutable_path_are_required(self):
+        client = Mock()
+        listener = {
+            "spec": {
+                "api_specification": {
+                    "api_definition": {"name": "lb-api-def", "namespace": "demo"}
+                }
+            }
+        }
+        path = "/api/object_store/namespaces/demo/stored_objects/swagger/showcase-form-native/v1"
+        definition = {"spec": {"swagger_specs": [path]}}
+        fixture = {"metadata": {"version": "v1"}, "string_value": "{}"}
+        client.api.side_effect = [(200, listener), (200, definition), (200, fixture)]
+        ensure_equal(schema_configuration(client, "demo", "lb")["fixture"], fixture)
+        ensure_equal(client.api.call_args.args[0], path)
+        definition["spec"]["swagger_specs"] = [path.rsplit("/", 1)[0] + "/latest"]
+        client.api.side_effect = [(200, listener), (200, definition)]
+        with expect_error(EvidenceError, "immutable"):
+            schema_configuration(client, "demo", "lb")
+        listener["spec"]["api_specification"]["api_definition"]["namespace"] = "foreign"
+        client.api.side_effect = [(200, listener)]
+        with expect_error(EvidenceError, "reference"):
+            schema_configuration(client, "demo", "lb")
