@@ -50,7 +50,7 @@ class PlannedCapacity(unittest.TestCase):
             ensure_equal(needs[QUOTA_TYPES[kind]], count)
 
     def test_declared_certificate_with_unknown_computed_children_counts_one(self):
-        change = {
+        change: dict[str, Any] = {
             "actions": ["create"],
             "after": {"https_auto_cert": {"port": 443, "no_mtls": {}}},
             "after_unknown": {
