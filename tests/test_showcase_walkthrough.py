@@ -275,6 +275,78 @@ class PhaseScopeTests(unittest.TestCase):
         self.assertEqual(len(result), 4)
 
 
+class FreshGuestFixtures(unittest.TestCase):
+    def test_waf_exports_declared_fixtures_after_stop_before_preparation(self):
+        """A stopped rebuilt guest has no export until the ownership helper runs."""
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory)
+            (state / "outputs.json").write_text(
+                '{"use_cases":{"value":{"waf":{"before":{},"after":{}}}}}'
+            )
+            lifecycle = Mock()
+            lifecycle.context.paths.state = state
+            lifecycle.context.paths.key = state / "key"
+            lifecycle.context.paths.known_hosts = state / "known_hosts"
+            client = Mock()
+            client.command.return_value = "synthetic-source"
+            client.ssh.side_effect = [
+                '{"source_commit":"synthetic-origin"}',
+                '{"source_commit":"synthetic-generator"}',
+                '{"service_active":false}',
+            ]
+            configuration = Mock()
+            configuration.original = {}
+            events = []
+            lifecycle.ownership.traffic.side_effect = events.append
+
+            def fixtures():
+                events.append("fixtures")
+
+            lifecycle.ownership.catalog_fixtures.side_effect = fixtures
+
+            def preparation(*_args):
+                events.append("prepare")
+                message = "synthetic stop after fixture preparation"
+                raise EvidenceError(message)
+
+            out = {
+                "origin": {},
+                "generator": {},
+                "namespace": "test-namespace",
+                "loadbalancer_name": "synthetic",
+                "domains": ["synthetic.example.test"],
+            }
+            args = Mock(category="waf", timeout_seconds=1800)
+            with (
+                patch.object(runner, "Lifecycle", return_value=lifecycle),
+                patch.object(runner, "outputs", return_value=out),
+                patch.object(runner, "Client", return_value=client),
+                patch.object(runner, "Configuration", return_value=configuration),
+                patch.object(runner, "effective"),
+                patch.object(runner, "readiness", return_value={}),
+                patch.object(runner, "prepare_category", side_effect=preparation),
+                patch.object(
+                    runner,
+                    "send",
+                    return_value={
+                        "status": 200,
+                        "body": {},
+                        "host": "synthetic.example.test",
+                        "path": "/httpbin/get",
+                        "user": "synthetic",
+                    },
+                ),
+                patch.object(runner, "rate_origin"),
+            ):
+                self.assertEqual(runner.run(args), 2)
+            self.assertEqual(events, ["stop", "fixtures", "prepare", "start"])
+            receipt = next(state.glob("walkthrough-*/receipt.json"))
+            report = __import__("json").loads(receipt.read_text())
+            self.assertFalse(report["complete"])
+            self.assertTrue(report["restored"])
+            self.assertTrue(report["traffic_restarted"])
+
+
 class ReplacementEnvelopeTests(unittest.TestCase):
     def test_outer_version_used_when_replacement_version_is_empty(self):
         with tempfile.TemporaryDirectory() as directory:

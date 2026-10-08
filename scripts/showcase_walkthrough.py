@@ -465,7 +465,7 @@ def prepare_category(
     base: str,
     lb: str,
 ) -> tuple[dict | None, str]:
-    """Validate private fixtures and snapshot the resources before stopping traffic."""
+    """Read the prepared private fixtures and snapshot declared resources."""
     session = None
     if args.category == "waf":
         # Reuse the installed generator's authenticated synthetic session exporter.
@@ -543,7 +543,6 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
     }
     stopped = False
     try:
-        session, firewall = prepare_category(client, args, out, configuration, base, lb)
         stopped = True
         lifecycle.ownership.traffic("stop")
         status = json.loads(
@@ -551,6 +550,9 @@ def run(args: argparse.Namespace) -> int:  # pylint: disable=too-many-locals,too
         )
         if status.get("service_active") is not False:
             fail("continuous traffic did not stop")
+        if args.category == "waf":
+            lifecycle.ownership.catalog_fixtures()
+        session, firewall = prepare_category(client, args, out, configuration, base, lb)
         calibrate_clock(client, out, "showcase-" + run_id)
         for enabled in (False, True):
             phase = "after" if enabled else "before"
