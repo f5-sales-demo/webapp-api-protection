@@ -13,7 +13,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.claude/governance.json": {
-      "sha256": "0650136c16e0507368d5515f256eeb1c4d6405902403bcda06a2159a3a6cbb7c",
+      "sha256": "2304f91f096cc2e4afb9a6e05fa026a0fc857c256c1c0bd773f20491d42e1ed2",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.claude/hooks/protect-managed-files.sh": {
@@ -65,11 +65,11 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/actionlint.yaml": {
-      "sha256": "e49b95be30cc3936bdfefda194b6f04d7b7e1ca1bf6dbace41ec147ee6e1c115",
+      "sha256": "04f7658aa88a902b997fb4fad69d8cfdfa364be7b2124724b66567ab69003c5c",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/config/self-hosted-runner-policy.json": {
-      "sha256": "31d8204f43de31967c7c0361c61f102efdc0c8a79b38e74140ba821639cc0c2d",
+      "sha256": "17610033f1473a82620f55e39e0f529efa339ff000e7eb970d927d356c30c094",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/workflows/antigravity-review.yml": {
@@ -81,7 +81,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/workflows/github-pages-deploy.yml": {
-      "sha256": "2b1fa6d511a49e8279f8c031eaa3ec19d1e1611c25d9372c991579124678b18a",
+      "sha256": "a1c8240d0f13254be942c30b09834f7e29900488f7238328bd2b3708e4d99038",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/.github/workflows/require-linked-issue.yml": {
@@ -701,7 +701,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/audit-runner-workflows.py": {
-      "sha256": "7677137f5a0c2ea835786c7a9711666875699be476fd151bf0e90190d495ad33",
+      "sha256": "e123f07fcaa317bdd7d5545287643e8140ed82f83ff60968e834c3658f1925fc",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/browser_requests.cjs": {
@@ -945,7 +945,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_native_identity.py": {
-      "sha256": "0282ac32755e40438c6a5b3dc87f1d1853683cc38fb8c81a726a34506d97dd4a",
+      "sha256": "9c1c04f56d776be38d4cbb7b3ceb89ee264baf1b16b405015cb4558e031a2e30",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
@@ -1005,7 +1005,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/workflow_security_validator.py": {
-      "sha256": "7c474d3f90dcb42a9432d3f6390f25fd7c1e1f03aafebf287e36e8adb9b8b068",
+      "sha256": "eba33f76888e3c6047b9eae0173ad059a8e1029e165d25b478068dd2253683ba",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/scripts/wrk_drain_adapter.py": {
@@ -2001,7 +2001,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_response_identity.py": {
-      "sha256": "304962616249e3f2b30cb7bd2f7e22d68c6274bd7394e7b77aef6b580589908e",
+      "sha256": "b6601678b933bdb705888253cd71de2e4397ed4a880ca6ea72754a9d3da4f403",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_native_scanner_process.py": {
