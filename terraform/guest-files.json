@@ -2449,6 +2449,18 @@
     "/opt/origin-server/csd-demo/static/vendor/dayjs.min.js": {
       "sha256": "9cfdb93f38afcf2d076abecd66d32bfd3383cdf1967654ebc26a26605daf4173",
       "mode": "0644"
+    },
+    "/usr/local/lib/demo-dvwa-session-cleanup.timer": {
+      "mode": "0644",
+      "sha256": "0fa44ac6340e8892f5cc44bee32509ec1d77c22647ccc2b85c83b6aea57ee3a0"
+    },
+    "/usr/local/bin/demo-seed-catalog": {
+      "mode": "0700",
+      "sha256": "7de379eacd0145b9d4c5255c0f9c5dde7b089651a88e40792b4e69b23cde7817"
+    },
+    "/usr/local/lib/demo-dvwa-session-cleanup.py": {
+      "mode": "0755",
+      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
     }
   },
   "schema_version": 1
