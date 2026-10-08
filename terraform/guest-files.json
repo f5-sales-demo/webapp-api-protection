@@ -1085,7 +1085,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/catalog.json": {
-      "sha256": "350afe5e397f68eda8790d9c9ac72555d8ed9c556f3c747d3b283c20b094fb2b",
+      "sha256": "d1a19f323444ad6cc77c3b8ee74814fa8f611ba08949fa6db74a8717d07ce495",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/01-baseline-throughput.sh": {
