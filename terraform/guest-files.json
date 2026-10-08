@@ -1101,7 +1101,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/04-thundering-herd.sh": {
-      "sha256": "ab2c1c5baf50dc776202621973d70de668e6c1f6d6f24c71a411957fcbeccaf0",
+      "sha256": "3f7ad2beb3fd51385ab11bd02d0208d8a37d023b4cbb9b0f812d7fae18236bec",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/05-post-put-bypass.sh": {
@@ -1117,7 +1117,7 @@
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/08-kraken-cdn-max.sh": {
-      "sha256": "7e0135578a9325ee298844f010e618e1099a575331c0005cb2859377826c191a",
+      "sha256": "dc1a0bd7603c30155a2ce65cfd85234176e4eadbbfafcb06b877653769bfe2c8",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/09-origin-torture.sh": {
