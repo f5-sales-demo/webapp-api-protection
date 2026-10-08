@@ -30,6 +30,7 @@ from showcase_walkthrough_config import Configuration, fail, save
 from showcase_walkthrough_evidence import (
     blocked,
     collect,
+    control_anchor,
     matched,
     read_only_retryable,
     schema_report,
@@ -373,7 +374,9 @@ def evaluate(
         and not all(
             blocked(
                 events,
-                matched(records, p, out["namespace"], out["loadbalancer_name"]),
+                control_anchor(
+                    records, events, p, out["namespace"], out["loadbalancer_name"]
+                ),
                 p,
                 out["namespace"],
                 out["loadbalancer_name"],
@@ -389,7 +392,9 @@ def evaluate(
         if not required or any(
             not blocked(
                 events,
-                matched(records, p, out["namespace"], out["loadbalancer_name"]),
+                control_anchor(
+                    records, events, p, out["namespace"], out["loadbalancer_name"]
+                ),
                 p,
                 out["namespace"],
                 out["loadbalancer_name"],
@@ -401,7 +406,9 @@ def evaluate(
         if any(
             not schema_report(
                 events,
-                matched(records, p, out["namespace"], out["loadbalancer_name"]),
+                control_anchor(
+                    records, events, p, out["namespace"], out["loadbalancer_name"]
+                ),
                 p["label"],
             )
             for p in required

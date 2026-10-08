@@ -236,6 +236,43 @@ class RateSampleEvidence(unittest.TestCase):
         self.assertIsNone(missing_second.get("server_request_id"))
 
 
+class RateSecurityAnchor(unittest.TestCase):
+    def test_exact_security_event_is_retained_as_security_when_access_sample_missing(
+        self,
+    ):
+        item = probe()
+        item.update(
+            status=429,
+            control="rate-limit",
+            label="burst",
+            received_at=item["sent_at"] + 0.1,
+        )
+        row = event()
+        row.update(
+            req_id="rate-denial", rsp_code="429", time="1970-01-01T00:01:40.050Z"
+        )
+        namespace, lb = (
+            row["namespace"],
+            row["vh_name"].removeprefix("ves-io-http-loadbalancer-"),
+        )
+        module = __import__("showcase_walkthrough_evidence")
+        anchor = module.control_anchor([], [row], item, namespace, lb)
+        self.assertEqual(anchor["req_id"], "rate-denial")
+        self.assertEqual(anchor["evidence_source"], "security_event")
+        self.assertIsNone(module.matched([], item, namespace, lb))
+        self.assertIsNone(
+            module.control_anchor(
+                [], [row, {**row, "req_id": "ambiguous"}], item, namespace, lb
+            )
+        )
+        self.assertIsNone(
+            module.control_anchor([], [{**row, "user": "wrong"}], item, namespace, lb)
+        )
+        self.assertIsNone(
+            module.control_anchor([], [row], {**item, "control": "waf"}, namespace, lb)
+        )
+
+
 class LogPages(unittest.TestCase):
     def client(self, pages):
         class Pages:

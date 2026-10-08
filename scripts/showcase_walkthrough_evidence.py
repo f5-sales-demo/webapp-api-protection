@@ -149,6 +149,25 @@ def bind_ordered_requests(
                 probe["server_request_id"] = record["req_id"]
 
 
+def control_anchor(
+    records: list[dict],
+    events: list[dict],
+    probe: dict,
+    namespace: str,
+    lb: str,
+) -> dict | None:
+    """Use actual access or uniquely matched rate security evidence, never a fake log."""
+    record = matched(records, probe, namespace, lb)
+    if record is not None:
+        return {**record, "evidence_source": "access_log"}
+    if probe.get("control") != "rate-limit" or probe.get("status") != RATE_DENIAL:
+        return None
+    record = matched(events, probe, namespace, lb)
+    return (
+        {**record, "evidence_source": "security_event"} if record is not None else None
+    )
+
+
 def blocked(
     events: list[dict], access: dict, probe: Probe, namespace: str, lb: str
 ) -> bool:
@@ -258,6 +277,21 @@ def collect(
             for event in client.pages(namespace, lb, start, end, user=user)
         ]
         save(client.walkthrough_directory / "security-log-window.json", events)
+        denial_events = [
+            event
+            for event in events
+            if event.get("sec_event_name") == "API Rate Limiting"
+        ]
+        bind_ordered_requests(
+            denial_events,
+            [
+                p
+                for p in probes
+                if p.get("control") == "rate-limit" and p.get("status") == RATE_DENIAL
+            ],
+            namespace,
+            lb,
+        )
         bind_ordered_requests(records, probes, namespace, lb)
         for probe in probes:
             if successful_rate_burst(probe):
@@ -269,7 +303,8 @@ def collect(
                     probe["user"],
                 )
         access_complete = all(
-            successful_rate_burst(p) or matched(records, p, namespace, lb)
+            successful_rate_burst(p)
+            or control_anchor(records, events, p, namespace, lb)
             for p in probes
         )
         if access_complete:
@@ -283,7 +318,11 @@ def collect(
             ]
             ready = all(
                 blocked(
-                    events, matched(records, p, namespace, lb) or {}, p, namespace, lb
+                    events,
+                    control_anchor(records, events, p, namespace, lb) or {},
+                    p,
+                    namespace,
+                    lb,
                 )
                 if p["status"] in (FORBIDDEN, RATE_DENIAL)
                 else p["control"] == "schema"
