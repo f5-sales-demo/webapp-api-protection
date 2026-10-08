@@ -1141,7 +1141,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/_lib.sh": {
-      "sha256": "10cf8d31eb550d59383f1947260f5fd363d4fd68aba215e9d6d7836893694591",
+      "sha256": "28848bf86aa70038f9952b69d432a11cf06fefc39035bdfd85da1875d5eff36a",
       "mode": "0555"
     },
     "/opt/traffic-generator/current/suites/cdn-load-testing/_multi-client.lua": {
@@ -1893,7 +1893,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_cache_monitor.py": {
-      "sha256": "18f50aee42ed6ada60cb0b9fe7e1d757399997541a1a102637b43a1fbf595449",
+      "sha256": "25dd1320ff8853a327861d6555f0d5df38b058a5afe069e5bf2f69ea5c63720f",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/tests/test_catalog.py": {
