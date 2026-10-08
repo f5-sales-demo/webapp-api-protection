@@ -624,7 +624,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--state-dir", type=Path, help="private persistent directory outside checkout"
     )
-    parser.add_argument("--timeout-seconds", type=int, default=1800)
+    parser.add_argument("--timeout-seconds", type=int, default=43200)
     args = parser.parse_args(argv)
     if args.timeout_seconds < 1:
         parser.error("--timeout-seconds must be positive")

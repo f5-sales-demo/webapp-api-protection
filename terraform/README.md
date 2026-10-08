@@ -89,7 +89,7 @@ Rebuild and destroy are destructive and must only be invoked deliberately for th
 
 `plan` saves a fresh private review plan, binding and action summary without applying. `adopt` imports only the exact reviewed mapping in `adoption-review.json`, after state/content verification and backups. Existing resources are never silently adopted by deploy. See the [operator reference](../docs/en/reference/terraform-ownership.mdx) for the comparison endpoints and completion gates.
 
-Each command accepts `--timeout-seconds` (default **1800**, whole-operation
+Each command accepts `--timeout-seconds` (default **43200**, whole-operation
 monotonic deadline), `--state-dir` and `--config`. Configuration accepts identical
 public fixed scope values, `subscription_id`, `tenant_id`, `ssh_key` and
 `expected_azure_user`; a `backend` object is rejected. An explicit `--config`

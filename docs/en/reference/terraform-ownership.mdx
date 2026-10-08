@@ -62,4 +62,6 @@ comparisons, successful legitimate requests, nine applications across native/pro
 two complete 164-entry catalog passes at 200 aggregate HTTP requests/second within 5%, at least 99%
 benign success, and zero baseline transport failures.
 
+Lifecycle commands use a finite 12-hour whole-operation deadline by default; override it with `--timeout-seconds` when needed. The collector calibrates XC and generator clocks before traffic starts, so early catalog requests can receive matched evidence.
+
 Verify restart and reboot recovery. Require a second unchanged apply and a refreshed plan with zero resource and output actions after walkthroughs, catalog passes, and reboot. Source tests and candidate provider checks do not satisfy live deployment acceptance.
