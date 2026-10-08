@@ -1,5 +1,5 @@
 locals {
-  showcase_schema_content   = local.showcase_schema_content
+  showcase_schema_content   = file("${path.module}/fixtures/showcase-openapi.json")
   comparison_schema_content = file("${path.module}/fixtures/comparison-openapi.json")
 }
 
