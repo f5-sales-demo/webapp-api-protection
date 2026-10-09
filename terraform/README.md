@@ -50,13 +50,12 @@ the existing DNS zone's managed-record support must be provisioned before the ru
 The namespace must already exist. Previously created Azure storage is left untouched;
 it is neither a prerequisite nor a lifecycle cleanup target.
 
-Provider releases are pinned exactly with the root registry lock:
-`f5-sales-demo/xcsh` **13.0.3**, `hashicorp/azurerm` **5.7.0**, and
-`hashicorp/azuread` **3.10.0**. The lifecycle uses `TF_CLI_CONFIG_FILE=/dev/null`
+Provider releases are pinned exactly in `versions.tf` and the checked-in registry locks.
+The namespace and reusable XC modules declare the same XC provider release. The lifecycle uses `TF_CLI_CONFIG_FILE=/dev/null`
 to exclude development overrides. Provider 12's empty one-of selections are
 object attributes (`field = {}`), not nested blocks.
 
-## Four commands
+## Lifecycle commands
 
 Use existing environment authentication; never write tokens to tracked files:
 
@@ -65,6 +64,7 @@ export XCSH_API_URL="https://f5-sales-demo.console.ves.volterra.io"
 export XCSH_API_TOKEN="<api-token>"
 
 # Approved IDs select the existing private per-subscription data directory.
+bash scripts/demo-lifecycle.sh plan
 bash scripts/demo-lifecycle.sh deploy
 bash scripts/demo-lifecycle.sh verify
 bash scripts/demo-lifecycle.sh rebuild
