@@ -14,9 +14,7 @@ from demo_test_support import ensure_equal, expect_error
 
 class LatestProvider(unittest.TestCase):
     def setUp(self):
-        directory = tempfile.TemporaryDirectory()
-        self.addCleanup(directory.cleanup)
-        self.root = Path(directory.name)
+        self.root = Path(self.enterContext(tempfile.TemporaryDirectory()))
         self.context = SimpleNamespace(
             paths=SimpleNamespace(app=self.root, state=self.root)
         )
