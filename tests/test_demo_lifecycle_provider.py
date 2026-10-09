@@ -1,6 +1,7 @@
 """Latest released provider pins and locks must converge before deployment."""
 
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,7 +15,8 @@ from demo_test_support import ensure_equal, expect_error
 
 class LatestProvider(unittest.TestCase):
     def setUp(self):
-        self.root = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        self.root = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.root)
         self.context = SimpleNamespace(
             paths=SimpleNamespace(app=self.root, state=self.root)
         )
