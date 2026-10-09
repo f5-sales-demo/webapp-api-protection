@@ -90,6 +90,7 @@ def preflight_fixture(
     mocks = []
     for owner, name, options in (
         (fixture.terraform, "local_backend_check", {}),
+        (lifecycle, "require_latest_provider", {}),
         (
             fixture.runtime,
             "run",
@@ -129,7 +130,7 @@ def preflight_fixture(
         mock_patch = patch.object(owner, name, **options)
         mocks.append(mock_patch.start())
         case.addCleanup(mock_patch.stop)
-    return Preflight(fixture, mocks[2], mocks[3], mocks[5])
+    return Preflight(fixture, mocks[3], mocks[4], mocks[6])
 
 
 class OperatorConfiguration(unittest.TestCase):

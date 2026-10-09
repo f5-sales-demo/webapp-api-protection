@@ -2,21 +2,21 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/f5-sales-demo/xcsh" {
-  version     = "15.3.0"
-  constraints = "15.3.0"
+  version     = "15.5.2"
+  constraints = "15.5.2"
   hashes = [
-    "h1:XxOImoljfYZIxUbge67PnU1r3WPvUIBtxx0KOSWokuo=",
-    "h1:qGyCXrTdUfS2wl3Y+maB0wgZeyIELskmgo86M4N5LYI=",
-    "zh:065e3a673d407d2e2718d99f936cdacffc65b32a6beb4ecec96544fcdfbaaac8",
-    "zh:0cc3a2fe22c18d01ce583bfeef768ca6d15bb6af42ba01ced95038bab5980930",
-    "zh:1d8dd547d1ee2fa191789372c0043469622e46149ead60d9918efd07d25c8a9d",
-    "zh:4261c65fff99f267f23262655be16cb9fb7d75e729b06d30a146bc9872c9428f",
-    "zh:54a8f4ac94007c606f4f3bead40a35e579d1fda34580fa4352647499078c1c34",
-    "zh:5942ed042773d21fe54a8d3b82eaeff222e79a4509033ab81fc95362f63d664b",
-    "zh:5fb4d672c7a4f111b6776cbd3fdcbea82086b1657f7bfe2a4edfa5ce905c27ea",
-    "zh:65b51b8e5561931207857e35fc0a915efd984cf7c1eab8143a5fdef245224a57",
-    "zh:80b1a42c4d5e6a6826e5601ee79fc99a101f9e2c265783ad208e95695a8d9acd",
+    "h1:BxmmO1tacDbdRPQ6oh1dQooLcTHT/4aPI7ho1fj1J3E=",
+    "h1:HCrPdKbHA035dyOXKz8ryMU4F7IB/3ngTV2HBAI0KhY=",
+    "zh:2121f4819e238de90e6835e79f40055a00a422aec7a7c33df99821557aebd1db",
+    "zh:2cfef9c2f7a23feb2e0baa81fc5a91d7fa7871d23c290f896893c91abb40301b",
+    "zh:2f34ba637aedcbb72ef4fa17ba4d3aa09a38fdd6a48ce2910ff7a5d6672b142e",
+    "zh:5ed59f8ed2cf9ef020a336a5327055128456f554d861dd155a9d97bb744a2c91",
+    "zh:6afe17f1b74a0c8ad0fe71f2abd11312c4ba8f0846cd147edb8017ac6bb9fc15",
     "zh:95513584b227b9c7923e641aae986935821077b1eb4116845b5312ac412bbc72",
-    "zh:d385d5012884ed4e79a73be7f09f211081c2450027e1e42aae589ce5cd8d2a14",
+    "zh:a6c58937c6b7b01ff153ea1ab13e0d326ddb62e6430af2be5063a759bf92ffa7",
+    "zh:ada7dbcf310998b12107b647c454f89c9528023f9cda084198dbd3e8edbc3125",
+    "zh:b49dbd28c37a58244e8c034cb0fff49bef1c2c28bef7f3c76f38d41ac07c9c3a",
+    "zh:cda2f2fe639b97c0c927b6130f5c2249411c4e0e6852ff74f8360d28943cfc76",
+    "zh:ff7c37cdf95690375b38063e000e3155ecbdc2911a5c5e5a1e7096296a20920e",
   ]
 }

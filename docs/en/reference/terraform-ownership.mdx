@@ -17,6 +17,10 @@ Each comparison has its own firewall and user identity. Origin pools and health 
 
 ## Plan and adoption
 
+Every lifecycle preflight checks the latest immutable XC provider release. Update all XC module
+pins and both registry locks when a newer release is published, then create a fresh plan.
+An older declared provider fails preflight; the lifecycle never upgrades or applies silently.
+
 Run `scripts/demo-lifecycle.sh plan` on Ubuntu with the approved private operator configuration and
 XC environment. The command saves `review.plan`, `review.binding.json`, and `review.summary.json`
 beside the private application state. Review proposed replacements before deployment. Bindings

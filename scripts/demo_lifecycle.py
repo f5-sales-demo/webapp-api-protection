@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any
 from demo_lifecycle_adoption import adopt
 from demo_lifecycle_capacity import require_capacity as _xc_capacity
 from demo_lifecycle_ownership import Ownership
+from demo_lifecycle_provider import require_latest_provider
 from demo_lifecycle_runtime import Runtime
 from demo_lifecycle_state import (
     Blocked,
@@ -308,6 +309,7 @@ class Lifecycle:
         _prerequisites(self.context, self.runtime)
         self.terraform.local_backend_check()
         _azure_identity(self.context, self.runtime)
+        require_latest_provider(self.context, self.runtime)
         self.terraform.namespace_prepare()
         _entitlement_dns(self.runtime)
         if deploying:

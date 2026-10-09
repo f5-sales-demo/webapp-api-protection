@@ -839,11 +839,16 @@ class NamespaceTerraform(unittest.TestCase):
         root = ROOT / "terraform"
         source = (root / "namespace/main.tf").read_text()
         outputs = (root / "namespace/outputs.tf").read_text()
+        declared = hcl2.loads((root / "versions.tf").read_text())
+        namespace = hcl2.loads(source)
+        ensure_equal(
+            namespace["terraform"][0]["required_providers"][0]["xcsh"][0]["version"],
+            declared["terraform"][0]["required_providers"][0]["xcsh"][0]["version"],
+        )
         for required in (
             'backend "local" {}',
             'provider "xcsh" {}',
             "f5-sales-demo/xcsh",
-            '"= 15.3.0"',
             'resource "xcsh_namespace" "this"',
             "prevent_destroy = true",
         ):
