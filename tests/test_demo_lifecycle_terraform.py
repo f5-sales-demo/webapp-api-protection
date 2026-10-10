@@ -55,6 +55,92 @@ def render_guest(profile: dict[str, Any], defaults: dict[str, Any]) -> dict[str,
     return json.loads(config_line)
 
 
+class ReviewedRebuild(unittest.TestCase):
+    """Do not apply or inspect a stale review as a replacement authorization."""
+
+    def test_stale_review_rejected_before_provider_reads(self):
+        fixture = make_fixture(self)
+        with (
+            patch.object(
+                terraform_module,
+                "require_current",
+                side_effect=state_module.Blocked("stale"),
+            ),
+            patch.object(fixture.terraform, "tf") as tf,
+            expect_error(state_module.Blocked, "stale"),
+        ):
+            fixture.terraform.reviewed_rebuild({})
+        tf.assert_not_called()
+
+    def test_current_owned_review_backs_up_actual_inputs_and_states(self):
+        fixture = make_fixture(self)
+        state = fixture.context.paths.state
+        fixture.context.paths.vars.write_text("private synthetic inputs")
+        (state / "application.tfstate").write_text("synthetic state")
+        (state / "review.plan").write_text("synthetic plan")
+        plan = {
+            "resource_changes": [
+                {
+                    "address": "vm",
+                    "type": "azurerm_linux_virtual_machine",
+                    "change": {
+                        "actions": ["delete", "create"],
+                        "before": {"id": "owned"},
+                    },
+                }
+            ]
+        }
+        with (
+            patch.object(terraform_module, "require_current"),
+            patch.object(fixture.terraform, "tf", return_value=(json.dumps(plan), 0)),
+            patch.object(fixture.terraform, "guard_conflicts"),
+            patch.object(terraform_module, "require_capacity"),
+        ):
+            ensure_equal(
+                fixture.terraform.reviewed_rebuild({"vm": "owned"}),
+                state / "review.plan",
+            )
+        backups = list(state.glob("rebuild-backup-*"))
+        ensure_equal(len(backups), 1)
+        ensure_equal(
+            (backups[0] / (fixture.context.paths.vars.name + ".snapshot")).read_text(),
+            "private synthetic inputs",
+        )
+        ensure_equal(
+            (backups[0] / "application.tfstate.snapshot").read_text(), "synthetic state"
+        )
+        ensure_equal(
+            (backups[0] / (fixture.context.paths.vars.name + ".snapshot"))
+            .stat()
+            .st_mode
+            & 0o777,
+            0o600,
+        )
+
+    def test_reviewed_unowned_deletion_rejected(self):
+        fixture = make_fixture(self)
+        plan = {
+            "resource_changes": [
+                {
+                    "address": "vm",
+                    "type": "azurerm_linux_virtual_machine",
+                    "change": {
+                        "actions": ["delete", "create"],
+                        "before": {"id": "unknown"},
+                    },
+                }
+            ]
+        }
+        with (
+            patch.object(terraform_module, "require_current"),
+            patch.object(fixture.terraform, "tf", return_value=(json.dumps(plan), 0)),
+            patch.object(fixture.terraform, "guard_conflicts") as conflicts,
+            expect_error(state_module.Blocked, "reviewed owned"),
+        ):
+            fixture.terraform.reviewed_rebuild({"vm": "owned"})
+        conflicts.assert_not_called()
+
+
 class TerraformWiring(unittest.TestCase):
     def test_generator_identity_is_not_deferred_by_load_balancer(self):
         config = hcl2.loads((ROOT / "terraform/main.tf").read_text())
@@ -81,12 +167,10 @@ class TerraformWiring(unittest.TestCase):
         rendered = modules["traffic_generator"]["custom_data"]
         ensure(
             'templatefile("${path.module}/cloud-init/traffic-generator.yaml"'
-            in rendered
+            in str(rendered)
         )
-        ensure('"target_domains": "${jsonencode(var.lb_domains)}"' in rendered)
-        ensure(
-            '"mud_bad_traffic": "${var.mud_enabled && var.mud_bad_traffic}"' in rendered
-        )
+        ensure("jsonencode(var.lb_domains)" in str(rendered))
+        ensure("var.mud_enabled && var.mud_bad_traffic" in str(rendered))
         declaration = (
             'variable "mud_bad_traffic" {'
             + (ROOT / "terraform/variables.tf")
@@ -97,7 +181,7 @@ class TerraformWiring(unittest.TestCase):
         )
         variables = hcl2.loads(declaration)
         defaults = {
-            name: value.get("default")
+            name: expression(value, "default")
             for block in variables["variable"]
             for name, value in block.items()
         }
@@ -187,7 +271,7 @@ class LocalBackend(unittest.TestCase):
         self.fixture.terraform.namespace_prepare()
         ensure_equal(
             self.fixture.context.state.persistent,
-            {"namespace": "system/" + state_module.FIXED["namespace"]},
+            state_module.foundation_identity(state_module.FIXED["namespace"]),
         )
         ensure_equal(self.fixture.context.state.namespace_uid, "namespace-uid")
         ensure_equal(
@@ -213,7 +297,7 @@ class LocalBackend(unittest.TestCase):
             (
                 "persistent.json",
                 {
-                    "namespace": "system/" + state_module.FIXED["namespace"],
+                    "namespace": f"system/{state_module.FIXED['namespace']}",
                     "storage_account": "old",
                 },
             ),
@@ -755,11 +839,16 @@ class NamespaceTerraform(unittest.TestCase):
         root = ROOT / "terraform"
         source = (root / "namespace/main.tf").read_text()
         outputs = (root / "namespace/outputs.tf").read_text()
+        declared = hcl2.loads((root / "versions.tf").read_text())
+        namespace = hcl2.loads(source)
+        ensure_equal(
+            namespace["terraform"][0]["required_providers"][0]["xcsh"][0]["version"],
+            declared["terraform"][0]["required_providers"][0]["xcsh"][0]["version"],
+        )
         for required in (
             'backend "local" {}',
             'provider "xcsh" {}',
             "f5-sales-demo/xcsh",
-            '"= 12.0.2"',
             'resource "xcsh_namespace" "this"',
             "prevent_destroy = true",
         ):

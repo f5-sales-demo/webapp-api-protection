@@ -2,7 +2,7 @@
 # mitigation action at every threat level, must produce a valid plan. Challenge modes
 # are covered in mud_challenge.tftest.hcl. Targets ./modules/http-lb — no tenant contact.
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80

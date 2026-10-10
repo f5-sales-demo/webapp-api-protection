@@ -2,6 +2,7 @@
 
 import base64
 import gzip
+import hashlib
 import json
 import os
 import re
@@ -27,6 +28,123 @@ from tests.demo_traffic_fixtures import (
 
 
 class CloudInitTests(unittest.TestCase):
+    def test_apt_retry_configuration_precedes_package_installation(self):
+        _, data = rendered_cloud_config()
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / "apt.conf"
+            source = data["bootcmd"][0].replace(
+                "/etc/apt/apt.conf.d/80-demo-acquire", str(config)
+            )
+            for _ in range(2):
+                ensure_equal(shell(source).returncode, 0)
+                ensure_equal(
+                    config.read_text().splitlines(),
+                    [
+                        'Acquire::Retries "5";',
+                        'Acquire::http::Timeout "60";',
+                        'Acquire::https::Timeout "60";',
+                    ],
+                )
+
+    def test_official_https_apt_sources_are_reproducible(self):
+        _, data = rendered_cloud_config()
+        ensure_equal(data["apt"]["preserve_sources_list"], True)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ubuntu.sources"
+            source = data["bootcmd"][1].replace(
+                "/etc/apt/sources.list.d/ubuntu.sources", str(path)
+            )
+            for _ in range(2):
+                ensure_equal(shell(source).returncode, 0)
+                ensure("https://archive.ubuntu.com/ubuntu/" in path.read_text())
+                ensure("https://security.ubuntu.com/ubuntu/" in path.read_text())
+                ensure("azure.archive" not in path.read_text())
+                manifest = json.loads((ROOT / "terraform/guest-files.json").read_text())
+                expected = manifest["generator"][
+                    "/etc/apt/sources.list.d/ubuntu.sources"
+                ]
+                ensure_equal(
+                    hashlib.sha256(path.read_bytes()).hexdigest(), expected["sha256"]
+                )
+
+    def test_node_package_checks_content_metadata_and_installed_version(self):
+        _, data = rendered_cloud_config()
+        pin = json.loads((ROOT / "terraform/tool-pins.json").read_text())
+        asset = pin["release_assets"]["nodejs_24.21.0-1nodesource1_amd64.deb"]
+        source = phase(data, "installing Node.js 24").replace(
+            ". /usr/local/lib/cloud-init-helpers.sh", ""
+        )
+        ensure(asset["url"] in source and asset["sha256"] in source)
+        ensure("setup_24.x" not in source)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "fixture.deb"
+            archive.write_bytes(b"declared-node-package")
+            digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+            installer = source.replace(
+                "/tmp/nodejs-pinned.deb",  # noqa: S108 -- owned local fixture replaces guest path
+                str(root / "download.deb"),
+            ).replace("dpkg-deb", "deb_metadata")
+            stubs = (
+                "set -eu\nlog_phase() { :; };\n"
+                "dpkg() { echo amd64; };\n"
+                'deb_metadata() { case "$3" in Package) echo "$PACKAGE" ;; '
+                'Version) echo "$VERSION" ;; Architecture) echo "$ARCH" ;; esac; };\n'
+                'node() { echo "$RUNTIME"; };\n'
+                'install_packages() { echo installed >> "$CALLS"; };\n'
+                "fetch_url() { cp " + shlex.quote(str(archive)) + ' "$2"; };\n'
+            )
+            environment = {
+                **os.environ,
+                "CALLS": str(root / "calls"),
+                "PACKAGE": "nodejs",
+                "VERSION": pin["nodejs_deb_version"],
+                "ARCH": "amd64",
+                "RUNTIME": "v24.21.0",
+            }
+            bad_hash = shell(stubs + installer, environment)
+            ensure(bad_hash.returncode != 0)
+            ensure(not (root / "calls").exists())
+            installer = installer.replace(asset["sha256"], digest)
+            for field, wrong in (
+                ("PACKAGE", "other"),
+                ("VERSION", "24.20.0"),
+                ("ARCH", "arm64"),
+            ):
+                with self.subTest(field=field):
+                    result = shell(stubs + installer, {**environment, field: wrong})
+                    ensure(result.returncode != 0)
+                    ensure(not (root / "calls").exists())
+            result = shell(stubs + installer, {**environment, "RUNTIME": "v24.20.0"})
+            ensure(result.returncode != 0)
+            ensure((root / "download.deb").exists(), result.stdout + result.stderr)
+            (root / "calls").unlink()
+            result = shell(stubs + installer, environment)
+            ensure_equal(result.returncode, 0)
+            ensure_equal((root / "calls").read_text(), "installed\n")
+            ensure(not (root / "download.deb").exists())
+
+    def test_posix_clone_helper_validates_pin_before_git(self):
+        _, data = rendered_cloud_config()
+        helper = content(data, "/usr/local/lib/cloud-init-helpers.sh")
+        ensure("[[" not in helper)
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "helper.sh"
+            script.write_text(helper)
+            result = subprocess.run(  # noqa: S603 - declared helper under POSIX shell
+                [
+                    "/bin/sh",
+                    "-c",
+                    ' . "$1"; clone_repo https://example.test/repo /unused invalid',
+                    "sh",
+                    str(script),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        ensure_equal(result.returncode, 1)
+
     def test_embedded_shell_syntax_and_wire_limit(self):
         template, data = rendered_cloud_config()
         encoded = azure_custom_data(template.encode())
@@ -112,7 +230,7 @@ class CloudInitTests(unittest.TestCase):
         source = phase(data, "installing security binaries").replace(
             ". /usr/local/lib/cloud-init-helpers.sh", ""
         )
-        stubs = 'log_phase() { :; }; dpkg() { echo amd64; }; ghlatest() { echo 1.2.3; }; fetch_url() { echo "fetch:$1"; }; unzip() { return 18; };\n'
+        stubs = 'log_phase() { :; }; dpkg() { echo amd64; }; ghlatest() { echo 1.2.3; }; fetch_url() { echo "fetch:$1"; }; sha256sum() { cat >/dev/null; }; unzip() { return 18; };\n'
         result = shell(data["runcmd"][0] + stubs + source)
         ensure_equal(result.returncode, 18)
         ensure("Phase 3 complete" not in result.stdout)
@@ -125,11 +243,11 @@ class CloudInitTests(unittest.TestCase):
                 'echo "Installing feroxbuster'
             )
         ]
-        stubs = 'set -eu\nDPKG_ARCH=amd64\nghlatest() { echo 1.2.3; }; uname() { echo x86_64; }; fetch_url() { echo "fetch:$1"; }; tar() { :; };\n'
+        stubs = 'set -eu\nDPKG_ARCH=amd64\nghlatest() { echo 1.2.3; }; uname() { echo x86_64; }; fetch_url() { echo "fetch:$1"; }; tar() { :; }; sha256sum() { cat >/dev/null; };\n'
         result = shell(stubs + source)
         ensure_equal(result.returncode, 0)
-        ensure("/v1.2.3/ffuf_1.2.3_linux_amd64.tar.gz" in result.stdout)
-        ensure("/v1.2.3/gobuster_Linux_x86_64.tar.gz" in result.stdout)
+        ensure("/v2.3.0/ffuf_2.3.0_linux_amd64.tar.gz" in result.stdout)
+        ensure("/v3.8.2/gobuster_Linux_x86_64.tar.gz" in result.stdout)
 
     def test_every_catalog_requires_zap_and_java(self):
         stubs = 'set -eu\nlog_phase() { :; }; command() { case "$2" in zap|msfconsole|java) return 1 ;; *) return 0 ;; esac; };\n'

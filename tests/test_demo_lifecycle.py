@@ -82,6 +82,7 @@ def fake_deploy(
 
     stub(case, fixture.terraform, "plan", side_effect=plan)
     stub(case, fixture.terraform, "tf", side_effect=terraform)
+    stub(case, fixture.terraform, "apply", side_effect=terraform)
     stub(
         case,
         fixture.ownership,
@@ -121,6 +122,7 @@ class Capacity:
 def capacity_fixture(case: unittest.TestCase, allocated: bool = True) -> Capacity:
     """Supply exact synthetic owned VM and subscription capacity readbacks."""
     fixture = make_fixture(case)
+    stub(case, lifecycle, "_xc_capacity")
     context = fixture.context
     context.settings = replace(context.settings, operation="rebuild")
     namespace = stub(case, fixture.terraform, "namespace_prepare")
@@ -240,12 +242,13 @@ class Orchestration(unittest.TestCase):
                 "acceptance",
                 "post-acceptance-drift",
                 "apply",
+                "post-second-apply-drift",
             ],
         )
         generated = json.loads(self.fixture.context.paths.vars.read_text())
         ensure_equal(
-            generated["api_definition_swagger_specs"],
-            [PINNED],
+            generated.get("api_definition_swagger_specs", []),
+            [],
         )
 
     def test_deploy_refreshes_stale_private_mud_profile_from_canonical_profile(
@@ -272,21 +275,12 @@ class Orchestration(unittest.TestCase):
             self.fixture.lifecycle.deploy()
         ensure("traffic-start" not in calls and "acceptance" not in calls)
 
-    def test_unpinned_upload_blocks_before_app_plan(self) -> None:
-        """Reject mutable upload identifiers."""
-        calls = fake_deploy(self, self.fixture)
-        stub(
-            self,
-            self.fixture.runtime,
-            "run",
-            return_value=(
-                "/api/object_store/namespaces/webapp-api-protection/stored_objects/swagger/showcase/latest",
-                0,
-            ),
-        )
-        with expect_error(lifecycle.Blocked):
-            self.fixture.lifecycle.deploy()
-        ensure("application" not in calls)
+    def test_deploy_does_not_issue_swagger_outside_terraform(self) -> None:
+        """Only Terraform may issue the declared Swagger version."""
+        fake_deploy(self, self.fixture)
+        command = stub(self, self.fixture.runtime, "run")
+        self.fixture.lifecycle.deploy()
+        command.assert_not_called()
 
     def test_missing_external_namespace_blocks(self) -> None:
         """Never create an unavailable external namespace."""
@@ -340,7 +334,7 @@ class Orchestration(unittest.TestCase):
         ensure_equal(stdout.strip(), payload)
 
     def test_rebuild_holds_one_outer_lock(self) -> None:
-        """Rebuild executes quota, destroy and deploy under one lock."""
+        """Rebuild executes quota and guarded replacement under one lock."""
         fixture = self.fixture
         fixture.context.settings = replace(
             fixture.context.settings, operation="rebuild"
@@ -358,9 +352,8 @@ class Orchestration(unittest.TestCase):
             side_effect=lambda _deploying: preflight(),
         )
         for method, label in (
-            ("destroy", "destroy"),
+            ("rebuild", "rebuild"),
             ("capacity_permissions", "quota"),
-            ("deploy", "deploy"),
         ):
             stub(
                 self,
@@ -369,7 +362,7 @@ class Orchestration(unittest.TestCase):
                 side_effect=lambda label=label: calls.append(label),
             )
         fixture.lifecycle.execute()
-        ensure_equal(calls, ["preflight", "quota", "destroy", "deploy"])
+        ensure_equal(calls, ["preflight", "quota", "rebuild"])
         ensure_equal(fixture.context.state.receipt["status"], "verified")
 
     def test_cleanup_never_masks_primary_failure(self) -> None:
@@ -449,6 +442,7 @@ class RuntimeContract(unittest.TestCase):
         stub(self, fixture.lifecycle, "preflight")
         stub(self, fixture.ownership, "enroll_guests")
         stub(self, fixture.ownership, "await_catalog")
+        stub(self, fixture.ownership, "verify_guest_pins")
         stub(
             self,
             fixture.lifecycle,
@@ -828,11 +822,9 @@ class ReviewedDefects(unittest.TestCase):
         )
         capacity.verify_phase.side_effect = lifecycle.Blocked("not ready")
         capacity.outputs.side_effect = lifecycle.Blocked("missing showcase")
-        destroy = stub(self, obj, "destroy")
-        deploy = stub(self, obj, "deploy")
+        rebuild = stub(self, obj, "rebuild")
         obj.execute()
-        destroy.assert_called_once_with()
-        deploy.assert_called_once_with()
+        rebuild.assert_called_once_with()
         capacity.namespace.assert_called_once_with()
         capacity.inventory.assert_called_once_with()
         capacity.verify_fixture.assert_called_once_with()

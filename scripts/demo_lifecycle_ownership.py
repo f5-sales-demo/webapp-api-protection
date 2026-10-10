@@ -3,18 +3,26 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import os
 import re
+import shlex
 import time
 from typing import TYPE_CHECKING, Any, Literal
 
+from demo_catalog_acceptance import catalog_metrics, coverage_failures
+from demo_catalog_clock import align_generator_clock, catalog_client
+from demo_catalog_evidence import collect_pending
+from demo_catalog_recovery import enroll_recovery
+from demo_catalog_start import await_catalog_start, catalog_status
+from demo_lifecycle_fixture import verify_fixture
+from demo_lifecycle_hosts import rotate_rebuilt_keys
 from demo_lifecycle_state import (
     AZURE_TYPES,
     XC_COLLECTIONS,
     XC_TYPES,
     Blocked,
+    foundation_identity,
     managed_resources,
     private_json,
     save_json,
@@ -27,9 +35,11 @@ if TYPE_CHECKING:
     from demo_lifecycle_runtime import Runtime
     from demo_lifecycle_state import Context, Guest
     from demo_lifecycle_terraform import Terraform
+    from demo_verify_client import Client
 
 _ACCESS_BUDGET_SECONDS = 20
 _REQUIRED_CATALOG_PASSES = 2
+_CATALOG_ENTRIES = 164
 _MAX_IP_OCTET = 255
 _GROUP_ID_PARTS = 5
 _MIN_PROVIDER_PARTS = 3
@@ -265,6 +275,49 @@ def _xc_ownership(
     for item in resources:
         if item["type"] not in XC_TYPES:
             continue
+        if item["type"] == "xcsh_swagger_object":
+            values = item["values"]
+            version = values.get("version")
+            name = values.get("name")
+            valid_version = (
+                isinstance(version, str)
+                and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", version)
+                and version.lower() != "latest"
+            )
+            valid_name = isinstance(name, str) and re.fullmatch(
+                r"[a-z][a-z0-9-]*[a-z0-9]", name
+            )
+            if (
+                values.get("namespace") != namespace
+                or not valid_version
+                or not valid_name
+            ):
+                message = "missing exact Swagger ownership identity"
+                raise Blocked(message)
+            path = (
+                "/api/object_store/namespaces/"
+                + namespace
+                + "/stored_objects/swagger/"
+                + name
+                + "/"
+                + version
+            )
+            live = runtime.xc(path)
+            if live is None:
+                message = "owned Swagger version unavailable"
+                raise Blocked(message)
+            content = live.get("string_value")
+            metadata = live.get("metadata", {})
+            if (
+                metadata.get("name") != name
+                or metadata.get("namespace") != namespace
+                or metadata.get("version") != version
+                or not isinstance(content, str)
+                or hashlib.sha256(content.encode()).hexdigest() != values.get("sha256")
+            ):
+                message = "owned Swagger content or identity differs"
+                raise Blocked(message)
+            continue
         collection = XC_COLLECTIONS.get(item["type"])
         name = item["values"].get("name")
         if (
@@ -307,56 +360,6 @@ def _backup_manifest(manifest: Path, snapshot: bytes) -> tuple[Path, str]:
     return backup, digest
 
 
-class _ReadOnlyClient:
-    """Adapt the canonical upload verifier to one pinned GET under the same budget."""
-
-    def __init__(self, runtime: Runtime, path: str, base: str) -> None:
-        """Bind an immutable request destination and tenant base."""
-        self.runtime = runtime
-        self.path = path
-        self.base = base
-
-    def remaining(self) -> float:
-        """Delegate the shrinking operation deadline."""
-        return self.runtime.remaining()
-
-    def request(
-        self, method: str, path: str, body: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
-        """Permit only the pinned GET with no payload or alternative object path."""
-        if method != "GET" or path != self.path or body is not None:
-            message = "fixture verification must remain read-only"
-            raise Blocked(message)
-        result = self.runtime.xc(path)
-        if result is None:
-            message = "fixture preservation object unavailable"
-            raise Blocked(message)
-        return result
-
-
-def _fixture_receipt(context: Context) -> dict[str, Any]:
-    receipt_path = context.paths.state / "swagger-receipt.json"
-    if not receipt_path.is_file() or receipt_path.is_symlink():
-        message = "fixture preservation receipt missing"
-        raise Blocked(message)
-    saved = private_json(receipt_path)
-    pinned = private_json(context.paths.vars).get("api_definition_swagger_specs")
-    scope = context.settings.scope
-    if not isinstance(saved, dict):
-        message = "fixture preservation identity mismatch"
-        raise Blocked(message)
-    if (
-        saved.get("api_url") != scope["xc_url"]
-        or saved.get("namespace") != scope["namespace"]
-        or saved.get("name") != "showcase"
-        or pinned != [saved.get("path")]
-        or not isinstance(saved.get("content"), str)
-    ):
-        message = "fixture preservation identity mismatch"
-        raise Blocked(message)
-    return saved
-
-
 class Ownership:
     """Join provider state to live identity before access, verification or recovery."""
 
@@ -367,6 +370,7 @@ class Ownership:
         self.context = context
         self.runtime = runtime
         self.terraform = terraform
+        self.catalog_evidence_client: Client | None = None
 
     def owned_guest(
         self,
@@ -411,6 +415,21 @@ class Ownership:
             "UserKnownHostsFile=" + str(self.context.paths.known_hosts),
             guest["admin_username"] + "@" + guest["public_ip"],
         ]
+
+    def rotate_rebuilt_hosts(self, previous: Sequence[dict[str, Any]]) -> None:
+        """Rotate only replaced owned VMs after checking Azure's unique VM identity."""
+        current = _resources(self.context)
+        roles: tuple[Literal["origin", "generator"], ...] = ("origin", "generator")
+        records = [
+            (_guest_records(previous, role), _guest_records(current, role), role)
+            for role in roles
+        ]
+        rotate_rebuilt_keys(
+            self.context,
+            self.runtime,
+            records,
+            lambda role: self.owned_guest(current, role),
+        )
 
     def enroll_guest(self, guest: Guest) -> None:
         """Bound authenticated host enrollment without replacing existing keys."""
@@ -462,6 +481,19 @@ class Ownership:
         guest = self.owned_guest(resources, "generator")
         self.context.state.outputs = {"generator": guest}
 
+    def enroll_order_recovery(
+        self, origin: Guest, generator: Guest, fixtures: dict
+    ) -> None:
+        """Delegate the dedicated forced-command order enrollment."""
+        enroll_recovery(
+            self.context,
+            self.runtime,
+            origin,
+            generator,
+            lambda guest: self.ssh_argv(guest, "yes"),
+            fixtures,
+        )
+
     def catalog_fixtures(self) -> None:
         """Restore private synthetic fixtures only between two ownership-verified guests."""
         outputs = self.context.state.outputs
@@ -480,6 +512,85 @@ class Ownership:
             ]
         )[0]
         fixtures = json.loads(payload)
+        # Enroll one purpose-specific forced-command key; no general root access.
+        key_path = self.context.paths.state / "signup-recovery-key"
+        if not key_path.exists():
+            self.runtime.run(
+                [
+                    "ssh-keygen",
+                    "-q",
+                    "-t",
+                    "ed25519",
+                    "-N",
+                    "",
+                    "-C",
+                    "waap-catalog-signup-recovery",
+                    "-f",
+                    key_path,
+                ]
+            )
+        public = key_path.with_suffix(".pub").read_text().strip()
+        self.runtime.run(
+            [
+                *self.ssh_argv(origin, "yes"),
+                "sudo",
+                "-n",
+                "/usr/local/bin/enroll-signup-recovery",
+            ],
+            input_text=public,
+        )
+        recovery = {
+            "host": origin["public_ip"],
+            "key": "/opt/traffic-generator/signup-recovery-key",
+            "known_hosts": "/opt/traffic-generator/signup-recovery-known_hosts",
+        }
+        # Same SSH host key already enrolled on this ownership-verified route.
+        known = self.runtime.run(
+            [
+                "ssh-keygen",
+                "-F",
+                origin["public_ip"],
+                "-f",
+                self.context.paths.known_hosts,
+            ]
+        )[0]
+        # Export the already-enrolled host's verified key in portable plain-host form.
+        rows = [
+            line.split()
+            for line in known.splitlines()
+            if line and not line.startswith("#")
+        ]
+        known = (
+            "\n".join(origin["public_ip"] + " " + " ".join(row[1:3]) for row in rows)
+            + "\n"
+        )
+        if not rows:
+            message = "owned recovery SSH host key unavailable"
+            raise Blocked(message)
+        package = {"key": key_path.read_text(), "known_hosts": known}
+        install = "import json,sys,pathlib,os; os.umask(0o077); p=json.load(sys.stdin); root=pathlib.Path('/opt/traffic-generator'); [(root/('signup-recovery-'+n)).write_text(p[n]) for n in ['key','known_hosts']]; [(root/('signup-recovery-'+n)).chmod(0o600) for n in ['key','known_hosts']]"
+        self.runtime.run(
+            [
+                *self.ssh_argv(generator, "yes"),
+                "sudo",
+                "-n",
+                "python3",
+                "-c",
+                __import__("shlex").quote(install),
+            ],
+            input_text=json.dumps(package),
+        )
+        fixtures["signup_recovery"] = recovery
+        self.enroll_order_recovery(origin, generator, fixtures)
+        enroll_recovery(
+            self.context,
+            self.runtime,
+            origin,
+            generator,
+            lambda guest: self.ssh_argv(guest, "yes"),
+            fixtures,
+            "family",
+        )
         if fixtures.get(
             "fixture_type"
         ) != "seeded-synthetic-origin-accounts" or not fixtures.get("crapi_tokens"):
@@ -497,6 +608,52 @@ class Ownership:
         )
         self.runtime.phase("synthetic-catalog-fixtures-restored")
 
+    def recover_catalog_families(self) -> None:
+        """Restore only active host-owned family journals before restarting traffic."""
+        outputs = self.context.state.outputs
+        if not outputs or "origin" not in outputs:
+            return
+        generator = self.owned_guest(
+            _resources(self.context), "generator", outputs["generator"]
+        )
+        status = catalog_status(self.runtime, self.ssh_argv(generator, "yes"))
+        if status.get("service_active") is True:
+            # An unchanged deploy may call start on an already-running catalog.
+            # Its active journal belongs to that execution and must remain untouched.
+            return
+        if status.get("service_active") is not False:
+            message = "catalog activity state unavailable for family recovery"
+            raise Blocked(message)
+        origin = self.owned_guest(_resources(self.context), "origin", outputs["origin"])
+        self.enroll_guest(origin)
+        script = (
+            "import json,pathlib,runpy,sys;sys.path.insert(0,'/usr/local/bin');"
+            "module=runpy.run_path('/usr/local/bin/catalog-family-recovery');"
+            "root=module['JOURNALS'];restored=[];"
+            "\nfor active in sorted(root.glob('*.active.json')):"
+            "\n family=active.name.removesuffix('.active.json');identity=json.loads(active.read_text())['identity']"
+            "\n receipt=module['operate']({'action':'restore','identity':identity,'family':family})"
+            "\n if not receipt.get('restored') or receipt.get('after')!=receipt.get('replicas'):raise ValueError('family recovery incomplete')"
+            "\n restored.append({'family':family,'identity':identity,'restored':True})"
+            "\nprint(json.dumps({'restored':restored,'remaining_active':[f.name for f in root.glob('*.active.json')]}))"
+        )
+        raw = self.runtime.run(
+            [
+                *self.ssh_argv(origin, "yes"),
+                "sudo -n python3 -B -c " + shlex.quote(script),
+            ]
+        )[0]
+        receipt = json.loads(raw)
+        if receipt.get("remaining_active") != []:
+            message = "active catalog family recovery incomplete"
+            raise Blocked(message)
+        save_json(
+            self.context.paths.state
+            / ("family-restart-recovery-" + str(time.time_ns()) + ".json"),
+            receipt,
+        )
+        self.runtime.phase("interrupted-family-journals-restored")
+
     def traffic(self, action: Literal["start", "stop"], cleanup: bool = False) -> None:
         """Control only the owned generator, granting cleanup its bounded stop budget."""
         if action not in ("start", "stop"):
@@ -513,8 +670,15 @@ class Ownership:
                 _resources(self.context), "generator", outputs["generator"]
             )
             self.enroll_guest(guest)
+            previous = {}
             if action == "start":
+                previous = catalog_status(self.runtime, self.ssh_argv(guest, "yes"))
+                self.recover_catalog_families()
                 self.catalog_fixtures()
+                # Complete calibration before the first catalog request needs evidence.
+                client = catalog_client(self.context, outputs)
+                align_generator_clock(client, self.runtime, self.ssh_argv(guest, "yes"))
+                self.catalog_evidence_client = client
             self.runtime.run(
                 [
                     *self.ssh_argv(guest, "yes"),
@@ -524,6 +688,10 @@ class Ownership:
                     action,
                 ]
             )
+            if action == "start":
+                await_catalog_start(
+                    self.context, self.runtime, self.ssh_argv(guest, "yes"), previous
+                )
         finally:
             self.context.state.deadline = original
         self.runtime.phase("traffic-" + action)
@@ -534,9 +702,21 @@ class Ownership:
         if not outputs:
             message = "catalog acceptance output unavailable"
             raise Blocked(message)
+        gaps = coverage_failures(
+            json.loads((self.context.paths.app / "coverage/catalog.json").read_text())
+        )
+        if gaps:
+            message = (
+                "catalog coverage has unsupported behavior or restoration contracts"
+            )
+            raise Blocked(message)
         guest = self.owned_guest(
             _resources(self.context), "generator", outputs["generator"]
         )
+        client = self.catalog_evidence_client
+        if client is None:
+            client = catalog_client(self.context, outputs)
+            align_generator_clock(client, self.runtime, self.ssh_argv(guest, "yes"))
         while True:
             self.runtime.remaining()
             status = json.loads(
@@ -550,6 +730,7 @@ class Ownership:
                     ]
                 )[0]
             )
+            collect_pending(self.runtime, self.ssh_argv(guest, "yes"), outputs, client)
             passes = status.get("catalog_passes", [])
             if (
                 status.get("service_active") is not True
@@ -559,12 +740,73 @@ class Ownership:
                 message = "continuous catalog inactive or failed; private receipts require repair"
                 raise Blocked(message)
             if len(passes) >= _REQUIRED_CATALOG_PASSES and all(
-                p.get("passed") and p.get("catalog_complete")
+                p.get("passed")
+                and p.get("scenario_count") == _CATALOG_ENTRIES
+                and p.get("catalog_complete")
+                and p.get("catalog_accepted")
+                and p.get("traffic", {}).get("verified") is True
+                and p.get("source_commit") == status.get("source_commit")
+                and p.get("artifact_sha256") == status.get("artifact_sha256")
                 for p in passes[-_REQUIRED_CATALOG_PASSES:]
             ):
+                if not catalog_metrics(status):
+                    message = (
+                        "catalog HTTP rate, benign success or transport gate failed"
+                    )
+                    raise Blocked(message)
                 self.runtime.phase("two-complete-catalog-passes")
                 return
             time.sleep(min(30, self.runtime.remaining()))
+
+    def verify_guest_pins(self) -> None:
+        """Compare actual installed receipts with the declared artifact pins."""
+        outputs = self.context.state.outputs
+        if outputs is None:
+            message = "guest pin outputs unavailable"
+            raise Blocked(message)
+        resources = _resources(self.context)
+        for role in ("origin", "generator"):
+            guest = self.owned_guest(resources, role, outputs[role])
+            filename = (
+                "/opt/origin-server/install-receipt.json"
+                if role == "origin"
+                else "/opt/traffic-generator/source-receipt.json"
+            )
+            raw, _ = self.runtime.run(
+                [*self.ssh_argv(guest, "yes"), "sudo -n cat " + filename]
+            )
+            receipt = json.loads(raw)
+            declared = outputs.get(role + "_source", {})
+            actual_hash = receipt.get(
+                "archive_sha256" if role == "origin" else "artifact_sha256"
+            )
+            if receipt.get("source_commit") != declared.get(
+                "commit"
+            ) or actual_hash != declared.get("archive_sha256"):
+                message = "installed " + role + " source differs from Terraform pins"
+                raise Blocked(message)
+            files = json.loads(
+                (self.context.paths.app / "guest-files.json").read_text()
+            )[role]
+            check = (
+                "import hashlib,json,pathlib,sys; "
+                "expected=json.load(sys.stdin); failures=[]; "
+                "\nfor name,record in expected.items():"
+                "\n p=pathlib.Path(name)"
+                "\n if p.is_symlink() or not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest()!=record['sha256'] or ('mode' in record and (p.stat().st_mode & 0o777) != int(record['mode'], 8)): failures.append(name)"
+                "\nprint(json.dumps({'verified':not failures,'checked':len(expected),'failures':failures}))"
+            )
+            # Fixed Python checker receives exact manifest JSON via stdin, never shell interpolation.
+            argv = [
+                *self.ssh_argv(guest, "yes"),
+                "sudo -n python3 -c " + shlex.quote(check),
+            ]
+            result, _ = self.runtime.run(argv, input_text=json.dumps(files))
+            proof = json.loads(result)
+            if proof.get("verified") is not True or proof.get("checked") != len(files):
+                message = "installed " + role + " files differ from Terraform artifacts"
+                raise Blocked(message)
+        self.runtime.phase("declared-guest-pins")
 
     def verify_phase(
         self, phase: Literal["readiness", "acceptance", "absence"]
@@ -572,6 +814,8 @@ class Ownership:
         """Run the original verifier against the shared private evidence artifacts."""
         if phase != "absence":
             self.enroll_guests()
+        if phase != "absence":
+            self.verify_guest_pins()
         if phase == "acceptance":
             self.await_catalog()
         paths = self.context.paths
@@ -686,7 +930,7 @@ class Ownership:
         """Prove foundation and live ownership before writing the canonical ledger."""
         state, scope = self.context.state, self.context.settings.scope
         if (
-            state.persistent != {"namespace": "system/" + scope["namespace"]}
+            state.persistent != foundation_identity(scope["namespace"])
             or not state.namespace_uid
         ):
             message = "inventory foundation not initialized; explicit external migration required"
@@ -747,37 +991,5 @@ class Ownership:
         return {item["address"]: item["values"]["id"] for item in resources}
 
     def verify_fixture(self) -> None:
-        """Read the pinned fixture through the canonical verifier with GET only."""
-        saved = _fixture_receipt(self.context)
-        spec = importlib.util.spec_from_file_location(
-            "showcase_swagger_upload",
-            self.context.paths.root / "scripts/swagger_upload.py",
-        )
-        if spec is None or spec.loader is None:
-            message = "fixture preservation verifier unavailable"
-            raise Blocked(message)
-        helper = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(helper)
-        scope = self.context.settings.scope
-        try:
-            version = helper.version(saved.get("version"))
-            expected = (
-                "/api/object_store/namespaces/"
-                + scope["namespace"]
-                + "/stored_objects/swagger/showcase/"
-                + version
-            )
-            if expected != saved.get("path"):
-                message = "fixture preservation path mismatch"
-                raise Blocked(message)
-            helper.verify(
-                _ReadOnlyClient(self.runtime, expected, scope["xc_url"]),
-                expected,
-                "showcase",
-                scope["namespace"],
-                version,
-                saved["content"],
-            )
-        except helper.UploadError as exc:
-            message = "fixture preservation content/version verification failed"
-            raise Blocked(message) from exc
+        """Verify the exact Terraform-owned fixture through the read-only helper."""
+        verify_fixture(self.context, self.runtime)

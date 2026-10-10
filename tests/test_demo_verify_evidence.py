@@ -463,6 +463,22 @@ class RiskReadinessEvidenceTests(unittest.TestCase):
             not evaluation.detection_ready([raw], [], [event], "demo", "demo-lb", 110)
         )
 
+    def test_high_detection_accepts_finite_fractional_scores(self):
+        raw, probe, event = fixtures.mud_evidence()
+        log = evaluation.decode_event(raw)
+        log.update(suspicion_score=0.99848, waf_suspicion_score=0.99848)
+        ensure(
+            evaluation.detection_attributed(
+                json.dumps(log), probe, [event], "demo", "demo-lb", 110
+            )
+        )
+        log["threat_level"] = "Medium"
+        ensure(
+            not evaluation.detection_attributed(
+                log, probe, [event], "demo", "demo-lb", 110
+            )
+        )
+
     def test_mud_detection_rejects_wrong_scores_states_identity_and_units(self):
         raw, probe, event = fixtures.mud_evidence()
         for key, value in (
@@ -471,6 +487,7 @@ class RiskReadinessEvidenceTests(unittest.TestCase):
             ("suspicion_log_type", "mitigation"),
             ("suspicion_log_type", "no_critical_activity"),
             ("suspicion_score", 0),
+            ("suspicion_score", 1.01),
             ("suspicion_score", True),
             ("suspicion_score", "1.0"),
             ("suspicion_score", None),
@@ -517,6 +534,18 @@ class RiskReadinessEvidenceTests(unittest.TestCase):
                     json.dumps(log), probe, [event], "demo", "demo-lb", 110
                 )
             )
+
+    def test_mud_detection_allows_multiple_waf_events_per_request(self):
+        raw, probe, event = fixtures.mud_evidence()
+        log = evaluation.decode_event(raw)
+        activity = evaluation.decode_event(log["incremental_activity_info"])
+        activity.update(waf_sec_event_count=20, req_count=19)
+        log["incremental_activity_info"] = json.dumps(activity)
+        ensure(
+            evaluation.detection_attributed(
+                json.dumps(log), probe, [event], "demo", "demo-lb", 110
+            )
+        )
 
     def test_mud_detection_requires_same_fresh_waf_attack(self):
         raw, probe, event = fixtures.mud_evidence()
