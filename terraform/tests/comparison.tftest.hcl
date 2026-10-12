@@ -1,9 +1,10 @@
 mock_provider "xcsh" {}
 
 variables {
-  namespace        = "example"
-  origin_pool_name = "example-origin"
-  swagger_path     = "/api/object_store/namespaces/example/stored_objects/swagger/schema/v1"
+  namespace                     = "example"
+  origin_pool_name              = "example-origin"
+  swagger_path                  = "/api/object_store/namespaces/example/stored_objects/swagger/schema/v1"
+  preserve_native_request_paths = true
 }
 
 run "waf_pair" {
@@ -19,6 +20,13 @@ run "waf_pair" {
       output.endpoints.after.url == "https://waf-after.f5-sales-demo.com"
     )
     error_message = "WAF comparison must isolate monitoring and blocking across two HTTPS hosts."
+  }
+  assert {
+    condition = alltrue([
+      for listener in xcsh_http_loadbalancer.this :
+      listener.https_auto_cert.disable_path_normalize != null
+    ])
+    error_message = "Both comparison hosts must preserve identical native request paths before WAF evaluation."
   }
   assert {
     condition     = length(xcsh_malicious_user_mitigation.this) == 0

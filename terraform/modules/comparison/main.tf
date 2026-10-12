@@ -1,3 +1,8 @@
+variable "preserve_native_request_paths" {
+  description = "Preserve native demo URI bytes for WAF evaluation instead of canonicalizing paths before routing."
+  type        = bool
+  default     = false
+}
 variable "namespace" { type = string }
 variable "origin_pool_name" { type = string }
 variable "swagger_path" { type = string }
@@ -63,9 +68,11 @@ resource "xcsh_http_loadbalancer" "this" {
   namespace = var.namespace
   domains   = ["${each.value.name}.f5-sales-demo.com"]
   https_auto_cert {
-    port          = 443
-    http_redirect = false
-    no_mtls       = {}
+    port                   = 443
+    http_redirect          = false
+    no_mtls                = {}
+    disable_path_normalize = var.preserve_native_request_paths ? {} : null
+    enable_path_normalize  = var.preserve_native_request_paths ? null : {}
   }
   default_route_pools {
     pool {

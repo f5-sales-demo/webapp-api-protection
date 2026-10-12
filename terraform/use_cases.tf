@@ -16,12 +16,13 @@ resource "xcsh_swagger_object" "comparison" {
   lifecycle { create_before_destroy = true }
 }
 module "use_case" {
-  for_each         = toset(["waf", "schema", "endpoint", "rate", "mud"])
-  source           = "./modules/comparison"
-  namespace        = var.namespace
-  category         = each.key
-  origin_pool_name = module.http_lb.origin_pool_name
-  swagger_path     = xcsh_swagger_object.comparison.path
+  for_each                      = toset(["waf", "schema", "endpoint", "rate", "mud"])
+  source                        = "./modules/comparison"
+  namespace                     = var.namespace
+  category                      = each.key
+  preserve_native_request_paths = var.preserve_native_request_paths
+  origin_pool_name              = module.http_lb.origin_pool_name
+  swagger_path                  = xcsh_swagger_object.comparison.path
 }
 output "use_cases" {
   description = "Simultaneous read-only protection comparisons."

@@ -356,9 +356,11 @@ resource "xcsh_http_loadbalancer" "this" {
   dynamic "https_auto_cert" {
     for_each = each.value.https ? [1] : []
     content {
-      port          = 443
-      http_redirect = false
-      no_mtls       = {}
+      port                   = 443
+      http_redirect          = false
+      no_mtls                = {}
+      disable_path_normalize = var.preserve_native_request_paths ? {} : null
+      enable_path_normalize  = var.preserve_native_request_paths ? null : {}
     }
   }
 

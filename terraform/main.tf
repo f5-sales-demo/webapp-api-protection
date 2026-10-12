@@ -62,9 +62,10 @@ module "origin_server" {
 module "http_lb" {
   source = "./modules/http-lb"
 
-  namespace          = var.namespace
-  lb_domains         = var.lb_domains
-  lb_https_auto_cert = var.lb_https_auto_cert
+  namespace                     = var.namespace
+  lb_domains                    = var.lb_domains
+  lb_https_auto_cert            = var.lb_https_auto_cert
+  preserve_native_request_paths = var.preserve_native_request_paths
   # Point the origin pool at the Azure origin server's public IP (created above).
   # Terraform orders VM creation before the pool that references its IP.
   origin_ip         = module.origin_server.public_ip
