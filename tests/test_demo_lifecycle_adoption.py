@@ -19,10 +19,13 @@ class AdoptionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             context = SimpleNamespace(
-                paths=SimpleNamespace(state=root),
+                paths=SimpleNamespace(state=root, app=root),
                 settings=SimpleNamespace(scope={"namespace": "demo"}),
             )
             mapping = root / "review.json"
+            (root / "application.tfstate").write_text("{}")
+            (root / "fixtures").mkdir()
+            (root / "fixtures/showcase-openapi.json").write_text("expected")
             terraform = Mock()
             for entry in (
                 {
@@ -49,10 +52,16 @@ class AdoptionTests(unittest.TestCase):
                     {
                         "schema_version": 1,
                         "scope": context.settings.scope,
+                        "state_sha256": hashlib.sha256(
+                            (root / "application.tfstate").read_bytes()
+                        ).hexdigest(),
                         "imports": [entry],
                     },
                 )
-                with expect_error(Blocked):
+                with (
+                    patch("demo_lifecycle_adoption.require_current"),
+                    expect_error(Blocked),
+                ):
                     adopt(context, terraform, mapping)
             terraform.tf.assert_not_called()
 
@@ -60,7 +69,7 @@ class AdoptionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             context = SimpleNamespace(
-                paths=SimpleNamespace(state=root),
+                paths=SimpleNamespace(state=root, app=root),
                 settings=SimpleNamespace(scope={"namespace": "demo"}),
             )
             mapping = root / "review.json"
@@ -112,7 +121,9 @@ class AdoptionTests(unittest.TestCase):
                     "imports": [
                         {
                             "address": "xcsh_swagger_object.showcase",
-                            "id": "example/showcase-form-native/v1",
+                            "id": "example/showcase-form-"
+                            + hashlib.sha256(b"expected").hexdigest()[:32]
+                            + "/v1",
                             "version": "v1",
                             "reviewed": True,
                             "sha256": hashlib.sha256(b"expected").hexdigest(),
@@ -126,7 +137,8 @@ class AdoptionTests(unittest.TestCase):
                 "metadata": {
                     "version": "v1",
                     "namespace": "example",
-                    "name": "showcase-form-native",
+                    "name": "showcase-form-"
+                    + hashlib.sha256(b"expected").hexdigest()[:32],
                 },
             }
             with (
@@ -182,3 +194,77 @@ class AdoptionTests(unittest.TestCase):
             with expect_error(Blocked):
                 _move_listeners({"moves": moves}, state, terraform, context)
             terraform.tf.assert_not_called()
+
+    def test_current_content_addressed_imports_validate_all_before_mutation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            app = root / "terraform"
+            (app / "fixtures").mkdir(parents=True)
+            state = root / "application.tfstate"
+            save_json(state, {"resources": []})
+            context = SimpleNamespace(
+                paths=SimpleNamespace(state=root, app=app, vars=root / "vars.json"),
+                settings=SimpleNamespace(scope={"namespace": "example"}),
+            )
+            entries = []
+            live = []
+            for owner, prefix, filename in (
+                ("showcase", "showcase-form-", "showcase-openapi.json"),
+                ("comparison", "comparison-", "comparison-openapi.json"),
+            ):
+                content = "synthetic " + owner
+                (app / "fixtures" / filename).write_text(content)
+                digest = hashlib.sha256(content.encode()).hexdigest()
+                name = prefix + digest[:32]
+                entries.append(
+                    {
+                        "address": "xcsh_swagger_object." + owner,
+                        "id": "example/" + name + "/v1",
+                        "version": "v1",
+                        "sha256": digest,
+                        "reviewed": True,
+                    }
+                )
+                live.append(
+                    {
+                        "string_value": content,
+                        "metadata": {
+                            "name": name,
+                            "namespace": "example",
+                            "version": "v1",
+                        },
+                    }
+                )
+            mapping = root / "review.json"
+            document = {
+                "schema_version": 1,
+                "scope": context.settings.scope,
+                "state_sha256": hashlib.sha256(state.read_bytes()).hexdigest(),
+                "imports": entries,
+                "moves": [],
+            }
+            save_json(mapping, document)
+            terraform = Mock()
+            terraform.runtime.xc.side_effect = [
+                live[0],
+                {**live[1], "string_value": "changed"},
+            ]
+            with (
+                patch("demo_lifecycle_adoption.require_current"),
+                expect_error(Blocked),
+            ):
+                adopt(context, terraform, mapping)
+            terraform.tf.assert_not_called()
+            terraform.runtime.xc.side_effect = live
+            with patch("demo_lifecycle_adoption.require_current"):
+                adopt(context, terraform, mapping)
+            assert terraform.tf.call_count == 2
+            assert [call.args[-1] for call in terraform.tf.call_args_list] == [
+                entry["id"] for entry in entries
+            ]
+            receipt = __import__("json").loads(
+                (root / "adoption-receipt.json").read_text()
+            )
+            assert (
+                Path(receipt["backup"]) / "application.tfstate"
+            ).read_bytes() == state.read_bytes()
