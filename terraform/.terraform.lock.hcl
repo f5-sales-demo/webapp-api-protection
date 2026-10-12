@@ -2,22 +2,22 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/f5-sales-demo/xcsh" {
-  version     = "15.5.2"
-  constraints = "15.5.2"
+  version     = "15.7.2"
+  constraints = "15.7.2"
   hashes = [
-    "h1:BxmmO1tacDbdRPQ6oh1dQooLcTHT/4aPI7ho1fj1J3E=",
-    "h1:HCrPdKbHA035dyOXKz8ryMU4F7IB/3ngTV2HBAI0KhY=",
-    "zh:2121f4819e238de90e6835e79f40055a00a422aec7a7c33df99821557aebd1db",
-    "zh:2cfef9c2f7a23feb2e0baa81fc5a91d7fa7871d23c290f896893c91abb40301b",
-    "zh:2f34ba637aedcbb72ef4fa17ba4d3aa09a38fdd6a48ce2910ff7a5d6672b142e",
-    "zh:5ed59f8ed2cf9ef020a336a5327055128456f554d861dd155a9d97bb744a2c91",
-    "zh:6afe17f1b74a0c8ad0fe71f2abd11312c4ba8f0846cd147edb8017ac6bb9fc15",
+    "h1:0PEv4Oh47yWT0cjh1d1uh+pmtdyHrSAeafx45aZTgF8=",
+    "h1:Ej7n7t6WT20T8z471r/FX3esYBJwVa6LP9aRA69pbto=",
+    "zh:04f65d7099363abf5c12d099979b1ffe445ff56c46504c9cf635c7a34987affb",
+    "zh:08646262188353829b5167e9f459975b83a7b4d0063a5a13f28166a39b013f41",
+    "zh:098e0144fbe091869ad7ecbfadd6efe764c4ee4ea9686babdbb43c5ab36454df",
+    "zh:204b2f895f53945b27f71c5eadd9c623deceeadb1519ce148d3e5dc121bcec0c",
+    "zh:2cdca0778754454deb8aa120c0dc457a2976236efd084c2d39acd10b2b5214ec",
+    "zh:4d541754dbe09ed08089e50578332acf43ef36dbfc49593a5e60b0c5fdd4f4c5",
+    "zh:599cbfd87056732f5a0dd4cae76a3da5b65e2b6070f98309d0ebb5fb777c93ec",
+    "zh:79c90f81ea29ed074c9076387ab01373f855700bafcea58f068906b2744c120a",
     "zh:95513584b227b9c7923e641aae986935821077b1eb4116845b5312ac412bbc72",
-    "zh:a6c58937c6b7b01ff153ea1ab13e0d326ddb62e6430af2be5063a759bf92ffa7",
-    "zh:ada7dbcf310998b12107b647c454f89c9528023f9cda084198dbd3e8edbc3125",
-    "zh:b49dbd28c37a58244e8c034cb0fff49bef1c2c28bef7f3c76f38d41ac07c9c3a",
-    "zh:cda2f2fe639b97c0c927b6130f5c2249411c4e0e6852ff74f8360d28943cfc76",
-    "zh:ff7c37cdf95690375b38063e000e3155ecbdc2911a5c5e5a1e7096296a20920e",
+    "zh:b30d1571f44a7112d864a266d326fc359fc626dc59d63cedc2988bd0a42d4a6c",
+    "zh:c68b5731959a33ac7a7556734e12556eda37c72a18325bf09583ed506cc87bf0",
   ]
 }
 
