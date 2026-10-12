@@ -17,6 +17,7 @@ from demo_catalog_evidence import (
     grouped_records,
     identity_records,
     read_retry,
+    request_paths,
     schema_configuration,
 )
 from demo_lifecycle_fixtures import TEST_SCOPE
@@ -557,3 +558,35 @@ class ContentAddressedSchemaReadback(unittest.TestCase):
             client.api.side_effect = [(200, listener), (200, definition)]
             with expect_error(EvidenceError, "immutable"):
                 schema_configuration(client, "demo", "lb")
+
+
+class PathNormalizationTests(unittest.TestCase):
+    def test_double_decoding_and_normalization_remain_bound_to_method_and_user(self):
+        row = {
+            "domain": "www.example.test",
+            "synthetic_identity": "showcase-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-request",
+            "method": "GET",
+            "path": "/juice-shop/ftp/%2e%2e/%2e%2e/%2e%2e/etc/passwd",
+        }
+        record = {
+            "domain": row["domain"],
+            "user": identified_user(row["synthetic_identity"]),
+            "method": "GET",
+            "req_path": "/etc/passwd",
+            "req_id": "exact",
+        }
+        result = request_paths([record], [row])[0]
+        ensure_equal(result["req_path"], row["path"])
+        ensure_equal(result["raw_req_path"], "/etc/passwd")
+        ensure_equal(
+            request_paths([{**record, "method": "POST"}], [row])[0]["req_path"],
+            "/etc/passwd",
+        )
+        ensure_equal(
+            request_paths([{**record, "user": "foreign"}], [row])[0]["req_path"],
+            "/etc/passwd",
+        )
+        other = {**row, "path": "/static/../../../etc/passwd"}
+        ensure_equal(
+            request_paths([record], [row, other])[0]["req_path"], "/etc/passwd"
+        )

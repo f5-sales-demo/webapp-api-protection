@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import posixpath
 import re
 import time
 from typing import TYPE_CHECKING, Any
@@ -103,8 +104,21 @@ def security_bindings(
     return bindings
 
 
+def route_forms(path: str) -> set[str]:
+    """Enumerate bounded XC URI decoding and dot-segment normalization."""
+    forms = {path}
+    for _ in range(2):
+        path = unquote(path)
+        forms.add(path)
+        normalized = posixpath.normpath(path)
+        forms.add(
+            normalized + "/" if path.endswith("/") and normalized != "/" else normalized
+        )
+    return forms
+
+
 def request_paths(records: list[dict], rows: list[dict]) -> list[dict]:
-    """Match one decoded log route to one exact sent route and retain the raw value."""
+    """Bind normalized log paths only to one exact method and synthetic request identity."""
     result = []
     for record in records:
         paths = {
@@ -112,7 +126,8 @@ def request_paths(records: list[dict], rows: list[dict]) -> list[dict]:
             for row in rows
             if record.get("domain") == row["domain"]
             and record.get("user") == identified_user(row["synthetic_identity"])
-            and record.get("req_path") in (row["path"], unquote(row["path"]))
+            and record.get("method") == row["method"]
+            and record.get("req_path") in route_forms(row["path"])
         }
         if len(paths) == 1:
             path = next(iter(paths))
