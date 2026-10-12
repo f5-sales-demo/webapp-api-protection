@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "expected_entries": 164,
-  "generator_source": "a0280f3c33f6c6a5cc89de2533f9030c5cdba695",
+  "generator_source": "3d3968d57afd0f2d2a876f967a57980b811b8117",
   "entries": [
     {
       "id": "api-attacks/01-vampi-owasp-top10",
