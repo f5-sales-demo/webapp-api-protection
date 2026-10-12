@@ -114,6 +114,14 @@ def route_forms(path: str) -> set[str]:
         forms.add(
             normalized + "/" if path.endswith("/") and normalized != "/" else normalized
         )
+        slashes = path.replace("\\", "/")
+        forms.add(slashes)
+        normalized_slashes = posixpath.normpath(slashes)
+        forms.add(
+            normalized_slashes + "/"
+            if slashes.endswith("/") and normalized_slashes != "/"
+            else normalized_slashes
+        )
     return forms
 
 

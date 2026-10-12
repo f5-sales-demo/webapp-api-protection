@@ -636,3 +636,34 @@ class MissingTelemetryPathTests(unittest.TestCase):
         ensure("req_path" not in request_paths([event], [row, dict(row)])[0])
         wrong = {**event, "req_path": "/unrelated"}
         ensure_equal(request_paths([wrong], [row])[0]["req_path"], "/unrelated")
+
+
+class BackslashTelemetryPathTests(unittest.TestCase):
+    def test_backslash_normalization_preserves_raw_path_and_exact_request_identity(
+        self,
+    ):
+        row = {
+            "domain": "www.example.test",
+            "synthetic_identity": "showcase-" + "a" * 32 + "-request",
+            "method": "GET",
+            "path": r"/juice-shop/rest/track-order/\x3cscript\x3ealert(1)\x3c/script\x3e",
+        }
+        path = row["path"].replace("\\", "/").replace("//", "/")
+        record = {
+            "domain": row["domain"],
+            "user": identified_user(row["synthetic_identity"]),
+            "method": "GET",
+            "req_path": path,
+            "req_id": "exact",
+        }
+        result = request_paths([record], [row])[0]
+        ensure_equal(result["req_path"], row["path"])
+        ensure_equal(result["raw_req_path"], path)
+        ensure_equal(
+            request_paths([{**record, "user": "foreign"}], [row])[0]["req_path"], path
+        )
+        ensure_equal(
+            request_paths([{**record, "method": "POST"}], [row])[0]["req_path"], path
+        )
+        other = {**row, "path": path}
+        ensure_equal(request_paths([record], [row, other])[0]["req_path"], path)
