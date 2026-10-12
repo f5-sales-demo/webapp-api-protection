@@ -52,6 +52,9 @@ def _move_listeners(
             if "index_key" in instance:
                 address += "[" + json.dumps(instance["index_key"]) + "]"
             identities[address.lstrip(".")] = instance.get("attributes", {}).get("id")
+    if not moves and any(source in identities for source in permitted_moves):
+        message = "adoption requires reviewed moves for legacy listener addresses"
+        raise Blocked(message)
     for move in moves:
         source, destination = move["from"], move["to"]
         if (

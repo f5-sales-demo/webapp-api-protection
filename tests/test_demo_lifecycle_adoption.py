@@ -187,6 +187,9 @@ class AdoptionTests(unittest.TestCase):
             ]
             context = SimpleNamespace(paths=SimpleNamespace(app=root))
             terraform = Mock()
+            with expect_error(Blocked):
+                _move_listeners({"moves": []}, state, terraform, context)
+            terraform.tf.assert_not_called()
             _move_listeners({"moves": moves}, state, terraform, context)
             assert terraform.tf.call_count == 2
             terraform.reset_mock()
