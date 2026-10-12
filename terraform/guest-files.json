@@ -949,7 +949,7 @@
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_native_identity.py": {
-      "sha256": "d40e3f32892a871345e05b55d962c1efb0e6fdf55b98402349216078c8d43b8a",
+      "sha256": "65d24d280f6a47d9e9db35c1a1007bde2e7f12e4fc97129dfbd37a277d937b58",
       "mode": "0444"
     },
     "/opt/traffic-generator/current/scripts/traffic_network.py": {
