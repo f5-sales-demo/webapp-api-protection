@@ -590,3 +590,49 @@ class PathNormalizationTests(unittest.TestCase):
         ensure_equal(
             request_paths([record], [row, other])[0]["req_path"], "/etc/passwd"
         )
+
+
+class MissingTelemetryPathTests(unittest.TestCase):
+    def test_unique_request_identity_can_bind_omitted_path_with_raw_absence(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"][0]["synthetic_identity"] += "-request"
+        event["user"] += "-request"
+        event.pop("req_path")
+        client.pages.return_value = [event]
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            result = evidence_bundle(client, pending, out, [-1, 1])
+        ensure(result is not None)
+        access = result["evidence"]["checks"][0]["access"]
+        ensure_equal(access["req_path"], pending["request"]["requests"][0]["path"])
+        ensure(access["raw_req_path"] is None)
+        ensure_equal(access["path_source"], "unique_synthetic_request_identity")
+        ensure_equal(access["path_source_request_id"], event["req_id"])
+
+    def test_omitted_path_cannot_bind_shared_identity_or_foreign_request(self):
+        out, pending, event, client = data()
+        pending["request"]["requests"][0]["synthetic_identity"] += "-request"
+        event["user"] += "-request"
+        event.pop("req_path")
+        row = pending["request"]["requests"][0]
+        other = {**row, "path": "/different"}
+        ensure("req_path" not in request_paths([event], [row, other])[0])
+        for change in (
+            {"method": "GET"},
+            {"user": "foreign"},
+            {"domain": "foreign.example.test"},
+            {"req_id": ""},
+        ):
+            ensure("req_path" not in request_paths([{**event, **change}], [row])[0])
+        client.pages.return_value = [{**event, "req_path": "/different"}]
+        with patch("demo_catalog_evidence.access_by_user", return_value=[event]):
+            ensure(evidence_bundle(client, pending, out, [-1, 1]) is None)
+
+    def test_omitted_path_rejects_reused_identity_and_existing_wrong_path(self):
+        _out, pending, event, _client = data()
+        pending["request"]["requests"][0]["synthetic_identity"] += "-request"
+        event["user"] += "-request"
+        event.pop("req_path")
+        row = pending["request"]["requests"][0]
+        ensure("req_path" not in request_paths([event], [row, dict(row)])[0])
+        wrong = {**event, "req_path": "/unrelated"}
+        ensure_equal(request_paths([wrong], [row])[0]["req_path"], "/unrelated")

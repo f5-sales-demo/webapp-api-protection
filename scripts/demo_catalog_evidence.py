@@ -121,6 +121,26 @@ def request_paths(records: list[dict], rows: list[dict]) -> list[dict]:
     """Bind normalized log paths only to one exact method and synthetic request identity."""
     result = []
     for record in records:
+        if record.get("req_path") is None and record.get("req_id"):
+            candidates = [
+                row
+                for row in rows
+                if record.get("domain") == row["domain"]
+                and record.get("user") == identified_user(row["synthetic_identity"])
+                and row["synthetic_identity"].endswith("-request")
+                and record.get("method") == row["method"]
+            ]
+            if len(candidates) == 1:
+                result.append(
+                    {
+                        **record,
+                        "req_path": candidates[0]["path"],
+                        "raw_req_path": record.get("req_path"),
+                        "path_source": "unique_synthetic_request_identity",
+                        "path_source_request_id": record["req_id"],
+                    }
+                )
+                continue
         paths = {
             row["path"]
             for row in rows
