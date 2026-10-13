@@ -176,3 +176,23 @@ def test_browser_modules_use_integrity_locked_npm_ci():
     assert "npm install -g" not in template
     assert "npm ci --no-audit --no-fund" in template
     assert "PUPPETEER_SKIP_DOWNLOAD" not in template
+
+
+def test_playwright_system_dependencies_are_in_immutable_role_lock():
+    """Install Chromium tools and fonts through the exact system package closure."""
+    manifest = json.loads((ROOT / "terraform/ubuntu-packages.json").read_text())
+    names = {
+        item["package"] for item in manifest["dependency_roles"]["traffic-generator"]
+    }
+    assert {
+        "fonts-unifont",
+        "xfonts-cyrillic",
+        "xfonts-scalable",
+        "fonts-ipafont-gothic",
+        "fonts-wqy-zenhei",
+        "fonts-tlwg-loma-otf",
+        "fonts-freefont-ttf",
+        "xvfb",
+    } <= names
+    template = (ROOT / "terraform/cloud-init/traffic-generator.yaml").read_text()
+    assert "playwright install-deps" not in template
