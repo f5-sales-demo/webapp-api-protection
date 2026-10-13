@@ -1,5 +1,6 @@
 """Require exact proxy bytes and tagged native tool identity in the Go lock."""
 
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -31,6 +32,13 @@ def test_complete_go_proxy_artifact_contract():
             body = ("\n".join(row["versions"]) + "\n").encode()
             assert hashlib.sha256(body).hexdigest() == row["sha256"]
             assert len(body) == row["bytes"]
+        elif row["path"].endswith(".info"):
+            body = base64.b64decode(row["metadata_base64"], validate=True)
+            assert hashlib.sha256(body).hexdigest() == row["sha256"]
+            assert len(body) == row["bytes"]
+            assert json.loads(body)["Version"] == Path(row["path"]).name.removesuffix(
+                ".info"
+            )
         else:
             assert row["url"] == "https://proxy.golang.org/" + row["path"]
     for module in (

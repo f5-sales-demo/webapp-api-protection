@@ -73,7 +73,9 @@ def test_invalid_lock_rejected_before_io(tmp_path, mutation):
     elif mutation == "traversal":
         manifest["artifacts"][0]["path"] = "../escape/@v/list"
     elif mutation == "url":
-        manifest["artifacts"][1]["url"] = "https://example.com/unowned"
+        next(row for row in manifest["artifacts"] if row["path"].endswith(".mod"))[
+            "url"
+        ] = "https://example.com/unowned"
     elif mutation == "latest":
         manifest["tools"][0]["module"] = "github.com/rakyll/hey@latest"
     else:

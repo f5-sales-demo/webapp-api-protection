@@ -1,6 +1,7 @@
 """Prepare immutable Go proxy artifacts and reproduce exact tagged native tools."""
 
 import argparse
+import base64
 import hashlib
 import json
 import re
@@ -50,6 +51,15 @@ def validated_lock(lock: Path) -> dict:
                 message = "invalid frozen Go version list"
                 raise ValueError(message)
             verify_bytes(row, ("\n".join(versions) + "\n").encode())
+        elif path.endswith(".info"):
+            data = base64.b64decode(row["metadata_base64"], validate=True)
+            verify_bytes(row, data)
+            metadata = json.loads(data)
+            if metadata.get("Version") != Path(path).name.removesuffix(
+                ".info"
+            ) or not metadata.get("Time"):
+                message = "frozen Go metadata version differs from declared path"
+                raise ValueError(message)
         elif row.get("url") != "https://proxy.golang.org/" + path:
             message = "Go proxy URL differs from declared path"
             raise ValueError(message)
@@ -127,6 +137,8 @@ def prepare(manifest: dict, directory: Path) -> int:
         for row in manifest["artifacts"]:
             if row["path"].endswith("/list"):
                 data = ("\n".join(row["versions"]) + "\n").encode()
+            elif row["path"].endswith(".info"):
+                data = base64.b64decode(row["metadata_base64"], validate=True)
             else:
                 with urllib.request.urlopen(  # noqa: S310 -- validated exact HTTPS URL
                     row["url"], timeout=180
