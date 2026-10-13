@@ -1404,7 +1404,7 @@ runcmd:
     export PATH=/opt/traffic-generator-toolchain/go/bin:$PATH
     [ "$(go version)" = 'go version go1.26.8 linux/amd64' ] || { echo 'Unexpected Go version' >&2; exit 1; }
     install -d -m 0755 /opt/traffic-generator-go-runtime
-    fetch_url 'https://raw.githubusercontent.com/f5-sales-demo/webapp-api-protection/bd37e8ca0f3adc8f20ac45bdcf3d446b20c48bbf/terraform/go-runtime/artifacts.json' /opt/traffic-generator-go-runtime/artifacts.json 'locked Go proxy manifest'
+    fetch_url 'https://raw.githubusercontent.com/f5-sales-demo/webapp-api-protection/6465f22b4eec8a30cdc8bea3649e15179680e03c/terraform/go-runtime/artifacts.json' /opt/traffic-generator-go-runtime/artifacts.json 'locked Go proxy manifest'
     printf '%s  %s\n' ${go_lock_sha256} /opt/traffic-generator-go-runtime/artifacts.json | sha256sum --check --strict -
     python3 /usr/local/lib/demo-go-artifacts.py toolchain --lock /opt/traffic-generator-go-runtime/artifacts.json --proxy /opt/traffic-generator-go-runtime/proxy --archive /opt/traffic-generator-go1.26.8.linux-amd64.tar.gz --toolchain /opt/traffic-generator-toolchain
     python3 /usr/local/lib/demo-go-artifacts.py prepare --lock /opt/traffic-generator-go-runtime/artifacts.json --proxy /opt/traffic-generator-go-runtime/proxy
