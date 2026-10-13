@@ -921,6 +921,10 @@ packages:
   - [zlib1g-dev, "1:1.3.dfsg-3.1ubuntu2.2"]
 
 write_files:
+  - path: /usr/local/lib/demo-go-artifacts.py
+    permissions: '0644'
+    encoding: b64
+    content: ${go_helper}
   - path: /etc/systemd/system/tgen-continuous.service.d/browser-runtime.conf
     permissions: '0644'
     content: |
@@ -1395,19 +1399,22 @@ runcmd:
     fetch_url 'https://go.dev/dl/go1.26.8.linux-amd64.tar.gz' /tmp/go.tar.gz 'Go 1.26.8'
     printf '%s  %s\n' d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b /tmp/go.tar.gz | sha256sum --check --strict -
     tar -xzf /tmp/go.tar.gz -C /opt/traffic-generator-toolchain
+    install -m 0644 /tmp/go.tar.gz /opt/traffic-generator-go1.26.8.linux-amd64.tar.gz
     rm /tmp/go.tar.gz
     export PATH=/opt/traffic-generator-toolchain/go/bin:$PATH
     [ "$(go version)" = 'go version go1.26.8 linux/amd64' ] || { echo 'Unexpected Go version' >&2; exit 1; }
-    echo "Installing hey v0.1.5..."
-    retry_cmd 3 15 sh -c 'go install github.com/rakyll/hey@v0.1.5'
-    cp /opt/go/bin/hey /usr/local/bin/hey
-
-    echo "Installing gotestwaf v0.5.9..."
-    retry_cmd 3 15 sh -c 'go install github.com/wallarm/gotestwaf/cmd/gotestwaf@v0.5.9'
-    cp /opt/go/bin/gotestwaf /usr/local/bin/gotestwaf
+    install -d -m 0755 /opt/traffic-generator-go-runtime
+    fetch_url 'https://raw.githubusercontent.com/f5-sales-demo/webapp-api-protection/bd37e8ca0f3adc8f20ac45bdcf3d446b20c48bbf/terraform/go-runtime/artifacts.json' /opt/traffic-generator-go-runtime/artifacts.json 'locked Go proxy manifest'
+    printf '%s  %s\n' ${go_lock_sha256} /opt/traffic-generator-go-runtime/artifacts.json | sha256sum --check --strict -
+    python3 /usr/local/lib/demo-go-artifacts.py toolchain --lock /opt/traffic-generator-go-runtime/artifacts.json --proxy /opt/traffic-generator-go-runtime/proxy --archive /opt/traffic-generator-go1.26.8.linux-amd64.tar.gz --toolchain /opt/traffic-generator-toolchain
+    python3 /usr/local/lib/demo-go-artifacts.py prepare --lock /opt/traffic-generator-go-runtime/artifacts.json --proxy /opt/traffic-generator-go-runtime/proxy
+    python3 /usr/local/lib/demo-go-artifacts.py build --lock /opt/traffic-generator-go-runtime/artifacts.json --proxy /opt/traffic-generator-go-runtime/proxy --go /opt/traffic-generator-toolchain/go/bin/go --workspace /opt/traffic-generator-go-runtime/build
+    install -m 0755 /opt/traffic-generator-go-runtime/build/bin/hey /usr/local/bin/hey
+    install -m 0755 /opt/traffic-generator-go-runtime/build/bin/gotestwaf /usr/local/bin/gotestwaf
+    python3 /usr/local/lib/demo-go-artifacts.py verify --lock /opt/traffic-generator-go-runtime/artifacts.json --proxy /opt/traffic-generator-go-runtime/proxy --binaries /usr/local/bin
     mkdir -p /opt/gotestwaf
-    cp -r /opt/go/pkg/mod/github.com/wallarm/gotestwaf@v0.5.9/config.yaml /opt/gotestwaf/
-    cp -r /opt/go/pkg/mod/github.com/wallarm/gotestwaf@v0.5.9/testcases /opt/gotestwaf/
+    cp -r /opt/traffic-generator-go-runtime/build/modules/github.com/wallarm/gotestwaf@v0.5.9/config.yaml /opt/gotestwaf/
+    cp -r /opt/traffic-generator-go-runtime/build/modules/github.com/wallarm/gotestwaf@v0.5.9/testcases /opt/gotestwaf/
     chown -R azureuser:azureuser /opt/gotestwaf
 
     echo "Installing checksum-pinned Vegeta 12.12.0..."

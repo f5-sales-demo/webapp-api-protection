@@ -287,13 +287,7 @@ class ArchiveInstallerTests(unittest.TestCase):
             ensure(not (root / "toolchain/go/bin/go").exists())
             good = shell(fixture.source(), fixture.environment)
             ensure_equal(good.returncode, 0)
-            ensure_equal(
-                (root / "calls").read_text().splitlines(),
-                [
-                    "install github.com/rakyll/hey@v0.1.5",
-                    "install github.com/wallarm/gotestwaf/cmd/gotestwaf@v0.5.9",
-                ],
-            )
+            ensure(not (root / "calls").exists())
             ensure_equal((root / "gopath").stat().st_mode & 0o777, 0o700)
             ensure_equal((root / "toolchain/go/bin/go").stat().st_mode & 0o777, 0o755)
             missing_home = shell(
@@ -302,19 +296,6 @@ class ArchiveInstallerTests(unittest.TestCase):
                 fixture.environment,
             )
             ensure_equal(missing_home.returncode, 31)
-            for package in (
-                "github.com/rakyll/hey@v0.1.5",
-                "github.com/wallarm/gotestwaf/cmd/gotestwaf@v0.5.9",
-            ):
-                failed = shell(
-                    fixture.source(), {**fixture.environment, "FAIL_PACKAGE": package}
-                )
-                ensure_equal(failed.returncode, 1)
-                ensure("provisioning failed (1)" in failed.stderr)
-                ensure_equal(
-                    (root / "calls").read_text().splitlines()[-3:],
-                    ["install " + package] * 3,
-                )
             wrong = shell(
                 fixture.source(), {**fixture.environment, "PROBE_VERSION": "go1.22.0"}
             )

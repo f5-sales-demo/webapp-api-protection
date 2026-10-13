@@ -327,6 +327,8 @@ module "traffic_generator" {
   # Azure limits decoded custom-data to 65535 bytes. As for the origin, cloud-init
   # detects gzip automatically and restores the exact YAML without extra tooling.
   custom_data = base64gzip(templatefile("${path.module}/cloud-init/traffic-generator.yaml", {
+    go_helper                 = filebase64("${path.module}/../scripts/demo_go_artifacts.py")
+    go_lock_sha256            = filesha256("${path.module}/go-runtime/artifacts.json")
     browser_helper            = filebase64("${path.module}/../scripts/demo_browser_artifacts.py")
     browser_package_json      = filebase64("${path.module}/browser-runtime/package.json")
     browser_package_lock_json = filebase64("${path.module}/browser-runtime/package-lock.json")

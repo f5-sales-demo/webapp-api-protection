@@ -16,6 +16,7 @@ from demo_catalog_evidence import collect_pending
 from demo_catalog_recovery import enroll_recovery
 from demo_catalog_start import await_catalog_start, catalog_status
 from demo_lifecycle_fixture import verify_fixture
+from demo_lifecycle_go import verify_go_toolchain
 from demo_lifecycle_hosts import rotate_rebuilt_keys
 from demo_lifecycle_state import (
     AZURE_TYPES,
@@ -205,7 +206,6 @@ def _confirmed_version(
                 "https://management.azure.com" + rid + "?api-version=" + version,
             )
         except Blocked as exc:
-            # Only the runtime's unsupported-version diagnostic permits another read.
             if "(arm-api-version-unsupported)" in str(exc):
                 continue
             raise
@@ -797,7 +797,6 @@ class Ownership:
                 "\n if p.is_symlink() or not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest()!=record['sha256'] or ('mode' in record and (p.stat().st_mode & 0o777) != int(record['mode'], 8)): failures.append(name)"
                 "\nprint(json.dumps({'verified':not failures,'checked':len(expected),'failures':failures}))"
             )
-            # Fixed Python checker receives exact manifest JSON via stdin, never shell interpolation.
             argv = [
                 *self.ssh_argv(guest, "yes"),
                 "sudo -n python3 -c " + shlex.quote(check),
@@ -807,6 +806,8 @@ class Ownership:
             if proof.get("verified") is not True or proof.get("checked") != len(files):
                 message = "installed " + role + " files differ from Terraform artifacts"
                 raise Blocked(message)
+            if role == "generator":
+                verify_go_toolchain(self.runtime, self.ssh_argv(guest, "yes"))
             verify_package_pins(
                 self.runtime, self.ssh_argv(guest, "yes"), self.context.paths.app, role
             )
