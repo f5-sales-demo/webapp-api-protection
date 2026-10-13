@@ -22,7 +22,8 @@ def test_each_guest_uses_exact_packages_from_snapshot_before_installation():
     artifacts = {
         (item["package"], item["version"]): item for item in manifest["packages"]
     }
-    for role, declared in manifest["roles"].items():
+    for role, closure in manifest["dependency_roles"].items():
+        declared = [item for item in closure if "snapshot.ubuntu.com" in item["url"]]
         template = (ROOT / "terraform/cloud-init" / (role + ".yaml")).read_text()
         value = yaml.safe_load(template)
         assert value.get("package_upgrade", False) is False
@@ -47,14 +48,16 @@ def test_each_guest_uses_exact_packages_from_snapshot_before_installation():
 
 def test_package_readback_rejects_drift_missing_results_and_incomplete_count(tmp_path):
     """Reject incomplete or failed remote verification receipts."""
-    manifest = {"roles": {"origin-server": [{"package": "curl", "version": "1.0"}]}}
+    manifest = {
+        "dependency_roles": {"origin-server": [{"package": "curl", "version": "1.0"}]}
+    }
     (tmp_path / "ubuntu-packages.json").write_text(json.dumps(manifest))
     runtime = Mock()
     runtime.run.return_value = (json.dumps({"verified": True, "checked": 1}), "")
     verify_package_pins(runtime, ["ssh", "owned-host"], tmp_path, "origin")
     assert (
         json.loads(runtime.run.call_args.kwargs["input_text"])
-        == manifest["roles"]["origin-server"]
+        == manifest["dependency_roles"]["origin-server"]
     )
     for result in (
         {"verified": False, "checked": 1},
@@ -118,7 +121,7 @@ def test_generator_readback_includes_later_jre_installation(tmp_path):
     for item in supplemental:
         assert item["package"] + "=" + item["version"] in template
     (tmp_path / "ubuntu-packages.json").write_text(json.dumps(manifest))
-    records = manifest["roles"]["traffic-generator"] + supplemental
+    records = manifest["dependency_roles"]["traffic-generator"]
     runtime = Mock()
     runtime.run.return_value = (
         json.dumps({"verified": True, "checked": len(records)}),
@@ -126,3 +129,31 @@ def test_generator_readback_includes_later_jre_installation(tmp_path):
     )
     verify_package_pins(runtime, ["ssh", "owned-host"], tmp_path, "generator")
     assert json.loads(runtime.run.call_args.kwargs["input_text"]) == records
+
+
+def test_dependency_closure_is_declared_installed_and_verified(tmp_path):
+    """Require each role dependency, including Docker, in runtime readback."""
+    manifest = json.loads((ROOT / "terraform/ubuntu-packages.json").read_text())
+    assert set(manifest["dependency_roles"]) == set(manifest["roles"])
+    for role, entries in manifest["dependency_roles"].items():
+        assert len(entries) > len(manifest["roles"][role])
+        template = yaml.safe_load(
+            (ROOT / "terraform/cloud-init" / (role + ".yaml")).read_text()
+        )
+        ubuntu = [item for item in entries if "snapshot.ubuntu.com" in item["url"]]
+        assert template["packages"] == [
+            [item["package"], item["version"]] for item in ubuntu
+        ]
+        (tmp_path / "ubuntu-packages.json").write_text(json.dumps(manifest))
+        runtime = Mock()
+        runtime.run.return_value = (
+            json.dumps({"verified": True, "checked": len(entries)}),
+            "",
+        )
+        verify_package_pins(
+            runtime,
+            ["ssh", "owned-host"],
+            tmp_path,
+            "origin" if role == "origin-server" else "generator",
+        )
+        assert json.loads(runtime.run.call_args.kwargs["input_text"]) == entries

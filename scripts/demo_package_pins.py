@@ -23,9 +23,7 @@ def verify_package_pins(runtime: Runtime, ssh: list, app: Path, role: str) -> No
     """Reject absent or changed native package readback before guest acceptance."""
     manifest = json.loads((app / "ubuntu-packages.json").read_text())
     package_role = "origin-server" if role == "origin" else "traffic-generator"
-    records = manifest["roles"][package_role] + manifest.get(
-        "supplemental_roles", {}
-    ).get(package_role, [])
+    records = manifest["dependency_roles"][package_role]
     raw, _ = runtime.run(
         [*ssh, "sudo -n python3 -c " + shlex.quote(PACKAGE_CHECK)],
         input_text=json.dumps(records),
