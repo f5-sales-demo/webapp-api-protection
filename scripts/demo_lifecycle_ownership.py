@@ -27,6 +27,7 @@ from demo_lifecycle_state import (
     private_json,
     save_json,
 )
+from demo_package_pins import verify_package_pins
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -806,6 +807,9 @@ class Ownership:
             if proof.get("verified") is not True or proof.get("checked") != len(files):
                 message = "installed " + role + " files differ from Terraform artifacts"
                 raise Blocked(message)
+            verify_package_pins(
+                self.runtime, self.ssh_argv(guest, "yes"), self.context.paths.app, role
+            )
         self.runtime.phase("declared-guest-pins")
 
     def verify_phase(

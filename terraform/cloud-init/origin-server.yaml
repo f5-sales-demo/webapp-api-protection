@@ -1,6 +1,23 @@
 #cloud-config
 package_update: true
-packages: [ca-certificates, curl, nginx, python3, sysstat, git]
+packages:
+  - [ca-certificates, "20260601~24.04.1"]
+  - [curl, "8.5.0-2ubuntu10.15"]
+  - [nginx, "1.24.0-2ubuntu7.18"]
+  - [python3, "3.12.3-0ubuntu2.1"]
+  - [sysstat, "12.6.1-2"]
+  - [git, "1:2.43.0-1ubuntu7.3"]
+# Configure the declared snapshot before cloud-init installs any package.
+bootcmd:
+  - |
+    set -eu
+    cat > /etc/apt/sources.list.d/ubuntu.sources <<'DEMO_UBUNTU_SOURCES'
+    Types: deb
+    URIs: https://snapshot.ubuntu.com/ubuntu/20261012T000000Z/
+    Suites: noble noble-updates noble-security noble-backports
+    Components: main universe restricted multiverse
+    Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+    DEMO_UBUNTU_SOURCES
 write_files:
   - path: /usr/local/lib/demo-dvwa-session-cleanup.timer
     permissions: '0644'

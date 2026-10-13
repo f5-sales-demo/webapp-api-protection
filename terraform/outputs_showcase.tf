@@ -2,6 +2,7 @@ output "showcase" {
   description = "Application endpoints, VM access metadata, and configured protection modes for the unattended showcase lifecycle."
   value = {
     guest_files_sha256          = filesha256("${path.module}/guest-files.json")
+    ubuntu_packages_sha256      = filesha256("${path.module}/ubuntu-packages.json")
     tool_pins_sha256            = filesha256("${path.module}/tool-pins.json")
     catalog_seed_sha256         = filesha256("${path.module}/../scripts/demo_catalog_fixtures.py")
     application_manifest_sha256 = filesha256("${path.module}/origin-applications.json")

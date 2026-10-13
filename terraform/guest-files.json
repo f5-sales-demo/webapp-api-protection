@@ -2189,7 +2189,7 @@
       "mode": "0644"
     },
     "/etc/apt/sources.list.d/ubuntu.sources": {
-      "sha256": "23637a23e791e18e05c95516ca76dac8b0d4eb918bc8d662812b434eba8d6319",
+      "sha256": "cff90d476e9d0cf81dfa273e02b07636dbc49b2b4d930c132589cdf2027ad0d6",
       "mode": "0644"
     }
   },
@@ -2513,6 +2513,10 @@
     "/usr/local/lib/demo-dvwa-session-cleanup.py": {
       "mode": "0755",
       "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
+    },
+    "/etc/apt/sources.list.d/ubuntu.sources": {
+      "sha256": "cff90d476e9d0cf81dfa273e02b07636dbc49b2b4d930c132589cdf2027ad0d6",
+      "mode": "0644"
     }
   },
   "schema_version": 1

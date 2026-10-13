@@ -56,8 +56,11 @@ class CloudInitTests(unittest.TestCase):
             )
             for _ in range(2):
                 ensure_equal(shell(source).returncode, 0)
-                ensure("https://archive.ubuntu.com/ubuntu/" in path.read_text())
-                ensure("https://security.ubuntu.com/ubuntu/" in path.read_text())
+                ensure(
+                    "https://snapshot.ubuntu.com/ubuntu/20261012T000000Z/"
+                    in path.read_text()
+                )
+                ensure("noble-security" in path.read_text())
                 ensure("azure.archive" not in path.read_text())
                 manifest = json.loads((ROOT / "terraform/guest-files.json").read_text())
                 expected = manifest["generator"][
