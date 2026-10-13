@@ -8311,11 +8311,11 @@
       "mode": "0644"
     },
     "/opt/origin-server/dvga-adapter/adapt.py": {
-      "sha256": "f57f0c03c17850b78f532c826f4d4e013974dd7478a93d3318033df78cb1d8c3",
+      "sha256": "b90d2fe66d3f389a2990b2645868d38612219a161d3da64745ed8abfff7076ff",
       "mode": "0644"
     },
     "/opt/origin-server/dvga-adapter/Dockerfile": {
-      "sha256": "3b5f916a10a2971b52be2ea259b5f7aea1a0c52117607a395e1eb18f1f28bd8f",
+      "sha256": "4f2f9af1cac94657e64961d328b12423f82f3ee36294bb63a11481fd1f2a5c33",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_dvwa_browser.mjs": {
@@ -8529,6 +8529,10 @@
     "/usr/local/lib/demo-dvwa-session-cleanup.py": {
       "mode": "0755",
       "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
+    },
+    "/opt/origin-server/dvga-adapter/dvga_wsgi.py": {
+      "sha256": "f59a3b7bdb8dd945a21ba02b21596f14d6686369bef564e737d8b8651eb0374f",
+      "mode": "0644"
     }
   },
   "schema_version": 1

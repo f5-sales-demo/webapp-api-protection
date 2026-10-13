@@ -55,10 +55,13 @@ def binding(context: Context, plan: Path) -> dict[str, Any]:
     """Capture every mutable input capable of invalidating the plan."""
     paths = context.paths
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "source": source_digest(paths.root),
         "inputs": digest(paths.vars),
-        "provider_locks": digest(paths.app / ".terraform.lock.hcl"),
+        "provider_locks": {
+            "application": digest(paths.app / ".terraform.lock.hcl"),
+            "namespace": digest(paths.namespace_root / ".terraform.lock.hcl"),
+        },
         "application_state": digest(paths.state / "application.tfstate"),
         "namespace_state": digest(paths.state / "namespace.tfstate"),
         "plan": digest(plan),
