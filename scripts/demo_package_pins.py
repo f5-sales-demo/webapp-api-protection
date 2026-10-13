@@ -1,4 +1,4 @@
-"""Verify installed system package versions against the Terraform artifact lock."""
+"""Verify installed system package identities against the Terraform artifact lock."""
 
 import json
 import shlex
@@ -11,8 +11,9 @@ PACKAGE_CHECK = """import json,subprocess,sys
 records=json.load(sys.stdin)
 failures=[]
 for record in records:
-    result=subprocess.run(['/usr/bin/dpkg-query','-W','-f=${Version}',record['package']],capture_output=True,text=True,check=False)
-    if result.returncode or result.stdout != record['version']:
+    result=subprocess.run(['/usr/bin/dpkg-query','-W','-f=${Version}\t${Architecture}\t${Status}',record['package']],capture_output=True,text=True,check=False)
+    expected=[record['version'],record['architecture'],'install ok installed']
+    if result.returncode or result.stdout.split(chr(9)) != expected:
         failures.append(record['package'])
 print(json.dumps({'verified':not failures,'checked':len(records),'failures':failures}))
 """
@@ -22,7 +23,9 @@ def verify_package_pins(runtime: Runtime, ssh: list, app: Path, role: str) -> No
     """Reject absent or changed native package readback before guest acceptance."""
     manifest = json.loads((app / "ubuntu-packages.json").read_text())
     package_role = "origin-server" if role == "origin" else "traffic-generator"
-    records = manifest["roles"][package_role]
+    records = manifest["roles"][package_role] + manifest.get(
+        "supplemental_roles", {}
+    ).get(package_role, [])
     raw, _ = runtime.run(
         [*ssh, "sudo -n python3 -c " + shlex.quote(PACKAGE_CHECK)],
         input_text=json.dumps(records),

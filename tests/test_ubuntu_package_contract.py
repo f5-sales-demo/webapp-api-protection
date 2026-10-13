@@ -1,18 +1,23 @@
 """Bootstrap package selection must stay inside the declared signed snapshot."""
 
+import io
 import json
+import runpy
+import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 import yaml
 from demo_lifecycle_state import Blocked
-from demo_package_pins import verify_package_pins
+from demo_package_pins import PACKAGE_CHECK, verify_package_pins
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_each_guest_uses_exact_packages_from_snapshot_before_installation():
+    """Require exact snapshot artifacts before cloud-init package installation."""
     manifest = json.loads((ROOT / "terraform/ubuntu-packages.json").read_text())
     artifacts = {
         (item["package"], item["version"]): item for item in manifest["packages"]
@@ -41,6 +46,7 @@ def test_each_guest_uses_exact_packages_from_snapshot_before_installation():
 
 
 def test_package_readback_rejects_drift_missing_results_and_incomplete_count(tmp_path):
+    """Reject incomplete or failed remote verification receipts."""
     manifest = {"roles": {"origin-server": [{"package": "curl", "version": "1.0"}]}}
     (tmp_path / "ubuntu-packages.json").write_text(json.dumps(manifest))
     runtime = Mock()
@@ -58,3 +64,65 @@ def test_package_readback_rejects_drift_missing_results_and_incomplete_count(tmp
         runtime.run.return_value = (json.dumps(result), "")
         with pytest.raises(Blocked, match="system packages differ"):
             verify_package_pins(runtime, ["ssh", "owned-host"], tmp_path, "origin")
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        ("1.0\tamd64\tinstall ok installed", 0, True),
+        ("1.0\tarm64\tinstall ok installed", 0, False),
+        ("1.0\tamd64\tdeinstall ok config-files", 0, False),
+        ("1.0\tamd64\tinstall ok unpacked", 0, False),
+        ("1.1\tamd64\tinstall ok installed", 0, False),
+        ("1.0", 0, False),
+        ("", 1, False),
+    ],
+)
+def test_native_package_checker_requires_complete_installed_identity(
+    monkeypatch, capsys, tmp_path, case
+):
+    """Run the remote checker against native dpkg identity responses."""
+    readback, returncode, accepted = case
+    records = [{"package": "curl", "version": "1.0", "architecture": "amd64"}]
+    monkeypatch.setattr(sys, "stdin", io.StringIO(json.dumps(records)))
+    commands = []
+
+    def query(argv, **_kwargs):
+        commands.append(argv)
+        return subprocess.CompletedProcess(argv, returncode, readback, "")
+
+    monkeypatch.setattr(subprocess, "run", query)
+    checker = tmp_path / "package_check.py"
+    checker.write_text(PACKAGE_CHECK)
+    runpy.run_path(str(checker))
+    result = json.loads(capsys.readouterr().out)
+    assert result["verified"] is accepted
+    assert result["checked"] == 1
+    assert result["failures"] == ([] if accepted else ["curl"])
+    assert commands == [
+        [
+            "/usr/bin/dpkg-query",
+            "-W",
+            "-f=${Version}\t${Architecture}\t${Status}",
+            "curl",
+        ]
+    ]
+
+
+def test_generator_readback_includes_later_jre_installation(tmp_path):
+    """Include the declared runtime JRE alongside bootstrap packages."""
+    manifest = json.loads((ROOT / "terraform/ubuntu-packages.json").read_text())
+    supplemental = manifest.get("supplemental_roles", {}).get("traffic-generator", [])
+    assert [item["package"] for item in supplemental] == ["default-jre-headless"]
+    template = (ROOT / "terraform/cloud-init/traffic-generator.yaml").read_text()
+    for item in supplemental:
+        assert item["package"] + "=" + item["version"] in template
+    (tmp_path / "ubuntu-packages.json").write_text(json.dumps(manifest))
+    records = manifest["roles"]["traffic-generator"] + supplemental
+    runtime = Mock()
+    runtime.run.return_value = (
+        json.dumps({"verified": True, "checked": len(records)}),
+        "",
+    )
+    verify_package_pins(runtime, ["ssh", "owned-host"], tmp_path, "generator")
+    assert json.loads(runtime.run.call_args.kwargs["input_text"]) == records

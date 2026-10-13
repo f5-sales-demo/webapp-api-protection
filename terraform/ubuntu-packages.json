@@ -5,249 +5,310 @@
     "origin-server": [
       {
         "package": "ca-certificates",
-        "version": "20260601~24.04.1"
+        "version": "20260601~24.04.1",
+        "architecture": "all"
       },
       {
         "package": "curl",
-        "version": "8.5.0-2ubuntu10.15"
+        "version": "8.5.0-2ubuntu10.15",
+        "architecture": "amd64"
       },
       {
         "package": "nginx",
-        "version": "1.24.0-2ubuntu7.18"
+        "version": "1.24.0-2ubuntu7.18",
+        "architecture": "amd64"
       },
       {
         "package": "python3",
-        "version": "3.12.3-0ubuntu2.1"
+        "version": "3.12.3-0ubuntu2.1",
+        "architecture": "amd64"
       },
       {
         "package": "sysstat",
-        "version": "12.6.1-2"
+        "version": "12.6.1-2",
+        "architecture": "amd64"
       },
       {
         "package": "git",
-        "version": "1:2.43.0-1ubuntu7.3"
+        "version": "1:2.43.0-1ubuntu7.3",
+        "architecture": "amd64"
       }
     ],
     "traffic-generator": [
       {
         "package": "ca-certificates",
-        "version": "20260601~24.04.1"
+        "version": "20260601~24.04.1",
+        "architecture": "all"
       },
       {
         "package": "curl",
-        "version": "8.5.0-2ubuntu10.15"
+        "version": "8.5.0-2ubuntu10.15",
+        "architecture": "amd64"
       },
       {
         "package": "gnupg",
-        "version": "2.4.4-2ubuntu17.6"
+        "version": "2.4.4-2ubuntu17.6",
+        "architecture": "all"
       },
       {
         "package": "lsb-release",
-        "version": "12.0-2"
+        "version": "12.0-2",
+        "architecture": "all"
       },
       {
         "package": "jq",
-        "version": "1.7.1-3ubuntu0.24.04.2"
+        "version": "1.7.1-3ubuntu0.24.04.2",
+        "architecture": "amd64"
       },
       {
         "package": "git",
-        "version": "1:2.43.0-1ubuntu7.3"
+        "version": "1:2.43.0-1ubuntu7.3",
+        "architecture": "amd64"
       },
       {
         "package": "unzip",
-        "version": "6.0-28ubuntu4.1"
+        "version": "6.0-28ubuntu4.1",
+        "architecture": "amd64"
       },
       {
         "package": "build-essential",
-        "version": "12.10ubuntu1"
+        "version": "12.10ubuntu1",
+        "architecture": "amd64"
       },
       {
         "package": "ffmpeg",
-        "version": "7:6.1.1-3ubuntu5"
+        "version": "7:6.1.1-3ubuntu5",
+        "architecture": "amd64"
       },
       {
         "package": "python3",
-        "version": "3.12.3-0ubuntu2.1"
+        "version": "3.12.3-0ubuntu2.1",
+        "architecture": "amd64"
       },
       {
         "package": "python3-pip",
-        "version": "24.0+dfsg-1ubuntu1.3"
+        "version": "24.0+dfsg-1ubuntu1.3",
+        "architecture": "all"
       },
       {
         "package": "python3-venv",
-        "version": "3.12.3-0ubuntu2.1"
+        "version": "3.12.3-0ubuntu2.1",
+        "architecture": "amd64"
       },
       {
         "package": "python3-dev",
-        "version": "3.12.3-0ubuntu2.1"
+        "version": "3.12.3-0ubuntu2.1",
+        "architecture": "amd64"
       },
       {
         "package": "libffi-dev",
-        "version": "3.4.6-1build1"
+        "version": "3.4.6-1build1",
+        "architecture": "amd64"
       },
       {
         "package": "libssl-dev",
-        "version": "3.0.13-0ubuntu3.16"
+        "version": "3.0.13-0ubuntu3.16",
+        "architecture": "amd64"
       },
       {
         "package": "libpcap-dev",
-        "version": "1.10.4-4.1ubuntu3.1"
+        "version": "1.10.4-4.1ubuntu3.1",
+        "architecture": "amd64"
       },
       {
         "package": "nmap",
-        "version": "7.94+git20230807.3be01efb1+dfsg-3build2"
+        "version": "7.94+git20230807.3be01efb1+dfsg-3build2",
+        "architecture": "amd64"
       },
       {
         "package": "masscan",
-        "version": "2:1.3.2+ds1-1"
+        "version": "2:1.3.2+ds1-1",
+        "architecture": "amd64"
       },
       {
         "package": "tshark",
-        "version": "4.2.2-1.1build3"
+        "version": "4.2.2-1.1build3",
+        "architecture": "amd64"
       },
       {
         "package": "hping3",
-        "version": "3.a2.ds2-10build2"
+        "version": "3.a2.ds2-10build2",
+        "architecture": "amd64"
       },
       {
         "package": "socat",
-        "version": "1.8.0.0-4ubuntu0.1"
+        "version": "1.8.0.0-4ubuntu0.1",
+        "architecture": "amd64"
       },
       {
         "package": "tcpdump",
-        "version": "4.99.4-3ubuntu4.24.04.1"
+        "version": "4.99.4-3ubuntu4.24.04.1",
+        "architecture": "amd64"
       },
       {
         "package": "netcat-openbsd",
-        "version": "1.226-1ubuntu2"
+        "version": "1.226-1ubuntu2",
+        "architecture": "amd64"
       },
       {
         "package": "ngrep",
-        "version": "1.47+ds1-5build2"
+        "version": "1.47+ds1-5build2",
+        "architecture": "amd64"
       },
       {
         "package": "iperf3",
-        "version": "3.16-1build2"
+        "version": "3.16-1build2",
+        "architecture": "amd64"
       },
       {
         "package": "mtr-tiny",
-        "version": "0.95-1.1ubuntu0.1"
+        "version": "0.95-1.1ubuntu0.1",
+        "architecture": "amd64"
       },
       {
         "package": "whois",
-        "version": "5.5.22"
+        "version": "5.5.22",
+        "architecture": "amd64"
       },
       {
         "package": "dnsutils",
-        "version": "1:9.18.39-0ubuntu0.24.04.7"
+        "version": "1:9.18.39-0ubuntu0.24.04.7",
+        "architecture": "all"
       },
       {
         "package": "nikto",
-        "version": "1:2.1.5-3.1"
+        "version": "1:2.1.5-3.1",
+        "architecture": "all"
       },
       {
         "package": "sqlmap",
-        "version": "1.8.4-1"
+        "version": "1.8.4-1",
+        "architecture": "all"
       },
       {
         "package": "dirb",
-        "version": "2.22+dfsg-5build2"
+        "version": "2.22+dfsg-5build2",
+        "architecture": "amd64"
       },
       {
         "package": "whatweb",
-        "version": "0.5.5-1"
+        "version": "0.5.5-1",
+        "architecture": "all"
       },
       {
         "package": "sslscan",
-        "version": "2.1.2-0.1build2"
+        "version": "2.1.2-0.1build2",
+        "architecture": "amd64"
       },
       {
         "package": "hydra",
-        "version": "9.5-1build3"
+        "version": "9.5-1build3",
+        "architecture": "amd64"
       },
       {
         "package": "medusa",
-        "version": "2.2-7build3"
+        "version": "2.2-7build3",
+        "architecture": "amd64"
       },
       {
         "package": "ncrack",
-        "version": "0.7+debian-5ubuntu1"
+        "version": "0.7+debian-5ubuntu1",
+        "architecture": "amd64"
       },
       {
         "package": "john",
-        "version": "1.9.0-2build1"
+        "version": "1.9.0-2build1",
+        "architecture": "amd64"
       },
       {
         "package": "hashcat",
-        "version": "6.2.6+ds1-1build2"
+        "version": "6.2.6+ds1-1build2",
+        "architecture": "amd64"
       },
       {
         "package": "binwalk",
-        "version": "2.3.4+dfsg1-5"
+        "version": "2.3.4+dfsg1-5",
+        "architecture": "all"
       },
       {
         "package": "strace",
-        "version": "6.8-0ubuntu2"
+        "version": "6.8-0ubuntu2",
+        "architecture": "amd64"
       },
       {
         "package": "ltrace",
-        "version": "0.7.3-6.4ubuntu3"
+        "version": "0.7.3-6.4ubuntu3",
+        "architecture": "amd64"
       },
       {
         "package": "sysstat",
-        "version": "12.6.1-2"
+        "version": "12.6.1-2",
+        "architecture": "amd64"
       },
       {
         "package": "htop",
-        "version": "3.3.0-4build1"
+        "version": "3.3.0-4build1",
+        "architecture": "amd64"
       },
       {
         "package": "iotop",
-        "version": "0.6-42-ga14256a-0.2build1"
+        "version": "0.6-42-ga14256a-0.2build1",
+        "architecture": "amd64"
       },
       {
         "package": "ethtool",
-        "version": "1:6.7-1build1"
+        "version": "1:6.7-1build1",
+        "architecture": "amd64"
       },
       {
         "package": "apache2-utils",
-        "version": "2.4.58-1ubuntu8.16"
+        "version": "2.4.58-1ubuntu8.16",
+        "architecture": "amd64"
       },
       {
         "package": "wrk",
-        "version": "4.1.0-4build2"
+        "version": "4.1.0-4build2",
+        "architecture": "amd64"
       },
       {
         "package": "fonts-noto-color-emoji",
-        "version": "2.047-0ubuntu0.24.04.1"
+        "version": "2.047-0ubuntu0.24.04.1",
+        "architecture": "all"
       },
       {
         "package": "fonts-liberation",
-        "version": "1:2.1.5-3"
+        "version": "1:2.1.5-3",
+        "architecture": "all"
       },
       {
         "package": "libnss3",
-        "version": "2:3.98-1ubuntu0.2"
+        "version": "2:3.98-1ubuntu0.2",
+        "architecture": "amd64"
       },
       {
         "package": "libatk-bridge2.0-dev",
-        "version": "2.52.0-1build1"
+        "version": "2.52.0-1build1",
+        "architecture": "amd64"
       },
       {
         "package": "libdrm2",
-        "version": "2.4.125-1ubuntu0.1~24.04.2"
+        "version": "2.4.125-1ubuntu0.1~24.04.2",
+        "architecture": "amd64"
       },
       {
         "package": "libxkbcommon0",
-        "version": "1.6.0-1build1"
+        "version": "1.6.0-1build1",
+        "architecture": "amd64"
       },
       {
         "package": "libgbm1",
-        "version": "25.2.8-0ubuntu0.24.04.4"
+        "version": "25.2.8-0ubuntu0.24.04.4",
+        "architecture": "amd64"
       },
       {
         "package": "libasound2-dev",
-        "version": "1.2.11-1ubuntu0.3"
+        "version": "1.2.11-1ubuntu0.3",
+        "architecture": "amd64"
       }
     ]
   },
@@ -4869,5 +4930,14 @@
       "url": "https://snapshot.ubuntu.com/ubuntu/20261012T000000Z/pool/universe/w/whatweb/whatweb_0.5.5-1_all.deb"
     }
   ],
-  "signed_indexes_verified": true
+  "signed_indexes_verified": true,
+  "supplemental_roles": {
+    "traffic-generator": [
+      {
+        "package": "default-jre-headless",
+        "version": "2:1.21-75+exp1",
+        "architecture": "amd64"
+      }
+    ]
+  }
 }
