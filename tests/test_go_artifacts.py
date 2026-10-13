@@ -212,3 +212,22 @@ def test_compiler_archive_readback_rejects_drift_and_extra_content(tmp_path):
     binary.write_bytes(b"drift")
     with pytest.raises(ValueError, match="file differs"):
         go_artifacts.verify_toolchain(manifest, archive, directory)
+
+
+def test_frozen_metadata_preserves_exact_json_bytes_without_binary_encoding(tmp_path):
+    data = b'{"Time":"2026-01-01T00:00:00Z","Version":"v1.2.3"}\n'
+    manifest = small_manifest()
+    row = manifest["artifacts"][0]
+    row.update(
+        path="example.com/tool/@v/v1.2.3.info",
+        metadata_json=data.decode(),
+        sha256=hashlib.sha256(data).hexdigest(),
+        bytes=len(data),
+    )
+    row.pop("versions")
+    proxy = tmp_path / "proxy"
+    assert go_artifacts.prepare(manifest, proxy) == 1
+    assert (proxy / row["path"]).read_bytes() == data
+    row["metadata_json"] = json.dumps(json.loads(data))
+    with pytest.raises(ValueError, match="bytes differ"):
+        go_artifacts.prepare(manifest, tmp_path / "corrupted")

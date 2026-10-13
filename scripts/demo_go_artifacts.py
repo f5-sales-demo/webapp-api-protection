@@ -1,7 +1,6 @@
 """Prepare immutable Go proxy artifacts and reproduce exact tagged native tools."""
 
 import argparse
-import base64
 import hashlib
 import json
 import re
@@ -52,7 +51,7 @@ def validated_lock(lock: Path) -> dict:
                 raise ValueError(message)
             verify_bytes(row, ("\n".join(versions) + "\n").encode())
         elif path.endswith(".info"):
-            data = base64.b64decode(row["metadata_base64"], validate=True)
+            data = row["metadata_json"].encode("utf-8")
             verify_bytes(row, data)
             metadata = json.loads(data)
             if metadata.get("Version") != Path(path).name.removesuffix(
@@ -138,7 +137,7 @@ def prepare(manifest: dict, directory: Path) -> int:
             if row["path"].endswith("/list"):
                 data = ("\n".join(row["versions"]) + "\n").encode()
             elif row["path"].endswith(".info"):
-                data = base64.b64decode(row["metadata_base64"], validate=True)
+                data = row["metadata_json"].encode("utf-8")
             else:
                 with urllib.request.urlopen(  # noqa: S310 -- validated exact HTTPS URL
                     row["url"], timeout=180

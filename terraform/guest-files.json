@@ -6961,11 +6961,11 @@
       "mode": "0644"
     },
     "/usr/local/lib/demo-go-artifacts.py": {
-      "sha256": "79d9e22852ebdfc60be41814a5b9afec30616dc5fabc44589a1e0390f17ed28b",
+      "sha256": "02a84627d0d34f2b8107e8a935637040f6e639415f4c2d3a3d6994c27a29221d",
       "mode": "0644"
     },
     "/opt/traffic-generator-go-runtime/artifacts.json": {
-      "sha256": "882ba2a9abf19ca3869b5c360adb2c2871ab5749ec4178ba3364555d8ecbdb0d",
+      "sha256": "46f38677b8883f1ba50421b9f54804b1434b64d4f726862ab336346f42ddc0b2",
       "mode": "0644"
     },
     "/opt/traffic-generator-go-runtime/proxy/github.com/chromedp/cdproto/@v/list": {
