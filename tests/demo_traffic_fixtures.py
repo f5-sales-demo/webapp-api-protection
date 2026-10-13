@@ -62,6 +62,14 @@ def rendered_cloud_config(tier: str = "standard") -> tuple[str, dict[str, Any]]:
         "installer_sha256": "a" * 64,
         "traffic_script": script.replace("\n", "\n      "),
     }
+    substitutions["browser_helper"] = base64.b64encode(
+        (ROOT / "scripts/demo_browser_artifacts.py").read_bytes()
+    ).decode("ascii")
+    for name in ("package.json", "package-lock.json", "artifacts.json"):
+        key = "browser_" + name.replace(".", "_").replace("-", "_")
+        substitutions[key] = base64.b64encode(
+            (ROOT / "terraform/browser-runtime" / name).read_bytes()
+        ).decode("ascii")
     for key, value in substitutions.items():
         template = template.replace("${" + key + "}", value)
     template = template.replace("$${", "${").replace("%%{", "%{")

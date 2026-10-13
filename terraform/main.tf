@@ -327,13 +327,17 @@ module "traffic_generator" {
   # Azure limits decoded custom-data to 65535 bytes. As for the origin, cloud-init
   # detects gzip automatically and restores the exact YAML without extra tooling.
   custom_data = base64gzip(templatefile("${path.module}/cloud-init/traffic-generator.yaml", {
-    traffic_script   = indent(6, file("${path.module}/../scripts/demo_traffic.py"))
-    target_domains   = jsonencode(var.lb_domains)
-    target_origin_ip = module.origin_server.public_ip
-    tool_tier        = var.traffic_gen_tool_tier
-    generator_commit = var.traffic_generator_commit
-    generator_sha256 = var.traffic_generator_sha256
-    installer_sha256 = var.traffic_generator_installer_sha256
+    browser_helper            = filebase64("${path.module}/../scripts/demo_browser_artifacts.py")
+    browser_package_json      = filebase64("${path.module}/browser-runtime/package.json")
+    browser_package_lock_json = filebase64("${path.module}/browser-runtime/package-lock.json")
+    browser_artifacts_json    = filebase64("${path.module}/browser-runtime/artifacts.json")
+    traffic_script            = indent(6, file("${path.module}/../scripts/demo_traffic.py"))
+    target_domains            = jsonencode(var.lb_domains)
+    target_origin_ip          = module.origin_server.public_ip
+    tool_tier                 = var.traffic_gen_tool_tier
+    generator_commit          = var.traffic_generator_commit
+    generator_sha256          = var.traffic_generator_sha256
+    installer_sha256          = var.traffic_generator_installer_sha256
     # Emit identifiable malicious-user traffic each burst so MUD scores a user and
     # applies the configured mitigation (only meaningful when mud_enabled).
     mud_bad_traffic = var.mud_enabled && var.mud_bad_traffic

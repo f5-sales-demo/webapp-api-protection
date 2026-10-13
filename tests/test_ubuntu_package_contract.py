@@ -165,10 +165,8 @@ def test_dependency_closure_is_declared_installed_and_verified(tmp_path):
 def test_browser_modules_use_integrity_locked_npm_ci():
     """Require locked transitive browser modules before native browser install."""
     template = (ROOT / "terraform/cloud-init/traffic-generator.yaml").read_text()
-    value = yaml.safe_load(template)
-    files = {item["path"]: item for item in value["write_files"]}
     lock = json.loads(
-        files["/opt/traffic-generator/browser-runtime/package-lock.json"]["content"]
+        (ROOT / "terraform/browser-runtime/package-lock.json").read_text()
     )
     assert len(lock["packages"]) > 4
     assert all(
