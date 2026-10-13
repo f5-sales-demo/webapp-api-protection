@@ -1415,7 +1415,10 @@ runcmd:
     mkdir -p /opt/gotestwaf
     cp -r /opt/traffic-generator-go-runtime/build/modules/github.com/wallarm/gotestwaf@v0.5.9/config.yaml /opt/gotestwaf/
     cp -r /opt/traffic-generator-go-runtime/build/modules/github.com/wallarm/gotestwaf@v0.5.9/testcases /opt/gotestwaf/
+    find /opt/gotestwaf -type d -exec chmod 0755 {} +
+    find /opt/gotestwaf -type f -exec chmod 0644 {} +
     chown -R azureuser:azureuser /opt/gotestwaf
+    rm -rf /opt/traffic-generator-go-runtime/build
 
     echo "Installing checksum-pinned Vegeta 12.12.0..."
     [ "$DPKG_ARCH" = "amd64" ] || { echo 'Unsupported Vegeta architecture' >&2; exit 1; }

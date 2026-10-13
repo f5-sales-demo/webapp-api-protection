@@ -7916,197 +7916,189 @@
       "sha256": "2acba103157a49d497ee938a5351419b51bec50eaa3574b0e3f31b6b4306984e",
       "mode": "0755"
     },
-    "/opt/traffic-generator-go-runtime/build/bin/hey": {
-      "sha256": "2acba103157a49d497ee938a5351419b51bec50eaa3574b0e3f31b6b4306984e",
-      "mode": "0755"
-    },
     "/usr/local/bin/gotestwaf": {
-      "sha256": "f3dca691c5eb1259f467a5a8e78564c6b0506b668987678f5d9e8164a43d675b",
-      "mode": "0755"
-    },
-    "/opt/traffic-generator-go-runtime/build/bin/gotestwaf": {
       "sha256": "f3dca691c5eb1259f467a5a8e78564c6b0506b668987678f5d9e8164a43d675b",
       "mode": "0755"
     },
     "/opt/gotestwaf/config.yaml": {
       "sha256": "3a6e410ff64b72f518768ed7a400d43c773068d8187dfc3c08ea334ba516ee63",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/ss-include.yml": {
       "sha256": "6bf11fad92d4039d046839516c755b17a5ecaa55ecf524e486727ade6f2018ff",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/ldap-injection.yml": {
       "sha256": "b049da879e696093b77399be65da0c98af92c46f459da33f72d67714bcf94e4f",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/mail-injection.yml": {
       "sha256": "7962af9bdafc9b058cc7144233f3710a5eab089be4fd93952ee13fb2c71f692a",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/shell-injection.yml": {
       "sha256": "158e1eacd6c5fc83062b2cf8c50a8574f338b55fe946e22e5be2554193120316",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/crlf.yml": {
       "sha256": "a96f0068090c853a6527d9d7f91f30730267e34277d830b86cc45a6da39cd495",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/xss-scripting.yml": {
       "sha256": "d720932b8f52be78fc09a19287e5f898cbb73d7a8ae1ca477d2d100fb7f507f0",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/path-traversal.yml": {
       "sha256": "6b415211855518f99d1f16461f8fd13f38b99e1e52e46e2719f0c6b3d08b83c7",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/rce-urlpath.yml": {
       "sha256": "ff2818455e6e404f15f921f72d37fe7535f9012db20caaa78d6c69d856c52a70",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/sql-injection.yml": {
       "sha256": "2426a12edb5f38003f43d460f15e582bc0b0db2c3ce20fa621190a29e4e15f4f",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/nosql-injection.yml": {
       "sha256": "e1e87ec41aed1f7d930726f10d6cb333b68e28937609c025169fcc2fc312482c",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/xml-injection.yml": {
       "sha256": "2af6c1ee19466d4364ae360910b5ecfd9a49b719e892e506a69ecca7e3bf5478",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/sst-injection.yml": {
       "sha256": "9b3c2d647ef77174f79edc9adbb8efe7a97e1e11e6815d0c3c3a5228502bedf0",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/rce-urlparam.yml": {
       "sha256": "1c9efac6df025548e129c045dd4065edcc10cbc78217759f7886d6afb3ae47cc",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp/rce.yml": {
       "sha256": "d0b056388d46408bf89f8231e125156a2874067dade73c7f15fd9300546702e5",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/false-pos/texts.yml": {
       "sha256": "f55a3ff64f9eea85e89398000955376a9b584c2427e4873dcde5bc2de2975dae",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-16kb-xss.yml": {
       "sha256": "05bc419988c0de5a3e73d6694466197ee4e1fffb02616c9a81437170e7a0d2ce",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-8kb-sqli.yml": {
       "sha256": "3593f57d1e150134b17d8e39b9ddbdb67506b261bfc0e9ec551537920b39d960",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-32kb-sqli.yml": {
       "sha256": "7a37feb64bf5f1c7cb6fbbcd6558fd09db1c4f067c678d6b6497fc06805e1122",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-64kb-rce.yml": {
       "sha256": "02b4f9a645f819fdddc110e9281c1ec2747af4035752a5624f869e05944945e8",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-8kb-rce.yml": {
       "sha256": "5860c8e4872d86d88d010e0fd9b6a4c14334b26586294d3684fb36029c70a1bf",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-sqli.yml": {
       "sha256": "9e4ee8fca77acc076fb376589cd3a2fb35d1f9c3e92f2d8f0bc5f2319fd05bb9",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-64kb-xss.yml": {
       "sha256": "d02558241b03ba7aa6bbe7eca813fe1aa16efeb7fb67ad8e5ca54f6142c6f74b",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-user-agent.yml": {
       "sha256": "ae52088c20cb426b51b739fc3cb6033be4dc465260cba9fd106c7f0d19807dbc",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-128kb-rce.yml": {
       "sha256": "e47e5ac6378686370b899d43b5699b5a365cfbfe4412854760a042efd330d213",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-128kb-sqli.yml": {
       "sha256": "9720f0364542cb37ffaef3535b9651e2fe8fba1bdabd1d5721f89e4b63eae709",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-xss.yml": {
       "sha256": "d0114d18342aa0adbb6bcf08dda3f61e9ed8a72f3cdf610421859966fe819a55",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-16kb-sqli.yml": {
       "sha256": "16c6f63e7847da599c5fac4dab4f251b53b3f2b586d6f579725d4adb86dfd9bd",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-lfi-multipart.yml": {
       "sha256": "dce3d44987203be37cc23f901f3a1b4dbc76d2fe901e19cf95fb4b0f3f863368",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-xxe.yml": {
       "sha256": "2c2ad243cd9e18b23361f1f001ad9f39225050a6cf267738fae36ea8d3e04232",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-64kb-sqli.yml": {
       "sha256": "59184bcd4bd8ad79e6ae3bdf3f54938c58f5f38dffd1979ecfd3586a4ccc7951",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-128kb-xss.yml": {
       "sha256": "ae9309abc7f81a13b0ad2706cc3c50d74461469158dd5b8e6e16d0382bb84dde",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-rce.yml": {
       "sha256": "e07fb821d81e794ea5c04af54c06034d98d1f901e66ea480d278c679a7fe4abc",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-lfi.yml": {
       "sha256": "f3f1eb9af129a7b2759da59b9b6083c8daf5504002e213425ab59cf7ca3e7430",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-8kb-xss.yml": {
       "sha256": "d1a58201123551d5c7349fe7fe20e518832382e438418de06b73d531877a43c8",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-rce-rawrequests.yml": {
       "sha256": "87bf079d0d51331347fc817bbabb178660f249fa41036c238515178cc05f1ce7",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-16kb-rce.yml": {
       "sha256": "508b2d9ad97c73f0d62b622fd7d524765460772e7cb469c7fca580ce17c1b742",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-32kb-rce.yml": {
       "sha256": "597f36c9c68e8de5137169852a5135b8f81685e736ce4a1b0fedf5f0a0243136",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/community/community-32kb-xss.yml": {
       "sha256": "e8a8e01157aa24fb29785c8a70b16ca55767de234ecf04c1e7654f7856de630c",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp-api/non-crud.yml": {
       "sha256": "d4b5ecef4e31e6d6dc8fe5fa99f531ef2db61dbcb18f994951732ed86d5a5058",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp-api/grpc.yml": {
       "sha256": "a68d82cb6d78c8524e11d713f527018cc03e854bbd6e49413fd08dd291d149b2",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp-api/graphql.yml": {
       "sha256": "529a256ea14fd793261a7d898757a0e4943d0af82375f3a29f9956eb39b19a09",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp-api/graphql-post.yml": {
       "sha256": "8984253132750dd629c134ff8203ca3412f81e4d7087678563bcd253ff468e5a",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp-api/soap.yml": {
       "sha256": "f531da9e6bfe7c59faea22099e9f6298ad562241761316113884da4c343d8d0e",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/gotestwaf/testcases/owasp-api/rest.yml": {
       "sha256": "f1305e7a2d288025c5d855cfde77950bb76c38f82f7990658c213807810a57d9",
-      "mode": "0444"
+      "mode": "0644"
     },
     "/opt/traffic-generator-go1.26.8.linux-amd64.tar.gz": {
       "sha256": "d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b",
