@@ -1,4 +1,6 @@
 #cloud-config
+apt:
+  preserve_sources_list: true
 package_update: true
 packages:
   - [adduser, "3.137ubuntu1"]

@@ -27,6 +27,7 @@ def test_each_guest_uses_exact_packages_from_snapshot_before_installation():
         declared = [item for item in closure if "snapshot.ubuntu.com" in item["url"]]
         template = (ROOT / "terraform/cloud-init" / (role + ".yaml")).read_text()
         value = yaml.safe_load(template)
+        assert value["apt"]["preserve_sources_list"] is True
         assert value.get("package_upgrade", False) is False
         assert value["packages"] == [
             [item["package"], item["version"]] for item in declared
