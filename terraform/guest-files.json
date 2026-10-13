@@ -8271,7 +8271,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/docker-compose.yml": {
-      "sha256": "38fe236a70ec29bc947e2db9905dadd25440159e36a1ead80bc972ca4d45be5b",
+      "sha256": "96e6233ee525794c4a9bc8175fabf9941b0e34e76348353aa3a2aa98ebca743f",
       "mode": "0644"
     },
     "/opt/origin-server/vampi-gunicorn.sh": {
