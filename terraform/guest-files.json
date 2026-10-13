@@ -2254,6 +2254,10 @@
       "sha256": "acc80662cd4736db4a7da614122e550cd5ec89f52b3328d329455a06a655fbb1",
       "mode": "0755"
     },
+    "/usr/local/bin/origin-install-docker-packages": {
+      "sha256": "af96ed6b7d6cb1c948c3bf43db576fa61500fd0a74f4a9a042d080e5e9c2d87d",
+      "mode": "0755"
+    },
     "/usr/local/bin/origin-verify-crapi-browser.mjs": {
       "sha256": "00fc51ef5660b766fbf2bfa656035da7277b9403a6f8ff7ff67460358f4a7c51",
       "mode": "0755"
@@ -2268,6 +2272,10 @@
     },
     "/usr/local/bin/demo-catalog-fixtures": {
       "sha256": "7de379eacd0145b9d4c5255c0f9c5dde7b089651a88e40792b4e69b23cde7817",
+      "mode": "0755"
+    },
+    "/usr/local/bin/origin-prepare-dvwa-packages": {
+      "sha256": "0ae588159d3a03d9699100640fbb374960331e8ab405556ad9b0e1d8fdec6f7b",
       "mode": "0755"
     },
     "/usr/local/bin/catalog_dvga_recovery.py": {
@@ -2291,7 +2299,7 @@
       "mode": "0644"
     },
     "/usr/local/bin/demo-origin-provision": {
-      "sha256": "f75211cb040f4f8e82856250316c59628888f6bed8d5a8e0649e4bce317523f4",
+      "sha256": "d48def17cc0f54df061982c95d63eb6f814b3e6e9999623b1c5251692ca5ab9f",
       "mode": "0755"
     },
     "/usr/local/bin/demo-dvwa-session-cleanup": {
@@ -2315,7 +2323,7 @@
       "mode": "0755"
     },
     "/usr/local/bin/catalog_juice_recovery.py": {
-      "sha256": "2ede22cc8f20ea22ec1d0d32af7a76a4d95c14ce9c1ce1b3edf42e4140503c55",
+      "sha256": "be2c0384b1c1f5901bcc851bfeffe41dc91de0ed42a51549dfc6857a8bdd2f28",
       "mode": "0644"
     },
     "/usr/local/bin/catalog_crapi_recovery.py": {
@@ -2342,8 +2350,16 @@
       "sha256": "97049de9a3b32530facf44ab3938142602bfcda1e63f8d18e5421ac321cb6082",
       "mode": "0644"
     },
+    "/opt/origin-server/dvwa-build-packages.json": {
+      "sha256": "d3fad33ce07a3cc84edab8f868ff0d49d120143df011c6e1cb248405cb09aca9",
+      "mode": "0644"
+    },
+    "/opt/origin-server/docker-packages.json": {
+      "sha256": "e5ae8f8290d06e2b9688c8be7efd219f0683a957122bcf1954516905f29b6569",
+      "mode": "0644"
+    },
     "/opt/origin-server/docker-compose.yml": {
-      "sha256": "6b5c9a30c3b2335865e6320712239b3252d0941e620ed7164b42107b7c89e22c",
+      "sha256": "38fe236a70ec29bc947e2db9905dadd25440159e36a1ead80bc972ca4d45be5b",
       "mode": "0644"
     },
     "/opt/origin-server/vampi-gunicorn.sh": {
@@ -2451,7 +2467,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/dvwa-fpm/Dockerfile": {
-      "sha256": "ea273d68ab36b931c016783930962dde2aca99384de5b09c9888ef18c7845418",
+      "sha256": "f3bf1c0d598823b63eca717c15bfc6f92881100bb4416750834e23bd7c4120f7",
       "mode": "0644"
     },
     "/opt/origin-server/vampi/seed.py": {
@@ -2502,6 +2518,14 @@
       "sha256": "9cfdb93f38afcf2d076abecd66d32bfd3383cdf1967654ebc26a26605daf4173",
       "mode": "0644"
     },
+    "/etc/apt/sources.list.d/ubuntu.sources": {
+      "sha256": "cff90d476e9d0cf81dfa273e02b07636dbc49b2b4d930c132589cdf2027ad0d6",
+      "mode": "0644"
+    },
+    "/usr/local/lib/demo-dvwa-session-cleanup.py": {
+      "mode": "0755",
+      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
+    },
     "/usr/local/lib/demo-dvwa-session-cleanup.timer": {
       "mode": "0644",
       "sha256": "0fa44ac6340e8892f5cc44bee32509ec1d77c22647ccc2b85c83b6aea57ee3a0"
@@ -2510,12 +2534,88 @@
       "mode": "0700",
       "sha256": "7de379eacd0145b9d4c5255c0f9c5dde7b089651a88e40792b4e69b23cde7817"
     },
-    "/usr/local/lib/demo-dvwa-session-cleanup.py": {
-      "mode": "0755",
-      "sha256": "6adf2710a4cb7e12d607bea842c1c24cc29cdf0f89154af7fc5c92aefacf118e"
+    "/opt/origin-server/dvwa-fpm/packages/libelf1t64.deb": {
+      "sha256": "94497b7e17b6f574a0605b380d454e20d3f01a9c63b70c2a2263f679d30053e1",
+      "mode": "0644"
     },
-    "/etc/apt/sources.list.d/ubuntu.sources": {
-      "sha256": "cff90d476e9d0cf81dfa273e02b07636dbc49b2b4d930c132589cdf2027ad0d6",
+    "/opt/origin-server/dvwa-fpm/packages/libbpf1.deb": {
+      "sha256": "04c96ead3024888d80d08c8d08cc8cf4589f4614627acc69519f87ffb5adc1c2",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libmnl0.deb": {
+      "sha256": "4ec9c1096e0b954e3bdb03a62314ee7f49999045d3d55be3e4ded520ffc9baf5",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libtirpc-common.deb": {
+      "sha256": "300f582e2c9151a8d329568c705cadc76252c417147312fe331c4560d2c7a6c3",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libtirpc3t64.deb": {
+      "sha256": "ef4536c09bf5063554310e22d586ae90990100ba66d2fe7c35660e9e658913b6",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libxtables12.deb": {
+      "sha256": "4de5aa59faef5e98d6ba9f5f521a915be5641f224f597862f8d29e8319e8db16",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libcap2-bin.deb": {
+      "sha256": "6404b8ee315ce3eb8e273981650e419ff0e91aed5213d4975a6895f98944ea80",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/iproute2.deb": {
+      "sha256": "7b2dcade4a83ded723fcab21c5a53c47f29352c9c5e1661a089a1e481b3fb48a",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/iputils-ping.deb": {
+      "sha256": "a78f6118527796bde8c34d410dda1e5457f4e4e2de080a0b852cd59d7058ef6f",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libbrotli-dev.deb": {
+      "sha256": "7149124783ccc38764f8b869ea2e4bde319c3d0872b248b7ab472b47d41c5176",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libbz2-dev.deb": {
+      "sha256": "b395471bf69087a18a6baa04d68a9d50497b20f8a2602d9729c7069f820bbe6b",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libpng16-16t64.deb": {
+      "sha256": "0f8034d1c2547760430c81e8d87e5d6acd533a3493c80cf76dbecd0343b6773c",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libfreetype6.deb": {
+      "sha256": "e4947f3291528f03d574f2b01d5c5fc45c58c47480f32888a5cdf0f231ab584e",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/zlib1g-dev.deb": {
+      "sha256": "76ed5c858e1aef38b7be93acce5910e457e77bd6271471b9d05fb42e78826224",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libpng-dev.deb": {
+      "sha256": "c340b3a68d3e494290db3952293cbb64f01a8ea1ac75ae0ac6980a3418782415",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libfreetype-dev.deb": {
+      "sha256": "f58107859d9fa44206e64cf35bdbd4febdec66a33e456ce2e5e3712f01b6c895",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libjpeg62-turbo.deb": {
+      "sha256": "5504299ad0e3c0a9ca9f962a68a650a040db52f9f416a109e74df48d55601d3f",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/libjpeg62-turbo-dev.deb": {
+      "sha256": "e687e3c8b24a3aa74974928b8e0b07f6df2442187492d85cbcea7dacd91e3aba",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/nginx-common.deb": {
+      "sha256": "d0eab69fa763305d11bd623418118b61da1738aacd1390cd4465b7773289df1c",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/nginx.deb": {
+      "sha256": "29258fa0e2f4c9162a95eda2c36cf84ee8f57289a14c58fb7e6d3868c61a5db3",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvwa-fpm/packages/SHA256SUMS": {
+      "sha256": "84249039a2acbf236b97089b61b5b5fa65673edba180d110bde66957236151d3",
       "mode": "0644"
     }
   },
