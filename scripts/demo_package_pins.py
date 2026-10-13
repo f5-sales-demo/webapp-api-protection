@@ -19,11 +19,35 @@ print(json.dumps({'verified':not failures,'checked':len(records),'failures':fail
 """
 
 
+PACKAGE_SCHEMA_VERSION = 2
+
+
+def package_records(manifest: dict, role: str) -> list:
+    """Resolve role references to unique canonical package artifacts."""
+    message = "invalid canonical system package ownership lock"
+    try:
+        artifacts = {item["sha256"]: item for item in manifest["packages"]}
+        references = manifest["dependency_roles"][role]
+        records = [artifacts[key] for key in references]
+        valid = (
+            manifest["schema_version"] == PACKAGE_SCHEMA_VERSION
+            and len(artifacts) == len(manifest["packages"])
+            and bool(references)
+            and len(set(references)) == len(references)
+            and len({item["package"] for item in records}) == len(records)
+        )
+    except (KeyError, TypeError) as error:
+        raise Blocked(message) from error
+    if not valid:
+        raise Blocked(message)
+    return records
+
+
 def verify_package_pins(runtime: Runtime, ssh: list, app: Path, role: str) -> None:
     """Reject absent or changed native package readback before guest acceptance."""
     manifest = json.loads((app / "ubuntu-packages.json").read_text())
     package_role = "origin-server" if role == "origin" else "traffic-generator"
-    records = manifest["dependency_roles"][package_role]
+    records = package_records(manifest, package_role)
     raw, _ = runtime.run(
         [*ssh, "sudo -n python3 -c " + shlex.quote(PACKAGE_CHECK)],
         input_text=json.dumps(records),
