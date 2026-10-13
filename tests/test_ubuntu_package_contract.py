@@ -157,3 +157,22 @@ def test_dependency_closure_is_declared_installed_and_verified(tmp_path):
             "origin" if role == "origin-server" else "generator",
         )
         assert json.loads(runtime.run.call_args.kwargs["input_text"]) == entries
+
+
+def test_browser_modules_use_integrity_locked_npm_ci():
+    """Require locked transitive browser modules before native browser install."""
+    template = (ROOT / "terraform/cloud-init/traffic-generator.yaml").read_text()
+    value = yaml.safe_load(template)
+    files = {item["path"]: item for item in value["write_files"]}
+    lock = json.loads(
+        files["/opt/traffic-generator/browser-runtime/package-lock.json"]["content"]
+    )
+    assert len(lock["packages"]) > 4
+    assert all(
+        item["integrity"].startswith("sha512-")
+        for path, item in lock["packages"].items()
+        if path
+    )
+    assert "npm install -g" not in template
+    assert "npm ci --no-audit --no-fund" in template
+    assert "PUPPETEER_SKIP_DOWNLOAD" not in template

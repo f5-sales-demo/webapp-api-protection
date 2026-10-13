@@ -2191,6 +2191,14 @@
     "/etc/apt/sources.list.d/ubuntu.sources": {
       "sha256": "cff90d476e9d0cf81dfa273e02b07636dbc49b2b4d930c132589cdf2027ad0d6",
       "mode": "0644"
+    },
+    "/opt/traffic-generator/browser-runtime/package.json": {
+      "sha256": "45afa55686fc308e908b89eb3c917271658c7df7bddbdd23a5583dd44490b035",
+      "mode": "0644"
+    },
+    "/opt/traffic-generator/browser-runtime/package-lock.json": {
+      "sha256": "450177addd5b32605248789851cc9d6460982da3c92a890f2f9d74b990033b64",
+      "mode": "0644"
     }
   },
   "origin": {
