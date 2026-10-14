@@ -8271,7 +8271,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/docker-compose.yml": {
-      "sha256": "8137cf711523cbb4d668e8dfef6e9ffa7aad00fad2e68bd669fbf1a37ef399b7",
+      "sha256": "abc1e169103ed183352f5725d255aefacb957019c896f54c5e6a9e0090c927c5",
       "mode": "0644"
     },
     "/opt/origin-server/vampi-gunicorn.sh": {
@@ -8311,11 +8311,11 @@
       "mode": "0644"
     },
     "/opt/origin-server/dvga-adapter/adapt.py": {
-      "sha256": "b90d2fe66d3f389a2990b2645868d38612219a161d3da64745ed8abfff7076ff",
+      "sha256": "283bb0b12f23091da7fa2e291f0804edefce004861659f4bd66d4ae222fe27db",
       "mode": "0644"
     },
     "/opt/origin-server/dvga-adapter/Dockerfile": {
-      "sha256": "4f2f9af1cac94657e64961d328b12423f82f3ee36294bb63a11481fd1f2a5c33",
+      "sha256": "ca370f2bc0ee944d82325d7d3a53f0e2238db971b4a797d36a1999d4d157d7ec",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_dvwa_browser.mjs": {
@@ -8532,6 +8532,10 @@
     },
     "/opt/origin-server/dvga-adapter/dvga_wsgi.py": {
       "sha256": "f59a3b7bdb8dd945a21ba02b21596f14d6686369bef564e737d8b8651eb0374f",
+      "mode": "0644"
+    },
+    "/opt/origin-server/dvga-adapter/dvga_startup.py": {
+      "sha256": "a3efd77e6580e050c2de8851233a3a6764de64dd4d80df81532676f601340080",
       "mode": "0644"
     }
   },
