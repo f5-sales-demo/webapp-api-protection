@@ -2185,7 +2185,7 @@
       "mode": "0755"
     },
     "/etc/apt/apt.conf.d/80-demo-acquire": {
-      "sha256": "cac8d44f109998badd392ec7e8e9c2839aff7a08fb168e1f16dd309f3cc81b99",
+      "sha256": "7c2a9f2e4c5da442bcb2e3ff2e54a0ea3f265b9a537dada81741508b38b8ce8d",
       "mode": "0644"
     },
     "/etc/apt/sources.list.d/ubuntu.sources": {
@@ -8103,6 +8103,10 @@
     "/opt/traffic-generator-go1.26.8.linux-amd64.tar.gz": {
       "sha256": "d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b",
       "mode": "0644"
+    },
+    "/usr/local/bin/demo-apt-retry": {
+      "sha256": "42da586f74d14363543f8aab6992da62e447d865d4ac70d54ddab797b9dedbd3",
+      "mode": "0755"
     }
   },
   "origin": {

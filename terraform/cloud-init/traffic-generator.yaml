@@ -1,14 +1,49 @@
 #cloud-config
+# Keep package failures and their exit status independent of journal socket consumption.
+output:
+  all: ">> /var/log/cloud-init-output.log"
+
 package_update: true
 package_upgrade: false
 apt:
   preserve_sources_list: true
+apt_get_wrapper:
+  enabled: true
+  command: ["/usr/local/bin/demo-apt-retry"]
 
 # bootcmd runs before cloud-init's package module, including the first apt update.
 bootcmd:
   - |
     set -eu
-    printf '%s\n' 'Acquire::Retries "5";' 'Acquire::http::Timeout "60";' 'Acquire::https::Timeout "60";' > /etc/apt/apt.conf.d/80-demo-acquire
+    printf '%s\n' 'Acquire::Retries "0";' 'Acquire::http::Timeout "60";' 'Acquire::https::Timeout "60";' > /etc/apt/apt.conf.d/80-demo-acquire
+
+  # Retry failed commands outside APT's delayed-item queue; retain the final exit status.
+  - |
+    set -eu
+    cat > /usr/local/bin/demo-apt-retry <<'DEMO_APT_RETRY'
+    #!/bin/sh
+    set -u
+    [ "$#" -gt 0 ] || exit 64
+    attempt=1
+    while [ "$attempt" -le 5 ]; do
+      if "$@"; then
+        exit 0
+      else
+        status=$?
+      fi
+      [ "$status" -eq 100 ] || exit "$status"
+      [ "$attempt" -lt 5 ] || exit "$status"
+      echo "APT attempt $attempt/5 failed with exit $status; retrying" >&2
+      if sleep "$((attempt * 5))"; then
+        :
+      else
+        exit "$?"
+      fi
+      attempt="$((attempt + 1))"
+    done
+    exit 100
+    DEMO_APT_RETRY
+    chmod 0755 /usr/local/bin/demo-apt-retry
 
   - |
     set -eu

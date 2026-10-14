@@ -40,7 +40,7 @@ class CloudInitTests(unittest.TestCase):
                 ensure_equal(
                     config.read_text().splitlines(),
                     [
-                        'Acquire::Retries "5";',
+                        'Acquire::Retries "0";',
                         'Acquire::http::Timeout "60";',
                         'Acquire::https::Timeout "60";',
                     ],
@@ -51,9 +51,11 @@ class CloudInitTests(unittest.TestCase):
         ensure_equal(data["apt"]["preserve_sources_list"], True)
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ubuntu.sources"
-            source = data["bootcmd"][1].replace(
-                "/etc/apt/sources.list.d/ubuntu.sources", str(path)
-            )
+            source = next(
+                command
+                for command in data["bootcmd"]
+                if "DEMO_UBUNTU_SOURCES" in command
+            ).replace("/etc/apt/sources.list.d/ubuntu.sources", str(path))
             for _ in range(2):
                 ensure_equal(shell(source).returncode, 0)
                 ensure(
@@ -453,6 +455,7 @@ class PythonInstallerTests(unittest.TestCase):
             result = subprocess.run(  # noqa: S603 -- owned interpreter, offline fixture wheel
                 [
                     python,
+                    "-I",
                     "-m",
                     "pip",
                     "--isolated",
