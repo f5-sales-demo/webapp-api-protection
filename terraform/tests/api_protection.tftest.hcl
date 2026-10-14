@@ -2,7 +2,7 @@
 # api_protection_rules (per-rule client_matcher + request_matcher + api_groups_rules,
 # Coverage Batch D), validation_custom_list. Targets ./modules/http-lb.
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -143,11 +143,11 @@ run "api_protection_per_rule_ip_threat_and_invert" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].client_matcher.ip_threat_category_list != null && xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].api_endpoint_method.invert_matcher == true
+    condition     = xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].client_matcher.ip_threat_category_list != null && xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].api_endpoint_method.invert_matcher == true
     error_message = "per-rule ip_threat client_matcher + methods_invert must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].action.deny != null && xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].action.allow == null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].action.deny != null && xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].action.allow == null
     error_message = "action=deny must render (and allow omitted)"
   }
 }
@@ -167,11 +167,11 @@ run "api_protection_deep_matchers_and_request_matcher" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].client_matcher.asn_matcher != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].client_matcher.asn_matcher != null
     error_message = "asn_matcher (ref sets) must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].request_matcher.headers[0].check_present != null && xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].request_matcher.query_params[0].item != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].request_matcher.headers[0].check_present != null && xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].request_matcher.query_params[0].item != null
     error_message = "request_matcher header(present) + query_param(match) must render"
   }
 }
@@ -187,7 +187,7 @@ run "api_protection_tls_fingerprint_matcher" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_endpoint_rules[0].client_matcher.tls_fingerprint_matcher != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_endpoint_rules[0].client_matcher.tls_fingerprint_matcher != null
     error_message = "tls_fingerprint_matcher must render"
   }
 }
@@ -211,11 +211,11 @@ run "api_protection_group_rules_render" {
     ]
   }
   assert {
-    condition     = output.api_protection_group_rule_count == 2 && xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].client_matcher.ip_prefix_list != null
+    condition     = output.api_protection_group_rule_count == 2 && xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_groups_rules[0].client_matcher.ip_prefix_list != null
     error_message = "api_groups_rules (allow/deny + client_matcher) must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].api_group == "sensitive" && xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].base_path == "/api/sensitive"
+    condition     = xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_groups_rules[0].api_group == "sensitive" && xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_groups_rules[0].base_path == "/api/sensitive"
     error_message = "api_group selection must preserve its explicitly configured base_path"
   }
 }

@@ -47,7 +47,14 @@ module "origin_server" {
   # gzip + base64: the rendered cloud-init exceeds Azure's 65535-byte custom_data
   # limit uncompressed. cloud-init detects the gzip magic bytes and decompresses
   # user-data automatically, so the VM receives the same YAML.
-  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {}))
+  custom_data = base64gzip(templatefile("${path.module}/cloud-init/origin-server.yaml", {
+    session_retention_script       = indent(6, file("${path.module}/../scripts/dvwa_session_retention.py"))
+    catalog_seed_script            = indent(6, file("${path.module}/../scripts/demo_catalog_fixtures.py"))
+    origin_commit                  = var.origin_commit
+    origin_archive_sha256          = var.origin_archive_sha256
+    origin_installer_sha256        = var.origin_installer_sha256
+    origin_python_installer_sha256 = var.origin_python_installer_sha256
+  }))
 }
 
 # --- F5 XC HTTP load balancer in the persistent namespace-only root's namespace --
@@ -55,9 +62,10 @@ module "origin_server" {
 module "http_lb" {
   source = "./modules/http-lb"
 
-  namespace          = var.namespace
-  lb_domains         = var.lb_domains
-  lb_https_auto_cert = var.lb_https_auto_cert
+  namespace                     = var.namespace
+  lb_domains                    = var.lb_domains
+  lb_https_auto_cert            = var.lb_https_auto_cert
+  preserve_native_request_paths = var.preserve_native_request_paths
   # Point the origin pool at the Azure origin server's public IP (created above).
   # Terraform orders VM creation before the pool that references its IP.
   origin_ip         = module.origin_server.public_ip
@@ -81,6 +89,7 @@ module "http_lb" {
   origin_endpoint_selection    = var.origin_endpoint_selection
   origin_connection_timeout    = var.origin_connection_timeout
   origin_http_idle_timeout     = var.origin_http_idle_timeout
+  lb_stream_idle_timeout_ms    = var.lb_stream_idle_timeout_ms
   custom_routes                = var.custom_routes
   route_objects                = var.route_objects
   custom_route_ref             = var.custom_route_ref
@@ -144,7 +153,7 @@ module "http_lb" {
 
   # API Definition & spec enforcement (SP2) passthrough. Default disable (0-change).
   api_definition_choice              = var.api_definition_choice
-  api_definition_swagger_specs       = var.api_definition_swagger_specs
+  api_definition_swagger_specs       = [xcsh_swagger_object.showcase.path]
   api_definition_inventory_inclusion = var.api_definition_inventory_inclusion
   api_definition_inventory_exclusion = var.api_definition_inventory_exclusion
   api_definition_non_api_endpoints   = var.api_definition_non_api_endpoints
@@ -318,13 +327,19 @@ module "traffic_generator" {
   # Azure limits decoded custom-data to 65535 bytes. As for the origin, cloud-init
   # detects gzip automatically and restores the exact YAML without extra tooling.
   custom_data = base64gzip(templatefile("${path.module}/cloud-init/traffic-generator.yaml", {
-    traffic_script   = indent(6, file("${path.module}/../scripts/demo_traffic.py"))
-    target_domains   = jsonencode(var.lb_domains)
-    target_origin_ip = module.origin_server.public_ip
-    tool_tier        = var.traffic_gen_tool_tier
-    generator_commit = var.traffic_generator_commit
-    generator_sha256 = var.traffic_generator_sha256
-    installer_sha256 = var.traffic_generator_installer_sha256
+    go_helper                 = filebase64("${path.module}/../scripts/demo_go_artifacts.py")
+    go_lock_sha256            = filesha256("${path.module}/go-runtime/artifacts.json")
+    browser_helper            = filebase64("${path.module}/../scripts/demo_browser_artifacts.py")
+    browser_package_json      = filebase64("${path.module}/browser-runtime/package.json")
+    browser_package_lock_json = filebase64("${path.module}/browser-runtime/package-lock.json")
+    browser_artifacts_json    = filebase64("${path.module}/browser-runtime/artifacts.json")
+    traffic_script            = indent(6, file("${path.module}/../scripts/demo_traffic.py"))
+    target_domains            = jsonencode(var.lb_domains)
+    target_origin_ip          = module.origin_server.public_ip
+    tool_tier                 = var.traffic_gen_tool_tier
+    generator_commit          = var.traffic_generator_commit
+    generator_sha256          = var.traffic_generator_sha256
+    installer_sha256          = var.traffic_generator_installer_sha256
     # Emit identifiable malicious-user traffic each burst so MUD scores a user and
     # applies the configured mitigation (only meaningful when mud_enabled).
     mud_bad_traffic = var.mud_enabled && var.mud_bad_traffic

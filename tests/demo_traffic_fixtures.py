@@ -62,6 +62,20 @@ def rendered_cloud_config(tier: str = "standard") -> tuple[str, dict[str, Any]]:
         "installer_sha256": "a" * 64,
         "traffic_script": script.replace("\n", "\n      "),
     }
+    substitutions["go_helper"] = base64.b64encode(
+        (ROOT / "scripts/demo_go_artifacts.py").read_bytes()
+    ).decode("ascii")
+    substitutions["go_lock_sha256"] = hashlib.sha256(
+        (ROOT / "terraform/go-runtime/artifacts.json").read_bytes()
+    ).hexdigest()
+    substitutions["browser_helper"] = base64.b64encode(
+        (ROOT / "scripts/demo_browser_artifacts.py").read_bytes()
+    ).decode("ascii")
+    for name in ("package.json", "package-lock.json", "artifacts.json"):
+        key = "browser_" + name.replace(".", "_").replace("-", "_")
+        substitutions[key] = base64.b64encode(
+            (ROOT / "terraform/browser-runtime" / name).read_bytes()
+        ).decode("ascii")
     for key, value in substitutions.items():
         template = template.replace("${" + key + "}", value)
     template = template.replace("$${", "${").replace("%%{", "%{")
@@ -326,7 +340,9 @@ class GoFixture:
 
 def go_fixture(root: Path, data: dict[str, Any]) -> GoFixture:
     source = phase(data, "installing load testing tools")
-    source = source[: source.index('echo "Installing checksum-pinned Vegeta')]
+    source = source[
+        : source.index("install -d -m 0755 /opt/traffic-generator-go-runtime")
+    ]
     pinned = "d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b"
     ensure("https://go.dev/dl/go1.26.8.linux-amd64.tar.gz" in source)
     ensure(pinned in source)
@@ -343,6 +359,7 @@ def go_fixture(root: Path, data: dict[str, Any]) -> GoFixture:
     installer = source.replace(". /usr/local/lib/cloud-init-helpers.sh", "")
     for original, destination in (
         ("/opt/traffic-generator-toolchain", "toolchain"),
+        ("/opt/traffic-generator-go1.26.8.linux-amd64.tar.gz", "retained-go.tar.gz"),
         ("/opt/gotestwaf", "gotestwaf"),
         ("/opt/go", "gopath"),
         ("/usr/local/bin", "bin"),
