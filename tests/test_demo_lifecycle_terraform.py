@@ -842,8 +842,8 @@ class NamespaceTerraform(unittest.TestCase):
         declared = hcl2.loads((root / "versions.tf").read_text())
         namespace = hcl2.loads(source)
         ensure_equal(
-            namespace["terraform"][0]["required_providers"][0]["xcsh"][0]["version"],
-            declared["terraform"][0]["required_providers"][0]["xcsh"][0]["version"],
+            namespace["terraform"][0]["required_providers"][0]["xcsh"]["version"],
+            declared["terraform"][0]["required_providers"][0]["xcsh"]["version"],
         )
         for required in (
             'backend "local" {}',

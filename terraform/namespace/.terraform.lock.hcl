@@ -2,21 +2,21 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/f5-sales-demo/xcsh" {
-  version     = "15.8.0"
-  constraints = "15.8.0"
+  version     = "15.8.2"
+  constraints = "15.8.2"
   hashes = [
-    "h1:ZnK/aIWiJ1VG5rtZlZI2wMpsRiuRIG3I1LCe3aO+4gc=",
-    "h1:tPgJbqUxc+BYDyT+jvoWG/Ux222ontTQ0Ajlba5BJgU=",
-    "zh:05948395c76066ac72675d721096f6e18ced52e58e4fe49636535dfb0eed7464",
-    "zh:0b3717f0e56c1bc9607a1c97e874a9bd2e7d60fa31a75e58d4d03ff715b6c4b7",
-    "zh:158d3efe5d4ef0f6d30d3a25804cf0a7b3a04932a1f89105c137632816953720",
-    "zh:253915d65a39d7e05cda2d3fceee429fdba22a8c70f6fce700d69ef693c5edff",
+    "h1:attcotm0WT9QBYHFmQ7XT9eTebWqVhRQpIab90O4oAo=",
+    "h1:bbKhuzVRTrwR05FWRF/ZUiyqlAP3FhLnHfScHJrwolA=",
+    "zh:0259e79d6184ab6402a723d860aa169789693fccd40eb5e02b56c61a9ce829b2",
+    "zh:24fe9496940657a4c4b08526fcb233908695686ce424e1ab7c7a92fd021eeebd",
+    "zh:2a5c0d64e546a666d676c1ef4b0ee5f2ad2ca47fa0234f6db26840873dc88063",
+    "zh:78499b1bd038713a4442eccadf1a1bb9b6aa9f394b7c6cb7fe151644a27fc866",
     "zh:95513584b227b9c7923e641aae986935821077b1eb4116845b5312ac412bbc72",
-    "zh:9cb4d909dbc62a65bae33bf160da773e018695d08af62b4fb8d35c7cbfd457b5",
-    "zh:9ed73ea8f7296ecddfe7ac03e95b3e162445634550d3645bda368f112f5f524f",
-    "zh:b2df24c086ef5dfb57c6f44cc4fa2decca2355edf826133b35fc56c58fd2c3cc",
-    "zh:c7eb3b55bfb981ca19feaf837f47a4582b392a6827e860a32204be1bd82c0e01",
-    "zh:dfd6b1d18e27d7750bc12f0990072cde61d74dc4617fab7e20b3c3f65bc7dc3a",
-    "zh:fb5eeb179aa89b732b54302df8498987f042db212b72272fc60774f99e614d63",
+    "zh:9da543e253f6897d8923c9acfb06af85629c3b333238355b10eb53476afd245f",
+    "zh:a17c65f248b26dbb912c8836e8a74c16775406b7f64134a97310467b72a6beb0",
+    "zh:a5b602c105388c3dbb6f17ecd4b088ebb0161b8054284b5833cc1b02d21e5195",
+    "zh:c344f79f5243ca772bb6576ee972b4f70f94e4dc95a9c6156d1c5df0125640ee",
+    "zh:cd52f9f16586409a0c6a3fe2c2708f7fae722210675007f0bb6f3a09131fb471",
+    "zh:d703452bd56ac7c89e9c7c9cafe6c7d79796c76dede5d2b785912f7195d05d59",
   ]
 }

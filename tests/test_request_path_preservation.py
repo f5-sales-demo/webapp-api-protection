@@ -49,9 +49,9 @@ class NativeRequestPaths(unittest.TestCase):
             value = https[0]
             ensure_equal(
                 expression(value, "disable_path_normalize"),
-                "${var.preserve_native_request_paths ? {} : None}",
+                "${var.preserve_native_request_paths ? {} : null}",
             )
             ensure_equal(
                 expression(value, "enable_path_normalize"),
-                "${var.preserve_native_request_paths ? None : {}}",
+                "${var.preserve_native_request_paths ? null : {}}",
             )
