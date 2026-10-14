@@ -8271,7 +8271,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/docker-compose.yml": {
-      "sha256": "96e6233ee525794c4a9bc8175fabf9941b0e34e76348353aa3a2aa98ebca743f",
+      "sha256": "8137cf711523cbb4d668e8dfef6e9ffa7aad00fad2e68bd669fbf1a37ef399b7",
       "mode": "0644"
     },
     "/opt/origin-server/vampi-gunicorn.sh": {
@@ -8283,7 +8283,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/juice-shop-framing/preload.cjs": {
-      "sha256": "2dae99d78f356c4e672213ca5ae946557f9ce2f65adaf0e96cccd2cce2c73bad",
+      "sha256": "f11f7d3b7d93085f844386c0a6abf6ac5ea0e5b7743b63754806cddfb0a0dc14",
       "mode": "0644"
     },
     "/opt/origin-server/juice-shop-framing/catalog-journal.cjs": {
