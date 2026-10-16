@@ -9,7 +9,7 @@ import threading
 import urllib.error
 import urllib.parse
 from email.message import Message
-from http.client import IncompleteRead
+from http.client import HTTPResponse, IncompleteRead
 from unittest.mock import Mock, patch
 
 import demo_ai_traffic as traffic
@@ -67,6 +67,8 @@ class NativeResponse(io.BytesIO):
     def __init__(self, raw, code):
         super().__init__(raw)
         self.code = code
+        self.headers = Message()
+        self.headers["Content-Length"] = str(len(raw))
 
 
 def response(raw, code=200):
@@ -245,3 +247,31 @@ def test_guest_manifest_binds_all_four_ai_artifacts():
             "sha256": hashlib.sha256(raw).hexdigest(),
             "mode": row["permissions"],
         }
+
+
+@pytest.mark.parametrize("declared_length", ["too-long", "invalid"])
+def test_real_http_reader_short_body_never_accepts_complete_json(
+    tmp_path, declared_length
+):
+    _, _, _, fixture = inputs(tmp_path)
+    item = next(row for row in fixture["requests"] if row["kind"] == "benign")
+    host = traffic.HOSTS["before"]
+    http = Mock()
+
+    def native(req, **_kwargs):
+        raw = json.dumps(echo(req)).encode()
+        length = str(len(raw) + 25) if declared_length == "too-long" else "invalid"
+        wire = (
+            b"HTTP/1.1 200 OK\r\nContent-Length: " + length.encode() + b"\r\n\r\n" + raw
+        )
+        sock = Mock()
+        sock.makefile.return_value = io.BytesIO(wire)
+        response = HTTPResponse(sock)
+        response.begin()
+        return response
+
+    http.open.side_effect = native
+    record = traffic.request(http, host, "before", item, fixture["path"], "e" * 32)
+    assert record["transport_failure"] is True
+    assert record["expected_response"] is False
+    assert record["error_type"] == "HTTPException"

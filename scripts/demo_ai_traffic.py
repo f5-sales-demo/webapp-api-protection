@@ -107,6 +107,15 @@ def bounded_response(raw: bytes) -> None:
         raise ValueError(message)
 
 
+def response_framing(raw: bytes, declared_length: str | None) -> None:
+    """Bounded reads can return short bodies without raising IncompleteRead."""
+    if declared_length is not None and (
+        not declared_length.isdecimal() or len(raw) != int(declared_length)
+    ):
+        message = "AI traffic response body length differs from HTTP framing"
+        raise HTTPException(message)
+
+
 def request(
     http: urllib.request.OpenerDirector,
     host: str,
@@ -142,7 +151,9 @@ def request(
         except urllib.error.HTTPError as exc:
             response = exc
         with response:
+            declared_length = response.headers.get("Content-Length")
             raw = response.read(MAX_RESPONSE + 1)
+            response_framing(raw, declared_length)
             record["status"] = response.code
         bounded_response(raw)
         record["response_sha256"] = hashlib.sha256(raw).hexdigest()

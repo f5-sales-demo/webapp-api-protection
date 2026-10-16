@@ -8109,7 +8109,7 @@
       "mode": "0755"
     },
     "/usr/local/lib/demo-ai-traffic.py": {
-      "sha256": "62a15a78b01322cc4b26c947f68c2e3bde5bccbb7f05eb113e173a57d596f19e",
+      "sha256": "a5b6ecccbc334da82369d440d08a437bb2d14f13988268631c0c324d6eae59d3",
       "mode": "0644"
     },
     "/etc/demo-ai-traffic/fixture.json": {
