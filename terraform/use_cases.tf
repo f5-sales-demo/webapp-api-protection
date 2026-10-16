@@ -16,7 +16,7 @@ resource "xcsh_swagger_object" "comparison" {
   lifecycle { create_before_destroy = true }
 }
 module "use_case" {
-  for_each                      = toset(["waf", "schema", "endpoint", "rate", "mud"])
+  for_each                      = toset(["waf", "schema", "endpoint", "rate", "mud", "ai-waf"])
   source                        = "./modules/comparison"
   namespace                     = var.namespace
   category                      = each.key

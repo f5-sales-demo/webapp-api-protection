@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "path": "/httpbin/anything/ai-waf",
+  "requests": [
+    {
+      "label": "legitimate",
+      "input": "quarterly sales report",
+      "kind": "benign"
+    },
+    {
+      "label": "suspicious-benign",
+      "input": "SELECT a product from our catalogue",
+      "kind": "benign"
+    },
+    {
+      "label": "sqli",
+      "input": "1' OR '1'='1'--",
+      "kind": "attack",
+      "signature_category": "SQL Injection"
+    },
+    {
+      "label": "xss",
+      "input": "<script>alert(\"synthetic-ai-waf\")</script>",
+      "kind": "attack",
+      "signature_category": "Cross Site Scripting"
+    },
+    {
+      "label": "literal-script",
+      "input": "The training example contains <script> as a literal HTML tag.",
+      "kind": "attack",
+      "signature_category": "Cross Site Scripting"
+    }
+  ]
+}

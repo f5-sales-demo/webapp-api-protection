@@ -2,21 +2,21 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/f5-sales-demo/xcsh" {
-  version     = "15.8.2"
-  constraints = "15.8.2"
+  version     = "15.8.3"
+  constraints = "15.8.3"
   hashes = [
-    "h1:attcotm0WT9QBYHFmQ7XT9eTebWqVhRQpIab90O4oAo=",
-    "h1:bbKhuzVRTrwR05FWRF/ZUiyqlAP3FhLnHfScHJrwolA=",
-    "zh:0259e79d6184ab6402a723d860aa169789693fccd40eb5e02b56c61a9ce829b2",
-    "zh:24fe9496940657a4c4b08526fcb233908695686ce424e1ab7c7a92fd021eeebd",
-    "zh:2a5c0d64e546a666d676c1ef4b0ee5f2ad2ca47fa0234f6db26840873dc88063",
-    "zh:78499b1bd038713a4442eccadf1a1bb9b6aa9f394b7c6cb7fe151644a27fc866",
+    "h1:CKh5NulUcIIWGsMh04r0JFRQjk4iixg+CMvodOkUnK0=",
+    "h1:y0ZMJbBdg2OPq0Y1GypW+HwMJCuc0i0fD0UYr44vYEE=",
+    "zh:214d4caaf444aba81e509e7164547baf4a4c4477403be43e018ccd930fec147f",
+    "zh:285b827ed27e7b59d2026724efa6bd0920fd839e2df99fb488f5b3e91b54f2bd",
+    "zh:341cee13bf07d439059ea707e6801af722a2cf80c840f95e72060fcdb60edcae",
+    "zh:3c1db69d1cc0ca0ff851cb7380bf59aee70968631b041e3726a0ce38aa3ef16a",
+    "zh:4401df6ae654365533e8e14b03450d5c7c4a1cbdeb8bca92213955ad3165c1cd",
+    "zh:4c0c1ad70625e3d3f97fb4da72556f924f946ec08f054bb1d6f402b98e147d9f",
+    "zh:8accbc283d43ead41583b3203840c318c7d8da8a1a348ea14ad7fd8193cc99bb",
+    "zh:904b1c0f008fbb1dba59cadc7fc62a54799cc6d5b0fa66e6f31bcb36a952262f",
     "zh:95513584b227b9c7923e641aae986935821077b1eb4116845b5312ac412bbc72",
-    "zh:9da543e253f6897d8923c9acfb06af85629c3b333238355b10eb53476afd245f",
-    "zh:a17c65f248b26dbb912c8836e8a74c16775406b7f64134a97310467b72a6beb0",
-    "zh:a5b602c105388c3dbb6f17ecd4b088ebb0161b8054284b5833cc1b02d21e5195",
-    "zh:c344f79f5243ca772bb6576ee972b4f70f94e4dc95a9c6156d1c5df0125640ee",
-    "zh:cd52f9f16586409a0c6a3fe2c2708f7fae722210675007f0bb6f3a09131fb471",
-    "zh:d703452bd56ac7c89e9c7c9cafe6c7d79796c76dede5d2b785912f7195d05d59",
+    "zh:b352413d5d66f7769630d0bffb71d0ba201ee38575ad73db69879f0533302cfe",
+    "zh:c50b331a372961180142a6fd6d363c982382155f20afbb1de41120bb504ea74d",
   ]
 }

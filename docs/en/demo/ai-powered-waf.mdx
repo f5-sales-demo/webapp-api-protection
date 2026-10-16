@@ -1,0 +1,61 @@
+---
+title: AI-powered WAF
+description: Compare traditional signature enforcement with AI-assisted high-risk enforcement.
+sidebar:
+  order: 7
+---
+
+Compare `ai-waf-before.f5-sales-demo.com` and `ai-waf-after.f5-sales-demo.com` using the
+private Terraform `use_cases["ai-waf"]` output. Both hosts use the same origin pool,
+WAF blocking mode, and high/medium accuracy signatures. The after policy enables AI
+enhancements with high-risk mitigation, following F5's conservative configuration.
+The before policy disables AI enhancements; acceptance verifies the effective API
+readback because the provider suppresses that server default during import.
+
+AI-powered risk scoring combines supported signature matches, attack indicators,
+and machine-learning classification into High, Medium, or Low request risk. Disabled
+or excluded signatures do not invoke the model. The separate Security Analytics
+Risk Score ranges from 1 to 100 and is enabled by default. Seeing that score alone
+does not prove that AI enforcement is enabled.
+
+## Run the comparison
+
+Deploy through the [Terraform ownership procedure](../../reference/terraform-ownership/).
+Check current tenant availability: the documented trial ended September 30, 2026.
+The demo advertises listeners on Regional Edges. A Customer Edge deployment must
+also verify the documented AVX hardware prerequisite.
+
+```sh
+python3 scripts/showcase_ai_waf.py --config /absolute/private/operator.json
+```
+
+The walkthrough reads Terraform outputs and configuration, sends immutable synthetic
+HTTPBin fixtures to both hosts, and collects request-bound access and security
+telemetry. It does not change XC configuration, stop services, or modify origin data.
+Background catalog traffic continues to target the declared www and api hosts and
+excludes this pair's baseline. Schema, endpoint, rate, and malicious-user enforcement
+remain disabled on both comparison hosts.
+
+## Read the evidence
+
+Require successful legitimate origin echoes, enabled supported signatures, exact
+request IDs, request risk classifications, AI reasons, and the declared action.
+Keep the numeric analytics score separate from the request classification. Report
+suspicious-but-benign results as measured; these fixtures do not promise a particular
+false-positive reduction.
+
+A block on both hosts can come from traditional signature enforcement. The acceptance
+gate also requires a preserved request blocked on the traditional host and allowed
+on the AI host with attributable Low or Medium risk, alongside a blocked High-risk
+request. Missing telemetry or an absent control difference produces a failed private
+receipt. It does not count as accepted AI mitigation.
+
+After testing, the configuration and fixture hashes must match their captured values.
+The second unchanged Terraform apply and refreshed plan must have zero resource and
+output actions. The complete application, catalog, recovery, and ownership gates
+still control publication. This use case remains pending live acceptance.
+
+References:
+
+- [AI Powered Risk Scoring](https://docs.cloud.f5.com/docs-v2/web-app-and-api-protection/concepts/ai-powered-risk-scoring)
+- [Understanding Risk Score](https://docs.cloud.f5.com/docs-v2/web-app-and-api-protection/concepts/understanding-risk-score)

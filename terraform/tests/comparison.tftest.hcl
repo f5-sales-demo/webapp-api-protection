@@ -97,3 +97,31 @@ run "mud_pair" {
     error_message = "MUD after must enable detection and temporary mitigation while both retain WAF blocking."
   }
 }
+
+run "ai_waf_pair" {
+  command = plan
+  module { source = "./modules/comparison" }
+  variables { category = "ai-waf" }
+  assert {
+    condition = (
+      length(xcsh_http_loadbalancer.this) == 2 &&
+      output.endpoints.before.url == "https://ai-waf-before.f5-sales-demo.com" &&
+      output.endpoints.after.url == "https://ai-waf-after.f5-sales-demo.com" &&
+      alltrue([for firewall in xcsh_app_firewall.this : firewall.blocking != null]) &&
+      xcsh_app_firewall.this["before"].enable_ai_enhancements == null &&
+      xcsh_app_firewall.this["after"].enable_ai_enhancements.mitigate_high_risk_action != null &&
+      xcsh_app_firewall.this["after"].enable_ai_enhancements.mitigate_high_medium_risk_action == null
+    )
+    error_message = "AI comparison must preserve WAF blocking and isolate high-risk AI mitigation on stable hosts."
+  }
+  assert {
+    condition = (
+      xcsh_app_firewall.this["before"].detection_settings.signature_selection_setting.high_medium_accuracy_signatures == xcsh_app_firewall.this["after"].detection_settings.signature_selection_setting.high_medium_accuracy_signatures &&
+      alltrue([for firewall in xcsh_app_firewall.this : firewall.detection_settings.signature_selection_setting.high_medium_accuracy_signatures != null]) &&
+      alltrue([for listener in xcsh_http_loadbalancer.this : listener.default_route_pools[0].pool.name == var.origin_pool_name && listener.https_auto_cert.disable_path_normalize != null && listener.enable_challenge == null && listener.api_rate_limit == null && listener.api_protection_rules == null && listener.api_specification == null]) &&
+      length(xcsh_malicious_user_mitigation.this) == 0 &&
+      length(xcsh_api_definition.this) == 0
+    )
+    error_message = "AI hosts must share signature selection, origin and routing without schema, endpoint, rate or MUD enforcement."
+  }
+}

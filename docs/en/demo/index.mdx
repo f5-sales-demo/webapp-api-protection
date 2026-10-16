@@ -8,7 +8,7 @@ sidebar:
 
 The demo runs nine applications on an Azure origin VM, with a separate traffic-generator VM
 and F5 Distributed Cloud protection. The existing www and api endpoints share the origin with
-five simultaneous HTTPS comparisons under f5-sales-demo.com.
+six simultaneous HTTPS comparisons under f5-sales-demo.com.
 
 | Comparison | Baseline host | Protected host |
 | --- | --- | --- |
@@ -17,6 +17,7 @@ five simultaneous HTTPS comparisons under f5-sales-demo.com.
 | Endpoint methods | endpoint-before | endpoint-after |
 | Per-user rate limit | rate-before | rate-after |
 | Malicious-user detection | mud-before | mud-after |
+| [AI-powered WAF](./ai-powered-waf/) | ai-waf-before | ai-waf-after |
 
 Walkthroughs read the private Terraform `use_cases` output and exercise both endpoints.
 They do not change protection configuration. Each comparison has isolated policy and synthetic

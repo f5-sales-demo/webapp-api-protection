@@ -9,7 +9,7 @@ variable "swagger_path" { type = string }
 variable "category" {
   type = string
   validation {
-    condition     = contains(["waf", "schema", "endpoint", "rate", "mud"], var.category)
+    condition     = contains(["waf", "schema", "endpoint", "rate", "mud", "ai-waf"], var.category)
     error_message = "Unsupported comparison category."
   }
 }
@@ -25,7 +25,23 @@ resource "xcsh_app_firewall" "this" {
   namespace                  = var.namespace
   monitoring                 = var.category == "waf" && !each.value.protected ? {} : null
   blocking                   = var.category != "waf" || each.value.protected ? {} : null
-  default_detection_settings = {}
+  default_detection_settings = var.category == "ai-waf" ? null : {}
+  # Keep signature accuracy identical on both AI endpoints. Omitted disabled AI
+  # is the provider's import-suppressed default; live acceptance must verify it.
+  dynamic "enable_ai_enhancements" {
+    for_each = var.category == "ai-waf" && each.value.protected ? [1] : []
+    content { mitigate_high_risk_action = {} }
+  }
+  dynamic "detection_settings" {
+    for_each = var.category == "ai-waf" ? [1] : []
+    content {
+      default_violation_settings = {}
+      signature_selection_setting {
+        high_medium_accuracy_signatures = {}
+        default_attack_type_settings    = {}
+      }
+    }
+  }
   blocking_page {
     blocking_page = "string:///PCFkb2N0eXBlIGh0bWw+PGh0bWw+PGJvZHk+UmVxdWVzdCBSZWplY3RlZDwvYm9keT48L2h0bWw+"
     response_code = "Forbidden"
