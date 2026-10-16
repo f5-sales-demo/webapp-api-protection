@@ -213,14 +213,16 @@ resource "xcsh_http_loadbalancer" "this" {
   advertise_on_public_default_vip = {}
   round_robin                     = {}
 }
+# Sequential adoption may populate only one resource instance at a time.
+# Keep missing resource names null until the complete reviewed set is imported.
 output "endpoints" {
   value = {
     for phase, endpoint in local.endpoints : phase => {
       url                      = "https://${endpoint.name}.f5-sales-demo.com"
       domain                   = "${endpoint.name}.f5-sales-demo.com"
-      loadbalancer_name        = xcsh_http_loadbalancer.this[phase].name
-      app_firewall_name        = xcsh_app_firewall.this[phase].name
-      user_identification_name = xcsh_user_identification.this[phase].name
+      loadbalancer_name        = try(xcsh_http_loadbalancer.this[phase].name, null)
+      app_firewall_name        = try(xcsh_app_firewall.this[phase].name, null)
+      user_identification_name = try(xcsh_user_identification.this[phase].name, null)
       origin_pool_name         = var.origin_pool_name
       namespace                = var.namespace
       protected                = endpoint.protected
