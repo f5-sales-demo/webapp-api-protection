@@ -170,7 +170,9 @@ def risk_evidence(
         )
     ]
     if risk == "false positive":
-        bound_reasons = [reason for reason in reasons if reason == FALSE_POSITIVE_REASON]
+        bound_reasons = [
+            reason for reason in reasons if reason == FALSE_POSITIVE_REASON
+        ]
     require(
         bool(bound_reasons),
         "AI reason does not identify an enabled supported signature",
