@@ -36,6 +36,14 @@ Background catalog traffic continues to target the declared www and api hosts an
 excludes this pair's baseline. Schema, endpoint, rate, and malicious-user enforcement
 remain disabled on both comparison hosts.
 
+AI processing can take time after you enable the settings. Allow a bounded warm-up
+of up to 30 minutes, preserving diagnostic and failed receipts separately. Then run
+an independent comparison with fresh synthetic request identities. The walkthrough
+also limits each comparison to 30 minutes while waiting for request-bound telemetry.
+A warm-up response cannot satisfy acceptance. If the fresh comparison still lacks
+model attribution or the required control difference, retain its failed receipt and
+investigate before proceeding.
+
 ## Read the evidence
 
 Require successful legitimate origin echoes, enabled supported signatures, exact
