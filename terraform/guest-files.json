@@ -8191,11 +8191,11 @@
       "mode": "0755"
     },
     "/usr/local/bin/origin-verify-crapi-browser.mjs": {
-      "sha256": "00fc51ef5660b766fbf2bfa656035da7277b9403a6f8ff7ff67460358f4a7c51",
+      "sha256": "0f9d00419c5d9114b08eaf2443acafda5d70a3f17ea10373fcd0be3680f7a566",
       "mode": "0755"
     },
     "/usr/local/bin/origin-verify-content.mjs": {
-      "sha256": "aebb04fb8f1fcf3863f05e48904fdf7b30e6dca12f547c25ffc79add04050efc",
+      "sha256": "81c5aa887673e4a443b1b1495255a16ee5849af3a35ef8c0e9a49cd716190a8f",
       "mode": "0755"
     },
     "/usr/local/bin/enroll-family-recovery": {
@@ -8227,7 +8227,7 @@
       "mode": "0755"
     },
     "/usr/local/bin/application_receipts.py": {
-      "sha256": "473a1fb1966622420815f4c341661079bb6ae583267723abed96c74d7f9cce91",
+      "sha256": "0818006dee701edf1356d5a82df683732fa9ebbb130179f63586a0407e6d6c87",
       "mode": "0644"
     },
     "/usr/local/bin/demo-origin-provision": {
@@ -8251,7 +8251,7 @@
       "mode": "0755"
     },
     "/usr/local/bin/origin-browser-verify": {
-      "sha256": "bcb02f70ed30a2528b171f363a512d78679f78c67a72172f344aa69e7315fb92",
+      "sha256": "2d48e5378927f80414d9f818cab1678c873a747033ad30eb7f76963cd62d91c3",
       "mode": "0755"
     },
     "/usr/local/bin/catalog_juice_recovery.py": {
@@ -8339,7 +8339,7 @@
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_dvwa_browser.mjs": {
-      "sha256": "6f92f2b25813d6c00648f8ed6d8b1c8e8c1245015c4115e32125abec414a3aa2",
+      "sha256": "98dae6a471aeff13d2c89e2e53f65e8c1098a8bfcbe1f9199c26d47a31f96ad1",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/package.json": {
@@ -8347,11 +8347,11 @@
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_content.mjs": {
-      "sha256": "aebb04fb8f1fcf3863f05e48904fdf7b30e6dca12f547c25ffc79add04050efc",
+      "sha256": "81c5aa887673e4a443b1b1495255a16ee5849af3a35ef8c0e9a49cd716190a8f",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_csd_browser.mjs": {
-      "sha256": "6429f5a623b5b33a09e2fd14b3fb9cbb31665161f74263786b53c3922e59f12b",
+      "sha256": "66be6a760d4a5f979e67aed0faea029b9ca961961a79de17cf470d6b7100bf13",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/Dockerfile": {
@@ -8359,11 +8359,11 @@
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_dvga_browser.mjs": {
-      "sha256": "b1c1fa7426647689d75b3328820afd4c3935ea043c946add9db49db37fcffaa2",
+      "sha256": "5cafc5df1b6c8f0ac07bbd430098a7b9332b388c3de1884038531b979d3e370f",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_restaurant_browser.mjs": {
-      "sha256": "618226f54137fd1614bb2b2dddcd89add6dd7ba53f1bda0770d6afa49bc5dd8b",
+      "sha256": "8ffb42a7a12a9a4e745e637cfca3e5728aefd59ce00b3de70c00dd2e5f8f4f6d",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/package-lock.json": {
@@ -8371,19 +8371,19 @@
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_crapi_browser.mjs": {
-      "sha256": "00fc51ef5660b766fbf2bfa656035da7277b9403a6f8ff7ff67460358f4a7c51",
+      "sha256": "0f9d00419c5d9114b08eaf2443acafda5d70a3f17ea10373fcd0be3680f7a566",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_httpbin_browser.mjs": {
-      "sha256": "682353e0dcf4844c50eeacac11afd354c4c6bdc83b055c11cbeb5400a9142c82",
+      "sha256": "cf2fde18535080f3d962c9453accabd2e75fe39af416d9cdd4846b0d18ae1292",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_crapi_signup.mjs": {
-      "sha256": "706fcf6d57a104d0e63dd97e7ad7dee0989eabaff22cd55f39c81bf656e57f15",
+      "sha256": "b82f83e6c102b53f360d960836af9da1dc97001096ef7c314bf112d3047018f0",
       "mode": "0644"
     },
     "/opt/origin-server/browser-runtime/verify_juice_browser.mjs": {
-      "sha256": "3a807f8fee9da8825a7291d8d5c6a8aae4c8fe14edc0bd502b876f843159a8fd",
+      "sha256": "c9812b197e3e9121a10e2cd7ce598fbbeba9b639abfa0974854d6b87dd403744",
       "mode": "0644"
     },
     "/opt/origin-server/dvwa-fpm/entrypoint.sh": {
@@ -8556,6 +8556,14 @@
     },
     "/opt/origin-server/dvga-adapter/dvga_startup.py": {
       "sha256": "a3efd77e6580e050c2de8851233a3a6764de64dd4d80df81532676f601340080",
+      "mode": "0644"
+    },
+    "/opt/origin-server/browser-runtime/browser_evidence.mjs": {
+      "sha256": "1cd2de9d19c536b1f82ca70f79c085ccfcd1d9a583d6d40b4fc062994e912285",
+      "mode": "0644"
+    },
+    "/usr/local/bin/browser_evidence.mjs": {
+      "sha256": "1cd2de9d19c536b1f82ca70f79c085ccfcd1d9a583d6d40b4fc062994e912285",
       "mode": "0644"
     }
   },
