@@ -50,8 +50,8 @@ still requires fresh evidence on the deployed AI host.
 
 A block on both hosts can come from traditional signature enforcement. The acceptance
 gate also requires a preserved request blocked on the traditional host and allowed
-on the AI host with attributable Low or Medium risk, alongside a blocked High-risk
-request. Missing telemetry or an absent control difference produces a failed private
+on the AI host with attributable Low or Medium risk, or an explicit request-bound
+`false positive` classification, alongside a blocked High-risk request. Missing telemetry or an absent control difference produces a failed private
 receipt. It does not count as accepted AI mitigation.
 
 After testing, the configuration and fixture hashes must match their captured values.

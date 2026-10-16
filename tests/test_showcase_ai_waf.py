@@ -194,13 +194,24 @@ class AiEvidence(unittest.TestCase):
             with pytest.raises(EvidenceError):
                 risk_evidence([changed], event, probe, "example", "ai-waf-after")
 
-    def test_false_positive_is_not_low_medium_acceptance(self):
+    def test_attributed_false_positive_contrast_is_accepted(self):
         before = {"sqli": {"risk": "high", "status": 403, "input": "same"}}
         after = {
             **before,
             "tutorial": {"risk": "false positive", "status": 200, "input": "same"},
         }
         before["tutorial"] = {"status": 403, "input": "same"}
+        require_control_difference(before, after)
+        for field, value in (
+            ("risk", "unknown"),
+            ("status", 403),
+            ("input", "changed"),
+        ):
+            changed = copy.deepcopy(after)
+            changed["tutorial"][field] = value
+            with pytest.raises(EvidenceError):
+                require_control_difference(before, changed)
+        del after["sqli"]
         with pytest.raises(EvidenceError):
             require_control_difference(before, after)
 

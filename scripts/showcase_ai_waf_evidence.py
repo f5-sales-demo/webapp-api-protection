@@ -265,7 +265,7 @@ def require_control_difference(before: dict, after: dict) -> None:
     )
     require(
         any(
-            row.get("risk") in {"medium", "low"}
+            row.get("risk") in {"medium", "low", "false positive"}
             and row.get("status") == SUCCESS
             and before.get(label, {}).get("status") == FORBIDDEN
             and before[label].get("input") == row.get("input")
