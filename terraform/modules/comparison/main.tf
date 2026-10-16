@@ -40,10 +40,18 @@ resource "xcsh_app_firewall" "this" {
   dynamic "detection_settings" {
     for_each = var.category == "ai-waf" ? [1] : []
     content {
+      # Explicit server defaults preserve the policy across import.
+      enable_suppression         = {}
+      enable_threat_campaigns    = {}
       default_violation_settings = {}
       signature_selection_setting {
         high_medium_accuracy_signatures = {}
         default_attack_type_settings    = {}
+        signature_settings_by_accuracy {
+          high_accuracy_action   = "SIG_BLOCK"
+          medium_accuracy_action = "SIG_BLOCK"
+          low_accuracy_action    = "SIG_IGNORE"
+        }
       }
     }
   }
