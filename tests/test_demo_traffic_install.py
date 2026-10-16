@@ -216,6 +216,7 @@ class CloudInitTests(unittest.TestCase):
                     "daemon-reload",
                     "disable --now tgen-continuous.service",
                     "stop tgen-continuous.service",
+                    "disable --now demo-ai-traffic.service",
                 ],
             )
 

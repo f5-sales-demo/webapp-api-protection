@@ -20,9 +20,14 @@ locals {
   }
 }
 resource "xcsh_app_firewall" "this" {
-  for_each                   = local.endpoints
-  name                       = "${each.value.name}-waf"
-  namespace                  = var.namespace
+  for_each  = local.endpoints
+  name      = "${each.value.name}-waf"
+  namespace = var.namespace
+  labels = var.category == "ai-waf" ? {
+    "demo-owner"    = "terraform-ownership-571"
+    "demo-use-case" = "ai-waf"
+    "demo-staging"  = "meeting-607"
+  } : null
   monitoring                 = var.category == "waf" && !each.value.protected ? {} : null
   blocking                   = var.category != "waf" || each.value.protected ? {} : null
   default_detection_settings = var.category == "ai-waf" ? null : {}
@@ -51,6 +56,11 @@ resource "xcsh_user_identification" "this" {
   for_each  = local.endpoints
   name      = "${each.value.name}-user"
   namespace = var.namespace
+  labels = var.category == "ai-waf" ? {
+    "demo-owner"    = "terraform-ownership-571"
+    "demo-use-case" = "ai-waf"
+    "demo-staging"  = "meeting-607"
+  } : null
   rules { http_header_name = "X-MUD-User" }
 }
 resource "xcsh_malicious_user_mitigation" "this" {
@@ -82,7 +92,12 @@ resource "xcsh_http_loadbalancer" "this" {
   for_each  = local.endpoints
   name      = each.value.name
   namespace = var.namespace
-  domains   = ["${each.value.name}.f5-sales-demo.com"]
+  labels = var.category == "ai-waf" ? {
+    "demo-owner"    = "terraform-ownership-571"
+    "demo-use-case" = "ai-waf"
+    "demo-staging"  = "meeting-607"
+  } : null
+  domains = ["${each.value.name}.f5-sales-demo.com"]
   https_auto_cert {
     port                   = 443
     http_redirect          = false

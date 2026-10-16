@@ -62,6 +62,24 @@ def rendered_cloud_config(tier: str = "standard") -> tuple[str, dict[str, Any]]:
         "installer_sha256": "a" * 64,
         "traffic_script": script.replace("\n", "\n      "),
     }
+    fixture = (ROOT / "terraform/fixtures/ai-waf-traffic.json").read_bytes()
+    ai_config = {
+        "schema_version": 1,
+        "aggregate_rps": 2,
+        "hosts": {
+            phase: "ai-waf-" + phase + ".f5-sales-demo.com"
+            for phase in ("before", "after")
+        },
+        "fixture_sha256": hashlib.sha256(fixture).hexdigest(),
+    }
+    for key, raw in {
+        "ai_traffic_script": (ROOT / "scripts/demo_ai_traffic.py").read_bytes(),
+        "ai_traffic_fixture": fixture,
+        "ai_traffic_config": json.dumps(
+            ai_config, sort_keys=True, separators=(",", ":")
+        ).encode(),
+    }.items():
+        substitutions[key] = base64.b64encode(raw).decode("ascii")
     substitutions["go_helper"] = base64.b64encode(
         (ROOT / "scripts/demo_go_artifacts.py").read_bytes()
     ).decode("ascii")

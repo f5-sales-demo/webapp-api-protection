@@ -15,8 +15,9 @@ from demo_catalog_clock import align_generator_clock, catalog_client
 from demo_catalog_evidence import collect_pending
 from demo_catalog_recovery import enroll_recovery
 from demo_catalog_start import await_catalog_start, catalog_status
+from demo_lifecycle_ai_traffic import control as control_ai_traffic
 from demo_lifecycle_fixture import verify_fixture
-from demo_lifecycle_go import verify_go_toolchain
+from demo_lifecycle_guest_pins import verify as verify_guest_pins
 from demo_lifecycle_hosts import rotate_rebuilt_keys
 from demo_lifecycle_state import (
     AZURE_TYPES,
@@ -28,7 +29,6 @@ from demo_lifecycle_state import (
     private_json,
     save_json,
 )
-from demo_package_pins import verify_package_pins
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -671,6 +671,10 @@ class Ownership:
                 _resources(self.context), "generator", outputs["generator"]
             )
             self.enroll_guest(guest)
+            if action == "stop":
+                control_ai_traffic(
+                    self.context, self.runtime, self.ssh_argv(guest, "yes"), action
+                )
             previous = {}
             if action == "start":
                 previous = catalog_status(self.runtime, self.ssh_argv(guest, "yes"))
@@ -692,6 +696,9 @@ class Ownership:
             if action == "start":
                 await_catalog_start(
                     self.context, self.runtime, self.ssh_argv(guest, "yes"), previous
+                )
+                control_ai_traffic(
+                    self.context, self.runtime, self.ssh_argv(guest, "yes"), action
                 )
         finally:
             self.context.state.deadline = original
@@ -760,58 +767,8 @@ class Ownership:
             time.sleep(min(30, self.runtime.remaining()))
 
     def verify_guest_pins(self) -> None:
-        """Compare actual installed receipts with the declared artifact pins."""
-        outputs = self.context.state.outputs
-        if outputs is None:
-            message = "guest pin outputs unavailable"
-            raise Blocked(message)
-        resources = _resources(self.context)
-        for role in ("origin", "generator"):
-            guest = self.owned_guest(resources, role, outputs[role])
-            filename = (
-                "/opt/origin-server/install-receipt.json"
-                if role == "origin"
-                else "/opt/traffic-generator/source-receipt.json"
-            )
-            raw, _ = self.runtime.run(
-                [*self.ssh_argv(guest, "yes"), "sudo -n cat " + filename]
-            )
-            receipt = json.loads(raw)
-            declared = outputs.get(role + "_source", {})
-            actual_hash = receipt.get(
-                "archive_sha256" if role == "origin" else "artifact_sha256"
-            )
-            if receipt.get("source_commit") != declared.get(
-                "commit"
-            ) or actual_hash != declared.get("archive_sha256"):
-                message = "installed " + role + " source differs from Terraform pins"
-                raise Blocked(message)
-            files = json.loads(
-                (self.context.paths.app / "guest-files.json").read_text()
-            )[role]
-            check = (
-                "import hashlib,json,pathlib,sys; "
-                "expected=json.load(sys.stdin); failures=[]; "
-                "\nfor name,record in expected.items():"
-                "\n p=pathlib.Path(name)"
-                "\n if p.is_symlink() or not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest()!=record['sha256'] or ('mode' in record and (p.stat().st_mode & 0o777) != int(record['mode'], 8)): failures.append(name)"
-                "\nprint(json.dumps({'verified':not failures,'checked':len(expected),'failures':failures}))"
-            )
-            argv = [
-                *self.ssh_argv(guest, "yes"),
-                "sudo -n python3 -c " + shlex.quote(check),
-            ]
-            result, _ = self.runtime.run(argv, input_text=json.dumps(files))
-            proof = json.loads(result)
-            if proof.get("verified") is not True or proof.get("checked") != len(files):
-                message = "installed " + role + " files differ from Terraform artifacts"
-                raise Blocked(message)
-            if role == "generator":
-                verify_go_toolchain(self.runtime, self.ssh_argv(guest, "yes"))
-            verify_package_pins(
-                self.runtime, self.ssh_argv(guest, "yes"), self.context.paths.app, role
-            )
-        self.runtime.phase("declared-guest-pins")
+        """Verify declared installed artifacts before traffic starts."""
+        verify_guest_pins(self, _resources(self.context))
 
     def verify_phase(
         self, phase: Literal["readiness", "acceptance", "absence"]

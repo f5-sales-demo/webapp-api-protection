@@ -334,12 +334,22 @@ module "traffic_generator" {
     browser_package_lock_json = filebase64("${path.module}/browser-runtime/package-lock.json")
     browser_artifacts_json    = filebase64("${path.module}/browser-runtime/artifacts.json")
     traffic_script            = indent(6, file("${path.module}/../scripts/demo_traffic.py"))
-    target_domains            = jsonencode(var.lb_domains)
-    target_origin_ip          = module.origin_server.public_ip
-    tool_tier                 = var.traffic_gen_tool_tier
-    generator_commit          = var.traffic_generator_commit
-    generator_sha256          = var.traffic_generator_sha256
-    installer_sha256          = var.traffic_generator_installer_sha256
+    ai_traffic_script         = filebase64("${path.module}/../scripts/demo_ai_traffic.py")
+    ai_traffic_fixture        = filebase64("${path.module}/fixtures/ai-waf-traffic.json")
+    ai_traffic_config = base64encode(jsonencode({
+      schema_version = 1
+      aggregate_rps  = 2
+      hosts = {
+        for phase, endpoint in module.use_case["ai-waf"].endpoints : phase => endpoint.domain
+      }
+      fixture_sha256 = filesha256("${path.module}/fixtures/ai-waf-traffic.json")
+    }))
+    target_domains   = jsonencode(var.lb_domains)
+    target_origin_ip = module.origin_server.public_ip
+    tool_tier        = var.traffic_gen_tool_tier
+    generator_commit = var.traffic_generator_commit
+    generator_sha256 = var.traffic_generator_sha256
+    installer_sha256 = var.traffic_generator_installer_sha256
     # Emit identifiable malicious-user traffic each burst so MUD scores a user and
     # applies the configured mitigation (only meaningful when mud_enabled).
     mud_bad_traffic = var.mud_enabled && var.mud_bad_traffic

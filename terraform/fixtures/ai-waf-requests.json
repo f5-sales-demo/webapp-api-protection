@@ -5,36 +5,46 @@
     {
       "label": "legitimate",
       "input": "quarterly sales report",
-      "kind": "benign"
+      "kind": "benign",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=quarterly+sales+report"
     },
     {
       "label": "suspicious-benign",
       "input": "SELECT a product from our catalogue",
-      "kind": "benign"
+      "kind": "benign",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=SELECT+a+product+from+our+catalogue"
     },
     {
       "label": "sqli",
       "input": "1' OR '1'='1'--",
       "kind": "attack",
-      "signature_category": "SQL Injection"
+      "signature_category": "SQL Injection",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=1'+OR+'1'%3D'1'--"
     },
     {
       "label": "xss",
       "input": "<script>alert(\"synthetic-ai-waf\")</script>",
       "kind": "attack",
-      "signature_category": "Cross Site Scripting"
+      "signature_category": "Cross Site Scripting",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=<script>alert(\"synthetic-ai-waf\")<%2Fscript>"
     },
     {
       "label": "literal-script",
       "input": "The training example contains <script> as a literal HTML tag.",
       "kind": "attack",
-      "signature_category": "Cross Site Scripting"
+      "signature_category": "Cross Site Scripting",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=The+training+example+contains+<script>+as+a+literal+HTML+tag."
     },
     {
       "label": "tutorial-version",
       "input": "The database tutorial uses SELECT VERSION() to show its version.",
       "kind": "attack",
-      "signature_category": "SQL Injection"
+      "signature_category": "SQL Injection",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=The+database+tutorial+uses+SELECT+VERSION()+to+show+its+version."
     }
-  ]
+  ],
+  "origin_uri_contract": {
+    "implementation": "Werkzeug uri_to_iri",
+    "version": "0.14.1"
+  }
 }

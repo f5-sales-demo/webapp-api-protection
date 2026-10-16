@@ -70,14 +70,27 @@
       "terraform": "module.use_case[\"ai-waf\"]",
       "outputs": "use_cases[\"ai-waf\"]",
       "fixture": "terraform/fixtures/ai-waf-requests.json",
-      "positive_test": "Enabled supported signatures, exact request ID, AI High/Medium/Low classification and high-risk mitigation action; analytics Risk Score alone fails acceptance",
+      "positive_test": "Exact attributed High-risk block and Low/Medium or explicit false-positive traditional-block/AI-allow contrast; exact request/signature/model joins required; analytics Risk Score alone fails acceptance",
       "negative_control": "Equivalent blocking and high/medium accuracy signatures; legitimate and suspicious-benign origin echoes; no schema, endpoint, rate or MUD enforcement",
       "restoration": "Read-only HTTPBin requests and immutable fixture; exact before/after XC configuration hashes unchanged",
       "walkthrough": "scripts/showcase_ai_waf.py",
       "baseline": "ai-waf-before.f5-sales-demo.com",
       "protected": "ai-waf-after.f5-sales-demo.com",
       "plan_test": "terraform/tests/comparison.tftest.hcl",
-      "acceptance_status": "pending-live"
+      "acceptance_status": "pending-live",
+      "continuous_traffic": {
+        "terraform_owner": "module.traffic_generator.azurerm_linux_virtual_machine.main",
+        "config": "module.use_case[ai-waf].endpoints",
+        "fixture": "terraform/fixtures/ai-waf-traffic.json",
+        "runner": "scripts/demo_ai_traffic.py",
+        "service": "demo-ai-traffic.service",
+        "examples": 18,
+        "aggregate_http_rps": 2,
+        "source_tests": "tests/test_demo_ai_traffic.py",
+        "restoration": "Read-only HTTPBin requests; lifecycle stop disables service; actual reboot/start recovery and unchanged XC configuration required",
+        "acceptance_status": "pending-installed-live",
+        "catalog_acceptance": false
+      }
     }
   },
   "guest_files": "terraform/guest-files.json",

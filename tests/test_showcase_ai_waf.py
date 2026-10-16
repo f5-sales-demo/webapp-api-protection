@@ -55,9 +55,13 @@ def configs():
             },
             "listener": {
                 "spec": {
-                    "app_firewall": {"name": endpoint["app_firewall_name"]},
+                    "app_firewall": {
+                        "name": endpoint["app_firewall_name"],
+                        "namespace": endpoint["namespace"],
+                    },
                     "user_identification": {
-                        "name": endpoint["user_identification_name"]
+                        "name": endpoint["user_identification_name"],
+                        "namespace": endpoint["namespace"],
                     },
                     "domains": [endpoint["domain"]],
                     "disable_malicious_user_detection": {},
@@ -350,3 +354,113 @@ class AiEvidence(unittest.TestCase):
         probe["body"]["args"]["input"] = "other"
         with pytest.raises(EvidenceError):
             evaluate_phase([event], [], [probe], pair()["after"], True)
+
+
+class NativeAiReadback(unittest.TestCase):
+    def test_native_operational_fields_and_route_ids_preserve_raw_identity(self):
+        value = configs()
+        for index, phase in enumerate(("before", "after")):
+            spec = value[phase]["listener"]["spec"]
+            spec.update(state="Ready", host_name=phase, auto_cert_info={"state": phase})
+            spec["routes"] = [
+                {
+                    "simple_route": {
+                        "uuid": "00000000-0000-4000-8000-00000000000" + str(index),
+                        "path": {"prefix": "/dvga/subscriptions"},
+                        "origin_pools": [
+                            {
+                                "pool": {
+                                    "name": "shared-origin",
+                                    "namespace": "example",
+                                    "tenant": "example",
+                                }
+                            }
+                        ],
+                    }
+                }
+            ]
+            for reference in (
+                spec["app_firewall"],
+                spec["user_identification"],
+                spec["default_route_pools"][0]["pool"],
+            ):
+                reference["tenant"] = "example"
+        original = copy.deepcopy(value)
+        pair_configuration(value)
+        ensure_equal(value, original)
+        value["after"]["listener"]["spec"]["routes"][0]["simple_route"]["uuid"] = (
+            "invalid-uuid"
+        )
+        with pytest.raises(EvidenceError):
+            pair_configuration(value)
+
+    def test_reference_namespace_name_and_tenant_mismatches_fail(self):
+        for reference in ("app_firewall", "user_identification"):
+            for field, replacement in (
+                ("namespace", "other"),
+                ("name", "other"),
+                ("tenant", "other"),
+            ):
+                value = configs()
+                value["after"]["listener"]["spec"][reference][field] = replacement
+                with pytest.raises(EvidenceError):
+                    pair_configuration(value)
+        value = configs()
+        for phase in value.values():
+            phase["listener"]["spec"]["default_route_pools"][0]["pool"]["tenant"] = (
+                "example"
+            )
+            phase["listener"]["spec"]["app_firewall"]["tenant"] = "example"
+            phase["listener"]["spec"]["user_identification"]["tenant"] = "example"
+            phase["listener"]["spec"]["routes"] = [
+                {
+                    "simple_route": {
+                        "origin_pools": [{"pool": {"tenant": "example-other"}}]
+                    }
+                }
+            ]
+        with pytest.raises(EvidenceError):
+            pair_configuration(value)
+
+    def test_native_parentheses_echo_preserves_original_wire_target(self):
+        probe, event = request_and_event()
+        input_value = "The database tutorial uses SELECT VERSION() to show its version."
+        wire = (
+            probe["path"]
+            + "?input=The+database+tutorial+uses+SELECT+VERSION%28%29+to+show+its+version."
+        )
+        native = wire.replace("%28%29", "()")
+        probe.update(
+            status=200,
+            label="tutorial",
+            kind="benign",
+            input=input_value,
+            request_target=wire,
+            origin_request_target=native,
+            body={
+                "url": "http://" + probe["host"] + native,
+                "headers": {"X-Mud-User": probe["user"]},
+                "args": {"input": input_value},
+            },
+        )
+        event["rsp_code"] = "200"
+        evaluate_phase([event], [], [probe], pair()["after"], True)
+        ensure_equal(probe["request_target"], wire)
+        for replacement in (
+            native + "&extra=changed",
+            "//other.example.test" + native,
+            native.replace("/ai-waf", "/other"),
+        ):
+            changed = copy.deepcopy(probe)
+            changed["origin_request_target"] = replacement
+            with pytest.raises(EvidenceError):
+                evaluate_phase([event], [], [changed], pair()["after"], True)
+        for key, replacement in (
+            ("url", "http://other.example.test" + native),
+            ("headers", {"X-Mud-User": "other"}),
+            ("args", {"input": "other"}),
+        ):
+            changed = copy.deepcopy(probe)
+            changed["body"][key] = replacement
+            with pytest.raises(EvidenceError):
+                evaluate_phase([event], [], [changed], pair()["after"], True)

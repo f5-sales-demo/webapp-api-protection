@@ -84,7 +84,16 @@ def probes(client: Client, endpoint: dict, fixture: dict, prefix: str) -> list[d
             control="ai-waf",
             label=item["label"],
         )
-        result.append({**probe, "input": item["input"], "kind": item["kind"]})
+        result.append(
+            {
+                **probe,
+                "input": item["input"],
+                "kind": item["kind"],
+                "origin_request_target": item.get(
+                    "origin_request_target", probe["request_target"]
+                ),
+            }
+        )
     return result
 
 

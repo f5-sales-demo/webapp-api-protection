@@ -8107,6 +8107,22 @@
     "/usr/local/bin/demo-apt-retry": {
       "sha256": "42da586f74d14363543f8aab6992da62e447d865d4ac70d54ddab797b9dedbd3",
       "mode": "0755"
+    },
+    "/usr/local/lib/demo-ai-traffic.py": {
+      "sha256": "62a15a78b01322cc4b26c947f68c2e3bde5bccbb7f05eb113e173a57d596f19e",
+      "mode": "0644"
+    },
+    "/etc/demo-ai-traffic/fixture.json": {
+      "sha256": "fc013c5b06e7bcb80bfe660e1a19ecc49d5961262afda84bc519b82a489e05de",
+      "mode": "0644"
+    },
+    "/etc/demo-ai-traffic/config.json": {
+      "sha256": "a34d0710c41885cc095275c60d28f357ff0d110eb8de3fbee4730c18f8587e61",
+      "mode": "0644"
+    },
+    "/etc/systemd/system/demo-ai-traffic.service": {
+      "sha256": "ed1b97cf64b094533265973e48403fdf7f6daab150133ac01de70d6cd1fb2046",
+      "mode": "0644"
     }
   },
   "origin": {

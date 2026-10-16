@@ -3,7 +3,7 @@ title: Terraform ownership and comparison endpoints
 description: Operate the declared demo and review adoption without changing protection during walkthroughs.
 ---
 
-Terraform declares the existing www and api endpoints and five simultaneous HTTPS comparisons under f5-sales-demo.com. Read the private `use_cases` output to obtain before/after URLs and policy references.
+Terraform declares the existing www and api endpoints and six simultaneous HTTPS comparisons under f5-sales-demo.com. Read the private `use_cases` output to obtain before/after URLs and policy references.
 
 | Comparison | Before | After |
 | --- | --- | --- |
@@ -12,6 +12,7 @@ Terraform declares the existing www and api endpoints and five simultaneous HTTP
 | Endpoint methods | endpoint-before | endpoint-after |
 | Per-user rate limit | rate-before | rate-after |
 | Malicious-user detection | mud-before | mud-after |
+| AI-powered WAF | ai-waf-before | ai-waf-after |
 
 Each comparison has its own firewall and user identity. Origin pools and health checks remain shared. MUD is enabled only on mud-after; CSD remains display-only. Background traffic continues to target the protected www/api hosts and excludes baseline hosts.
 
@@ -38,7 +39,16 @@ the review plan is current. The mapping binds the approved scope, state digest, 
 namespace/name/version, verified content digest, and ownership review. Adoption backs up state and
 receipts before import.
 
-Capacity checks count new resources from the fresh plan, including all twelve listeners on a clean deployment. Unchanged and imported resources need no additional quota; unknown limits or insufficient capacity fail before apply.
+The six AI comparison objects staged for the showcase require an explicit reviewed import,
+preserving their original live UIDs. The complete mapping declares both listeners, both firewalls,
+and both user identities at stable `module.use_case["ai-waf"]` addresses. Adoption checks the live
+inventory, exact namespace/name, ownership labels, and managed policy hashes before any import.
+Listener route UUIDs remain part of the reviewed identity. Operational certificate and DNS status
+do not change that policy hash. An interrupted import retains its failed progress receipt and state
+backup. Resume requires a fresh plan and current-state review; only already-owned exact identities
+are skipped. A different identity or another Terraform owner fails the operation.
+
+Capacity checks count new resources from the fresh plan, including all fourteen listeners on a clean deployment. Unchanged and imported resources need no additional quota; unknown limits or insufficient capacity fail before apply.
 
 The namespace remains in its separate protected state. DNS and tenant subscriptions retain their owning plans. Never move these shared prerequisites into application state.
 
@@ -57,6 +67,16 @@ records the service/control files. Tool versions, release hashes, browser packag
 repository commits are declared in `terraform/tool-pins.json`. Direct file changes fail
 verification.
 
+The generator's Terraform custom data also installs `demo-ai-traffic.service`, its Python runner,
+configuration, and immutable 18-example fixture. Configuration consumes the AI module's endpoint
+outputs. The service is provisioned stopped and starts only after lifecycle readiness and catalog
+startup checks. Lifecycle stop disables it; an enabled service resumes on reboot. Verify actual
+stop/start and reboot recovery before accepting this behavior. Guest verification checks all four
+installed artifact hashes and modes. The service restricts requests to the two AI HTTPS hosts,
+disables redirects, creates fresh synthetic identities, and retains bounded private journals.
+Its two aggregate requests/second provide display statistics; they do not count toward catalog or
+AI attribution acceptance.
+
 ## Session retention
 
 Terraform declares a five-minute DVWA cleanup timer and a 24-hour anonymous-session retention
@@ -67,7 +87,7 @@ cleanup program and timer against their declared hashes.
 
 ## Acceptance
 
-The coverage manifest is `terraform/coverage/demo.json`. Publication requires all five attributed
+The coverage manifest is `terraform/coverage/demo.json`. Publication requires all six attributed
 comparisons, successful legitimate requests, nine applications across native/proxy/published routes,
 two complete 164-entry catalog passes at 200 aggregate HTTP requests/second within 5%, at least 99%
 benign success, and zero baseline transport failures.

@@ -956,6 +956,42 @@ packages:
   - [zlib1g-dev, "1:1.3.dfsg-3.1ubuntu2.2"]
 
 write_files:
+  - path: /usr/local/lib/demo-ai-traffic.py
+    permissions: '0644'
+    encoding: b64
+    content: ${ai_traffic_script}
+  - path: /etc/demo-ai-traffic/fixture.json
+    permissions: '0644'
+    encoding: b64
+    content: ${ai_traffic_fixture}
+  - path: /etc/demo-ai-traffic/config.json
+    permissions: '0644'
+    encoding: b64
+    content: ${ai_traffic_config}
+  - path: /etc/systemd/system/demo-ai-traffic.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Continuous synthetic AI WAF comparison traffic
+      Wants=network-online.target
+      After=network-online.target cloud-final.service
+      [Service]
+      Type=simple
+      DynamicUser=yes
+      StateDirectory=demo-ai-traffic
+      StateDirectoryMode=0700
+      UMask=0077
+      ExecStartPre=/usr/bin/python3 -B /usr/local/lib/demo-ai-traffic.py --config /etc/demo-ai-traffic/config.json --fixture /etc/demo-ai-traffic/fixture.json --check
+      ExecStart=/usr/bin/python3 -B /usr/local/lib/demo-ai-traffic.py --config /etc/demo-ai-traffic/config.json --fixture /etc/demo-ai-traffic/fixture.json
+      Restart=on-failure
+      RestartSec=10
+      TimeoutStopSec=30
+      NoNewPrivileges=yes
+      ProtectSystem=strict
+      ProtectHome=yes
+      PrivateTmp=yes
+      [Install]
+      WantedBy=multi-user.target
   - path: /usr/local/lib/demo-go-artifacts.py
     permissions: '0644'
     encoding: b64
@@ -1602,7 +1638,12 @@ runcmd:
     systemctl daemon-reload
     systemctl disable --now tgen-continuous.service
     systemctl stop tgen-continuous.service
+    systemctl disable --now demo-ai-traffic.service
     printf '{"status":"stopped","history":[],"tool_tier":"${tool_tier}"}\n' > /opt/traffic-generator/status.json
+
+  - |
+    set -eu
+    /usr/bin/python3 -B /usr/local/lib/demo-ai-traffic.py --config /etc/demo-ai-traffic/config.json --fixture /etc/demo-ai-traffic/fixture.json --check
 
   # --- Completion ---
   - |

@@ -259,6 +259,20 @@ class AdoptionTests(unittest.TestCase):
                 adopt(context, terraform, mapping)
             terraform.tf.assert_not_called()
             terraform.runtime.xc.side_effect = live
+
+            def import_state(*args):
+                snapshot = __import__("json").loads(state.read_text())
+                snapshot["resources"].append(
+                    {
+                        "type": "xcsh_swagger_object",
+                        "name": args[-2].split(".")[-1],
+                        "instances": [{"attributes": {"id": args[-1]}}],
+                    }
+                )
+                save_json(state, snapshot)
+
+            terraform.tf.side_effect = import_state
+            original_state = state.read_bytes()
             with patch("demo_lifecycle_adoption.require_current"):
                 adopt(context, terraform, mapping)
             assert terraform.tf.call_count == 2
@@ -270,4 +284,6 @@ class AdoptionTests(unittest.TestCase):
             )
             assert (
                 Path(receipt["backup"]) / "application.tfstate"
-            ).read_bytes() == state.read_bytes()
+            ).read_bytes() == original_state
+            assert receipt["status"] == "passed"
+            assert receipt["completed"] == entries

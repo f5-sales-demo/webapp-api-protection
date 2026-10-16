@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import copy
 import re
+import urllib.parse
+import uuid
 
 from demo_verify_evidence import rate_origin
 from demo_verify_types import EvidenceError
@@ -31,9 +33,55 @@ def require(condition: bool, message: str) -> None:
         raise EvidenceError(message)
 
 
+def _reference(actual: dict, expected: dict, tenant: str | None) -> bool:
+    """Validate native tenant-qualified references against the declared scope."""
+    return (
+        isinstance(actual, dict)
+        and set(actual) <= set(expected) | {"tenant"}
+        and {key: value for key, value in actual.items() if key != "tenant"} == expected
+        and actual.get("tenant") == tenant
+    )
+
+
+def _listener_controls(listener: dict, tenant: str | None) -> dict:
+    """Compare controls across endpoints; raw snapshots retain each identity."""
+    for field in (
+        "state",
+        "host_name",
+        "auto_cert_info",
+        "cert_state",
+        "dns_info",
+        "internet_vip_info",
+        "downstream_tls_certificate_expiration_timestamps",
+    ):
+        listener.pop(field, None)
+    for route in listener.get("routes", []):
+        simple = route.get("simple_route", {})
+        if "uuid" in simple:
+            try:
+                uuid.UUID(simple.pop("uuid"))
+            except (TypeError, ValueError, AttributeError) as exc:
+                message = "native route identity is invalid"
+                raise EvidenceError(message) from exc
+    for pool in listener.get("default_route_pools", []):
+        require(
+            pool.get("pool", {}).get("tenant") == tenant, "AI route tenant mismatch"
+        )
+        pool.get("pool", {}).pop("tenant", None)
+    for route in listener.get("routes", []):
+        for pool in route.get("simple_route", {}).get("origin_pools", []):
+            require(
+                pool.get("pool", {}).get("tenant") == tenant, "AI route tenant mismatch"
+            )
+            pool.get("pool", {}).pop("tenant", None)
+    return listener
+
+
 def pair_configuration(configs: dict) -> None:
     """Require equal effective controls and the exact AI high-risk selection."""
     firewalls, listeners = {}, {}
+    before_pools = configs["before"]["listener"]["spec"].get("default_route_pools", [])
+    tenant = before_pools[0].get("pool", {}).get("tenant") if before_pools else None
     for phase in ("before", "after"):
         endpoint = configs[phase]
         firewall = copy.deepcopy(endpoint["firewall"]["spec"])
@@ -84,13 +132,25 @@ def pair_configuration(configs: dict) -> None:
             "unrelated enforcement can explain AI comparison",
         )
         require(
-            listener.get("app_firewall", {}).get("name")
-            == endpoint["names"]["app_firewall_name"],
+            _reference(
+                listener.get("app_firewall", {}),
+                {
+                    "name": endpoint["names"]["app_firewall_name"],
+                    "namespace": endpoint["names"]["namespace"],
+                },
+                tenant,
+            ),
             "AI firewall reference mismatch",
         )
         require(
-            listener.get("user_identification", {}).get("name")
-            == endpoint["names"]["user_identification_name"],
+            _reference(
+                listener.get("user_identification", {}),
+                {
+                    "name": endpoint["names"]["user_identification_name"],
+                    "namespace": endpoint["names"]["namespace"],
+                },
+                tenant,
+            ),
             "AI identity reference mismatch",
         )
         require(
@@ -104,16 +164,19 @@ def pair_configuration(configs: dict) -> None:
             "AI origin routing identity missing",
         )
         require(
-            pools[0].get("pool")
-            == {
-                "name": endpoint["names"]["origin_pool_name"],
-                "namespace": endpoint["names"]["namespace"],
-            },
+            _reference(
+                pools[0].get("pool"),
+                {
+                    "name": endpoint["names"]["origin_pool_name"],
+                    "namespace": endpoint["names"]["namespace"],
+                },
+                tenant,
+            ),
             "AI origin pool does not match Terraform output",
         )
         for key in ("app_firewall", "user_identification", "domains"):
             listener.pop(key, None)
-        listeners[phase] = listener
+        listeners[phase] = _listener_controls(listener, tenant)
     require(
         firewalls["before"] == firewalls["after"],
         "AI pair has unequal effective signature controls",
@@ -205,11 +268,21 @@ def evaluate_phase(
             message = "exact AI access log missing"
             raise EvidenceError(message)
         if probe["status"] == SUCCESS:
+            origin_target = probe.get("origin_request_target", probe["request_target"])
+            wire = urllib.parse.urlsplit(probe["request_target"])
+            native = urllib.parse.urlsplit(origin_target)
+            require(
+                native.path == wire.path
+                and not (native.scheme or native.netloc or native.fragment)
+                and urllib.parse.parse_qsl(native.query, keep_blank_values=True)
+                == urllib.parse.parse_qsl(wire.query, keep_blank_values=True),
+                "native origin URI contract changed request content",
+            )
             rate_origin(
                 probe["status"],
                 probe["body"],
                 probe["host"],
-                probe["request_target"],
+                origin_target,
                 probe["user"],
             )
             require(

@@ -148,6 +148,52 @@ class CatalogStart(unittest.TestCase):
         calibrate.assert_not_called()
         ensure_equal(run.call_args.args[0][-1], "stop")
 
+    def test_ai_start_follows_catalog_start_confirmation(self):
+        fixture = self.prepare()
+        fixture.context.state.outputs["use_cases"] = {"ai-waf": {}}
+        calls = []
+
+        def ordered_run(argv, **_kwargs):
+            calls.append(argv[-1])
+            return "{}", 0
+
+        stub(
+            self,
+            fixture.runtime,
+            "run",
+            side_effect=ordered_run,
+        )
+        with (
+            patch("demo_lifecycle_ownership.catalog_client"),
+            patch("demo_lifecycle_ownership.align_generator_clock"),
+            patch(
+                "demo_lifecycle_ownership.await_catalog_start",
+                side_effect=lambda *_: calls.append("confirmed"),
+            ),
+        ):
+            fixture.ownership.traffic("start")
+        assert calls == [
+            "status",
+            "start",
+            "confirmed",
+            "demo-ai-traffic.service",
+            "demo-ai-traffic.service",
+        ]
+
+    def test_ai_stop_precedes_catalog_stop_without_evidence_api(self):
+        fixture = self.prepare()
+        fixture.context.state.outputs["use_cases"] = {"ai-waf": {}}
+        run = stub(self, fixture.runtime, "run", return_value=("", 0))
+        with patch("demo_lifecycle_ownership.catalog_client") as client:
+            fixture.ownership.traffic("stop")
+        client.assert_not_called()
+        assert run.call_args_list[0].args[0][-3:] == [
+            "disable",
+            "--now",
+            "demo-ai-traffic.service",
+        ]
+        assert run.call_args_list[1].args[0][-1] == "stop"
+
 
 class CatalogStartupJournal(unittest.TestCase):
     """A stopped pass may remain visible briefly after systemd starts the new service."""

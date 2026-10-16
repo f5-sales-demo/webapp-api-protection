@@ -9,6 +9,7 @@ import shutil
 import time
 from typing import TYPE_CHECKING
 
+from demo_lifecycle_ai_adoption import OWNERS, validate_ai_imports
 from demo_lifecycle_plan import require_current
 from demo_lifecycle_state import Blocked, private_json, save_json
 
@@ -20,6 +21,65 @@ if TYPE_CHECKING:
 
 
 _MAX_SWAGGER_IMPORTS = 2
+
+
+def _state_identities(state: Path) -> dict[str, str]:
+    """Read authoritative addresses, rejecting duplicate owners before mutation."""
+    identities = {}
+    for row in private_json(state).get("resources", []):
+        if row.get("mode", "managed") != "managed":
+            continue
+        for instance in row.get("instances", []):
+            address = ".".join(
+                filter(None, (row.get("module"), row["type"], row["name"]))
+            )
+            if "index_key" in instance:
+                address += "[" + json.dumps(instance["index_key"]) + "]"
+            if address in identities:
+                message = "adoption state contains duplicate resource addresses"
+                raise Blocked(message)
+            attributes = instance.get("attributes", {})
+            identity = attributes.get("id")
+            if row["type"] in {
+                "xcsh_http_loadbalancer",
+                "xcsh_app_firewall",
+                "xcsh_user_identification",
+            }:
+                if identity != attributes.get("name") or not attributes.get(
+                    "namespace"
+                ):
+                    message = "adoption XC state identity is incomplete"
+                    raise Blocked(message)
+                identity = attributes["namespace"] + "/" + attributes["name"]
+            identities[address] = identity
+    return identities
+
+
+def _pending_imports(state: Path, entries: list[dict]) -> list[dict]:
+    """Resume only exact reviewed identities; never import over a different owner."""
+    identities = _state_identities(state)
+    pending = []
+    for entry in entries:
+        address, identity = entry["address"], entry["id"]
+        if address in identities and identities[address] != identity:
+            message = "adoption destination owns a different identity"
+            raise Blocked(message)
+        if any(
+            owner != address and value == identity
+            for owner, value in identities.items()
+        ):
+            message = "adoption identity already has a different Terraform owner"
+            raise Blocked(message)
+        if address not in identities:
+            pending.append(entry)
+    return pending
+
+
+def _require_import_identity(state: Path, entry: dict) -> None:
+    """Check the actual saved identity before recording an import as completed."""
+    if _state_identities(state).get(entry["address"]) != entry["id"]:
+        message = "adoption import did not preserve the reviewed identity"
+        raise Blocked(message)
 
 
 def _move_listeners(
@@ -128,7 +188,7 @@ def _validate_imports(context: Context, terraform: Terraform, entries: list) -> 
 
 
 def adopt(context: Context, terraform: Terraform, mapping: Path) -> None:
-    """Import reviewed Swagger identities, preserving state and receipt backups."""
+    """Import reviewed declared identities, preserving state and receipt backups."""
     document = private_json(mapping)
     if (
         document.get("schema_version") != 1
@@ -137,8 +197,10 @@ def adopt(context: Context, terraform: Terraform, mapping: Path) -> None:
         message = "adoption review scope mismatch"
         raise Blocked(message)
     entries = document.get("imports")
-    if not isinstance(entries, list) or not 1 <= len(entries) <= _MAX_SWAGGER_IMPORTS:
-        message = "adoption requires one or two reviewed declared Swagger imports"
+    if not isinstance(entries, list) or not 1 <= len(
+        entries
+    ) <= _MAX_SWAGGER_IMPORTS + len(OWNERS):
+        message = "adoption requires reviewed declared Swagger or AI comparison imports"
         raise Blocked(message)
     plan = context.paths.state / "review.plan"
     require_current(context, plan)
@@ -146,7 +208,17 @@ def adopt(context: Context, terraform: Terraform, mapping: Path) -> None:
     if hashlib.sha256(state.read_bytes()).hexdigest() != document.get("state_sha256"):
         message = "adoption state changed since inventory review"
         raise Blocked(message)
-    _validate_imports(context, terraform, entries)
+    if any(not isinstance(entry, dict) for entry in entries):
+        message = "adoption import mapping must contain objects"
+        raise Blocked(message)
+    ai_entries = [entry for entry in entries if entry.get("address") in OWNERS]
+    swagger_entries = [entry for entry in entries if entry.get("address") not in OWNERS]
+    if len(swagger_entries) > _MAX_SWAGGER_IMPORTS:
+        message = "too many declared Swagger imports"
+        raise Blocked(message)
+    _validate_imports(context, terraform, swagger_entries)
+    validate_ai_imports(context, terraform, ai_entries)
+    pending = _pending_imports(state, entries)
     backup = context.paths.state.parent / ("adoption-backup-" + str(time.time_ns()))
     backup.mkdir(mode=0o700)
     for name in (
@@ -155,28 +227,54 @@ def adopt(context: Context, terraform: Terraform, mapping: Path) -> None:
         "run-manifest.json",
         "swagger-receipt.json",
         "application.tfvars.json",
+        "adoption-review.json",
+        "adoption-receipt.json",
+        "review.plan",
+        "review.binding.json",
+        "review.summary.json",
     ):
         source = context.paths.state / name
         if source.is_file():
             shutil.copyfile(source, backup / name)
             (backup / name).chmod(0o600)
-    moves = _move_listeners(document, state, terraform, context)
-    for entry in entries:
-        terraform.tf(
-            context.paths.app,
-            "import",
-            "-input=false",
-            "-var-file=" + str(context.paths.vars),
-            entry["address"],
-            entry["id"],
-        )
-    save_json(
-        context.paths.state / "adoption-receipt.json",
-        {
-            "schema_version": 1,
-            "imports": entries,
-            "moves": moves,
-            "backup": str(backup),
-            "review_sha256": hashlib.sha256(mapping.read_bytes()).hexdigest(),
-        },
-    )
+    receipt = {
+        "schema_version": 2,
+        "status": "running",
+        "imports": entries,
+        "completed": [],
+        "already_owned": [entry for entry in entries if entry not in pending],
+        "moves": document.get("moves", []),
+        "backup": str(backup),
+        "review_sha256": hashlib.sha256(mapping.read_bytes()).hexdigest(),
+    }
+
+    def checkpoint() -> None:
+        receipt["state_sha256"] = hashlib.sha256(state.read_bytes()).hexdigest()
+        save_json(backup / "progress.json", receipt)
+        save_json(context.paths.state / "adoption-receipt.json", receipt)
+
+    checkpoint()
+    try:
+        _move_listeners(document, state, terraform, context)
+        checkpoint()
+        for entry in pending:
+            terraform.tf(
+                context.paths.app,
+                "import",
+                "-input=false",
+                "-var-file=" + str(context.paths.vars),
+                entry["address"],
+                entry["id"],
+            )
+            _require_import_identity(state, entry)
+            receipt["completed"].append(entry)
+            checkpoint()
+        validate_ai_imports(context, terraform, ai_entries)
+        receipt["status"] = "passed"
+        checkpoint()
+    except BaseException as exc:
+        # Preserve interruptions and partial imports without exposing private error text.
+        receipt["status"] = "failed"
+        receipt["error_type"] = type(exc).__name__
+        checkpoint()
+        raise
