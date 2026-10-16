@@ -29,6 +29,12 @@
       "input": "The training example contains <script> as a literal HTML tag.",
       "kind": "attack",
       "signature_category": "Cross Site Scripting"
+    },
+    {
+      "label": "tutorial-version",
+      "input": "The database tutorial uses SELECT VERSION() to show its version.",
+      "kind": "attack",
+      "signature_category": "SQL Injection"
     }
   ]
 }

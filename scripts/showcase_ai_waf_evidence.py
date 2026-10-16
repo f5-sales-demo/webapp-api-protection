@@ -18,7 +18,10 @@ SUPPORTED = {
     "ATTACK_TYPE_XPATH_INJECTION",
     "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION",
 }
-RISK_LEVELS = {"high", "medium", "low"}
+RISK_LEVELS = {"high", "medium", "low", "false positive"}
+FALSE_POSITIVE_REASON = (
+    "The AI has determined that the triggered signatures are false positives"
+)
 FORBIDDEN, SUCCESS = 403, 200
 
 
@@ -166,6 +169,8 @@ def risk_evidence(
             sig in enabled for sig in re.findall(r"attack signature ([0-9]+)", reason)
         )
     ]
+    if risk == "false positive":
+        bound_reasons = [reason for reason in reasons if reason == FALSE_POSITIVE_REASON]
     require(
         bool(bound_reasons),
         "AI reason does not identify an enabled supported signature",

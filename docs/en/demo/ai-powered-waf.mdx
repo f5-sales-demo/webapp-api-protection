@@ -42,7 +42,11 @@ Require successful legitimate origin echoes, enabled supported signatures, exact
 request IDs, request risk classifications, AI reasons, and the declared action.
 Keep the numeric analytics score separate from the request classification. Report
 suspicious-but-benign results as measured; these fixtures do not promise a particular
-false-positive reduction.
+false-positive reduction. The API can also report an explicit `false positive`
+classification with a model reason bound to the request's enabled signatures. Keep
+that label in the receipt; do not relabel it as Low or Medium. The tutorial-version
+fixture preserves a measured traditional signature match for this diagnostic. It
+still requires fresh evidence on the deployed AI host.
 
 A block on both hosts can come from traditional signature enforcement. The acceptance
 gate also requires a preserved request blocked on the traditional host and allowed

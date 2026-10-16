@@ -167,6 +167,43 @@ class AiEvidence(unittest.TestCase):
         ensure_equal(result["risk"], "high")
         ensure_equal(result["signature_ids"], ["200002883"])
 
+    def test_false_positive_classification_is_preserved_without_low_risk_alias(self):
+        probe, event = request_and_event()
+        event["req_risk"] = "false positive"
+        event["req_risk_reasons"] = [
+            "The AI has determined that the triggered signatures are false positives"
+        ]
+        result = risk_evidence([event], event, probe, "example", "ai-waf-after")
+        ensure_equal(result["risk"], "false positive")
+        ensure_equal(result["signature_ids"], ["200002883"])
+
+    def test_false_positive_reason_cannot_substitute_for_supported_signature(self):
+        probe, event = request_and_event()
+        event["req_risk"] = "false positive"
+        event["req_risk_reasons"] = [
+            "The AI has determined that the triggered signatures are false positives"
+        ]
+        for field, value in (
+            ("req_id", "wrong-request"),
+            ("signatures", []),
+            ("req_risk_reasons", ["unbound false positive"]),
+            ("req_risk", "high"),
+        ):
+            changed = copy.deepcopy(event)
+            changed[field] = value
+            with pytest.raises(EvidenceError):
+                risk_evidence([changed], event, probe, "example", "ai-waf-after")
+
+    def test_false_positive_is_not_low_medium_acceptance(self):
+        before = {"sqli": {"risk": "high", "status": 403, "input": "same"}}
+        after = {
+            **before,
+            "tutorial": {"risk": "false positive", "status": 200, "input": "same"},
+        }
+        before["tutorial"] = {"status": 403, "input": "same"}
+        with pytest.raises(EvidenceError):
+            require_control_difference(before, after)
+
     def test_numeric_analytics_score_alone_fails(self):
         probe, event = request_and_event()
         del event["req_risk"]
