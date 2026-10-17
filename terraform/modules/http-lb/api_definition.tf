@@ -9,7 +9,7 @@
 # omit it) and mixed is emitted explicitly.
 resource "xcsh_api_definition" "this" {
   count     = var.api_definition_choice == "specification" ? 1 : 0
-  name      = "${var.namespace}-api-def"
+  name      = "${local.lb_name}-api-def"
   namespace = var.namespace
 
   # swagger_specs is an attribute (not a block): set it only when non-empty so the

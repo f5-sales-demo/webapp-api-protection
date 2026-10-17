@@ -4,7 +4,7 @@
 # with a dummy origin. A successful plan proves the dynamic secret block builds a
 # valid provider value; asserts pin the effective arm via module outputs.
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -46,7 +46,7 @@ run "blindfold_secret_selects_blindfold_arm" {
     error_message = "blindfold method must select the blindfold arm"
   }
   assert {
-    condition     = output.api_crawler_password_method == "blindfold"
+    condition     = contains(["blindfold"], output.api_crawler_password_method)
     error_message = "effective method must be blindfold"
   }
 }
