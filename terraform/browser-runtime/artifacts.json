@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "artifacts": [
+    {
+      "name": "playwright-chromium",
+      "version": "153.0.8010.12",
+      "url": "https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip",
+      "sha256": "8aac35011c18f6e2d10696154af89a5728ac2ddd6dc6fad24ffdf243c3fcfd5a",
+      "bytes": 195836009,
+      "cache_path": "/opt/traffic-generator/browser-cache/playwright/chromium-1243"
+    },
+    {
+      "name": "playwright-headless",
+      "version": "153.0.8010.12",
+      "url": "https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-headless-shell-linux64.zip",
+      "sha256": "a9da028861a0cf789ff25c2fed45f5f1aaf969ed9247835b6a7821a4f7af9d1d",
+      "bytes": 119809080,
+      "cache_path": "/opt/traffic-generator/browser-cache/playwright/chromium_headless_shell-1243"
+    },
+    {
+      "name": "playwright-ffmpeg",
+      "version": "1011",
+      "url": "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip",
+      "sha256": "ebc74fc5b94830176a3c2914ae96bd8bc7f6a91f4f33890230f84a172ee61ccc",
+      "bytes": 2376500,
+      "cache_path": "/opt/traffic-generator/browser-cache/playwright/ffmpeg-1011"
+    },
+    {
+      "name": "puppeteer-chrome",
+      "version": "154.0.8037.57",
+      "url": "https://storage.googleapis.com/chrome-for-testing-public/154.0.8037.57/linux64/chrome-linux64.zip",
+      "sha256": "ceee2972074d441ea7c4ba8bcc0eaab77e7e87680f6653d73d3065851fe10302",
+      "bytes": 196223440,
+      "cache_path": "/opt/traffic-generator/browser-cache/puppeteer/chrome/linux-154.0.8037.57"
+    },
+    {
+      "name": "puppeteer-headless",
+      "version": "154.0.8037.57",
+      "url": "https://storage.googleapis.com/chrome-for-testing-public/154.0.8037.57/linux64/chrome-headless-shell-linux64.zip",
+      "sha256": "5a6979d0ab7cf952ea575d35164e7bdce4872b2ced8f8a215c8f8e8eda00ee09",
+      "bytes": 120504312,
+      "cache_path": "/opt/traffic-generator/browser-cache/puppeteer/chrome-headless-shell/linux-154.0.8037.57"
+    }
+  ]
+}

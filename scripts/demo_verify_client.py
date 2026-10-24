@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import http.client
 import ipaddress
 import json
 import os
 import re
 import signal
+import ssl
 import subprocess
 import time
 import urllib.error
@@ -161,6 +163,7 @@ class Client:
     def __init__(self, deadline: float) -> None:
         """Capture the deadline and authenticated HTTPS tenant endpoint."""
         self.deadline = deadline
+        self.rate_connections: dict[str, http.client.HTTPSConnection] = {}
         self.read_retries: list[ReadRetry] = []
         self.base = os.environ.get("XCSH_API_URL", "").rstrip("/")
         self.token = os.environ.get("XCSH_API_TOKEN", "")
@@ -415,6 +418,39 @@ class Client:
             phase_budget=phase_budget,
             allowed=allowed,
         )
+
+    def keepalive_request(
+        self, host: str, path: str, method: str, user: str
+    ) -> tuple[int, Any]:
+        """Reuse a verified HTTPS connection for one rate-limit comparison."""
+        identified_user(user)
+        if host not in self.rate_connections:
+            self.rate_connections[host] = http.client.HTTPSConnection(
+                host, context=ssl.create_default_context(), timeout=self.remaining()
+            )
+        connection = self.rate_connections[host]
+        connection.timeout = self.remaining()
+        connection.request(
+            method,
+            path,
+            headers={"X-MUD-User": user, "Content-Type": "application/json"},
+        )
+        response = connection.getresponse()
+        raw = response.read(APPLICATION_BOUND + 1)
+        if len(raw) > APPLICATION_BOUND:
+            msg = "application body exceeded bound"
+            raise _fail(msg)
+        try:
+            result = json.loads(raw)
+        except ValueError:
+            result = None
+        return response.status, result
+
+    def close_rate_connections(self) -> None:
+        """Close every comparison connection after the probe phase."""
+        for connection in self.rate_connections.values():
+            connection.close()
+        self.rate_connections.clear()
 
     def request(
         self,

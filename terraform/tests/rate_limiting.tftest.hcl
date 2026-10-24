@@ -3,7 +3,7 @@
 # LB rate_limit allow-lists/policies (Stage 3), and the api_rate_limit arm (Stage 4).
 # Targets ./modules/http-lb. Defaults keep everything off (0-change).
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -300,7 +300,7 @@ run "rate_limit_default_no_lists" {
   module { source = "./modules/http-lb" }
   variables { rate_limit_choice = "rate_limit" }
   assert {
-    condition     = xcsh_http_loadbalancer.this.rate_limit.no_ip_allowed_list != null && xcsh_http_loadbalancer.this.rate_limit.no_policies != null
+    condition     = xcsh_http_loadbalancer.this["primary"].rate_limit.no_ip_allowed_list != null && xcsh_http_loadbalancer.this["primary"].rate_limit.no_policies != null
     error_message = "rate_limit defaults must render no_ip_allowed_list + no_policies (0-change vs SP3)"
   }
 }
@@ -313,7 +313,7 @@ run "rate_limit_inline_ip_allowed_list" {
     rate_limit_ip_allowed_prefixes = ["192.0.2.0/24", "198.51.100.0/24"]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.rate_limit.ip_allowed_list != null && toset(xcsh_http_loadbalancer.this.rate_limit.ip_allowed_list.prefixes) == toset(["192.0.2.0/24", "198.51.100.0/24"])
+    condition     = xcsh_http_loadbalancer.this["primary"].rate_limit.ip_allowed_list != null && toset(xcsh_http_loadbalancer.this["primary"].rate_limit.ip_allowed_list.prefixes) == toset(["192.0.2.0/24", "198.51.100.0/24"])
     error_message = "inline prefixes must render the actual planned ip_allowed_list"
   }
   # Optional+Computed no_ip_allowed_list is UNKNOWN when omitted. Verify the
@@ -335,7 +335,7 @@ run "rate_limit_custom_ip_allowed_list" {
     rate_limit_custom_ip_prefix_sets = [{ name = "corp-prefixes" }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.rate_limit.custom_ip_allowed_list != null && xcsh_http_loadbalancer.this.rate_limit.custom_ip_allowed_list.rate_limiter_allowed_prefixes[0].name == "corp-prefixes"
+    condition     = xcsh_http_loadbalancer.this["primary"].rate_limit.custom_ip_allowed_list != null && xcsh_http_loadbalancer.this["primary"].rate_limit.custom_ip_allowed_list.rate_limiter_allowed_prefixes[0].name == "corp-prefixes"
     error_message = "custom sets must render custom_ip_allowed_list.rate_limiter_allowed_prefixes"
   }
 }
@@ -349,7 +349,7 @@ run "rate_limit_with_policies" {
     rate_limiter_policies  = [{ name = "rlp-a", rules = [{ name = "r", action = "apply" }] }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.rate_limit.policies != null && xcsh_http_loadbalancer.this.rate_limit.policies.policies[0].name == "rlp-a"
+    condition     = xcsh_http_loadbalancer.this["primary"].rate_limit.policies != null && xcsh_http_loadbalancer.this["primary"].rate_limit.policies.policies[0].name == "rlp-a"
     error_message = "policy refs must render the actual planned policies.policies"
   }
   # no_policies is also Optional+Computed: omission is a configuration choice,
@@ -419,19 +419,19 @@ run "api_rate_limit_endpoint_ref_and_matchers" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit != null && xcsh_http_loadbalancer.this.rate_limit == null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit != null && xcsh_http_loadbalancer.this["primary"].rate_limit == null
     error_message = "rate_limit_choice=api_rate_limit must render api_rate_limit, not rate_limit"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].ref_rate_limiter.name == "rl-api" && xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].api_endpoint_path == "/api/orders"
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].ref_rate_limiter.name == "rl-api" && xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].api_endpoint_path == "/api/orders"
     error_message = "endpoint rule must reference rl-api on /api/orders"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].client_matcher.ip_prefix_list != null && xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].any_domain != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].client_matcher.ip_prefix_list != null && xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].any_domain != null
     error_message = "endpoint rule must render ip_prefix_list client_matcher + any_domain default"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].request_matcher.headers[0].check_present != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].request_matcher.headers[0].check_present != null
     error_message = "request_matcher header presence=present must render check_present"
   }
 }
@@ -453,11 +453,11 @@ run "api_rate_limit_endpoint_inline_and_asn_matcher" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.threshold == 5 && xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.use_http_lb_user_id != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.threshold == 5 && xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].inline_rate_limiter.use_http_lb_user_id != null
     error_message = "inline limiter must render threshold + use_http_lb_user_id default"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].specific_domain == "api.f5-sales-demo.com" && xcsh_http_loadbalancer.this.api_rate_limit.api_endpoint_rules[0].client_matcher.asn_matcher != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].specific_domain == "api.f5-sales-demo.com" && xcsh_http_loadbalancer.this["primary"].api_rate_limit.api_endpoint_rules[0].client_matcher.asn_matcher != null
     error_message = "specific_domain attr + asn_matcher ref must render"
   }
 }
@@ -485,11 +485,11 @@ run "api_rate_limit_bypass_and_server_url" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit.bypass_rate_limiting_rules.bypass_rate_limiting_rules[0].api_endpoint != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit.bypass_rate_limiting_rules.bypass_rate_limiting_rules[0].api_endpoint != null
     error_message = "bypass rule target=api_endpoint must render api_endpoint"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit.server_url_rules[0].ref_rate_limiter.name == "rl-su" && xcsh_http_loadbalancer.this.api_rate_limit.server_url_rules[0].client_matcher.tls_fingerprint_matcher != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit.server_url_rules[0].ref_rate_limiter.name == "rl-su" && xcsh_http_loadbalancer.this["primary"].api_rate_limit.server_url_rules[0].client_matcher.tls_fingerprint_matcher != null
     error_message = "server_url rule must render ref limiter + tls_fingerprint_matcher"
   }
 }
@@ -663,7 +663,7 @@ run "server_url_client_matcher_renders" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit.server_url_rules[0].client_matcher.ip_prefix_list != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit.server_url_rules[0].client_matcher.ip_prefix_list != null
     error_message = "server_url client_matcher must render (positive coverage for the bypass/server_url matcher path)"
   }
 }
@@ -681,7 +681,7 @@ run "server_url_api_group_with_explicit_base_path_renders" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_rate_limit.server_url_rules[0].api_group == "orders" && xcsh_http_loadbalancer.this.api_rate_limit.server_url_rules[0].base_path == "/api/orders"
+    condition     = xcsh_http_loadbalancer.this["primary"].api_rate_limit.server_url_rules[0].api_group == "orders" && xcsh_http_loadbalancer.this["primary"].api_rate_limit.server_url_rules[0].base_path == "/api/orders"
     error_message = "server_url api_group selection must preserve its explicitly configured base_path"
   }
 }

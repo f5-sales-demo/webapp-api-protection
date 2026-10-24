@@ -2,7 +2,7 @@
 # gated by csd_enabled). command = plan, targets ./modules/http-lb. No import round-trip is tested
 # (CSD domain API is list/create/delete only — 501 GET-by-name; verified live via steady-state).
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -28,7 +28,7 @@ run "mitigated_and_allowed_render" {
     error_message = "mitigated_domain must render the host"
   }
   assert {
-    condition     = xcsh_mitigated_domain.this["block-jsdelivr"].namespace == "webapp-api-protection"
+    condition     = xcsh_mitigated_domain.this["block-jsdelivr"].namespace == var.namespace
     error_message = "mitigated_domain must be in the LB namespace"
   }
   assert {
