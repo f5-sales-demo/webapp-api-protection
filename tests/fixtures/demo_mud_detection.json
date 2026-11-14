@@ -18,7 +18,7 @@
       "policy_hits": [
         {
           "malicious_user_mitigate_action": "MUM_BLOCK_TEMPORARILY",
-          "policy": "ves-io-http-loadbalancer-oas-validation-demo-lb",
+          "policy": "ves-io-http-loadbalancer-challenge-demo-lb",
           "policy_namespace": "demo",
           "policy_set": "ves-io-http-loadbalancer-waf-exclusion-demo-lb",
           "rate_limiter_action": "pass",

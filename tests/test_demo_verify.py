@@ -450,7 +450,7 @@ class AcceptanceReadinessTests(unittest.TestCase):
                     v.readiness(fixtures.readiness_client(status), out, Mock())
             for host, path in (
                 ("other.example.test", "/get"),
-                (None, "/httpbin/get"),
+                (None, "/get"),
                 (None, "/get?x=/get"),
             ):
                 with expect_error(contracts.EvidenceError):
@@ -746,7 +746,7 @@ class BoundedProbeTests(unittest.TestCase):
             ):
                 code = 403
             return code, {
-                "url": "http://" + host + path.removeprefix("/httpbin"),
+                "url": "http://" + host + path,
                 "headers": {"X-Mud-User": user},
             }
 

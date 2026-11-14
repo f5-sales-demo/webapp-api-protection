@@ -147,7 +147,7 @@ def _application_ready(client: transport.Client, domain: str) -> None:
         and route is not None
         and route.scheme == "http"
         and route.hostname == domain
-        and route.path == "/get"
+        and route.path == GET_PATH
         and not (route.query or route.fragment or route.username)
         and route.port in (None, evaluation.HTTP_PORT)
     ):

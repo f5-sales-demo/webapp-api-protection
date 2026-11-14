@@ -2,7 +2,7 @@
 # (request/response skip|block|report), fall_through (allow|custom), and settings
 # (oversized-body, additional-params) on api_specification. Targets ./modules/http-lb.
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80

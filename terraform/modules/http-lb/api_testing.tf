@@ -5,7 +5,7 @@
 # Credentials carry the clear/blindfold SecretType (seal-once-pin — see locals_api.tf).
 resource "xcsh_api_testing" "this" {
   count     = var.api_testing_standalone_enabled ? 1 : 0
-  name      = "${var.namespace}-api-testing"
+  name      = "${local.lb_name}-api-testing"
   namespace = var.namespace
 
   custom_header_value = var.api_testing_custom_header_value

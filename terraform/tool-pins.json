@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "binary_versions": {
+    "NUCLEI": "3.11.1",
+    "SUBFINDER": "2.16.0",
+    "HTTPX": "1.12.0",
+    "FFUF": "2.3.0",
+    "GOBUSTER": "3.8.2",
+    "FEROX": "2.13.1",
+    "AMASS": "5.1.1"
+  },
+  "git_commits": {
+    "testssl.sh": "5b900792f2a6a86135d1151e965c05c59a861e72",
+    "SecLists": "63802eeee4d5cb8791587bab59d78862ce381a32",
+    "recon-ng": "c08acee0f84645ecf521ec616ac2dde94cbc1d63",
+    "spiderfoot": "0f815a203afebf05c98b605dba5cf0475a0ee5fd",
+    "waf-bypass": "887f2f9d4667bc72c89a1384e1445925a10413c4",
+    "PayloadsAllTheThings": "3ac27901c711bdf3f5b65a7b1d1820a1f65bd09a"
+  },
+  "npm_versions": {
+    "corepack": "0.36.0",
+    "npm": "11.19.0",
+    "playwright": "1.63.0",
+    "puppeteer-extra-plugin-stealth": "2.11.2",
+    "puppeteer-extra": "3.3.6",
+    "puppeteer": "25.12.0"
+  },
+  "release_assets": {
+    "nuclei_3.11.1_linux_amd64.zip": {
+      "url": "https://github.com/projectdiscovery/nuclei/releases/download/v3.11.1/nuclei_3.11.1_linux_amd64.zip",
+      "sha256": "ea63d4ae232808cd7c6bc00d0142428e231fab59dae01042246097d195835ab6"
+    },
+    "subfinder_2.16.0_linux_amd64.zip": {
+      "url": "https://github.com/projectdiscovery/subfinder/releases/download/v2.16.0/subfinder_2.16.0_linux_amd64.zip",
+      "sha256": "1b7f9c608e9a5bd59e609a5e09710d63c5485e92d3d49dc2c16eb4fdbe10cb60"
+    },
+    "httpx_1.12.0_linux_amd64.zip": {
+      "url": "https://github.com/projectdiscovery/httpx/releases/download/v1.12.0/httpx_1.12.0_linux_amd64.zip",
+      "sha256": "9d8439e8b6c9aa7d1e2314817a392e00d5178da3af5652f7475f88868f418f76"
+    },
+    "ffuf_2.3.0_linux_amd64.tar.gz": {
+      "url": "https://github.com/ffuf/ffuf/releases/download/v2.3.0/ffuf_2.3.0_linux_amd64.tar.gz",
+      "sha256": "b2a3c725fcb9da175159682f54d6e9149f2905b00d84d155e7efc5d599975ceb"
+    },
+    "gobuster_Linux_x86_64.tar.gz": {
+      "url": "https://github.com/OJ/gobuster/releases/download/v3.8.2/gobuster_Linux_x86_64.tar.gz",
+      "sha256": "c8a8c6a966eeb011d682a0ef2305a3e3a86b8b3fabe744350c00a766cc0f8021"
+    },
+    "feroxbuster_amd64.deb.zip": {
+      "url": "https://github.com/epi052/feroxbuster/releases/download/v2.13.1/feroxbuster_amd64.deb.zip",
+      "sha256": "80e2069b105001c536c55eae040065dc00b0e877863ef07416253a9268521b1f"
+    },
+    "amass_linux_amd64.tar.gz": {
+      "url": "https://github.com/owasp-amass/amass/releases/download/v5.1.1/amass_linux_amd64.tar.gz",
+      "sha256": "5e22b5f0239e7eb79439d60d43d3cd20dca2478588bc2242e91ab0c4f8fa40dd"
+    },
+    "nodejs_24.21.0-1nodesource1_amd64.deb": {
+      "url": "https://deb.nodesource.com/node_24.x/pool/main/n/nodejs/nodejs_24.21.0-1nodesource1_amd64.deb",
+      "sha256": "6f091c83324fefd8f7dd9d358b77131b679c04aa6f5859244749f3a6c60ea56a",
+      "metadata_signer_fingerprint": "6F71F525282841EEDAF851B42F59B5F99B1BE0B4"
+    }
+  },
+  "nodejs_deb_version": "24.21.0-1nodesource1",
+  "uv": {
+    "version": "0.12.22",
+    "sha256": "b9980552309f09c15172b8be828555e375097f16deb459795ce7bfd200380f0b"
+  }
+}

@@ -3,7 +3,7 @@
 # is verified live by the config-matrix round-trip import (plan tests cannot introspect
 # nested blocks). Targets ./modules/http-lb with a dummy origin — no tenant contact.
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80

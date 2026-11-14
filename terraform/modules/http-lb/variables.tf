@@ -355,3 +355,13 @@ variable "lb_https_auto_cert" {
   type        = bool
   default     = false
 }
+
+variable "resource_name" {
+  description = "Unique resource prefix for this module instance."
+  type        = string
+  default     = "webapp-api-protection"
+  validation {
+    condition     = can(regex("^[a-z][a-z0-9-]{0,42}[a-z0-9]$", var.resource_name))
+    error_message = "resource_name must be a DNS label of 2-44 characters."
+  }
+}

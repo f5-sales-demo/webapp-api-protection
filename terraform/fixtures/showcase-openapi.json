@@ -5,7 +5,14 @@
     "version": "1.0.0",
     "description": "Authorized synthetic demo traffic only. Only POST /httpbin/post is schema-enforced; unrelated endpoints remain outside this specification and fall through to the origin."
   },
-  "servers": [{ "url": "http://www.f5-sales-demo.com" }, { "url": "http://api.f5-sales-demo.com" }],
+  "servers": [
+    {
+      "url": "http://www.f5-sales-demo.com"
+    },
+    {
+      "url": "http://api.f5-sales-demo.com"
+    }
+  ],
   "paths": {
     "/httpbin/post": {
       "post": {
@@ -18,16 +25,59 @@
                 "type": "object",
                 "required": ["demo_id"],
                 "properties": {
-                  "demo_id": { "type": "string", "example": "synthetic-run-001" }
+                  "demo_id": {
+                    "type": "string",
+                    "example": "synthetic-run-001"
+                  }
                 },
                 "additionalProperties": true
               },
-              "example": { "demo_id": "synthetic-run-001" }
+              "example": {
+                "demo_id": "synthetic-run-001"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "custname": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "custtel": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "custemail": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "size": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "topping": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "delivery": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "comments": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                },
+                "additionalProperties": false
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "Origin echoes the valid synthetic request; response validation is disabled." }
+          "200": {
+            "description": "Origin echoes the valid synthetic request; response validation is disabled."
+          }
         }
       }
     }

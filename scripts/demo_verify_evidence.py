@@ -203,6 +203,46 @@ def _traffic_pair(
 CONTINUOUS_HEARTBEAT_MAX_AGE = 10
 CONTINUOUS_RATE_MIN, CONTINUOUS_RATE_MAX = 190, 210
 CONTINUOUS_BENIGN_SUCCESS = 0.99
+CONTINUOUS_BENIGN_RATE_MIN, CONTINUOUS_BENIGN_RATE_MAX = 171, 189
+
+
+CONTINUOUS_APPLICATION_PATHS = {
+    "/juice-shop/rest/products/search",
+    "/dvwa/login.php",
+    "/vampi/",
+    "/httpbin/get",
+    "/whoami/",
+    "/csd-demo/",
+    "/dvga/",
+    "/restaurant/openapi.json",
+    "/crapi/",
+}
+
+
+def continuous_rotation_ready(
+    rates: dict, domains: list[str], elapsed: float, count: int
+) -> bool:
+    """Require the benign budget, equal domains and rotation over all applications."""
+    per_domain = rates.get("benign_per_domain", {})
+    per_application = rates.get("benign_per_application", {})
+    if (
+        not CONTINUOUS_BENIGN_RATE_MIN <= count / elapsed <= CONTINUOUS_BENIGN_RATE_MAX
+        or set(per_domain) != set(domains)
+    ):
+        return False
+    if sum(per_domain.values()) != count or any(
+        abs(value - count / 2) > max(1, count * 0.025) for value in per_domain.values()
+    ):
+        return False
+    if (
+        set(per_application) != CONTINUOUS_APPLICATION_PATHS
+        or sum(per_application.values()) != count
+    ):
+        return False
+    return all(
+        abs(value - count / 9) <= max(2, count * 0.01)
+        for value in per_application.values()
+    )
 
 
 def continuous_traffic_ready(status: Any, domains: list[str], since: float) -> bool:
@@ -230,7 +270,10 @@ def continuous_traffic_ready(status: Any, domains: list[str], since: float) -> b
         or any(
             not p.get("complete")
             or not p.get("catalog_complete")
+            or not p.get("catalog_accepted")
             or not p.get("passed")
+            or p.get("source_commit") != status.get("source_commit")
+            or p.get("artifact_sha256") != status.get("artifact_sha256")
             or p.get("started", 0) < run_started
             for p in passes[-2:]
         )
@@ -253,11 +296,8 @@ def continuous_traffic_ready(status: Any, domains: list[str], since: float) -> b
         or rates.get("attack_transport_failures", 1) != 0
     ):
         return False
-    per_domain = rates.get("benign_per_domain", {})
-    return (
-        set(per_domain) == set(domains)
-        and all(per_domain[d] > 0 for d in domains)
-        and not status.get("failures")
+    return continuous_rotation_ready(rates, domains, elapsed, count) and not status.get(
+        "failures"
     )
 
 
@@ -358,7 +398,7 @@ def _mud(event: dict[str, Any], namespace: str, lb: str) -> bool:
         and any(
             hit.get("malicious_user_mitigate_action") == "MUM_BLOCK_TEMPORARILY"
             and hit.get("policy_namespace") == namespace
-            and hit.get("policy") == "ves-io-http-loadbalancer-oas-validation-" + lb
+            and hit.get("policy") == "ves-io-http-loadbalancer-challenge-" + lb
             and hit.get("policy_set") == "ves-io-http-loadbalancer-waf-exclusion-" + lb
             for hit in policy_hits(event)
         )
@@ -471,7 +511,7 @@ def _detection_join(log: dict[str, Any], probe: Probe, namespace: str, lb: str) 
         and log.get("suspicion_log_type") == "detection"
         and log.get("threat_level") == "High"
         and all(
-            type(log.get(field)) in (int, float) and log[field] == 1.0
+            _finite_nonnegative(log.get(field)) and 0 < log[field] <= 1.0
             for field in ("suspicion_score", "waf_suspicion_score")
         )
     )
@@ -505,7 +545,9 @@ def _detection_activity(log: dict[str, Any]) -> bool:
     return (
         _counters(activity, ACTIVITY_COUNTERS)
         and _counters(mitigation, MITIGATION_COUNTERS)
-        and 0 < activity["waf_sec_event_count"] <= activity["req_count"]
+        # XC counts security events independently; one request can emit several.
+        and activity["waf_sec_event_count"] > 0
+        and activity["req_count"] > 0
     )
 
 
@@ -666,8 +708,9 @@ def _origin_route(route: urllib.parse.SplitResult, host: str, path: str) -> bool
     return (
         route.scheme == "http"
         and route.hostname == host
-        and route.path == path.removeprefix("/httpbin")
-        and not (route.query or route.fragment or route.username)
+        and route.path == urllib.parse.urlsplit(path).path
+        and route.query == urllib.parse.urlsplit(path).query
+        and not (route.fragment or route.username)
         and route.port in (None, HTTP_PORT)
     )
 

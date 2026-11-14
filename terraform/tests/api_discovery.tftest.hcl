@@ -2,7 +2,7 @@
 # renders a valid provider value. Targets ./modules/http-lb with a dummy origin
 # (no tenant contact). Defaults reproduce the bare enable_api_discovery {} block.
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80

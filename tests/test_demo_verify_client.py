@@ -23,6 +23,19 @@ DOMAINS = fixtures.DOMAINS
 
 
 class ScopedTransportTests(unittest.TestCase):
+    def test_rate_probe_reuses_only_same_host_connection(self):
+        client = fixtures.client()
+        client.deadline = time.monotonic() + 30
+        with patch.object(transport.http.client, "HTTPSConnection") as connection:
+            response = connection.return_value.getresponse.return_value
+            response.status = 200
+            response.read.return_value = b'{"url": "synthetic"}'
+            client.keepalive_request("first.example.test", "/httpbin/get", "GET", USER)
+            client.keepalive_request("first.example.test", "/httpbin/get", "GET", USER)
+            client.keepalive_request("second.example.test", "/httpbin/get", "GET", USER)
+        ensure_equal(connection.call_count, 2)
+        ensure_equal(connection.return_value.request.call_count, 3)
+
     def test_exact_event_query_filters_the_identified_user(self):
         client = fixtures.client()
         client.api = Mock(return_value=(200, {"events": [], "total_hits": "0"}))

@@ -1,7 +1,7 @@
 # Plan-level tests for LPC-4a: LB inline waf_exclusion rules. Targets ./modules/http-lb.
 # command = plan (no creds).
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -24,15 +24,15 @@ run "skip_rule_renders" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].metadata.name == "skip-health"
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion.waf_exclusion_inline_rules.rules[0].metadata.name == "skip-health"
     error_message = "rule metadata.name must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].path_prefix == "/health"
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion.waf_exclusion_inline_rules.rules[0].path_prefix == "/health"
     error_message = "path_prefix must render for path=prefix"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].waf_skip_processing != null
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion.waf_exclusion_inline_rules.rules[0].waf_skip_processing != null
     error_message = "waf_skip_processing arm must render for action=skip"
   }
 }
@@ -54,20 +54,20 @@ run "detection_control_rule_renders" {
     }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].exact_value == "api.f5-sales-demo.com"
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion.waf_exclusion_inline_rules.rules[0].exact_value == "api.f5-sales-demo.com"
     error_message = "exact_value must render for domain=exact"
   }
   # signature_id 0 = "all signatures"; round-trips since provider v3.72.10 (#1129).
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].app_firewall_detection_control.exclude_signature_contexts[0].signature_id == 0
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion.waf_exclusion_inline_rules.rules[0].app_firewall_detection_control.exclude_signature_contexts[0].signature_id == 0
     error_message = "signature_id=0 (all signatures) must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].app_firewall_detection_control.exclude_signature_contexts[1].signature_id == 200002147
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion.waf_exclusion_inline_rules.rules[0].app_firewall_detection_control.exclude_signature_contexts[1].signature_id == 200002147
     error_message = "exclude_signature_contexts signature_id must render"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules.rules[0].app_firewall_detection_control.exclude_violation_contexts[0].exclude_violation == "VIOL_JSON_MALFORMED"
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion.waf_exclusion_inline_rules.rules[0].app_firewall_detection_control.exclude_violation_contexts[0].exclude_violation == "VIOL_JSON_MALFORMED"
     error_message = "exclude_violation_contexts must render"
   }
 }
@@ -76,7 +76,7 @@ run "waf_exclusion_omitted_by_default" {
   command = plan
   module { source = "./modules/http-lb" }
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion == null
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion == null
     error_message = "waf_exclusion must be omitted (null) by default"
   }
 }

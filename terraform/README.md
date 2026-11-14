@@ -29,13 +29,13 @@ caller-owned, non-symlink file with mode **0600** containing:
 
 ```json
 {
-  "subscription_id": "00000000-0000-0000-0000-000000000000",
-  "tenant_id": "11111111-1111-1111-1111-111111111111",
-  "expected_azure_user": "operator@example.test"
+  "subscription_id": "${APPROVED_SUBSCRIPTION_ID}",
+  "tenant_id": "${APPROVED_TENANT_ID}",
+  "expected_azure_user": "operator@example.com"
 }
 ```
 
-Replace both synthetic UUIDs and the synthetic UPN with the explicitly approved
+Replace both identity placeholders and the synthetic UPN with the explicitly approved
 Azure subscription, Entra tenant and human operator. Keep real IDs, user data and
 credentials out of public files. The lifecycle matches that user case-insensitively
 and rejects missing authorization, another user, a service principal, or a wrong
@@ -50,13 +50,12 @@ the existing DNS zone's managed-record support must be provisioned before the ru
 The namespace must already exist. Previously created Azure storage is left untouched;
 it is neither a prerequisite nor a lifecycle cleanup target.
 
-Provider releases are pinned exactly with the root registry lock:
-`f5-sales-demo/xcsh` **12.0.2**, `hashicorp/azurerm` **5.7.0**, and
-`hashicorp/azuread` **3.10.0**. The lifecycle uses `TF_CLI_CONFIG_FILE=/dev/null`
+Provider releases are pinned exactly in `versions.tf` and the checked-in registry locks.
+The namespace and reusable XC modules declare the same XC provider release. The lifecycle uses `TF_CLI_CONFIG_FILE=/dev/null`
 to exclude development overrides. Provider 12's empty one-of selections are
 object attributes (`field = {}`), not nested blocks.
 
-## Four commands
+## Lifecycle commands
 
 Use existing environment authentication; never write tokens to tracked files:
 
@@ -65,6 +64,7 @@ export XCSH_API_URL="https://f5-sales-demo.console.ves.volterra.io"
 export XCSH_API_TOKEN="<api-token>"
 
 # Approved IDs select the existing private per-subscription data directory.
+bash scripts/demo-lifecycle.sh plan
 bash scripts/demo-lifecycle.sh deploy
 bash scripts/demo-lifecycle.sh verify
 bash scripts/demo-lifecycle.sh rebuild
@@ -75,17 +75,21 @@ These are separate operations, not a sequence to run blindly. `deploy` validates
 both secure local backends and the existing exact namespace. It imports that
 confirmed namespace into the persistent namespace-only root when needed, then
 saves and applies its guarded namespace plan before provisioning disposable
-applications and uploading the versioned schema fixture. Namespace preparation is
+applications and creating the Terraform-owned versioned schema fixture. Namespace preparation is
 part of `deploy`, not an extra manual step. Readiness, traffic and live acceptance
 must pass before the application zero-change plan is applied. `verify` reads existing
 ownership, checks namespace preservation and fixture integrity, runs live acceptance
 and requires zero drift; it never imports, applies or repairs infrastructure.
-`rebuild` verifies owned application deletion and persistent survival, then redeploys.
+`rebuild` consumes the exact current reviewed plan and replaces only captured demo VMs or the
+owned Swagger version, preserving XC, namespace and network identities. It snapshots private
+inputs/state and verifies Azure unique VM identities before rotating rebuilt host keys.
 `destroy` deletes only owned disposable application resources and proves their absence;
-it retains local state/receipts, namespace, exact schema fixture and shared DNS zone.
+it retains local state/receipts, namespace and shared DNS zone. Terraform deletes only the owned schema versions.
 Rebuild and destroy are destructive and must only be invoked deliberately for this demo.
 
-Each command accepts `--timeout-seconds` (default **1800**, whole-operation
+`plan` saves a fresh private review plan, binding and action summary without applying. `adopt` imports only the exact reviewed mapping in `adoption-review.json`, after state/content verification and backups. Existing resources are never silently adopted by deploy. See the [operator reference](../docs/en/reference/terraform-ownership.mdx) for the comparison endpoints and completion gates.
+
+Each command accepts `--timeout-seconds` (default **43200**, whole-operation
 monotonic deadline), `--state-dir` and `--config`. Configuration accepts identical
 public fixed scope values, `subscription_id`, `tenant_id`, `ssh_key` and
 `expected_azure_user`; a `backend` object is rejected. An explicit `--config`

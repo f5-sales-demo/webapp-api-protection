@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "path": "/httpbin/anything/ai-waf",
+  "diagnostic_only": true,
+  "requests": [
+    {
+      "label": "command-injection-attack",
+      "violation_candidate": "command-injection",
+      "input": "; cat /etc/passwd",
+      "kind": "attack",
+      "expected_status": {
+        "before": 403,
+        "after": 403
+      }
+    },
+    {
+      "label": "command-injection-benign",
+      "violation_candidate": "command-injection",
+      "input": "The command reference describes cat and grep for synthetic files.",
+      "kind": "benign",
+      "expected_status": {
+        "before": 200,
+        "after": 200
+      }
+    },
+    {
+      "label": "path-traversal-attack",
+      "violation_candidate": "path-traversal",
+      "input": "../../../../etc/passwd",
+      "kind": "attack",
+      "expected_status": {
+        "before": 403,
+        "after": 403
+      }
+    },
+    {
+      "label": "path-traversal-benign",
+      "violation_candidate": "path-traversal",
+      "input": "The documentation describes relative paths such as ../images/logo.png.",
+      "kind": "benign",
+      "expected_status": {
+        "before": 200,
+        "after": 200
+      }
+    },
+    {
+      "label": "template-injection-attack",
+      "violation_candidate": "template-injection",
+      "input": "{{7*7}}",
+      "kind": "attack",
+      "expected_status": {
+        "before": 403,
+        "after": 403
+      }
+    },
+    {
+      "label": "template-injection-benign",
+      "violation_candidate": "template-injection",
+      "input": "The template guide describes replacing a product_name placeholder.",
+      "kind": "benign",
+      "expected_status": {
+        "before": 200,
+        "after": 200
+      }
+    },
+    {
+      "label": "xml-xxe-attack",
+      "violation_candidate": "xml-xxe",
+      "input": "<!DOCTYPE demo [<!ENTITY example SYSTEM \"file:///etc/passwd\">]><demo>&example;</demo>",
+      "kind": "attack",
+      "expected_status": {
+        "before": 403,
+        "after": 403
+      }
+    },
+    {
+      "label": "xml-xxe-benign",
+      "violation_candidate": "xml-xxe",
+      "input": "<demo><title>Quarterly sales report</title></demo>",
+      "kind": "benign",
+      "expected_status": {
+        "before": 200,
+        "after": 200
+      }
+    },
+    {
+      "label": "php-code-injection-attack",
+      "violation_candidate": "php-code-injection",
+      "input": "<?php system(\"id\"); ?>",
+      "kind": "attack",
+      "expected_status": {
+        "before": 403,
+        "after": 403
+      }
+    },
+    {
+      "label": "php-code-injection-benign",
+      "violation_candidate": "php-code-injection",
+      "input": "The PHP documentation describes echoing a synthetic greeting.",
+      "kind": "benign",
+      "expected_status": {
+        "before": 200,
+        "after": 200
+      }
+    },
+    {
+      "label": "ldap-injection-attack",
+      "violation_candidate": "ldap-injection",
+      "input": "*)(uid=*))(|(uid=*",
+      "kind": "attack",
+      "expected_status": {
+        "before": 403,
+        "after": 403
+      }
+    },
+    {
+      "label": "ldap-injection-benign",
+      "violation_candidate": "ldap-injection",
+      "input": "The directory guide describes searching for a synthetic demo user.",
+      "kind": "benign",
+      "expected_status": {
+        "before": 200,
+        "after": 200
+      }
+    },
+    {
+      "label": "legitimate",
+      "input": "quarterly sales report",
+      "kind": "benign",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=quarterly+sales+report",
+      "expected_status": {
+        "before": 200,
+        "after": 200
+      }
+    },
+    {
+      "label": "suspicious-benign",
+      "input": "SELECT a product from our catalogue",
+      "kind": "benign",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=SELECT+a+product+from+our+catalogue",
+      "expected_status": {
+        "before": 200,
+        "after": 200
+      }
+    },
+    {
+      "label": "sqli",
+      "input": "1' OR '1'='1'--",
+      "kind": "attack",
+      "signature_category": "SQL Injection",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=1'+OR+'1'%3D'1'--",
+      "expected_status": {
+        "before": 403,
+        "after": 403
+      }
+    },
+    {
+      "label": "xss",
+      "input": "<script>alert(\"synthetic-ai-waf\")</script>",
+      "kind": "attack",
+      "signature_category": "Cross Site Scripting",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=<script>alert(\"synthetic-ai-waf\")<%2Fscript>",
+      "expected_status": {
+        "before": 403,
+        "after": 403
+      }
+    },
+    {
+      "label": "literal-script",
+      "input": "The training example contains <script> as a literal HTML tag.",
+      "kind": "attack",
+      "signature_category": "Cross Site Scripting",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=The+training+example+contains+<script>+as+a+literal+HTML+tag.",
+      "expected_status": {
+        "before": 403,
+        "after": 403
+      }
+    },
+    {
+      "label": "tutorial-version",
+      "input": "The database tutorial uses SELECT VERSION() to show its version.",
+      "kind": "attack",
+      "signature_category": "SQL Injection",
+      "origin_request_target": "/httpbin/anything/ai-waf?input=The+database+tutorial+uses+SELECT+VERSION()+to+show+its+version.",
+      "expected_status": {
+        "before": 403,
+        "after": 200
+      }
+    }
+  ],
+  "purpose": "Continuous display traffic; exact AI attribution is accepted separately by showcase_ai_waf.py.",
+  "attribution_limits": {
+    "command-injection": "Mixed families; model reason attributes predictable resource signature 200003909.",
+    "xml-xxe": "XML-shaped query input; no native XML parser XXE execution claim. Mixed families; model reason attributes 200003909.",
+    "template-injection": "Generic malicious request reason; single observed code signature 200104643."
+  }
+}

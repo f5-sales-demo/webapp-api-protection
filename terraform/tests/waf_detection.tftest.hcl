@@ -1,7 +1,7 @@
 # Plan-level tests: detection_setting_choice and every detection_settings nested
 # oneof arm + enum + list bound render. Targets ./modules/http-lb, no tenant contact.
 variables {
-  namespace          = "webapp-api-protection"
+  namespace          = "example"
   lb_domains         = ["www.f5-sales-demo.com"]
   origin_ip          = "203.0.113.10"
   origin_port        = 80

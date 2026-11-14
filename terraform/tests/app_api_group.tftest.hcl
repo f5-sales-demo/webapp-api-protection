@@ -2,7 +2,7 @@
 # (elements + LB association) and api_protection_group_rules referencing a module-created
 # group. Targets ./modules/http-lb, dummy origin.
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -48,11 +48,11 @@ run "api_groups_rule_references_created_group" {
     api_protection_group_rules = [{ api_group = "orders-api", base_path = "/api/orders", action = "deny" }]
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].api_group == "orders-api" && xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].action.deny != null
+    condition     = xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_groups_rules[0].api_group == "orders-api" && xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_groups_rules[0].action.deny != null
     error_message = "api_groups_rules must reference the created group by name with the deny action"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.api_protection_rules.api_groups_rules[0].base_path == "/api/orders"
+    condition     = xcsh_http_loadbalancer.this["primary"].api_protection_rules.api_groups_rules[0].base_path == "/api/orders"
     error_message = "group rule must render the explicit synthetic orders endpoint prefix"
   }
 }

@@ -1,7 +1,7 @@
 # Plan-level tests for LPC-4b: standalone xcsh_waf_exclusion_policy + LB waf_exclusion_policy
 # ref arm. Targets ./modules/http-lb. command = plan (no creds).
 variables {
-  namespace         = "webapp-api-protection"
+  namespace         = "example"
   lb_domains        = ["www.f5-sales-demo.com"]
   origin_ip         = "203.0.113.10"
   origin_port       = 80
@@ -46,11 +46,11 @@ run "lb_ref_arm_renders" {
     waf_exclusion_policy_ref = "excl-pol-a"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_policy.name == "excl-pol-a"
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion.waf_exclusion_policy.name == "excl-pol-a"
     error_message = "LB waf_exclusion_policy ref arm must render the referenced policy name"
   }
   assert {
-    condition     = xcsh_http_loadbalancer.this.waf_exclusion.waf_exclusion_inline_rules == null
+    condition     = xcsh_http_loadbalancer.this["primary"].waf_exclusion.waf_exclusion_inline_rules == null
     error_message = "inline arm must be omitted when the policy ref arm is used"
   }
 }
